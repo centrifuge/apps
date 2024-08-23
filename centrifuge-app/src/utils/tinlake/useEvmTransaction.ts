@@ -10,6 +10,7 @@ import {
 import { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import * as React from 'react'
 import { Observable, lastValueFrom, tap } from 'rxjs'
+import { useGmp } from '../useGmp'
 
 export function useEvmTransaction<T extends Array<any>>(
   title: string,
@@ -26,8 +27,9 @@ export function useEvmTransaction<T extends Array<any>>(
   const centrifuge = useCentrifuge()
   const provider = useEvmProvider()
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: TransactionRequest }>()
+  const { setGmpHash } = useGmp()
 
-  async function doTransaction(id: string, args: T, txOptions?: TransactionRequest) {
+  async function doTransaction(id: string, args: T, txOptions?: TransactionRequest, gmp?: boolean) {
     try {
       const signer = provider!.getSigner()
       const connectedCent = centrifuge.connectEvm(selectedAddress!, signer)
@@ -36,6 +38,7 @@ export function useEvmTransaction<T extends Array<any>>(
       const lastResult = await lastValueFrom(
         transaction(args, txOptions).pipe(
           tap((result) => {
+            gmp && setGmpHash(result.hash)
             updateTransaction(id, { status: 'pending', hash: result.hash })
           })
         )
@@ -50,7 +53,7 @@ export function useEvmTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T, options?: TransactionRequest) {
+  function execute(args: T, options?: TransactionRequest, gmp?: boolean) {
     const id = Math.random().toString(36).substring(2)
     const tx: Transaction = {
       id,
@@ -66,7 +69,7 @@ export function useEvmTransaction<T extends Array<any>>(
       pendingTransaction.current = { id, args, options }
       showWallets(chainId ?? 1)
     } else {
-      doTransaction(id, args, options)
+      doTransaction(id, args, options, gmp)
     }
     return id
   }

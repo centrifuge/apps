@@ -118,10 +118,11 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   function doAction<T = any>(
     name: InvestRedeemAction,
     fn: (arg: T) => any[] | Promise<any[]>,
-    opt?: TransactionRequest
+    opt?: TransactionRequest,
+    gmp?: boolean
   ): (args?: T) => void {
     return (args) => {
-      txActions[name]?.execute(fn(args!) as any, opt)
+      txActions[name]?.execute(fn(args!) as any, opt, gmp)
       setPendingAction(name)
     }
   }
@@ -236,16 +237,16 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
           assets,
         ])
         console.log('permit', permit)
-        investWithPermit.execute([lpInvest.lpAddress, assets, lpInvest?.currency.address, permit, chainId])
+        investWithPermit.execute([lpInvest.lpAddress, assets, lpInvest?.currency.address, permit, chainId], {}, true)
         setPendingAction('investWithPermit')
       } else {
-        invest.execute([lpInvest.lpAddress, assets, chainId])
+        invest.execute([lpInvest.lpAddress, assets, chainId], {}, true)
         setPendingAction('invest')
       }
     },
     redeem: async (newOrder: BN) => {
       if (!lpInvest) return
-      redeem.execute([lpInvest.lpAddress, newOrder, chainId])
+      redeem.execute([lpInvest.lpAddress, newOrder, chainId], {}, true)
       setPendingAction('redeem')
     },
     collect: doAction('collect', () =>
@@ -257,8 +258,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       chainId,
     ]),
     approveTrancheToken: () => {},
-    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId]),
-    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, chainId]),
+    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId], undefined, true),
+    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, chainId], undefined, true),
     selectPoolCurrency(symbol) {
       setLpIndex(lps!.findIndex((lp) => lp.currency.symbol === symbol))
     },
