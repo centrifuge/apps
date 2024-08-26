@@ -21,6 +21,10 @@ const ExternalLink = styled(Text)`
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[1]}px;
   white-space: nowrap;
+  color: ${({ theme }) => theme.colors.textInverted};
+  &:hover {
+    color: ${({ theme }) => theme.colors.textGold};
+  }
 `
 
 export function GovernanceMenu() {
@@ -31,6 +35,7 @@ export function GovernanceMenu() {
   const id = React.useId()
   const isLarge = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
+  const theme = useTheme()
 
   return (
     <Box position={['static', 'static', 'relative', 'relative', 'static']}>
@@ -90,7 +95,7 @@ export function GovernanceMenu() {
             ))}
           </Stack>
         ) : (
-          <Panel>
+          <Panel backgroundColor={theme.colors.backgroundBlack}>
             {links.map(({ href, label }) => (
               <MenuItemGroup key={href}>
                 <Box px={2} py={1}>

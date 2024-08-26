@@ -3,13 +3,13 @@ import * as CSS from 'csstype'
 import * as React from 'react'
 import styled, { DefaultTheme, useTheme } from 'styled-components'
 import {
-  color,
   ColorProps,
-  compose,
   ResponsiveValue,
+  TypographyProps as TypographySystemProps,
+  color,
+  compose,
   system,
   typography as typographySystem,
-  TypographyProps as TypographySystemProps,
 } from 'styled-system'
 import { PropsOf } from '../../utils/types'
 
@@ -92,4 +92,4 @@ const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
   )
 })
 
-export { Text, TextProps, useTextContext, TextContext }
+export { Text, TextContext, TextProps, useTextContext }

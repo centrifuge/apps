@@ -10,29 +10,29 @@ export const Footer = () => {
   return (
     <>
       <InvestmentDisclaimerDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
-      <Stack as="footer" px={2} py="12px" gap={1} width="100%" background={theme.colors.backgroundPrimary}>
+      <Stack as="footer" px={2} py="12px" gap={1} width="100%">
         <UnstyledLink href="mailto:support@centrifuge.io">
-          <Text textOverflow="ellipsis" variant="body4">
+          <Text textOverflow="ellipsis" variant="body4" color="textInverted">
             Need help?
           </Text>
         </UnstyledLink>
         <UnstyledLink href="https://docs.centrifuge.io/">
-          <Text textOverflow="ellipsis" variant="body4">
+          <Text textOverflow="ellipsis" variant="body4" color="textInverted">
             Documentation
           </Text>
         </UnstyledLink>
         <UntyledButton onClick={() => setIsDialogOpen(true)}>
-          <Text textOverflow="ellipsis" variant="body4">
+          <Text textOverflow="ellipsis" variant="body4" color="textInverted">
             Investment disclaimer
           </Text>
         </UntyledButton>
         <UnstyledLink target="_blank" href="https://centrifuge.io/data-privacy-policy/">
-          <Text textOverflow="ellipsis" variant="body4">
+          <Text textOverflow="ellipsis" variant="body4" color="textInverted">
             Data privacy policy
           </Text>
         </UnstyledLink>
         <UnstyledLink target="_blank" href="https://centrifuge.io/imprint/">
-          <Text textOverflow="ellipsis" variant="body4">
+          <Text textOverflow="ellipsis" variant="body4" color="textInverted">
             Imprint
           </Text>
         </UnstyledLink>

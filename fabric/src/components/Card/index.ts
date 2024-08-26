@@ -10,9 +10,9 @@ type Props = {
 export type CardProps = Props &
   Omit<BoxProps, 'border' | 'borderColor' | 'borderWidth' | 'borderStyle' | 'bg' | 'backgroundColor'>
 
-export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }) =>
-  css({
-    bg: backgroundColor ?? 'backgroundPage',
+export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }) => {
+  return css({
+    background: backgroundColor ?? 'backgroundPage',
     borderRadius: 'card',
     borderWidth: variant === 'default' && !backgroundColor ? 1 : 0,
     borderStyle: 'solid',
@@ -25,4 +25,4 @@ export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }
       boxShadow: variant === 'interactive' ? 'cardActive' : undefined,
     },
   })
-)
+})
