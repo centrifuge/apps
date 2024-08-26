@@ -1,10 +1,10 @@
-import type { JsonRpcSigner, TransactionRequest } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
 import { DefinitionRpc, DefinitionsCall, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
+import type { JsonRpcSigner, TransactionRequest } from 'ethers'
 import 'isomorphic-fetch'
 import {
   Observable,

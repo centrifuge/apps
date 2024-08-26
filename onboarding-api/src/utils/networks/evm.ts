@@ -1,7 +1,4 @@
-import { isAddress } from '@ethersproject/address'
-import { Contract } from '@ethersproject/contracts'
-import { InfuraProvider, JsonRpcProvider, Provider } from '@ethersproject/providers'
-import { BigNumber, ethers } from 'ethers'
+import { Contract, InfuraProvider, JsonRpcProvider, Provider, ethers, isAddress } from 'ethers'
 import { Request, Response } from 'express'
 import fetch from 'node-fetch'
 import { SiweMessage } from 'siwe'
@@ -41,7 +38,7 @@ export const validateEvmRemark = async (
     Number(transactionInfo.blockNumber)
   )
 
-  const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.args?.map((arg) => arg.toString()))
+  const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.topics?.map((arg) => arg.toString()))
   if (actualRemark !== expectedRemark || sender !== wallet.address) {
     throw new HttpError(400, 'Invalid remark')
   }
@@ -102,9 +99,9 @@ export const verifySafeWallet = async (req: Request, res: Response) => {
     throw new HttpError(400, 'Unable to fetch SafeMessage')
   }
 
-  const threshold = BigNumber.from(await safeContract.getThreshold()).toNumber()
+  const threshold = BigInt(await safeContract.getThreshold())
 
-  if (!threshold || threshold > safeMessage.confirmations.length) {
+  if (!threshold || threshold > BigInt(safeMessage.confirmations.length)) {
     throw new HttpError(400, 'Threshold has not been met')
   }
 
@@ -134,5 +131,5 @@ const fetchSafeMessage = async (safeMessageHash: string, chainId: number) => {
     headers: { 'Content-Type': 'application/json' },
   })
 
-  return response.json()
+  return response.json() as Promise<{ confirmations: any[]; preparedSignature: string }>
 }

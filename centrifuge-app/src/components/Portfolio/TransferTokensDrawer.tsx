@@ -20,9 +20,9 @@ import {
   TabsItem,
   Text,
 } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
+import { isAddress as isEvmAddress } from 'ethers'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
 import { useQuery } from 'react-query'

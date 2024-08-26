@@ -7,8 +7,8 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { Dialog, Grid, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
+import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'

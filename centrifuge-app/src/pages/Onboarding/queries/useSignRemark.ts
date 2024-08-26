@@ -8,7 +8,7 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { useNativeBalance } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/evm/utils'
-import { Contract } from '@ethersproject/contracts'
+import { Contract } from 'ethers'
 import React, { useEffect } from 'react'
 import { UseMutateFunction } from 'react-query'
 import { lastValueFrom } from 'rxjs'

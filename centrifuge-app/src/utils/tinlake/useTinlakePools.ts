@@ -9,7 +9,6 @@ import {
   TokenBalance,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -346,12 +345,12 @@ export async function getWriteOffPercentages(pool: TinlakePool, loans: any[]) {
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
-  const toDateString = (val: BigNumber) => new Date(val.toNumber() * 1000).toISOString()
-  const toNumber = (val: BigNumber) => val.toNumber()
-  const toCurrencyBalance = (val: BigNumber) => new CurrencyBalance(val.toString(), 18)
-  const toTokenBalance = (val: BigNumber) => new TokenBalance(val.toString(), 18)
-  const toRate = (val: BigNumber) => new Rate(val.toString())
-  const toPrice = (val: BigNumber) => new Rate(val.toString())
+  const toDateString = (val: BigInt) => new Date(Number(val) * 1000).toISOString()
+  const toNumber = (val: BigInt) => Number(val)
+  const toCurrencyBalance = (val: BigInt) => new CurrencyBalance(val.toString(), 18)
+  const toTokenBalance = (val: BigInt) => new TokenBalance(val.toString(), 18)
+  const toRate = (val: BigInt) => new Rate(val.toString())
+  const toPrice = (val: BigInt) => new Rate(val.toString())
 
   const calls: Call[] = []
   pools.active.forEach((pool) => {
@@ -828,6 +827,6 @@ interface State {
   submissionPeriod: boolean
 }
 
-function toBN(val: BigNumber) {
+function toBN(val: BigInt) {
   return new BN(val.toString())
 }

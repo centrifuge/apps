@@ -7,7 +7,7 @@ import {
   useTransactions,
   useWallet,
 } from '@centrifuge/centrifuge-react'
-import { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
+import { TransactionRequest, TransactionResponse } from 'ethers'
 import * as React from 'react'
 import { Observable, lastValueFrom, tap } from 'rxjs'
 

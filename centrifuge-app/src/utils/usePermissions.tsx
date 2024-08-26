@@ -14,8 +14,8 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { Select } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
+import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
 import { combineLatest, combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs'
 import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'

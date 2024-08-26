@@ -1,11 +1,8 @@
-import {
-  TransactionReceipt as EvmTransactionReceipt,
-  TransactionResponse as EvmTransactionResponse,
-} from '@ethersproject/providers'
 import { AddressOrPair } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { HexString } from '@polkadot/util/types'
 import BN from 'bn.js'
+import { TransactionReceipt as EvmTransactionReceipt, TransactionResponse as EvmTransactionResponse } from 'ethers'
 import { Config } from '../CentrifugeBase'
 
 type EvmTransactionResult = {

@@ -1,5 +1,4 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { BigNumber } from '@ethersproject/bignumber'
 import Decimal from 'decimal.js-light'
 import { useQuery } from 'react-query'
 import { useAddress } from '../useAddress'
@@ -17,8 +16,8 @@ export function useTinlakeInvestments(poolId: string, address?: string) {
 }
 
 async function getInvestment(pool: TinlakePool, address: string) {
-  const toNumber = (val: BigNumber) => val.toNumber()
-  const toDec18 = (val: BigNumber) => new CurrencyBalance(val.toString(), 18).toDecimal()
+  const toNumber = (val: BigInt) => Number(val)
+  const toDec18 = (val: BigInt) => new CurrencyBalance(val.toString(), 18).toDecimal()
   const calls: Call[] = [
     {
       target: pool.addresses.JUNIOR_TRANCHE,

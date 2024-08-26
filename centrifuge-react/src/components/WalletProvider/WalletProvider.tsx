@@ -1,10 +1,10 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
-import { BaseProvider, getDefaultProvider, JsonRpcProvider, Networkish } from '@ethersproject/providers'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
+import { getDefaultProvider, JsonRpcProvider, Networkish, Provider } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
@@ -63,7 +63,7 @@ export type WalletContextType = {
     selectedWallet: EvmConnectorMeta | null
     isSmartContractWallet: boolean
     selectedAddress: string | null
-    getProvider(chainId: number): BaseProvider
+    getProvider(chainId: number): Provider
   }
 }
 
@@ -134,7 +134,7 @@ type WalletProviderProps = {
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
-const cachedProviders = new Map<Networkish, BaseProvider>()
+const cachedProviders = new Map<Networkish, Provider>()
 
 export function WalletProvider({
   children,

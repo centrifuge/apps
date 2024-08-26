@@ -1,1 +1,9 @@
-["function investmentManager() view returns (address)"]
+[
+  {
+    "inputs": [],
+    "name": "investmentManager",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

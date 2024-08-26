@@ -1,6 +1,4 @@
-import { Interface } from '@ethersproject/abi'
-import { Contract } from '@ethersproject/contracts'
-import { BaseProvider } from '@ethersproject/providers'
+import { Contract, Interface, Provider } from 'ethers'
 import set from 'lodash/set'
 
 const MULTICALL_ABI = [
@@ -25,7 +23,7 @@ const MULTICALL_ABI = [
 const MULTICALL_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11'
 
 type AggregateOptions = {
-  rpcProvider: BaseProvider
+  rpcProvider: Provider
   allowFailure?: boolean
 }
 
@@ -41,7 +39,7 @@ export type Call = {
 }
 
 const identity = (v: any) => v
-const multicallContracts = new WeakMap<BaseProvider, Contract>()
+const multicallContracts = new WeakMap<Provider, Contract>()
 
 export async function multicall<T = Record<string, any>>(calls: Call[], options: AggregateOptions) {
   let contract = multicallContracts.get(options.rpcProvider)
@@ -60,7 +58,7 @@ export async function multicall<T = Record<string, any>>(calls: Call[], options:
     callData: interfaces[i][0].encodeFunctionData(interfaces[i][1], c.call.slice(1)),
   }))
 
-  const results = await contract.callStatic.aggregate3(encoded)
+  const results = await contract.aggregate3.staticCall(encoded)
 
   const transformed: Record<string, any> = {}
   calls.forEach((c, i) => {

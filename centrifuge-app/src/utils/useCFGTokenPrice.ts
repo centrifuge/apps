@@ -1,10 +1,9 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
-import { Contract } from '@ethersproject/contracts'
-import { BaseProvider } from '@ethersproject/providers'
+import { Contract, Provider } from 'ethers'
 import { useQuery } from 'react-query'
 import { Dec } from './Decimal'
 
-async function getWCFGPrice(provider: BaseProvider) {
+async function getWCFGPrice(provider: Provider) {
   const usdcWcfgPool = '0x7270233cCAE676e776a659AFfc35219e6FCfbB10'
   const uniswapPoolAbi = ['function observe(uint32[] secondsAgos) external view returns (int56[], uint160[])']
   const poolContract = new Contract(usdcWcfgPool, uniswapPoolAbi, provider)
