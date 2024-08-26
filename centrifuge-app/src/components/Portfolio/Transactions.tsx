@@ -183,7 +183,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
         </Box>
         {onlyMostRecent ? (
           <Box display="inline-block">
-            <RouterLinkButton to={`/history/${address}`} small variant="tertiary" icon={IconEye}>
+            <RouterLinkButton newTab to={`/history/${address}`} small variant="tertiary" icon={IconEye}>
               View all
             </RouterLinkButton>
           </Box>
