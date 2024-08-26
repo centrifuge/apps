@@ -3,17 +3,14 @@ import styled from 'styled-components'
 
 // the main breakpoint to switch from stacked to columns layout
 const BREAK_POINT_COLUMNS = 'M'
-// breakpoint from minimal to extended left sidebar width
-const BREAK_POINT_SIDEBAR_EXTENDED = 'L'
 
 const HEADER_HEIGHT = 60
-const TOOLBAR_HEIGHT = 50
-const SIDEBAR_WIDTH = 80
-const SIDEBAR_WIDTH_EXTENDED = 220
 
 export const Root = styled(Box)`
   position: relative;
   min-height: 100vh;
+  width: 100vw;
+  display: flex;
 
   @supports (min-height: 100dvh) {
     min-height: 100dvh;
@@ -22,6 +19,7 @@ export const Root = styled(Box)`
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     height: 100vh;
     overflow: auto;
+    width: 100vw;
 
     @supports (height: 100dvh) {
       height: 100dvh;
@@ -30,29 +28,28 @@ export const Root = styled(Box)`
 `
 
 export const Inner = styled(Grid)`
-  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: transparent;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  z-index: 2;
+  padding-bottom: 1rem;
 
-  align-items: start;
-  grid-template-rows: 0px ${HEADER_HEIGHT}px 1fr auto ${TOOLBAR_HEIGHT}px;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    'header-background header-background'
-    'logo wallet'
-    'main main'
-    'footer footer'
-    'toolbar toolbar';
-
-  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    grid-template-rows: ${HEADER_HEIGHT}px minmax(max-content, 1fr) auto;
-    grid-template-columns: ${SIDEBAR_WIDTH}px 1fr;
-    grid-template-areas:
-      'logo wallet'
-      'toolbar main'
-      'footer main';
+  @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
+      theme.breakpoints['L']}) {
+    width: 7vw;
+    background-color: ${({ theme }) => theme.colors.backgroundBlack};
   }
 
-  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_SIDEBAR_EXTENDED]}) {
-    grid-template-columns: ${SIDEBAR_WIDTH_EXTENDED}px 1fr;
+  @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
+    width: 15vw;
+    background-color: ${({ theme }) => theme.colors.backgroundBlack};
   }
 `
 
@@ -66,7 +63,7 @@ export const HeaderBackground = styled(Box)`
   width: 100%;
   height: ${HEADER_HEIGHT}px;
 
-  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
+  background-color: ${({ theme }) => theme.colors.backgroundBlack};
   border-bottom: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
@@ -74,35 +71,12 @@ export const HeaderBackground = styled(Box)`
   }
 `
 
-export const ToolbarContainer = styled(Box)`
-  z-index: ${({ theme }) => theme.zIndices.header};
-  grid-area: toolbar;
-  position: sticky;
-  left: 0;
-  bottom: 0;
-  height: ${TOOLBAR_HEIGHT}px;
-
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
-  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
-
-  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
-    bottom: auto;
-    height: auto;
-
-    border-top: 0;
-    background-color: transparent;
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_SIDEBAR_EXTENDED]}) {
-    padding: ${({ theme }) => theme.space[2]}px;
-  }
-`
-
 export const LogoContainer = styled(Stack)`
+  background-color: ${({ theme }) => theme.colors.backgroundBlack};
   z-index: ${({ theme }) => theme.zIndices.header};
   position: sticky;
   top: 0;
+  width: 100%;
 
   grid-area: logo;
   height: ${HEADER_HEIGHT}px;
@@ -116,13 +90,17 @@ export const LogoContainer = styled(Stack)`
 `
 
 export const WalletContainer = styled(Stack)`
-  z-index: ${({ theme }) => theme.zIndices.header};
-  position: sticky;
+  position: fixed;
   top: 0;
+  right: 0;
+  z-index: ${({ theme }) => theme.zIndices.header};
   grid-area: wallet;
-  // WalletContainer & WalletPositioner are positioned above the main content and would block user interaction (click).
-  // disabling pointer-events here and enable again on WalletInner
+  margin-right: 10px;
   pointer-events: none;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
+    margin-right: 20px;
+  }
 `
 
 export const WalletPositioner = styled(Shelf)`
@@ -134,7 +112,8 @@ export const WalletPositioner = styled(Shelf)`
 export const WalletInner = styled(Stack)`
   height: ${HEADER_HEIGHT}px;
   justify-content: center;
-  pointer-events: auto; // resetting pointer events
+  pointer-events: auto;
+  width: 250px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
@@ -152,10 +131,51 @@ export const MainContainer = styled(Stack)`
 `
 
 export const FooterContainer = styled(Box)`
-  grid-area: footer;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     position: sticky;
     bottom: 0;
+  }
+`
+
+export const ToolbarContainer = styled(Box)`
+  z-index: ${({ theme }) => theme.zIndices.header};
+  grid-area: toolbar;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+
+  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
+
+  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
+    top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
+    bottom: auto;
+    height: auto;
+    border-top: 0;
+    background-color: transparent;
+  }
+`
+
+export const ContentWrapper = styled.div`
+  width: 100%;
+  margin-left: 0;
+  margin-top: ${HEADER_HEIGHT}px;
+  overflow-x: hidden;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
+      theme.breakpoints['L']}) {
+    margin-left: 7vw;
+    width: calc(100% - 7vw);
+    margin-top: 0;
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
+    margin-left: 15vw;
+    width: calc(100% - 15vw);
+    margin-top: 0;
   }
 `

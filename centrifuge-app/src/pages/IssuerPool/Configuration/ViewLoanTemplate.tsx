@@ -1,16 +1,11 @@
 import { Box, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { useMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 
 export function IssuerPoolViewLoanTemplatePage() {
-  return (
-    <LayoutBase>
-      <ViewLoanTemplate />
-    </LayoutBase>
-  )
+  return <ViewLoanTemplate />
 }
 
 export function ViewLoanTemplate() {

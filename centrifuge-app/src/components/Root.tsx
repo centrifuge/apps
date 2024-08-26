@@ -9,7 +9,7 @@ import { GlobalStyle as FabricGlobalStyle, FabricProvider } from '@centrifuge/fa
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { HashRouter, NavLinkProps, Navigate, Route, Routes, matchRoutes } from 'react-router-dom'
+import { NavLinkProps, Navigate, RouterProvider, createHashRouter, matchRoutes } from 'react-router-dom'
 import { config, evmChains } from '../config'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -17,6 +17,7 @@ import { DemoBanner } from './DemoBanner'
 import { ExpiringCFGRewardsBanner } from './ExpiringCFGRewardsBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
+import { LayoutBase } from './LayoutBase'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
@@ -54,61 +55,6 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
-export function Root() {
-  const [debugState, setDebugState] = React.useState(initialFlagsState)
-  const isThemeToggled = debugState.alternativeTheme
-
-  return (
-    <>
-      <HelmetProvider>
-        <Head />
-      </HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <FabricProvider
-          theme={
-            !isThemeToggled
-              ? config.themes[config.defaultTheme]
-              : config.defaultTheme === 'dark'
-              ? config.themes.light
-              : config.themes.dark
-          }
-        >
-          <GlobalStyle />
-          <FabricGlobalStyle />
-          <CentrifugeProvider config={centConfig}>
-            <HashRouter>
-              <DemoBanner />
-              <WalletProvider
-                evmChains={evmChains}
-                subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-                walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-                showAdvancedAccounts={debugState.showAdvancedAccounts}
-                showTestNets={debugState.showTestNets}
-                showFinoa={debugState.showFinoa}
-              >
-                <SupportedBrowserBanner />
-                <OnboardingAuthProvider>
-                  <OnboardingProvider>
-                    <DebugFlags onChange={(state) => setDebugState(state)}>
-                      <ExpiringCFGRewardsBanner />
-                      <TransactionProvider>
-                        <TransactionToasts />
-                        <LoadBoundary>
-                          <AppRoutes />
-                        </LoadBoundary>
-                      </TransactionProvider>
-                    </DebugFlags>
-                  </OnboardingProvider>
-                </OnboardingAuthProvider>
-              </WalletProvider>
-            </HashRouter>
-          </CentrifugeProvider>
-        </FabricProvider>
-      </QueryClientProvider>
-    </>
-  )
-}
-
 const AccountNFTsPage = React.lazy(() => import('../pages/AccountNFTs'))
 const CollectionPage = React.lazy(() => import('../pages/Collection'))
 const CollectionsPage = React.lazy(() => import('../pages/Collections'))
@@ -135,67 +81,133 @@ const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 const PoolsPage = React.lazy(() => import('../pages/Pools'))
 
-const routes = [
+const router = createHashRouter([
   {
-    path: '/issuer/:pid/*',
-    element: <IssuerPoolPage />,
+    path: '/',
+    element: <LayoutBase />,
+    children: [
+      {
+        path: '/',
+        element: <Navigate to="/pools" replace />,
+      },
+      {
+        path: '/pools',
+        element: <PoolsPage />,
+        handle: { component: PoolsPage },
+      },
+      {
+        path: '/pools/:pid/*',
+        element: <PoolDetailPage />,
+        handle: { component: PoolDetailPage },
+      },
+      {
+        path: '/issuer/:pid/*',
+        element: <IssuerPoolPage />,
+        handle: { component: IssuerPoolPage },
+      },
+      { path: '/nfts/collection/:cid/object/mint', element: <MintNFTPage />, handle: { component: MintNFTPage } },
+      { path: '/nfts/collection/:cid/object/:nftid', element: <NFTPage />, handle: { component: NFTPage } },
+      { path: '/nfts/collection/:cid', element: <CollectionPage />, handle: { component: CollectionPage } },
+      { path: '/nfts/account', element: <AccountNFTsPage />, handle: { component: AccountNFTsPage } },
+      { path: '/nfts', element: <CollectionsPage />, handle: { component: CollectionsPage } },
+      { path: '/issuer/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
+      { path: '/history/:address', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
+      { path: '/history', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
+      { path: '/pools/:pid/assets/:aid', element: <LoanPage />, handle: { component: LoanPage } },
+      {
+        path: '/pools/:pid/transactions',
+        element: <PoolTransactionsPage />,
+        handle: { component: PoolTransactionsPage },
+      },
+      {
+        path: '/issuer/:pid/assets/create',
+        element: <IssuerCreateLoanPage />,
+        handle: { component: IssuerCreateLoanPage },
+      },
+      { path: '/portfolio', element: <PortfolioPage />, handle: { component: PortfolioPage } },
+      { path: '/prime/:dao', element: <PrimeDetailPage />, handle: { component: PrimeDetailPage } },
+      { path: '/prime', element: <PrimePage />, handle: { component: PrimePage } },
+      { path: '/disclaimer', element: <InvestmentDisclaimerPage />, handle: { component: InvestmentDisclaimerPage } },
+      { path: '/onboarding', element: <OnboardingPage />, handle: { component: OnboardingPage } },
+      { path: '/onboarding/verifyEmail', element: <EmailVerified />, handle: { component: EmailVerified } },
+      {
+        path: '/onboarding/updateInvestorStatus',
+        element: <UpdateInvestorStatus />,
+        handle: { component: UpdateInvestorStatus },
+      },
+      { path: '/multisig-approval', element: <MultisigApprovalPage />, handle: { component: MultisigApprovalPage } },
+      { path: '/swaps', element: <SwapsPage />, handle: { component: SwapsPage } },
+      {
+        path: '/utils/address-format-converter',
+        element: <ConvertAddressPage />,
+        handle: { component: ConvertAddressPage },
+      },
+      { path: '/nav-management/:pid', element: <NavManagementPage />, handle: { component: NavManagementPage } },
+      { path: '*', element: <NotFoundPage />, handle: { component: NotFoundPage } },
+    ],
+    errorElement: <NotFoundPage />,
   },
-  {
-    path: '/pools',
-    element: <PoolsPage />,
-  },
-  {
-    path: '/pools/:pid/*',
-    element: <PoolDetailPage />,
-  },
-  { path: '/nfts/collection/:cid/object/mint', element: <MintNFTPage /> },
-  { path: '/nfts/collection/:cid/object/:nftid', element: <NFTPage /> },
-  { path: '/nfts/collection/:cid', element: <CollectionPage /> },
-  { path: '/nfts/account', element: <AccountNFTsPage /> },
-  { path: '/nfts', element: <CollectionsPage /> },
-  { path: '/issuer/create-pool', element: <IssuerCreatePoolPage /> },
-  { path: '/history/:address', element: <TransactionHistoryPage /> },
-  { path: '/history', element: <TransactionHistoryPage /> },
-  { path: '/pools/:pid/assets/:aid', element: <LoanPage /> },
-  { path: '/pools/:pid/transactions', element: <PoolTransactionsPage /> },
-  { path: '/issuer/:pid/assets/create', element: <IssuerCreateLoanPage /> },
-  { path: '/portfolio', element: <PortfolioPage /> },
-  { path: '/prime/:dao', element: <PrimeDetailPage /> },
-  { path: '/prime', element: <PrimePage /> },
-  { path: '/disclaimer', element: <InvestmentDisclaimerPage /> },
-  { path: '/onboarding', element: <OnboardingPage /> },
-  { path: '/onboarding/verifyEmail', element: <EmailVerified /> },
-  { path: '/onboarding/updateInvestorStatus', element: <UpdateInvestorStatus /> },
-  { path: '/multisig-approval', element: <MultisigApprovalPage /> },
-  { path: '/swaps', element: <SwapsPage /> },
-  { path: '/utils/address-format-converter', element: <ConvertAddressPage /> },
-  { path: '/nav-management/:pid', element: <NavManagementPage /> },
-  { path: '/', element: <Navigate to="/pools" /> },
-  { path: '*', element: <NotFoundPage /> },
-]
+])
 
 export function findRoute(pathname: string) {
-  const matchedRoutes = matchRoutes(routes, { pathname })
+  const matchedRoutes = matchRoutes(router.routes, { pathname })
   return matchedRoutes ? matchedRoutes[0] : null
 }
 
 export function prefetchRoute(to: string | NavLinkProps['to']) {
   const pathname = typeof to === 'string' ? to : 'pathname' in to ? to.pathname : null
   const route = pathname ? findRoute(pathname) : null
-  const Comp = route?.route.element
+  const Comp = route?.route.handle?.component
+
   try {
-    if (Comp && '_init' in Comp && '_payload' in Comp) (Comp as any)._init(Comp._payload)
+    if (Comp && '_init' in Comp && '_payload' in Comp) {
+      ;(Comp as any)._init(Comp._payload)
+    }
   } catch (error) {
     console.error('Error prefetching route:', error)
   }
 }
 
-function AppRoutes() {
+export function Root() {
+  const [debugState, setDebugState] = React.useState(initialFlagsState)
+
   return (
-    <Routes>
-      {routes.map((route, i) => (
-        <Route key={i} path={route.path} element={route.element} />
-      ))}
-    </Routes>
+    <>
+      <HelmetProvider>
+        <Head />
+      </HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <FabricProvider theme={config.themes.light}>
+          <GlobalStyle />
+          <FabricGlobalStyle />
+          <CentrifugeProvider config={centConfig}>
+            <DemoBanner />
+            <WalletProvider
+              evmChains={evmChains}
+              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+              walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+              showAdvancedAccounts={debugState.showAdvancedAccounts}
+              showTestNets={debugState.showTestNets}
+              showFinoa={debugState.showFinoa}
+            >
+              <SupportedBrowserBanner />
+              <OnboardingAuthProvider>
+                <OnboardingProvider>
+                  <DebugFlags onChange={(state) => setDebugState(state)}>
+                    <ExpiringCFGRewardsBanner />
+                    <TransactionProvider>
+                      <TransactionToasts />
+                      <LoadBoundary>
+                        <RouterProvider router={router} />
+                      </LoadBoundary>
+                    </TransactionProvider>
+                  </DebugFlags>
+                </OnboardingProvider>
+              </OnboardingAuthProvider>
+            </WalletProvider>
+          </CentrifugeProvider>
+        </FabricProvider>
+      </QueryClientProvider>
+    </>
   )
 }

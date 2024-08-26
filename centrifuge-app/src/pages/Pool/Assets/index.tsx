@@ -5,7 +5,6 @@ import { useParams } from 'react-router'
 import currencyDollar from '../../../assets/images/currency-dollar.svg'
 import daiLogo from '../../../assets/images/dai-logo.svg'
 import usdcLogo from '../../../assets/images/usdc-logo.svg'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -20,12 +19,12 @@ import { PoolDetailHeader } from '../Header'
 
 export function PoolDetailAssetsTab() {
   return (
-    <LayoutBase>
+    <>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 

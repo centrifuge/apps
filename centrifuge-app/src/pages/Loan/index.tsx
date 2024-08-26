@@ -63,13 +63,7 @@ const FullHeightStack = styled(Stack)`
 `
 
 export default function LoanPage() {
-  return (
-    <FullHeightLayoutBase>
-      <FullHeightStack>
-        <Loan />
-      </FullHeightStack>
-    </FullHeightLayoutBase>
-  )
+  return <Loan />
 }
 function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
