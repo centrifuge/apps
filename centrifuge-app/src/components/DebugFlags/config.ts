@@ -38,7 +38,6 @@ export type Key =
   | 'persistDebugFlags'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
-  | 'alternativeTheme'
   | 'editPoolConfig'
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
@@ -56,11 +55,6 @@ export const flagsConfig = {
     type: 'text',
   },
   allowInvestBelowMin: {
-    default: false,
-    type: 'checkbox',
-  },
-  alternativeTheme: {
-    alwaysShow: true,
     default: false,
     type: 'checkbox',
   },

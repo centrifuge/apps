@@ -1,7 +1,7 @@
 import { baseTheme } from './tokens/baseTheme'
 import { brandAltair } from './tokens/brandAltair'
 import { blueScale, grayScale, yellowScale } from './tokens/colors'
-import { modeLight } from './tokens/modeLight'
+import { colorTheme } from './tokens/theme'
 import { FabricTheme } from './types'
 
 export const altairLight: FabricTheme = {
@@ -9,7 +9,7 @@ export const altairLight: FabricTheme = {
   scheme: 'light',
   colors: {
     ...brandAltair,
-    ...modeLight.colors,
+    ...colorTheme.colors,
     primarySelectedBackground: blueScale[500],
     secondarySelectedBackground: blueScale[50],
     focus: blueScale[500],

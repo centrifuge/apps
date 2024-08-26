@@ -1,7 +1,7 @@
 import { baseTheme } from './tokens/baseTheme'
 import { brandCentrifuge } from './tokens/brandCentrifuge'
 import { blueScale, grayScale, yellowScale } from './tokens/colors'
-import { modeLight } from './tokens/modeLight'
+import { colorTheme } from './tokens/theme'
 import { FabricTheme } from './types'
 
 export const centrifugeLight: FabricTheme = {
@@ -9,7 +9,7 @@ export const centrifugeLight: FabricTheme = {
   scheme: 'light',
   colors: {
     ...brandCentrifuge,
-    ...modeLight.colors,
+    ...colorTheme.colors,
     primarySelectedBackground: blueScale[500],
     secondarySelectedBackground: blueScale[50],
     focus: blueScale[500],

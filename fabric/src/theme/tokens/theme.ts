@@ -1,4 +1,4 @@
-import { blueScale, centrifugeBlue, grayScale, yellowScale } from './colors'
+import { blackScale, blueScale, centrifugeBlue, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
 const statusInfo = blueScale[500]
@@ -14,11 +14,16 @@ const statusWarningBg = yellowScale[50]
 const statusCriticalBg = '#fcf0ee'
 const statusPromoteBg = '#f8107114'
 
-const lightColors = {
+const black = '#252B34'
+const gold = '#FFC500'
+
+const colors = {
   textPrimary: grayScale[900],
   textSecondary: grayScale[800],
   textDisabled: grayScale[500],
   textInverted: 'white',
+  textGold: gold,
+  textBlack: black,
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
@@ -29,6 +34,7 @@ const lightColors = {
   backgroundInput: 'white',
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[900],
+  backgroundBlack: black,
 
   borderPrimary: grayScale[100],
   borderSecondary: grayScale[300],
@@ -46,37 +52,37 @@ const lightColors = {
   statusCriticalBg,
   statusPromoteBg,
 
-  backgroundButtonPrimary: centrifugeBlue,
-  backgroundButtonPrimaryFocus: centrifugeBlue,
-  backgroundButtonPrimaryHover: centrifugeBlue,
-  backgroundButtonPrimaryPressed: blueScale[500],
-  backgroundButtonPrimaryDisabled: grayScale[300],
-  textButtonPrimary: 'white',
-  textButtonPrimaryFocus: 'white',
-  textButtonPrimaryHover: 'white',
-  textButtonPrimaryPressed: 'white',
+  backgroundButtonPrimary: gold,
+  backgroundButtonPrimaryFocus: gold,
+  backgroundButtonPrimaryHover: gold,
+  backgroundButtonPrimaryPressed: yellowScale[500],
+  backgroundButtonPrimaryDisabled: yellowScale[500],
+  textButtonPrimary: black,
+  textButtonPrimaryFocus: black,
+  textButtonPrimaryHover: black,
+  textButtonPrimaryPressed: black,
   textButtonPrimaryDisabled: grayScale[500],
-  borderButtonPrimary: centrifugeBlue,
-  borderButtonPrimaryFocus: blueScale[700],
-  borderButtonPrimaryHover: blueScale[700],
-  borderButtonPrimaryPressed: blueScale[700],
+  borderButtonPrimary: gold,
+  borderButtonPrimaryFocus: yellowScale[800],
+  borderButtonPrimaryHover: yellowScale[800],
+  borderButtonPrimaryPressed: yellowScale[800],
   borderButtonPrimaryDisabled: 'transparent',
-  shadowButtonPrimary: '#0241E945',
+  shadowButtonPrimary: 'transparent',
 
-  backgroundButtonSecondary: blueScale[100],
-  backgroundButtonSecondaryFocus: blueScale[100],
-  backgroundButtonSecondaryHover: blueScale[100],
-  backgroundButtonSecondaryPressed: blueScale[100],
+  backgroundButtonSecondary: black,
+  backgroundButtonSecondaryFocus: blackScale[500],
+  backgroundButtonSecondaryHover: blackScale[500],
+  backgroundButtonSecondaryPressed: blackScale[500],
   backgroundButtonSecondaryDisabled: grayScale[300],
-  textButtonSecondary: centrifugeBlue,
-  textButtonSecondaryFocus: centrifugeBlue,
-  textButtonSecondaryHover: centrifugeBlue,
-  textButtonSecondaryPressed: centrifugeBlue,
+  textButtonSecondary: 'white',
+  textButtonSecondaryFocus: gold,
+  textButtonSecondaryHover: gold,
+  textButtonSecondaryPressed: gold,
   textButtonSecondaryDisabled: grayScale[500],
   borderButtonSecondary: grayScale[300],
-  borderButtonSecondaryFocus: centrifugeBlue,
-  borderButtonSecondaryHover: centrifugeBlue,
-  borderButtonSecondaryPressed: centrifugeBlue,
+  borderButtonSecondaryFocus: gold,
+  borderButtonSecondaryHover: gold,
+  borderButtonSecondaryPressed: gold,
   borderButtonSecondaryDisabled: 'transparent',
   shadowButtonSecondary: '#A8BFFD35',
 
@@ -114,6 +120,6 @@ const lightColors = {
   shadowButtonInverted: '#E0E7FF',
 }
 
-export const modeLight = {
-  colors: lightColors,
+export const colorTheme = {
+  colors,
 }
