@@ -4,7 +4,7 @@ import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
-import { getDefaultProvider, JsonRpcProvider, Networkish, Provider } from 'ethers'
+import { JsonRpcProvider, Provider } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
@@ -129,12 +129,10 @@ type WalletProviderProps = {
   showAdvancedAccounts?: boolean
   showTestNets?: boolean
   showFinoa?: boolean
-  alchemyKey?: string
-  infuraKey?: string
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
-const cachedProviders = new Map<Networkish, Provider>()
+const cachedProviders = new Map<number, JsonRpcProvider>()
 
 export function WalletProvider({
   children,
@@ -150,8 +148,6 @@ export function WalletProvider({
   showAdvancedAccounts,
   showTestNets,
   showFinoa,
-  alchemyKey,
-  infuraKey,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
@@ -244,28 +240,26 @@ export function WalletProvider({
 
   const [proxies] = useCentrifugeQuery(['allProxies'], (cent) => cent.proxies.getAllProxies())
 
-  function getProvider(networkish: Networkish) {
-    let network = networkish
-    const cachedProvider = cachedProviders.get(network)
-    if (cachedProvider) {
-      return cachedProvider
-    } else {
+  async function findHealthyProvider(chainId: number, urls: string[]): Promise<JsonRpcProvider> {
+    for (const url of urls) {
       try {
-        const provider = getDefaultProvider(network, {
-          alchemy: alchemyKey,
-          infura: infuraKey,
-        })
-        cachedProviders.set(network, provider)
+        const provider = new JsonRpcProvider(url, chainId)
+        await provider.getBlockNumber()
+        cachedProviders.set(chainId, provider)
         return provider
       } catch (error) {
-        if (typeof network === 'number') {
-          const provider = new JsonRpcProvider((evmChains as any)[network].urls[0], network)
-          cachedProviders.set(network, provider)
-          return provider
-        }
-        throw error
+        console.error(`Provider health check failed for ${url}:`, error)
       }
     }
+    throw new Error(`No healthy provider found for chain ${chainId}`)
+  }
+
+  function getProvider(chainId: number): JsonRpcProvider {
+    const urls = (evmChains as any)[chainId].urls
+    if (!cachedProviders.has(chainId)) {
+      findHealthyProvider(chainId, urls).catch(console.error)
+    }
+    return cachedProviders.get(chainId) || new JsonRpcProvider(urls[0], chainId)
   }
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {

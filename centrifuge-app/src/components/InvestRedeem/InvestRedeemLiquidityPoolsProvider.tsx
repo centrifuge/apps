@@ -48,7 +48,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
-  const chainId = provider?.network.chainId || 1
+  const chainId = Number(provider?._network.chainId) || 1
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -228,12 +228,13 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       // If the last tx was an approve, we may not have refetched the allowance yet,
       // so assume the allowance is enough to do a normal invest
       else if (lpInvest.lpCurrencyAllowance.lt(assets) && supportsPermits && pendingAction !== 'approvePoolCurrency') {
-        const signer = provider!.getSigner()
+        const signer = await provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
         const permit = await connectedCent.liquidityPools.signPermit([
           lpInvest.lpAddress,
           lpInvest.currency.address,
           assets,
+          chainId,
         ])
         console.log('permit', permit)
         // investWithPermit.execute([lpInvest.lpAddress, assets, permit])

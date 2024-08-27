@@ -483,7 +483,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const currencyData = await multicall<{
       currencies: { currencySupportsPermit?: boolean }[]
       trancheTokenSymbol: string
-      trancheTokenDecimals: number
+      trancheTokenDecimals: BigInt
     }>(
       [
         ...Object.values(currenciesByLpAddress).flatMap(
@@ -521,7 +521,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       managerAddress,
       trancheTokenAddress: shareData.share,
       trancheTokenSymbol: currencyData.trancheTokenSymbol,
-      trancheTokenDecimals: currencyData.trancheTokenDecimals,
+      trancheTokenDecimals: Number(currencyData.trancheTokenDecimals),
       currencySupportsPermit: currencyData.currencies?.[i]?.currencySupportsPermit,
     }))
     return result

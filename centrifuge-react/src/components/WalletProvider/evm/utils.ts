@@ -8,6 +8,7 @@ import { createWeb3ReactStoreAndActions } from '@web3-react/store'
 import { Actions, Provider as Web3ReactProvider, Web3ReactState, Web3ReactStore } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import type { Networkish } from 'ethers'
+import { BrowserProvider } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useWallet } from '../WalletProvider'
@@ -49,10 +50,7 @@ function getProviderKey(connector: Connector) {
   return providerKey
 }
 
-export function useProviderForConnector<T extends Web3ReactProvider = Web3ReactProvider>(
-  connector?: Connector | null,
-  network?: Networkish
-) {
+export function useProviderForConnector<T extends BrowserProvider>(connector?: Connector | null, network?: Networkish) {
   const conn = connector ?? emptyConnector
   const state = useConnectorState(conn)
   const isActive = computeIsActive(state)

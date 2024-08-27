@@ -123,7 +123,7 @@ const CENTRIFUGE: EnvironmentConfig = {
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
 
 const alchemyKey = import.meta.env.REACT_APP_ALCHEMY_KEY
-
+const onfinalityKey = import.meta.env.REACT_APP_ONFINALITY_KEY
 export const ethConfig = {
   rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 1,
@@ -156,7 +156,10 @@ export const evmChains: EvmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://etherscan.io/',
-    urls: [`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`],
+    urls: [
+      `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
+      `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
+    ],
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
@@ -164,7 +167,10 @@ export const evmChains: EvmChains = {
     name: 'Ethereum Sepolia',
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
     blockExplorerUrl: 'https://sepolia.etherscan.io/',
-    urls: [`https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`],
+    urls: [
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`,
+      `https://eth-sepolia.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
+    ],
     iconUrl: sepoliaLogo,
     isTestnet: true,
   },

@@ -29,7 +29,7 @@ export function useEvmTransaction<T extends Array<any>>(
 
   async function doTransaction(id: string, args: T, txOptions?: TransactionRequest) {
     try {
-      const signer = provider!.getSigner()
+      const signer = await provider!.getSigner()
       const connectedCent = centrifuge.connectEvm(selectedAddress!, signer)
       const transaction = transactionCallback(connectedCent)
       updateTransaction(id, { status: 'unconfirmed' })
