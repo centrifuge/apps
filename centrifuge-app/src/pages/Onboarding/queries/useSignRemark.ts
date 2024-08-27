@@ -149,11 +149,13 @@ export const useSignRemark = (
     try {
       const [message] = args
       const remarkerContract = new Contract(ethConfig.remarkerAddress, RemarkerAbi)
-      if (!evmProvider?.getSigner()) {
+      const signer = await evmProvider?.getSigner()
+      if (!signer) {
         throw new Error('Signer may not be set')
       }
-      const connectedContract = remarkerContract.connect(evmProvider?.getSigner())
-      const result = await connectedContract.functions.remarkWithEvent(message)
+      const connectedContract = remarkerContract.connect(signer) as Contract
+
+      const result = await connectedContract.remarkWithEvent(message)
       updateTransaction(txId, () => ({
         status: 'pending',
         hash: result.hash,
