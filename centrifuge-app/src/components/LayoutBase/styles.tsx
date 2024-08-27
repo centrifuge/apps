@@ -45,6 +45,7 @@ export const Inner = styled(Grid)`
       theme.breakpoints['L']}) {
     width: 7vw;
     background-color: ${({ theme }) => theme.colors.backgroundBlack};
+    overflow: visible;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {

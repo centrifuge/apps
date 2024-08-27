@@ -12,7 +12,7 @@ type Props = {
 
 export function LayoutSection({ title, titleAddition, subtitle, headerRight, children, ...boxProps }: Props) {
   return (
-    <BasePadding as="section" gap={2} {...boxProps}>
+    <BasePadding as="section" gap={2} pt={20} pb={20} {...boxProps}>
       {(title || titleAddition || subtitle || headerRight) && (
         <Shelf justifyContent="space-between" as="header" maxWidth="mainContent">
           <Stack>
