@@ -96,7 +96,6 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
  */
 function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string }) {
   const pool = usePool(loan.poolId) as Pool
-  console.log('🚀 ~ pool:', pool)
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
