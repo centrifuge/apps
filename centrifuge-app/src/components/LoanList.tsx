@@ -112,7 +112,7 @@ export function LoanList({ loans }: Props) {
             align: 'left',
             header: <SortableTableHeader label="Financing date" />,
             cell: (l: Row) => {
-              if (l.poolId.startsWith('0x')) {
+              if (l.poolId.startsWith('0x') && l.id !== '0') {
                 return formatDate((l as TinlakeLoan).originationDate)
               }
               return l.status === 'Active' && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
@@ -125,10 +125,14 @@ export function LoanList({ loans }: Props) {
     {
       align: 'left',
       header: <SortableTableHeader label="Maturity date" />,
-      cell: (l: Row) =>
-        l?.maturityDate && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
+      cell: (l: Row) => {
+        if (l.poolId.startsWith('0x') && l.id !== '0' && l.maturityDate) {
+          return formatDate(l.maturityDate)
+        }
+        return l?.maturityDate && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
           ? formatDate(l.maturityDate)
-          : '-',
+          : '-'
+      },
       sortKey: 'maturityDate',
     },
     {
