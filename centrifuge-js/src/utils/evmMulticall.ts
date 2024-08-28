@@ -50,7 +50,11 @@ export async function multicall<T = Record<string, any>>(calls: Call[], options:
 
   const interfaces = calls.map((c) => {
     const int = new Interface([c.call[0] as string])
-    return [int, int.fragments[0].name] as const
+    const functionFragment = int.getFunction(c.call[0] as string)
+    if (!functionFragment) {
+      throw new Error(`Function ${c.call[0]} not found in interface`)
+    }
+    return [int, functionFragment.name] as const
   })
   const encoded = calls.map((c, i) => ({
     target: c.target,

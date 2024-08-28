@@ -8,6 +8,7 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Contract } from 'ethers'
 import * as React from 'react'
 import { switchMap } from 'rxjs'
 import { Dec } from '../utils/Decimal'
@@ -337,9 +338,9 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     (cent) => cent.tinlake.closeEpoch,
     {
       onSuccess: async () => {
-        const signer = provider!.getSigner()
+        const signer = await provider!.getSigner()
         const connectedCent = cent.connectEvm(selectedAddress!, signer)
-        const coordinator = connectedCent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR')
+        const coordinator = connectedCent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR') as Contract
         if ((await coordinator.submissionPeriod()) === true) {
           // didn't execute right away, run solver
           solveEpochTx([])
