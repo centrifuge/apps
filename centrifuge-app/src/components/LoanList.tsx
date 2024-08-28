@@ -100,18 +100,10 @@ export function LoanList({ loans }: Props) {
   const columns = [
     {
       align: 'left',
-      header: <SortableTableHeader label="Asset" />,
+      header: <SortableTableHeader label={isTinlakePool ? 'NFT ID' : 'Asset'} />,
       cell: (l: Row) => <AssetName loan={l} />,
       sortKey: 'idSortKey',
       width: 'minmax(300px, 1fr)',
-    },
-    isTinlakePool && {
-      align: 'left',
-      header: <SortableTableHeader label="NFT ID" />,
-      cell: (l: Row) =>
-        l.asset.nftId.length >= 9 ? `${l.asset.nftId.slice(0, 4)}...${l.asset.nftId.slice(-4)}` : l.asset.nftId,
-      sortKey: 'nftIdSortKey',
-      width: 'minmax(150px, 1fr)',
     },
     ...(additionalColumns?.length
       ? additionalColumns
@@ -120,13 +112,11 @@ export function LoanList({ loans }: Props) {
             align: 'left',
             header: <SortableTableHeader label="Financing date" />,
             cell: (l: Row) => {
-              // @ts-expect-error value only exists on Tinlake loans and on active Centrifuge loans
-              return l.originationDate &&
-                (l.poolId.startsWith('0x') || l.status === 'Active') &&
-                'valuationMethod' in l.pricing &&
-                l.pricing.valuationMethod !== 'cash'
-                ? // @ts-expect-error
-                  formatDate(l.originationDate)
+              if (l.poolId.startsWith('0x')) {
+                return formatDate((l as TinlakeLoan).originationDate)
+              }
+              return l.status === 'Active' && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
+                ? formatDate(l.originationDate)
                 : '-'
             },
             sortKey: 'originationDateSortKey',
@@ -288,6 +278,23 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
           style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
         >
           <Tooltips type="onchainReserve" label={<Text variant="body2">Onchain reserve</Text>} />
+        </TextWithPlaceholder>
+      </Shelf>
+    )
+  }
+
+  if (isTinlakePool) {
+    return (
+      <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
+        <TextWithPlaceholder
+          isLoading={isLoading}
+          width={12}
+          variant="body2"
+          style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
+        >
+          {loan.asset.nftId.length >= 9
+            ? `${loan.asset.nftId.slice(0, 4)}...${loan.asset.nftId.slice(-4)}`
+            : loan.asset.nftId}
         </TextWithPlaceholder>
       </Shelf>
     )
