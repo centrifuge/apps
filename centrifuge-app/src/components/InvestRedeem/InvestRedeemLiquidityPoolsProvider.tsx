@@ -119,7 +119,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     name: InvestRedeemAction,
     fn: (arg: T) => any[] | Promise<any[]>,
     opt?: TransactionRequest,
-    gmp?: boolean
+    gmp?: boolean // enable gmp to display pending messages in Axelar
   ): (args?: T) => void {
     return (args) => {
       txActions[name]?.execute(fn(args!) as any, opt, gmp)

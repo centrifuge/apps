@@ -274,7 +274,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           estimate,
         ])
         const enable = iface.encodeFunctionData('enable', [lpAddress])
-        const permit = iface.encodeFunctionData('permit', [currencyAddress, user, deadline, v, r, s])
+        const permit = iface.encodeFunctionData('permit', [currencyAddress, user, order.toString(), deadline, v, r, s])
 
         return pending(
           contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, permit, requestDeposit], {
@@ -289,11 +289,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function cancelRedeemOrder(args: [lpAddress: string, chainId: number], options: TransactionRequest = {}) {
     const [lpAddress, chainId] = args
-    const user = inst.getSignerAddress('evm')
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).cancelRedeemRequest(lpAddress, user, {
+          contract(centrifugeRouter, ABI.CentrifugeRouter).cancelRedeemRequest(lpAddress, estimate, {
             ...options,
             value: estimate,
           })
@@ -338,7 +337,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).claimCancelRedeemRequest(lpAddress, user, user, estimate, {
+          contract(centrifugeRouter, ABI.CentrifugeRouter).claimCancelRedeemRequest(lpAddress, user, user, {
             ...options,
             value: estimate,
           })
@@ -347,25 +346,17 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function mint(
-    args: [lpAddress: string, mint: BN, chainId: number, receiver?: string],
-    options: TransactionRequest = {}
-  ) {
-    const [lpAddress, mint, chainId, receiver] = args
+  function mint(args: [lpAddress: string, chainId: number, receiver?: string], options: TransactionRequest = {}) {
+    const [lpAddress, chainId, receiver] = args
     const user = inst.getSignerAddress('evm')
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).requestDeposit(
-            lpAddress,
-            mint.toString(),
-            receiver ?? user,
-            {
-              ...options,
-              value: estimate,
-              gasLimit: 200000,
-            }
-          )
+          contract(centrifugeRouter, ABI.CentrifugeRouter).claimDeposit(lpAddress, receiver ?? user, user, {
+            ...options,
+            value: estimate,
+            gasLimit: 200000,
+          })
         )
       })
     )
@@ -384,7 +375,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             lpAddress,
             withdraw.toString(),
             receiver ?? user,
-            user,
             {
               ...options,
               value: estimate,
