@@ -21,7 +21,6 @@ import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
-import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../components/LoadBoundary'
 import { LoanLabel } from '../../components/LoanLabel'
@@ -48,12 +47,6 @@ import { PricingValues } from './PricingValues'
 import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
 import { formatNftAttribute, isCashLoan, isExternalLoan } from './utils'
-
-const FullHeightLayoutBase = styled(LayoutBase)`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-`
 
 const FullHeightStack = styled(Stack)`
   flex: 1;

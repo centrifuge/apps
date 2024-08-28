@@ -49,7 +49,7 @@ export function useListedPools() {
   return [listedPools, listedTokens, isLoading] as const
 }
 
-export function getYearOverYearGrowth() {
+export function useYearOverYearGrowth() {
   const [listedPools] = useListedPools()
 
   const { oneDayAgoFromOneYearAgo, nextDay } = useMemo(() => {

@@ -1,7 +1,7 @@
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Box, IconArrowDown, IconArrowUpRight, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { getYearOverYearGrowth, useListedPools } from '../../src/utils/useListedPools'
+import { useListedPools, useYearOverYearGrowth } from '../../src/utils/useListedPools'
 import { LayoutSection } from '../components/LayoutBase/LayoutSection'
 import { PoolList } from '../components/PoolList'
 import { prefetchRoute } from '../components/Root'
@@ -10,7 +10,7 @@ import { Dec } from '../utils/Decimal'
 
 export default function PoolsPage() {
   const [, listedTokens] = useListedPools()
-  const { totalValueLockedGrowth, isLoading } = getYearOverYearGrowth()
+  const { totalValueLockedGrowth, isLoading } = useYearOverYearGrowth()
   const isPositiveYoy = totalValueLockedGrowth > 0
   const IconComponent = isPositiveYoy ? IconArrowUpRight : IconArrowDown
 
