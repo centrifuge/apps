@@ -62,16 +62,30 @@ function PoolPerformanceChart() {
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const isSingleTranche = pool?.tranches.length === 1
+
+  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
+  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
+  const todayPrice = pool?.tranches
+    ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
+    : null
+
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
         const price = (isSingleTranche && Object.values(day.tranches)[0].price?.toFloat()) || null
-
-        return { day: new Date(day.timestamp), nav, price }
+        if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
+          return { day: new Date(day.timestamp), nav: todayAssetValue, price: Number(todayPrice) }
+        }
+        return { day: new Date(day.timestamp), nav: Number(nav), price: Number(price) }
       }) || [],
     [isSingleTranche, truncatedPoolStates]
   )
+
+  const today = {
+    nav: todayAssetValue,
+    price: todayPrice,
+  }
 
   const chartData = data.slice(-rangeNumber)
 
@@ -80,7 +94,12 @@ function PoolPerformanceChart() {
       return undefined
     }
 
-    return getCSVDownloadUrl(chartData as any)
+    const filteredData = chartData.map((data) => ({
+      day: data.day,
+      tokenPrice: data.price,
+    }))
+
+    return getCSVDownloadUrl(filteredData as any)
   }, [chartData])
 
   const priceRange = React.useMemo(() => {
@@ -101,24 +120,21 @@ function PoolPerformanceChart() {
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
 
-  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
-  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
-  const todayPrice = data.length > 0 ? data[data.length - 1].price : null
+  const getOneDayPerMonth = (): any[] => {
+    const seenMonths = new Set<string>()
+    const result: any[] = []
 
-  const today = {
-    nav: todayAssetValue,
-    price: todayPrice,
-  }
+    chartData.forEach((item) => {
+      const date = new Date(item.day)
+      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' })
 
-  const getXAxisInterval = () => {
-    if (rangeNumber <= 30) return 5
-    if (rangeNumber > 30 && rangeNumber <= 90) {
-      return 14
-    }
-    if (rangeNumber > 90 && rangeNumber <= 180) {
-      return 30
-    }
-    return 45
+      if (!seenMonths.has(monthYear)) {
+        seenMonths.add(monthYear)
+        result.push(item.day)
+      }
+    })
+
+    return result
   }
 
   return (
@@ -173,17 +189,13 @@ function PoolPerformanceChart() {
               </defs>
               <XAxis
                 dataKey="day"
+                dy={4}
+                interval={0}
+                minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tickFormatter={(tick: number) => {
-                  if (data.length > 180) {
-                    return new Date(tick).toLocaleString('en-US', { month: 'short' })
-                  }
-                  return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
-                }}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-                dy={4}
-                interval={getXAxisInterval()}
+                tick={<CustomTick tickCount={getOneDayPerMonth().length} />}
+                ticks={getOneDayPerMonth()}
               />
               <YAxis
                 stroke="none"
@@ -216,9 +228,9 @@ function PoolPerformanceChart() {
                             </Text>
                             <Text variant="label2">
                               {name === 'nav' && typeof value === 'number'
-                                ? formatBalance(value, 'USD' || '')
+                                ? formatBalance(value, 'USD')
                                 : typeof value === 'number'
-                                ? formatBalance(value, 'USD' || '', 6)
+                                ? formatBalance(value, 'USD', 6)
                                 : '-'}
                             </Text>
                           </Shelf>
@@ -272,6 +284,23 @@ function CustomLegend({
         )}
       </Grid>
     </Shelf>
+  )
+}
+
+const CustomTick = ({ x, y, payload }: any) => {
+  const theme = useTheme()
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+        x={0}
+        y={0}
+        dy={16}
+        textAnchor="middle"
+      >
+        {new Date(payload.value).toLocaleString('en-US', { month: 'short' })}
+      </text>
+    </g>
   )
 }
 
