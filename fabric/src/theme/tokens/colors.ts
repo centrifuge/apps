@@ -14,7 +14,7 @@ export const yellowScale = {
   50: '#FFF4D9',
   100: '#FFE299',
   500: '#FFC012',
-  800: '#CC9700',
+  800: '#6B4F00',
 }
 
 export const blackScale = {

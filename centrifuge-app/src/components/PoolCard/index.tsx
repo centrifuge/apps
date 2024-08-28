@@ -1,18 +1,47 @@
-import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
-import { Rate } from '@centrifuge/centrifuge-js'
-import { Box, Grid, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
+import { Box, Card, Divider, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { useTheme } from 'styled-components'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
-import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
+import { useNavigate } from 'react-router'
+import styled from 'styled-components'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { Eththumbnail } from '../EthThumbnail'
-import { Anchor, Ellipsis, Root } from '../ListItemCardStyles'
-import { Tooltips } from '../Tooltips'
+import { CardHeader } from '../ListItemCardStyles'
+import { RouterTextLink } from '../TextLink'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
-const columns_base = 'minmax(150px, 2fr) minmax(100px, 1fr) 140px 70px 150px'
-const columns_extended = 'minmax(200px, 2fr) minmax(100px, 1fr) 140px 100px 150px'
-export const COLUMNS = ['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', columns_base, columns_extended]
-export const COLUMN_GAPS = [3, 3, 6, 8]
+
+type TrancheData = {
+  name: string
+  apr: string
+  minInvestment: string
+}
+
+export type InnerMetadata = {
+  minInitialInvestment?: CurrencyBalance
+}
+
+export type MetaData = {
+  tranches: {
+    [key: string]: InnerMetadata
+  }
+}
+export type Tranche = {
+  id: string
+  currency: {
+    name: string
+    decimals: CurrencyBalance | number
+  }
+  interestRatePerSec: {
+    toAprPercent: () => Decimal
+  } | null
+  capacity?: CurrencyBalance | number
+  metadata?: MetaData
+}
+
+const StyledRouterTextLink = styled(RouterTextLink)`
+  font-size: 12px;
+  margin-top: 8px;
+  text-decoration: none;
+`
 
 export type PoolCardProps = {
   poolId?: string
@@ -23,7 +52,8 @@ export type PoolCardProps = {
   apr?: Rate | null | undefined
   status?: PoolStatusKey
   iconUri?: string
-  isLoading?: boolean
+  tranches?: Tranche[]
+  metaData?: MetaData
 }
 
 export function PoolCard({
@@ -32,100 +62,116 @@ export function PoolCard({
   assetClass,
   valueLocked,
   currencySymbol,
-  apr,
   status,
   iconUri,
-  isLoading,
+  tranches,
+  metaData,
 }: PoolCardProps) {
-  const isMedium = useIsAboveBreakpoint('M')
-  const basePath = useBasePath('/pools')
-  const { sizes, zIndices } = useTheme()
+  const navigate = useNavigate()
+  const isOneTranche = tranches && tranches?.length === 1
+  const renderText = (text: string) => (
+    <Text fontWeight={500} as="h2" variant="body1">
+      {text}
+    </Text>
+  )
+
+  const tranchesData: TrancheData[] = tranches?.map((tranche: Tranche) => {
+    const words = tranche.currency.name.trim().split(' ')
+    const metadata = metaData?.tranches[tranche.id] ?? null
+    const trancheName = words[words.length - 1]
+
+    return {
+      name: trancheName,
+      apr: tranche.interestRatePerSec
+        ? formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          })
+        : '-',
+      minInvestment:
+        metadata && metadata.minInitialInvestment
+          ? formatBalanceAbbreviated(Number(metadata.minInitialInvestment), '', 0)
+          : '-',
+    }
+  }) as TrancheData[]
 
   return (
-    <Root as="article" bg={status === 'Archived' ? 'backgroundSecondary' : 'transparent'}>
-      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} p={2} alignItems="center">
-        <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
-          <Eththumbnail show={poolId?.startsWith('0x')}>
-            {iconUri ? (
-              <Box as="img" src={iconUri} alt="" height="iconMedium" width="iconMedium" />
-            ) : (
-              <Thumbnail type="pool" label="LP" size="small" />
-            )}
-          </Eththumbnail>
-
-          <TextWithPlaceholder as="h2" variant="body2" color="textPrimary" isLoading={isLoading}>
-            <Ellipsis>{name}</Ellipsis>
-          </TextWithPlaceholder>
-        </Grid>
-
-        {isMedium && (
-          <TextWithPlaceholder as="span" variant="body2" color="textSecondary" isLoading={isLoading}>
-            <Ellipsis>{assetClass}</Ellipsis>
-          </TextWithPlaceholder>
+    <Card
+      marginRight={20}
+      marginBottom={20}
+      onClick={() => navigate(`/pools/${poolId}`)}
+      padding={18}
+      style={{ cursor: 'pointer' }}
+      height={320}
+    >
+      <CardHeader marginBottom={12}>
+        <Box>
+          <PoolStatus status={status} />
+          <Text as="h2" fontWeight={500} style={{ marginTop: 4 }} variant="body1">
+            {name}
+          </Text>
+        </Box>
+        <Eththumbnail show={poolId?.startsWith('0x')}>
+          {iconUri ? (
+            <Box as="img" src={iconUri} alt="" height={38} width={38} borderRadius="4px" />
+          ) : (
+            <Thumbnail type="pool" label="LP" size="small" />
+          )}
+        </Eththumbnail>
+      </CardHeader>
+      <Divider />
+      <Box display="flex" justifyContent="space-between" alignItems="center" marginY="8px">
+        <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+          TVL ({currencySymbol})
+        </Text>
+        <Text variant="heading1">{valueLocked ? formatBalance(valueLocked, '') : '-'}</Text>
+      </Box>
+      <Box
+        bg={isOneTranche ? 'white' : 'backgroundSecondary'}
+        marginY="8px"
+        borderRadius={4}
+        padding={isOneTranche ? 0 : '8px'}
+        display="flex"
+        justifyContent="space-between"
+        width={isOneTranche ? '50%' : '100%'}
+      >
+        {!isOneTranche && (
+          <Stack>
+            <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+              Tranches
+            </Text>
+            {tranchesData?.map((tranche) => renderText(tranche.name))}
+            {tranches && tranches.length > 2 ? (
+              <StyledRouterTextLink to={`/pools/${poolId}`}>View all</StyledRouterTextLink>
+            ) : null}
+          </Stack>
         )}
-
-        <TextWithPlaceholder as="span" variant="body1" color="textPrimary" textAlign="right" isLoading={isLoading}>
-          <Ellipsis>{valueLocked ? formatBalance(valueLocked, currencySymbol) : '-'}</Ellipsis>
-        </TextWithPlaceholder>
-
-        {isMedium && (
-          <TextWithPlaceholder
-            as="span"
-            variant="body1"
-            color="textPrimary"
-            fontWeight={500}
-            textAlign="left"
-            isLoading={isLoading}
-            maxLines={1}
-          >
-            <Ellipsis>
-              {apr ? (
-                formatPercentage(apr.toAprPercent(), true, {
-                  minimumFractionDigits: 1,
-                  maximumFractionDigits: 1,
-                })
-              ) : poolId === '4139607887' ? (
-                <Tooltips
-                  style={{ zIndex: zIndices.overlay }}
-                  type="tbillApr"
-                  label={
-                    <>
-                      <Text fontWeight={500} variant="body1">
-                        5.0%
-                      </Text>
-                      <Text variant="body3"> target</Text>{' '}
-                    </>
-                  }
-                />
-              ) : poolId === '1655476167' ? (
-                <Tooltips
-                  style={{ zIndex: zIndices.overlay }}
-                  type="dyfApr"
-                  label={
-                    <>
-                      <Text fontWeight={500} variant="body1">
-                        15.0%
-                      </Text>
-                      <Text variant="body3"> target</Text>{' '}
-                    </>
-                  }
-                />
-              ) : (
-                '—'
-              )}
-            </Ellipsis>
-            {status === 'Upcoming' && apr ? <Text variant="body3"> target</Text> : ''}
-          </TextWithPlaceholder>
-        )}
-
-        {isMedium && (
-          <Box>
-            <PoolStatus status={status} />
-          </Box>
-        )}
-      </Grid>
-
-      {status === 'Upcoming' ? null : <Anchor to={`${basePath}/${poolId}`} aria-label={`Go to ${name} details`} />}
-    </Root>
+        <Stack>
+          <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+            APY
+          </Text>
+          {tranchesData?.map((tranche) => renderText(`${tranche.apr}`))}
+        </Stack>
+        <Stack>
+          <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+            Min Investment
+          </Text>
+          {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
+        </Stack>
+      </Box>
+      <Box marginY={12}>
+        <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
+          Fully onchain, BVI-licensed fund holding T-Bills with a maximum maturity of 6 months.
+        </Text>
+      </Box>
+      <Box display="flex" justifyContent="space-between">
+        <Text variant="body2">Asset Type</Text>
+        <Text variant="body2">{assetClass ?? '-'}</Text>
+      </Box>
+      <Box display="flex" justifyContent="space-between">
+        <Text variant="body2">Investor Type</Text>
+        <Text variant="body2"> Non-US professionals</Text>
+      </Box>
+    </Card>
   )
 }

@@ -3,7 +3,7 @@ import { black, blackScale, centrifugeBlue, gold, grayScale, yellowScale } from 
 const statusDefault = grayScale[800]
 const statusInfo = '#1253ff'
 const statusOk = '#519b10'
-const statusWarning = yellowScale[500]
+const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
@@ -31,7 +31,7 @@ const colors = {
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[900],
 
-  borderPrimary: grayScale[100],
+  borderPrimary: grayScale[300],
   borderSecondary: grayScale[300],
 
   statusDefault,
