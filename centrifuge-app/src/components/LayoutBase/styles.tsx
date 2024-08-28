@@ -4,7 +4,7 @@ import styled from 'styled-components'
 // the main breakpoint to switch from stacked to columns layout
 const BREAK_POINT_COLUMNS = 'M'
 
-const HEADER_HEIGHT = 60
+const HEADER_HEIGHT = 80
 
 export const Root = styled(Box)`
   position: relative;
@@ -40,7 +40,6 @@ export const Inner = styled(Grid)`
   overflow-y: auto;
   z-index: 2;
   padding-bottom: 1rem;
-
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
     width: 7vw;
@@ -51,6 +50,7 @@ export const Inner = styled(Grid)`
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundBlack};
+    padding-left: 16px;
   }
 `
 
@@ -81,7 +81,6 @@ export const LogoContainer = styled(Stack)`
 
   grid-area: logo;
   height: ${HEADER_HEIGHT}px;
-  padding-left: ${({ theme }) => theme.space[2]}px;
   justify-content: center;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {

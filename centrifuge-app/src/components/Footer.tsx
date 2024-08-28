@@ -9,7 +9,7 @@ export const Footer = () => {
   return (
     <>
       <InvestmentDisclaimerDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
-      <Stack as="footer" px={2} py="12px" gap={1} width="100%">
+      <Stack as="footer" gap={1} width="100%">
         <UnstyledLink href="mailto:support@centrifuge.io">
           <Text textOverflow="ellipsis" variant="body4" color="textInverted">
             Need help?
