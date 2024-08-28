@@ -35,7 +35,6 @@ import { Tooltips } from './Tooltips'
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
   originationDateSortKey: string
-  maturityDate: string | null
   status: 'Created' | 'Active' | 'Closed' | ''
 }
 
@@ -123,19 +122,6 @@ export function LoanList({ loans }: Props) {
           },
         ]),
     {
-      align: 'left',
-      header: <SortableTableHeader label="Maturity date" />,
-      cell: (l: Row) => {
-        if (l.poolId.startsWith('0x') && l.id !== '0' && l.maturityDate) {
-          return formatDate(l.maturityDate)
-        }
-        return l?.maturityDate && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
-          ? formatDate(l.maturityDate)
-          : '-'
-      },
-      sortKey: 'maturityDate',
-    },
-    {
       align: 'right',
       header: <SortableTableHeader label="Amount" />,
       cell: (l: Row) => <Amount loan={l} />,
@@ -173,7 +159,6 @@ export function LoanList({ loans }: Props) {
       !loan?.totalBorrowed?.isZero()
         ? loan.originationDate
         : '',
-    maturityDate: loan.pricing.maturityDate,
     ...loan,
   }))
 
@@ -212,7 +197,6 @@ export function LoanList({ loans }: Props) {
             !loan?.totalBorrowed?.isZero()
               ? loan.originationDate
               : '',
-          maturityDate: loan.pricing.maturityDate,
           ...loan,
         }
       }),
@@ -228,7 +212,6 @@ export function LoanList({ loans }: Props) {
             <DataTable
               data={rows}
               columns={columns}
-              defaultSortKey="maturityDate"
               onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
               page={pagination.page}
