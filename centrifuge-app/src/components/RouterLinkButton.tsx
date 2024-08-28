@@ -8,6 +8,7 @@ export type RouterLinkButtonProps = VisualButtonProps &
     showActive?: boolean
     goBack?: boolean
     to?: string
+    newTab?: boolean
   }
 
 const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
@@ -30,13 +31,17 @@ export function RouterLinkButton({
   goBack,
   to,
   children,
+  newTab = false,
   ...routeProps
 }: RouterLinkButtonProps) {
   const navigate = useNavigate()
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault()
-    if (goBack) {
+
+    if (newTab) {
+      window.open(to, '_blank', 'noopener,noreferrer')
+    } else if (goBack) {
       navigate(-1)
     } else if (to) {
       navigate(to)
