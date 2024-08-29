@@ -94,7 +94,12 @@ function PoolPerformanceChart() {
       return undefined
     }
 
-    return getCSVDownloadUrl(chartData as any)
+    const filteredData = chartData.map((data) => ({
+      day: data.day,
+      tokenPrice: data.price,
+    }))
+
+    return getCSVDownloadUrl(filteredData as any)
   }, [chartData])
 
   const priceRange = React.useMemo(() => {

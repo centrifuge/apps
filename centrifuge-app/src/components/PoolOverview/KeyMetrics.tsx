@@ -151,7 +151,12 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
               <Text variant="heading4">Centrifuge</Text>
               {pool.tranches.length > 1 ? (
                 pool.tranches.map((tranche) => (
-                  <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
+                  <a
+                    key={tranche.id}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}
+                  >
                     <Shelf gap={1} alignItems="center">
                       <Text variant="body2" color="black">
                         View {tranche.currency.name.split(' ').at(-1)}
@@ -184,6 +189,7 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
           const chain = (evmChains as any)[domain.chainId]
           return (
             <Tooltip
+              key={domain.poolManager}
               delay={300}
               bodyWidth="maxContent"
               bodyPadding={0}
