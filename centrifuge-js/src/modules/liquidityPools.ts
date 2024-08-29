@@ -189,12 +189,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       domainOrCurrency = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
     }
 
+    const deadline = Math.floor(Date.now() / 1000) + 3600 // 1 hour
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
       domainOrCurrency,
       inst.getSignerAddress('evm'),
       spender,
-      amount.toString()
+      amount.toString(),
+      deadline
     )
     return permit as Permit
   }

@@ -18,8 +18,6 @@ import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePool
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
-const PERMITS_DISABLED = true
-
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
@@ -79,7 +77,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrder)
   const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrderWithPermit)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.increaseRedeemOrder)
-  const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
+  const collectInvest = useEvmTransaction('Claim', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Withdraw', (cent) => cent.liquidityPools.withdraw)
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelInvestOrder)
@@ -152,8 +150,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }
   }, [lps])
 
-  const supportsPermits =
-    !PERMITS_DISABLED && lpInvest?.currencySupportsPermit && !isSmartContractWallet && selectedWallet?.id !== 'finoa'
+  const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet && selectedWallet?.id !== 'finoa'
   const canChangeOrder = false // LP contracts don't support changing orders
 
   const state: InvestRedeemState = {
