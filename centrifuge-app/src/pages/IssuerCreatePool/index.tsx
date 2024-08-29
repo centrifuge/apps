@@ -285,7 +285,7 @@ function CreatePoolForm() {
     {
       onSuccess: (args) => {
         if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) setIsMultisigDialogOpen(true)
-        const [, , , poolId] = args
+        const [, , , , poolId] = args
         if (createType === 'immediate') {
           setCreatedPoolId(poolId)
         }
