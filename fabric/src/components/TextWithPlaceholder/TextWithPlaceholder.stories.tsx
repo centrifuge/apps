@@ -1,10 +1,14 @@
 import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { TextWithPlaceholder } from '.'
 import { TextVariantName } from '../../theme'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
+
+const StyledTextWithPlaceholder = styled(TextWithPlaceholder)`
+  max-width: 70ch;
+`
 
 export default {
   title: 'Components/TextWithPlaceholder',
@@ -19,12 +23,12 @@ const ParagraphTemplate: TextWithPlaceholderStory = (args) => (
       <TextWithPlaceholder variant="heading2" isLoading={args.isLoading}>
         Body 1
       </TextWithPlaceholder>
-      <TextWithPlaceholder variant="body1" as="p" {...args} style={{ maxWidth: '70ch' }}>
+      <StyledTextWithPlaceholder variant="body1" as="p" {...args}>
         Lorem ipsum dolor sit amet <Text variant="emphasized">consectetur adipisicing</Text> elit. Corporis, ex?
         Nesciunt consequatur consectetur magnam delectus distinctio ipsa{' '}
         <Text variant="emphasized">tempore maiores</Text> pariatur ipsum necessitatibus harum ea, labore quas impedit id
         iure perferendis.
-      </TextWithPlaceholder>
+      </StyledTextWithPlaceholder>
     </Stack>
   </Stack>
 )

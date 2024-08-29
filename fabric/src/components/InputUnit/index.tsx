@@ -1,4 +1,5 @@
 import * as React from 'react'
+import styled from 'styled-components'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
@@ -24,17 +25,9 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
     <IdContext.Provider value={id}>
       <Stack gap={1}>
         {label && <InputLabel disabled={disabled}>{label}</InputLabel>}
-        <Text
-          variant="body2"
-          color={disabled ? 'textDisabled' : 'textPrimary'}
-          style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
+        <StyledText variant="body2" color={disabled ? 'textDisabled' : 'textPrimary'}>
           {inputElement}
-        </Text>
+        </StyledText>
         {secondaryLabel && (
           <Text variant="body3" color={disabled ? 'textDisabled' : 'textSecondary'}>
             {secondaryLabel}
@@ -48,7 +41,12 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
 
 export function InputLabel({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) {
   return (
-    <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'} as="label" htmlFor={useContextId()}>
+    <Text
+      variant="label2"
+      color={disabled ? 'textDisabled' : 'textSecondary'}
+      as="label"
+      htmlFor={useContextId() as string}
+    >
       {children}
     </Text>
   )
@@ -61,3 +59,9 @@ export function InputErrorMessage({ children }: { children: React.ReactNode }) {
     </Text>
   )
 }
+
+const StyledText = styled(Text)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`

@@ -8,7 +8,7 @@ import { Text } from '../Text'
 export type TabsProps = {
   selectedIndex: number
   onChange?: (index: number) => void
-  children: (React.ReactElement<TabsItemProps> | string | boolean | null | undefined)[]
+  children: (React.ReactElement<TabsItemPrivateProps> | string | boolean | null | undefined)[]
 }
 
 export function Tabs({ selectedIndex, onChange, children }: TabsProps) {

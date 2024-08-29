@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import { DefaultTheme } from 'styled-components/dist/types'
 import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
@@ -8,7 +9,7 @@ import { Text } from '../Text'
 export type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   errorMessage?: string
-  textStyle?: string
+  textStyle?: keyof DefaultTheme['typography']
 }
 
 export function RadioButton({ label, errorMessage, textStyle, ...radioProps }: RadioButtonProps) {

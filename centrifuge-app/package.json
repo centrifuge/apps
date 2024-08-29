@@ -47,7 +47,7 @@
     "react-router": "6",
     "react-router-dom": "6",
     "recharts": "2.6.2",
-    "styled-components": "^5.3.5",
+    "styled-components": "6.1.12",
     "styled-system": "^5.1.5",
     "typescript": "~5.3.3",
     "vitest": "^1.2.1"

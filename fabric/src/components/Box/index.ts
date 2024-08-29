@@ -69,7 +69,6 @@ interface SystemProps
     PositionProps,
     BleedProps,
     AspectProps {}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StyledBoxProps extends SystemProps {}
 

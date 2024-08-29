@@ -8,6 +8,10 @@ import { Text } from '../Text'
 export type AccordionProps = BoxProps & {
   items: { title: React.ReactNode; body: React.ReactNode }[]
 }
+interface AccordionEntryProps extends Omit<BoxProps, 'title'> {
+  title: React.ReactNode
+  body: React.ReactNode
+}
 
 const Root = styled(Box)`
   list-style: none;
@@ -33,7 +37,6 @@ const Toggle = styled(Shelf)`
 export function Accordion({ items, ...boxProps }: AccordionProps) {
   return (
     <Root
-      as="ul"
       pl={0}
       aria-label="Accordion Control Group Buttons"
       borderRadius="card"
@@ -50,12 +53,12 @@ export function Accordion({ items, ...boxProps }: AccordionProps) {
   )
 }
 
-function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][number] & BoxProps) {
+function AccordionEntry({ title, body, ...boxProps }: AccordionEntryProps) {
   const [open, setOpen] = React.useState(false)
   const id = React.useId()
 
   return (
-    <Box as="li" borderStyle="solid" borderWidth={0} borderColor="borderPrimary" {...boxProps}>
+    <Box as="li" borderStyle="solid" borderWidth={0} borderColor="borderPrimary" {...(boxProps as any)}>
       <Toggle
         as="button"
         id={`accordion-control-${id}`}

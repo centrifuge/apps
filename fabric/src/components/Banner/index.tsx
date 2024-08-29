@@ -1,6 +1,6 @@
 import { useModal, useOverlay } from '@react-aria/overlays'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { IconX } from '../../icon'
 import { Button } from '../Button'
 import { Shelf } from '../Shelf'
@@ -13,6 +13,10 @@ type BannerProps = {
   onClose?: () => void
   children?: React.ReactNode
 }
+
+const StyledText = styled(Text)`
+  padding-right: 12px;
+`
 
 export function Banner({ children, title, ...props }: BannerProps) {
   const theme = useTheme()
@@ -54,9 +58,9 @@ export function Banner({ children, title, ...props }: BannerProps) {
             style={{ marginLeft: 'auto' }}
           />
         </Shelf>
-        <Text variant="body1" color={theme.colors.textInverted} style={{ paddingRight: '12px' }}>
+        <StyledText variant="body1" color={theme.colors.textInverted}>
           {children}
-        </Text>
+        </StyledText>
       </Stack>
     </Shelf>
   ) : null

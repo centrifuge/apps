@@ -70,6 +70,13 @@ const Container = styled(Grid)<{ $disabled?: boolean; $active: boolean }>`
   }
 `
 
+const StyledText = styled(Text)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+`
+
 export type ImageUploadProps = Omit<FileUploadProps, 'file' | 'height'> & {
   file?: File | null
   requirements?: string
@@ -227,18 +234,9 @@ export function ImageUpload({
             </Stack>
             <Stack p={2} gridArea="unit" justifySelf="stretch" style={{ visibility: fileUrl ? 'visible' : 'hidden' }}>
               <Shelf px={1} pb={1} justifyContent="space-between">
-                <Text
-                  variant="body1"
-                  color={disabled ? 'textDisabled' : 'textPrimary'}
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    direction: 'rtl',
-                  }}
-                >
+                <StyledText variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
                   {curFile && (typeof curFile === 'string' ? curFile : curFile.name)}
-                </Text>
+                </StyledText>
                 <Flex display="flex" zIndex="3" bleedY={2} bleedX={2}>
                   {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Flex>

@@ -175,7 +175,7 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
           </ConnectionGuard>
         ) : (
           pool.tranches.map((tranche) => (
-            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank">
+            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank" rel="noreferrer">
               <Button variant="secondary" small style={{ width: '100%' }}>
                 <Shelf gap={1}>
                   <span>View {tranche.currency.symbol} token</span>

@@ -22,6 +22,10 @@ type AccountButtonProps = {
   multisig?: ComputedMultisig
 }
 
+const StyledText = styled(Text)`
+  display: block;
+`
+
 const Root = styled(Shelf)<{ selected: boolean }>`
   cursor: pointer;
   border: none;
@@ -138,7 +142,7 @@ export function AccountIcon({ id, theme = 'polkadot' }: { id: string; theme?: Ic
 export function AccountName({ account, proxies }: { account: WalletAccount; proxies?: Proxy[] }) {
   const utils = useCentrifugeUtils()
   return (
-    <Text as="span" variant="body2" fontWeight={300} style={{ display: 'block' }}>
+    <StyledText as="span" variant="body2" fontWeight={300}>
       {account.name && (
         <>
           <Text as="span" fontWeight={500}>
@@ -154,6 +158,6 @@ export function AccountName({ account, proxies }: { account: WalletAccount; prox
           {truncateAddress(utils.formatAddress(p.delegator))}{' '}
         </span>
       ))}
-    </Text>
+    </StyledText>
   )
 }
