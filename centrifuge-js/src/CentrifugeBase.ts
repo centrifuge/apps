@@ -7,6 +7,7 @@ import { sortAddresses } from '@polkadot/util-crypto'
 import type { JsonRpcSigner, TransactionRequest } from 'ethers'
 import 'isomorphic-fetch'
 import {
+  BehaviorSubject,
   Observable,
   Subject,
   bufferCount,
@@ -19,6 +20,7 @@ import {
   map,
   mergeWith,
   of,
+  race,
   share,
   startWith,
   switchMap,
@@ -26,6 +28,7 @@ import {
   takeWhile,
   tap,
   throwError,
+  timer,
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionErrorResult, TransactionOptions, TransactionResult } from './types'
@@ -298,16 +301,89 @@ const blockEvents: Record<string, Observable<Events>> = {}
 
 export class CentrifugeBase {
   config: Config
-  parachainUrl: string
   relayChainUrl: string
   subqueryUrl: string
+  rpcEndpoints: string[]
+  private parachainUrlCache: BehaviorSubject<string | null> // cache the healthy parachain url
+  private healthCheckInProgress: Promise<string | null> | null = null // prevent concurrent health checks
 
   constructor(config: UserProvidedConfig = {}) {
     this.config = { ...defaultConfig, ...config }
-    this.parachainUrl = this.config.network === 'centrifuge' ? this.config.centrifugeWsUrl : this.config.altairWsUrl
     this.relayChainUrl = this.config.network === 'centrifuge' ? this.config.polkadotWsUrl : this.config.kusamaWsUrl
     this.subqueryUrl =
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
+    this.rpcEndpoints = this.config.centrifugeWsUrl.split(',').map((url) => url.trim())
+    this.parachainUrlCache = new BehaviorSubject<string | null>(null)
+    this.initParachainUrl()
+  }
+
+  private initParachainUrl() {
+    if (!this.healthCheckInProgress) {
+      this.healthCheckInProgress = this.findHealthyWs().then((url) => {
+        this.parachainUrlCache.next(url)
+        this.healthCheckInProgress = null
+        return url
+      })
+    }
+    return this.healthCheckInProgress
+  }
+
+  private findHealthyWs(): Promise<string | null> {
+    return firstValueFrom(
+      from(this.rpcEndpoints).pipe(
+        switchMap((url) => this.checkWsHealth(url)),
+        map((url) => {
+          if (url) {
+            console.log(`Connection to ${url} established`)
+            return url
+          }
+          throw new Error('No healthy parachain URL found')
+        }),
+        catchError((error) => {
+          console.error('Error establishing connection to parachain URL:', error)
+          return of(null)
+        })
+      )
+    )
+  }
+
+  private checkWsHealth(url: string, timeoutMs: number = 5000): Observable<string | null> {
+    return race(
+      new Observable<string | null>((observer) => {
+        const ws = new WebSocket(url)
+        ws.onopen = () => {
+          ws.close()
+          observer.next(url)
+          observer.complete()
+        }
+        ws.onerror = () => {
+          ws.close()
+          observer.next(null)
+          observer.complete()
+        }
+        return () => ws.close()
+      }),
+      timer(timeoutMs).pipe(map(() => null))
+    ).pipe(
+      tap((result) => {
+        if (result === null) {
+          console.log(`Connection to ${url} failed or timed out`)
+        }
+      })
+    )
+  }
+
+  private async getCachedParachainUrl(): Promise<string> {
+    const cachedUrl = this.parachainUrlCache.getValue()
+    if (cachedUrl) {
+      return cachedUrl
+    }
+    await this.findHealthyWs()
+    const parachainUrl = this.parachainUrlCache.getValue()
+    if (!parachainUrl) {
+      throw new Error('No healthy parachain URL available')
+    }
+    return parachainUrl
   }
 
   async getChainId() {
@@ -459,7 +535,13 @@ export class CentrifugeBase {
         }),
         tap((result) => {
           options?.onStatusChange?.(result)
-          if (result.status === 'InBlock') this.getTxCompletedEvents().next(result.events)
+          if (result.status === 'InBlock') {
+            from(this.getTxCompletedEvents())
+              .pipe(take(1))
+              .subscribe((subject) => {
+                subject.next(result.events)
+              })
+          }
         }),
         takeWhile((result) => {
           return result.status !== 'InBlock' && !result.error
@@ -593,39 +675,53 @@ export class CentrifugeBase {
   }
 
   getBlockEvents() {
-    if (blockEvents[this.parachainUrl]) return blockEvents[this.parachainUrl]
-    const $api = this.getApi()
+    return from(this.getCachedParachainUrl()).pipe(
+      switchMap((url) => {
+        if (blockEvents[url]) return blockEvents[url]
+        const $api = this.getApi()
 
-    return (blockEvents[this.parachainUrl] = $api.pipe(
-      switchMap((api) =>
-        api.queryMulti([api.query.system.events, api.query.system.number]).pipe(
-          bufferCount(2, 1), // Delay the events by one block, to make sure storage has been updated
-          filter(([[events]]) => !!(events as any)?.length),
-          map(([[events]]) => events as any)
-        )
-      ),
-      share()
-    ))
+        return (blockEvents[url] = $api.pipe(
+          switchMap((api) =>
+            api.queryMulti([api.query.system.events, api.query.system.number]).pipe(
+              bufferCount(2, 1),
+              filter(([[events]]) => !!(events as any)?.length),
+              map(([[events]]) => events as any)
+            )
+          ),
+          share()
+        ))
+      })
+    )
   }
 
-  getTxCompletedEvents() {
-    return txCompletedEvents[this.parachainUrl] || (txCompletedEvents[this.parachainUrl] = new Subject())
+  async getTxCompletedEvents() {
+    const parachainUrl = await this.getCachedParachainUrl()
+    if (!txCompletedEvents[parachainUrl]) {
+      txCompletedEvents[parachainUrl] = new Subject<Events>()
+    }
+    return txCompletedEvents[parachainUrl]
   }
 
   getEvents() {
     return this.getBlockEvents().pipe(
-      mergeWith(this.getTxCompletedEvents()),
+      mergeWith(from(this.getTxCompletedEvents())),
       combineLatestWith(this.getApi()),
       map(([events, api]) => ({ events, api }))
     )
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi)
+    return from(this.getCachedParachainUrl()).pipe(
+      switchMap((parachainUrl) =>
+        getPolkadotApi(parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi)
+      )
+    )
   }
 
   getApiPromise() {
-    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi))
+    return this.getCachedParachainUrl().then((parachainUrl) =>
+      firstValueFrom(getPolkadotApi(parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi))
+    )
   }
 
   getRelayChainApi() {

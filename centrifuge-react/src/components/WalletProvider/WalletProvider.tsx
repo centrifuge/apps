@@ -156,7 +156,7 @@ export function WalletProvider({
   const centEvmChainId = useCentEvmChainId()
 
   const evmChains = React.useMemo(() => {
-    const centUrl = new URL(cent.parachainUrl)
+    const centUrl = new URL(cent.config.centrifugeWsUrl.split(',')[0])
     centUrl.protocol = 'https:'
     const chains = {
       ...evmChainsProp,
