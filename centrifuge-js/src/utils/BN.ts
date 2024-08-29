@@ -9,8 +9,12 @@ class BNSubType extends BN {
     const n = Dec(number).mul(Dec(10).pow(this.decimals)).toDecimalPlaces(0).toString()
     return new (this as typeof BNSubType)(n) as T
   }
-  constructor(number: number | string | number[] | Uint8Array | Buffer | BN) {
-    super(BN.isBN(number) ? number.toString() : number)
+  constructor(number: number | string | number[] | Uint8Array | Buffer | BN | Codec | bigint) {
+    super(
+      (typeof number === 'object' && 'toPrimitive' in number) || typeof number === 'bigint' || BN.isBN(number)
+        ? number.toString()
+        : number
+    )
   }
   getDecimals() {
     return (this.constructor as typeof BNSubType).decimals
@@ -25,11 +29,9 @@ class BNSubType extends BN {
 
 export class CurrencyBalance extends BN {
   decimals: number
-  constructor(number: number | string | number[] | Uint8Array | Buffer | BN | Codec, decimals: number) {
+  constructor(number: number | string | number[] | Uint8Array | Buffer | BN | Codec | bigint, decimals: number) {
     super(
-      typeof number === 'object' && 'toPrimitive' in number
-        ? number.toString()
-        : BN.isBN(number)
+      (typeof number === 'object' && 'toPrimitive' in number) || typeof number === 'bigint' || BN.isBN(number)
         ? number.toString()
         : number
     )
