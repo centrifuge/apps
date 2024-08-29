@@ -279,7 +279,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         const permit = iface.encodeFunctionData('permit', [currencyAddress, user, order.toString(), deadline, v, r, s])
 
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, permit, requestDeposit], {
+          contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([permit, enable, requestDeposit], {
             ...options,
             gasLimit: 300000,
             value: estimate,
