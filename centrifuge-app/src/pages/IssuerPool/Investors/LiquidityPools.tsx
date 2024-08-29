@@ -253,9 +253,7 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
   )
 
   const tokenPricesToUpdate = Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
-    return domain.currencies
-      .filter((cur) => !!poolsByCurrency[cur.address])
-      .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+    return domain.currencies.map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
   })
 
   const currenciesToAdd = domain.currencies

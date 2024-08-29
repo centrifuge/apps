@@ -115,9 +115,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
               ]),
               ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
-              ...tokenPricesToUpdate.map(([tid, curKey]) =>
-                inst.liquidityPools.updateTokenPrice([poolId, tid, curKey, domainChainId], { batch: true })
-              ),
+              ...tokenPricesToUpdate.map(([tid, curKey]) => {
+                return api.tx.liquidityPools.updateTokenPrice(poolId, tid, curKey, { EVM: domainChainId })
+              }),
               api.tx.liquidityPoolsGateway.endBatchMessage({ EVM: chainId }),
             ])
             return inst.wrapSignAndSend(api, tx, options)
