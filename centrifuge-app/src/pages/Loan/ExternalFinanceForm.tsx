@@ -102,6 +102,10 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    financeForm.validateForm()
+  }, [source])
+
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
