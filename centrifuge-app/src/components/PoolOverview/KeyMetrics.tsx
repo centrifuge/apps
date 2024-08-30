@@ -189,7 +189,7 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
           const chain = (evmChains as any)[domain.chainId]
           return (
             <Tooltip
-              key={domain.chainId}
+              key={domain.poolManager}
               delay={300}
               bodyWidth="maxContent"
               bodyPadding={0}

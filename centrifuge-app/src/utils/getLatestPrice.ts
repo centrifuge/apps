@@ -5,7 +5,8 @@ export const getLatestPrice = (
   borrowerAssetTransactions: AssetTransaction[] | undefined,
   decimals: number
 ): { value: CurrencyBalance; timestamp: number } => {
-  if (!borrowerAssetTransactions) return { value: new CurrencyBalance(0, decimals), timestamp: 0 }
+  if (!borrowerAssetTransactions || !borrowerAssetTransactions.length)
+    return { value: new CurrencyBalance(0, decimals), timestamp: 0 }
 
   const latestTx = borrowerAssetTransactions[borrowerAssetTransactions.length - 1]
 

@@ -144,6 +144,10 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    repayForm.validateForm()
+  }, [destination])
+
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 

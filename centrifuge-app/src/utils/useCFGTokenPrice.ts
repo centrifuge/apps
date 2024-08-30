@@ -63,7 +63,10 @@ export const useDailyCFGPrice = (filter: 'YTD' | '30days' | '90days') => {
       }),
     }
 
-    const res = await fetch('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', options)
+    const res = await fetch(
+      `https://gateway.thegraph.com/api/9cdc906f79cb4b557d79846a994f6564/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV`,
+      options
+    )
     return res.json()
   })
 }

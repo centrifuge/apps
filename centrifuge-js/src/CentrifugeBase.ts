@@ -577,11 +577,14 @@ export class CentrifugeBase {
             return from(response.wait()).pipe(
               map((receipt) => [response, receipt] as const),
               startWith([response, null] as const),
-              map(([response, receipt]) => {
+              switchMap(([response, receipt]) => {
+                const $events = receipt?.blockNumber ? this.getEventsByBlockNumber(receipt.blockNumber) : of(null)
+                return combineLatest([of(response), of(receipt), $events])
+              }),
+              map(([response, receipt, events]) => {
                 const result: TransactionResult = {
                   data: { response, receipt: receipt ?? undefined },
-                  // TODO: Events
-                  events: [],
+                  events: (events as any) ?? [],
                   status: receipt ? 'InBlock' : 'Broadcast',
                   error: receipt?.status === 0 ? new Error('failed') : undefined,
                   txHash: response.hash,
@@ -749,6 +752,16 @@ export class CentrifugeBase {
     return combineLatest([$api, $hash]).pipe(
       switchMap(([api, hashByBlockNumber]) => {
         return api.rpc.chain.getBlock(hashByBlockNumber?.toHex())
+      })
+    )
+  }
+
+  getEventsByBlockNumber(blockNumber: number) {
+    const $api = this.getApi()
+    const $hash = $api.pipe(switchMap((api) => api.rpc.chain.getBlockHash(blockNumber)))
+    return combineLatest([$api, $hash]).pipe(
+      switchMap(([api, hashByBlockNumber]) => {
+        return api.query.system.events.at(hashByBlockNumber)
       })
     )
   }
