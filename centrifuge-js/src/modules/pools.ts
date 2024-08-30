@@ -4308,7 +4308,8 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.poolFees.lastFeeId()),
       take(1),
       combineLatestWith($api),
-      switchMap(([lastFeeId, api]) => {
+      combineLatestWith(getPoolFees([poolId])),
+      switchMap(([[lastFeeId, api], poolFees]) => {
         const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee([feeId]))
         const addSubmittables = add.map(({ poolId, fee }) => {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
@@ -4317,15 +4318,14 @@ export function getPoolsModule(inst: Centrifuge) {
             feeType: { [fee.feeType]: { limit: { [fee.limit]: fee.amount } } },
           })
         })
+        const removedFeeIds = new Set(remove)
+        const remainingFeeIds = new Set(poolFees.map((fee) => fee.id).filter((id) => !removedFeeIds.has(id)))
         const updatedMetadata = {
           ...metadata,
           pool: {
             ...metadata.pool,
             poolFees: [
-              ...(metadata?.pool?.poolFees?.filter((fee) => {
-                if (remove.length) return remove.find((f) => f !== fee.id)
-                return true
-              }) || []),
+              ...(metadata?.pool?.poolFees?.filter((fee) => remainingFeeIds.has(fee.id)) || []),
               ...add.map((metadata, index) => {
                 return {
                   id: parseInt(lastFeeId.toHuman() as string, 10) + index + 1,
