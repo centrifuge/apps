@@ -161,6 +161,10 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    financeForm.validateForm()
+  }, [source])
+
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
