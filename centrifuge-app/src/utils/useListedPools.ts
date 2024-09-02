@@ -124,8 +124,7 @@ export function useYearOverYearGrowth() {
   const currentYearNAV = aggregatedListedPoolsNav.toNumber()
 
   // YoY growth
-  const totalValueLockedGrowth =
-    lastYearNAV && currentYearNAV ? ((currentYearNAV - lastYearNAV) / lastYearNAV) * 100 : 0
+  const totalYoyGrowth = lastYearNAV && currentYearNAV ? ((currentYearNAV - lastYearNAV) / lastYearNAV) * 100 : 0
 
-  return { totalValueLockedGrowth, isLoading }
+  return { totalYoyGrowth, isLoading }
 }

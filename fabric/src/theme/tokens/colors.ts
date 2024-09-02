@@ -1,17 +1,13 @@
+export const black = '#252B34'
+export const gold = '#FFC500'
+
 export const grayScale = {
   50: '#fbfbfb',
   100: '#f5f5f5',
   300: '#e0e0e0',
   500: '#82888D',
   800: '#424242',
-  900: '#212121',
-}
-
-export const blueScale = {
-  50: '#f0f4ff',
-  100: '#dbe5ff',
-  500: '#1253ff',
-  700: '#002b9e',
+  900: black,
 }
 
 export const yellowScale = {
@@ -28,7 +24,13 @@ export const blackScale = {
   800: '#1A1F27',
 }
 
+// Only for altair
+export const blueScale = {
+  50: '#f0f4ff',
+  100: '#dbe5ff',
+  500: '#1253ff',
+  700: '#002b9e',
+}
+
 export const centrifugeBlue = blueScale[500]
 export const altairYellow = yellowScale[500]
-export const black = '#252B34'
-export const gold = '#FFC012'

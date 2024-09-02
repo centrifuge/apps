@@ -95,7 +95,7 @@ export function GovernanceMenu() {
             ))}
           </Stack>
         ) : (
-          <Panel backgroundColor={theme.colors.backgroundBlack}>
+          <Panel backgroundColor={theme.colors.backgroundInverted}>
             {links.map(({ href, label }) => (
               <MenuItemGroup key={href}>
                 <Box px={2} py={1}>

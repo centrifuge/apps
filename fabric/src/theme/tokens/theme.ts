@@ -1,7 +1,7 @@
-import { blackScale, blueScale, centrifugeBlue, grayScale, yellowScale } from './colors'
+import { black, blackScale, centrifugeBlue, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
-const statusInfo = blueScale[500]
+const statusInfo = '#1253ff'
 const statusOk = '#519b10'
 const statusWarning = yellowScale[500]
 const statusCritical = '#d43f2b'
@@ -14,27 +14,22 @@ const statusWarningBg = yellowScale[50]
 const statusCriticalBg = '#fcf0ee'
 const statusPromoteBg = '#f8107114'
 
-const black = '#252B34'
-const gold = '#FFC500'
-
 const colors = {
   textPrimary: grayScale[900],
   textSecondary: grayScale[800],
   textDisabled: grayScale[500],
   textInverted: 'white',
   textGold: gold,
-  textBlack: black,
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
   backgroundTertiary: grayScale[50],
-  backgroundAccentPrimary: blueScale[100],
+  backgroundAccentPrimary: '#dbe5ff',
   backgroundAccentSecondary: '#e9eff2',
   backgroundPage: 'white',
   backgroundInput: 'white',
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[900],
-  backgroundBlack: black,
 
   borderPrimary: grayScale[100],
   borderSecondary: grayScale[300],

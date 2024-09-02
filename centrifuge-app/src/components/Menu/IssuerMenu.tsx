@@ -81,7 +81,7 @@ export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
             {children}
           </Stack>
         ) : (
-          <Panel backgroundColor={theme.colors.backgroundBlack}>{children}</Panel>
+          <Panel backgroundColor={theme.colors.backgroundInverted}>{children}</Panel>
         )}
       </Box>
     </Box>

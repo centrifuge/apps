@@ -22,7 +22,7 @@ export const altairDark: FabricTheme = {
     blueScale,
     yellowScale,
     grayScale,
-    backgroundBlack: black,
+    backgroundInverted: black,
     textGold: gold,
   },
   shadows: {

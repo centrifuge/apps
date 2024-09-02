@@ -10,8 +10,8 @@ import { Dec } from '../utils/Decimal'
 
 export default function PoolsPage() {
   const [, listedTokens] = useListedPools()
-  const { totalValueLockedGrowth, isLoading } = useYearOverYearGrowth()
-  const isPositiveYoy = totalValueLockedGrowth > 0
+  const { totalYoyGrowth, isLoading } = useYearOverYearGrowth()
+  const isPositiveYoy = totalYoyGrowth > 0
   const IconComponent = isPositiveYoy ? IconArrowUpRight : IconArrowDown
 
   const totalValueLocked = React.useMemo(() => {
@@ -36,7 +36,7 @@ export default function PoolsPage() {
     <LayoutSection py={5}>
       <Stack gap={4} mb={20}>
         <Stack>
-          <Text as="h3" variant="heading3" color="textBlack">
+          <Text as="h3" variant="heading3">
             Pools of real-world assets
           </Text>
           <Box mt={40}>
@@ -49,13 +49,13 @@ export default function PoolsPage() {
                   <Box display="flex" alignItems="center" pt="2px">
                     <IconComponent size={16} color="ok" />
                     <Text variant="body3" color={isPositiveYoy ? 'ok' : 'warning'}>
-                      {formatBalance(totalValueLockedGrowth ?? 0, '', 2)} YoY
+                      {formatBalance(totalYoyGrowth ?? 0, '', 2)} YoY
                     </Text>
                   </Box>
                 </StatusChip>
               )}
             </Box>
-            <Text as="h1" variant="heading1" color="textBlack" style={{ fontSize: 36 }}>
+            <Text as="h1" variant="heading1" style={{ fontSize: 36 }}>
               {formatBalance(totalValueLocked ?? 0, config.baseCurrency)}
             </Text>
           </Box>

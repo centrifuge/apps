@@ -38,7 +38,7 @@ export function Menu() {
       flexDirection={['row', 'row', 'column']}
       alignItems={['center', 'center', 'stretch']}
       justifyContent={['space-between', 'space-between']}
-      backgroundColor="backgroundBlack"
+      backgroundColor="backgroundInverted"
     >
       <Box width="100%">
         <PageLink to="/pools" stacked={!isLarge}>
