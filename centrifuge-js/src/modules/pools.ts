@@ -2301,7 +2301,7 @@ export function getPoolsModule(inst: Centrifuge) {
       poolSnapshots(
         orderBy: BLOCK_NUMBER_ASC,
         filter: {
-          id: { startsWith: $poolId },
+          poolId: { equalTo: $poolId },
           timestamp: { greaterThan: $from, lessThan: $to }
         }
         after: $poolCursor
@@ -2791,23 +2791,45 @@ export function getPoolsModule(inst: Centrifuge) {
       )
   }
 
-  function getPoolFeeStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
+  function getPoolFeeStatesByGroup(
+    args: [poolId: string, from?: Date, to?: Date],
+    groupBy: GroupBy = 'month'
+  ): Observable<Record<string, DailyPoolFeesState[]>> {
     return getDailyPoolFeeStates(args).pipe(
       map((poolFees) => {
-        return Object.entries(poolFees).map(([feeId, feeStates]) => {
-          if (!feeStates.length) return []
-          const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+        return Object.fromEntries(
+          Object.entries(poolFees).map(([feeId, feeStates]) => {
+            if (!feeStates.length) return []
+            const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
 
-          feeStates.forEach((feeState) => {
-            const date = new Date(feeState.timestamp)
-            const period = getGroupByPeriod(date, groupBy)
-            if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
-              poolStatesByGroup[period] = feeState
-            }
+            feeStates.forEach((feeState) => {
+              const date = new Date(feeState.timestamp)
+              const period = getGroupByPeriod(date, groupBy)
+              if (!poolStatesByGroup[period]) {
+                poolStatesByGroup[period] = feeState
+              } else {
+                const existing = poolStatesByGroup[period]
+                poolStatesByGroup[period] = {
+                  ...feeState,
+                  sumAccruedAmountByPeriod: new CurrencyBalance(
+                    feeState.sumAccruedAmountByPeriod.add(existing?.sumAccruedAmountByPeriod ?? new BN(0)),
+                    feeState.sumAccruedAmountByPeriod.decimals
+                  ),
+                  sumChargedAmountByPeriod: new CurrencyBalance(
+                    feeState.sumChargedAmountByPeriod.add(existing?.sumChargedAmountByPeriod ?? new BN(0)),
+                    feeState.sumChargedAmountByPeriod.decimals
+                  ),
+                  sumPaidAmountByPeriod: new CurrencyBalance(
+                    feeState.sumPaidAmountByPeriod.add(existing?.sumPaidAmountByPeriod ?? new BN(0)),
+                    feeState.sumPaidAmountByPeriod.decimals
+                  ),
+                }
+              }
+            })
+
+            return [feeId, Object.values(poolStatesByGroup)]
           })
-
-          return { [feeId]: Object.values(poolStatesByGroup) }
-        })
+        )
       })
     )
   }
