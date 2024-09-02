@@ -179,6 +179,10 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    repayForm.validateForm()
+  }, [destination])
+
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
