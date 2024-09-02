@@ -2,7 +2,7 @@ import { Box, InlineFeedback, Text } from '@centrifuge/fabric'
 
 type Props = {
   children: React.ReactNode
-  type: 'default' | 'critical'
+  type: 'default' | 'critical' | 'warning'
   condition: boolean
 }
 
@@ -14,6 +14,10 @@ const styles: Record<Props['type'], { bg: string; color: string }> = {
   critical: {
     bg: 'statusCriticalBg',
     color: 'statusCritical',
+  },
+  warning: {
+    bg: 'statusWarningBg',
+    color: 'statusWarning',
   },
 }
 
