@@ -3,7 +3,6 @@ import { Box, Grid, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Identity } from '../components/Identity'
-import { LayoutBase } from '../components/LayoutBase'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
@@ -22,11 +21,7 @@ interface Params extends Record<string, string | undefined> {
 }
 
 export default function CollectionPage() {
-  return (
-    <LayoutBase>
-      <Collection />
-    </LayoutBase>
-  )
+  return <Collection />
 }
 
 const COUNT_PER_PAGE = 16

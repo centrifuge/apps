@@ -9,9 +9,14 @@ const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${baseButton}
   ${primaryButton}
   grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
-  color: ${({ isActive }) => (isActive ? 'blue' : 'black')}; /* Example styling */
+  color: ${({ isActive, theme }) =>
+    isActive ? theme.colors.textGold : theme.colors.textInverted}; /* Example styling */
   font-size: 14px;
   font-weight: 500;
+  background-color: transparent;
+  &:hover {
+    color: ${({ theme }) => theme.colors.textGold};
+  }
 `
 
 type PageLinkProps = LinkProps & {

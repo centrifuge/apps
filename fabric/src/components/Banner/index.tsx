@@ -39,7 +39,7 @@ export function Banner({ children, title, ...props }: BannerProps) {
         py="2"
         px="2"
         maxWidth="540px"
-        backgroundColor={theme.colors.accentPrimary}
+        backgroundColor={theme.colors.backgroundInverted}
         style={{ boxShadow: theme.shadows.cardInteractive }}
       >
         <Shelf gap="1">

@@ -36,7 +36,6 @@ import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../components/LayoutBase'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
@@ -65,11 +64,7 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
 }))
 
 export default function IssuerCreatePoolPage() {
-  return (
-    <LayoutBase>
-      <CreatePoolForm />
-    </LayoutBase>
-  )
+  return <CreatePoolForm />
 }
 
 export interface Tranche {

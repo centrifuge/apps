@@ -79,7 +79,7 @@ function PoolPerformanceChart() {
         }
         return { day: new Date(day.timestamp), nav: Number(nav), price: Number(price) }
       }) || [],
-    [isSingleTranche, truncatedPoolStates]
+    [isSingleTranche, truncatedPoolStates, todayAssetValue, todayPrice]
   )
 
   const today = {

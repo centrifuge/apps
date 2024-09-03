@@ -1,5 +1,4 @@
 export * from './altairDark'
 export * from './altairLight'
-export * from './centrifugeDark'
-export * from './centrifugeLight'
+export * from './centrifugeTheme'
 export * from './types'

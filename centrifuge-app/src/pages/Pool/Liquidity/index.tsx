@@ -2,7 +2,6 @@ import { Button, Drawer } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
@@ -17,12 +16,12 @@ const LiquidityTransactionsSection = React.lazy(() => import('../../../component
 
 export function PoolDetailLiquidityTab() {
   return (
-    <LayoutBase>
+    <>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailLiquidity />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 
@@ -63,23 +62,23 @@ export function PoolDetailLiquidity() {
       </PageSummary>
       {!('addresses' in pool) && (
         <>
-            <LiquidityTransactionsSection
-              pool={pool}
-              title="Originations & repayments"
-              dataKeys={['sumRepaidAmountByPeriod', 'sumBorrowedAmountByPeriod']}
-              dataNames={['Repayment', 'Origination']}
-              dataColors={[colors.grayScale[500], colors.blueScale[500]]}
-              tooltips={['repayment', 'origination']}
-            />
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Originations & repayments"
+            dataKeys={['sumRepaidAmountByPeriod', 'sumBorrowedAmountByPeriod']}
+            dataNames={['Repayment', 'Origination']}
+            dataColors={[colors.grayScale[500], colors.blueScale[500]]}
+            tooltips={['repayment', 'origination']}
+          />
 
-            <LiquidityTransactionsSection
-              pool={pool}
-              title="Investments & redemptions"
-              dataKeys={['sumInvestedAmountByPeriod', 'sumRedeemedAmountByPeriod']}
-              dataNames={['Investment', 'Redemption']}
-              dataColors={[colors.statusOk, colors.statusCritical]}
-              tooltips={['investment', 'redemption']}
-            />
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Investments & redemptions"
+            dataKeys={['sumInvestedAmountByPeriod', 'sumRedeemedAmountByPeriod']}
+            dataNames={['Investment', 'Redemption']}
+            dataColors={[colors.statusOk, colors.statusCritical]}
+            tooltips={['investment', 'redemption']}
+          />
           {/* 
           <PageSection title="Cash drag">
             <Stack height="290px">
