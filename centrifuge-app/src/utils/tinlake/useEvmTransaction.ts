@@ -27,7 +27,7 @@ export function useEvmTransaction<T extends Array<any>>(
   const centrifuge = useCentrifuge()
   const provider = useEvmProvider()
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: TransactionRequest }>()
-  const { setGmpHash } = useGmp()
+  const { setGmpHash, gmpHash } = useGmp()
 
   async function doTransaction(id: string, args: T, txOptions?: TransactionRequest, gmp?: boolean) {
     try {
@@ -38,7 +38,9 @@ export function useEvmTransaction<T extends Array<any>>(
       const lastResult = await lastValueFrom(
         transaction(args, txOptions).pipe(
           tap((result) => {
-            gmp && setGmpHash(result.hash)
+            if (!gmpHash && gmp) {
+              setGmpHash(result.hash)
+            }
             updateTransaction(id, { status: 'pending', hash: result.hash })
           })
         )
