@@ -228,11 +228,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       else if (lpInvest.lpCurrencyAllowance.lt(assets) && supportsPermits && pendingAction !== 'approvePoolCurrency') {
         const signer = provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
-        const permit = await connectedCent.liquidityPools.signPermit([
-          lpInvest.lpAddress,
-          lpInvest.currency.address,
-          assets,
-        ])
+        const permit = await connectedCent.liquidityPools.signPermit([lpInvest.currency.address, assets, chainId])
         console.log('permit', permit)
         investWithPermit.execute([lpInvest.lpAddress, assets, lpInvest?.currency.address, permit, chainId], {}, true)
         setPendingAction('investWithPermit')

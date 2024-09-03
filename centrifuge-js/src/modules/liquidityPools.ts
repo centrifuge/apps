@@ -175,8 +175,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pending(contract(currencyAddress, ABI.Currency).approve(centrifugeRouterAddress, amount, options))
   }
 
-  async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
-    const [spender, currencyAddress, amount] = args
+  async function signPermit(args: [currencyAddress: string, amount: BN, chainId: number]) {
+    const [currencyAddress, amount] = args
     if (!inst.config.evmSigner) throw new Error('EVM signer not set')
 
     let domainOrCurrency: any = currencyAddress
@@ -189,12 +189,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       domainOrCurrency = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
     }
 
+    const centrifugeRouterAddress = getCentrifugeRouterAddress(chainId)
     const deadline = Math.floor(Date.now() / 1000) + 3600 // 1 hour
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
       domainOrCurrency,
       inst.getSignerAddress('evm'),
-      spender,
+      centrifugeRouterAddress,
       amount.toString(),
       deadline
     )
