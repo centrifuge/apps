@@ -269,14 +269,17 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         const iface = new Interface(ABI.CentrifugeRouter)
-        const requestDeposit = iface.encodeFunctionData('requestDeposit', [
-          lpAddress,
-          order.toString(),
-          user,
-          user,
-          estimate,
-        ])
-        const enable = iface.encodeFunctionData('enable', [lpAddress])
+        // TODO: add these back after contract upgrade that allows to call the enable function
+        // const requestDeposit = iface.encodeFunctionData('requestDeposit', [
+        //   lpAddress,
+        //   order.toString(),
+        //   user,
+        //   user,
+        //   estimate,
+        // ])
+        // const enable = iface.encodeFunctionData('enable', [lpAddress])
+        const enable = iface.encodeFunctionData('enableLockDepositRequest', [lpAddress, order.toString()])
+        const requestDeposit = iface.encodeFunctionData('executeLockedDepositRequest', [lpAddress, user, estimate])
         const permit = iface.encodeFunctionData('permit', [currencyAddress, user, order.toString(), deadline, v, r, s])
 
         return pending(
