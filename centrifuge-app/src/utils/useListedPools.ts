@@ -1,5 +1,6 @@
 import { CurrencyBalance, PoolMetadata } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useMemo } from 'react'
 import { useAddress } from '../utils/useAddress'
@@ -109,7 +110,7 @@ export function useYearOverYearGrowth() {
     ) || []
 
   // Aggregate NAV from last year
-  const aggregatedNetAssetValue = flattenedData.reduce((accumulator: any, item: FlattenedDataItem) => {
+  const aggregatedNetAssetValue = flattenedData.reduce((accumulator: Decimal, item: FlattenedDataItem) => {
     const netAssetValue = new CurrencyBalance(item.netAssetValue, item.decimals)
     return accumulator.add(netAssetValue.toDecimal())
   }, Dec(0))
