@@ -8,7 +8,7 @@ export default function TransactionHistoryPage() {
   const connectedAddress = useAddress()
   const address = addressParam || connectedAddress
   return (
-    <LayoutSection title="Transaction history" pt={5}>
+    <LayoutSection title="Transaction history" marginTop={20}>
       {address && <Transactions address={address} />}
     </LayoutSection>
   )
