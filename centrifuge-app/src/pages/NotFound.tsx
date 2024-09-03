@@ -1,15 +1,10 @@
 import { Stack, Text } from '@centrifuge/fabric'
 import { useLocation } from 'react-router'
-import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 
 export default function NotFoundPag() {
-  return (
-    <LayoutBase>
-      <Pools />
-    </LayoutBase>
-  )
+  return <Pools />
 }
 
 function Pools() {

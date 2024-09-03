@@ -1,7 +1,6 @@
 import { Stack } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { useCanBorrow, usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
@@ -14,12 +13,12 @@ import { PoolConfig } from './PoolConfig'
 
 export function IssuerPoolConfigurationPage() {
   return (
-    <LayoutBase>
+    <>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolConfiguration />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 

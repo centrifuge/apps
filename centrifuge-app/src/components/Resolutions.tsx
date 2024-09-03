@@ -5,7 +5,7 @@ import { LayoutSection } from './LayoutBase/LayoutSection'
 
 export const Resolutions = ({ dao }: { dao: DAO }) => {
   return (
-    <LayoutSection title="Resolutions">
+    <LayoutSection title="Resolutions" pt={12} pb={12}>
       <Grid columns={[1, 2, 3, 4]} equalColumns gap={3} alignItems="start">
         {dao.resolutions.map((blog) => (
           <HoverableCard

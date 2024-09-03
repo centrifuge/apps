@@ -1,6 +1,6 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { EvmChains } from '@centrifuge/centrifuge-react'
-import { altairDark, centrifugeLight } from '@centrifuge/fabric'
+import { centrifugeTheme } from '@centrifuge/fabric'
 import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
 import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
@@ -23,37 +23,17 @@ export const FEATURED_COLLECTIONS = [
 ]
 
 const lightTheme: DefaultTheme = {
-  ...centrifugeLight,
+  ...centrifugeTheme,
   sizes: {
-    ...centrifugeLight.sizes,
+    ...centrifugeTheme.sizes,
     mainContent: 1800,
   },
   colors: {
-    ...centrifugeLight.colors,
-    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
+    ...centrifugeTheme.colors,
+    placeholderBackground: centrifugeTheme.colors.backgroundSecondary,
   },
   typography: {
-    ...centrifugeLight.typography,
-    headingLarge: {
-      fontSize: [24, 24, 36],
-      lineHeight: 1.25,
-      fontWeight: 600,
-      color: 'textPrimary',
-    },
-  },
-}
-const darkTheme: DefaultTheme = {
-  ...altairDark,
-  sizes: {
-    ...altairDark.sizes,
-    mainContent: 1800,
-  },
-  colors: {
-    ...altairDark.colors,
-    placeholderBackground: altairDark.colors.backgroundSecondary,
-  },
-  typography: {
-    ...altairDark.typography,
+    ...centrifugeTheme.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,
@@ -67,10 +47,7 @@ type EnvironmentConfig = {
   name: string
   logo: React.ComponentType<any>[]
   network: 'altair' | 'centrifuge'
-  themes: {
-    light: DefaultTheme
-    dark: DefaultTheme
-  }
+  themes: { light: DefaultTheme }
   defaultTheme: 'light' | 'dark'
   baseCurrency: 'USD'
   assetClasses: Record<'Public credit' | 'Private credit', string[]>
@@ -86,10 +63,7 @@ const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
   logo: [LogoAltair, LogoAltairText],
   network: 'altair',
-  themes: {
-    light: lightTheme,
-    dark: darkTheme,
-  },
+  themes: { light: lightTheme },
   defaultTheme: 'dark',
   baseCurrency: 'USD',
   assetClasses: { 'Private credit': ['Art NFTs'], 'Public credit': [] },
@@ -102,7 +76,6 @@ const CENTRIFUGE: EnvironmentConfig = {
   network: 'centrifuge',
   themes: {
     light: lightTheme,
-    dark: darkTheme,
   },
   defaultTheme: 'light',
   baseCurrency: 'USD',
