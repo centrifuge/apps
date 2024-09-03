@@ -23,6 +23,12 @@ export type MetaData = {
   tranches: {
     [key: string]: InnerMetadata
   }
+  pool: {
+    issuer: {
+      shortDescription?: string
+    }
+    investorType?: string
+  }
 }
 export type Tranche = {
   id: string
@@ -159,18 +165,20 @@ export function PoolCard({
           {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
         </Stack>
       </Box>
-      <Box marginY={12}>
-        <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
-          Fully onchain, BVI-licensed fund holding T-Bills with a maximum maturity of 6 months.
-        </Text>
-      </Box>
+      {metaData?.pool?.issuer?.shortDescription && (
+        <Box marginY={12}>
+          <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
+            {metaData?.pool?.issuer?.shortDescription}
+          </Text>
+        </Box>
+      )}
       <Box display="flex" justifyContent="space-between">
         <Text variant="body2">Asset Type</Text>
         <Text variant="body2">{assetClass ?? '-'}</Text>
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Text variant="body2">Investor Type</Text>
-        <Text variant="body2"> Non-US professionals</Text>
+        <Text variant="body2"> {metaData?.pool?.investorType || '-'}</Text>
       </Box>
     </Card>
   )

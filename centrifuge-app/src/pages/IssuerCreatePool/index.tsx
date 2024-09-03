@@ -111,6 +111,12 @@ export type CreatePoolValues = Omit<
     category: string
   }[]
   poolType: 'open' | 'closed'
+  investorType: string
+  issuerShortDescription: string
+  ratingAgency: string
+  ratingValue: string
+  ratingReport: File | null
+  minPoolInvestment: number
 }
 
 const initialValues: CreatePoolValues = {
@@ -123,11 +129,14 @@ const initialValues: CreatePoolValues = {
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
+  investorType: '',
+  minPoolInvestment: 0,
 
   issuerName: '',
   issuerRepName: '',
   issuerLogo: null,
   issuerDescription: '',
+  issuerShortDescription: '',
 
   executiveSummary: null,
   website: '',
@@ -138,6 +147,10 @@ const initialValues: CreatePoolValues = {
   reportAuthorTitle: '',
   reportAuthorAvatar: null,
   reportUrl: '',
+
+  ratingAgency: '',
+  ratingValue: '',
+  ratingReport: null,
 
   tranches: [createEmptyTranche('')],
   adminMultisig: {
@@ -326,6 +339,8 @@ function CreatePoolForm() {
       let prevInterest = Infinity
       let prevRiskBuffer = 0
 
+      const juniorInterestRate = parseFloat(values.tranches[0].interestRate as string)
+
       values.poolFees.forEach((fee, i) => {
         if (fee.name === '') {
           errors = setIn(errors, `poolFees.${i}.name`, 'Name is required')
@@ -361,7 +376,14 @@ function CreatePoolForm() {
           errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must all start with the same 3 characters')
         }
 
-        if (t.interestRate !== '') {
+        if (i > 0 && t.interestRate !== '') {
+          if (t.interestRate > juniorInterestRate) {
+            errors = setIn(
+              errors,
+              `tranches.${i}.interestRate`,
+              "Interest rate can't be higher than the junior tranche's target APY"
+            )
+          }
           if (t.interestRate > prevInterest) {
             errors = setIn(errors, `tranches.${i}.interestRate`, "Can't be higher than a more junior tranche")
           }
@@ -384,6 +406,7 @@ function CreatePoolForm() {
 
       const metadataValues: PoolMetadataInput = { ...values } as any
 
+      // Handle admin multisig
       metadataValues.adminMultisig =
         values.adminMultisigEnabled && values.adminMultisig.threshold > 1
           ? {
@@ -392,13 +415,16 @@ function CreatePoolForm() {
             }
           : undefined
 
+      // Get the currency for the pool
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
+      // Pool ID and required assets
       const poolId = await centrifuge.pools.getAvailablePoolId()
       if (!values.poolIcon || (!isTestEnv && !values.executiveSummary)) {
         return
       }
 
+      // Handle pinning files (pool icon, issuer logo, and executive summary)
       const promises = [lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon)))]
 
       if (values.issuerLogo) {
@@ -422,6 +448,7 @@ function CreatePoolForm() {
 
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
+      // Handle pool report if available
       if (values.reportUrl) {
         let avatar = null
         if (values.reportAuthorAvatar) {
@@ -438,10 +465,11 @@ function CreatePoolForm() {
         }
       }
 
-      // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const nonJuniorTranches = metadataValues.tranches.slice(1)
       const tranches = [
-        {}, // most junior tranche
+        {
+          interestRatePerSec: Rate.fromAprPercent(values.tranches[0].interestRate),
+        },
         ...nonJuniorTranches.map((tranche) => ({
           interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
@@ -466,8 +494,6 @@ function CreatePoolForm() {
         feePosition: fee.feePosition,
         feeType: fee.feeType,
       }))
-
-      // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
       if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
         addMultisig(metadataValues.adminMultisig)
@@ -650,6 +676,21 @@ function CreatePoolForm() {
                 </Field>
               </Box>
               <Box gridColumn="span 2">
+                <Field name="investorType" validate={validate.investorType}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FieldWithErrorMessage
+                      name="investorType"
+                      label={<Tooltips type="investorType" label="Investor Type*" variant="secondary" />}
+                      onChange={(event: any) => form.setFieldValue('investorType', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      as={TextInput}
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
                 <Field name="subAssetClass" validate={validate.subAssetClass}>
                   {({ field, meta, form }: FieldProps) => (
                     <Select
@@ -681,6 +722,20 @@ function CreatePoolForm() {
                       />
                     )
                   }}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="minPoolInvestment" validate={validate.minPoolInvestment}>
+                  {({ field, form }: FieldProps) => (
+                    <CurrencyInput
+                      {...field}
+                      name="minPoolInvestment"
+                      label="Minimum investment amount*"
+                      placeholder="0"
+                      currency={form.values.currency}
+                      onChange={(value) => form.setFieldValue('minPoolInvestment', value)}
+                    />
+                  )}
                 </Field>
               </Box>
               <Box gridColumn="span 2">
