@@ -3,15 +3,15 @@ on:
   workflow_dispatch:
     inputs:
       app_name:
-        description: "Choose an app to publish to NPM"
+        description: 'Choose an app to publish to NPM'
         type: choice
         options:
-        - fabric
-        - centrifuge-js
-        - centrifuge-react
+          - fabric
+          - centrifuge-js
+          - centrifuge-react
 concurrency:
   group: '${{ github.workflow }}-${{ inputs.app_name || github.event.inputs.app_name }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
-  cancel-in-progress: true  
+  cancel-in-progress: true
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
 
       - run: yarn install --immutable
       - run: yarn build
-      
+
       # yarn lint actually fails
       # - name: Lint and build for centrifuge-js
       #   run: |
@@ -43,17 +43,17 @@ jobs:
 
       - name: Publish
         id: publish
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@v3.1.1
         with:
-          token:  ${{secrets.NPM_TOKEN}}
+          token: ${{secrets.NPM_TOKEN}}
           package: './${{ inputs.app_name }}/package.json'
 
       - uses: actions-ecosystem/action-push-tag@v1
-        if: steps.publish.outputs.type != 'none'
+        if: steps.publish.outputs.type
         with:
           tag: ${{ inputs.appname }}/v${{ steps.publish.outputs.version }}
           message: auto-created from GHActions after publishing npm package
 
-      - if: steps.publish.outputs.type != 'none'
+      - if: steps.publish.outputs.type
         run: |
-          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"          
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"

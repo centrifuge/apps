@@ -216,6 +216,14 @@ export const TransactionTable = ({
             header: `Principal (${currency})`,
             cell: (row: Row) => (row.position ? `${formatBalance(row.position, undefined, 2, 2)}` : '-'),
           },
+          {
+            align: 'left',
+            header: `Realized P&L`,
+            cell: (row: Row) =>
+              row.realizedProfitFifo
+                ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                : '-',
+          },
         ]),
   ] as Column[]
 
