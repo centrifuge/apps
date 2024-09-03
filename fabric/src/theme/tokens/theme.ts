@@ -51,7 +51,7 @@ const colors = {
   backgroundButtonPrimaryFocus: gold,
   backgroundButtonPrimaryHover: gold,
   backgroundButtonPrimaryPressed: yellowScale[500],
-  backgroundButtonPrimaryDisabled: yellowScale[500],
+  backgroundButtonPrimaryDisabled: grayScale[300],
   textButtonPrimary: black,
   textButtonPrimaryFocus: black,
   textButtonPrimaryHover: black,

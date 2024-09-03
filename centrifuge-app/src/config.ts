@@ -1,6 +1,6 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { EvmChains } from '@centrifuge/centrifuge-react'
-import { centrifugeLight } from '@centrifuge/fabric'
+import { centrifugeTheme } from '@centrifuge/fabric'
 import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
 import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
@@ -23,17 +23,17 @@ export const FEATURED_COLLECTIONS = [
 ]
 
 const lightTheme: DefaultTheme = {
-  ...centrifugeLight,
+  ...centrifugeTheme,
   sizes: {
-    ...centrifugeLight.sizes,
+    ...centrifugeTheme.sizes,
     mainContent: 1800,
   },
   colors: {
-    ...centrifugeLight.colors,
-    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
+    ...centrifugeTheme.colors,
+    placeholderBackground: centrifugeTheme.colors.backgroundSecondary,
   },
   typography: {
-    ...centrifugeLight.typography,
+    ...centrifugeTheme.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,

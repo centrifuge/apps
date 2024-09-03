@@ -4,7 +4,7 @@ import { blueScale, grayScale, yellowScale } from './tokens/colors'
 import { colorTheme } from './tokens/theme'
 import { FabricTheme } from './types'
 
-export const centrifugeLight: FabricTheme = {
+export const centrifugeTheme: FabricTheme = {
   ...baseTheme,
   scheme: 'light',
   colors: {
@@ -25,4 +25,4 @@ export const centrifugeLight: FabricTheme = {
   },
 }
 
-export default centrifugeLight
+export default centrifugeTheme
