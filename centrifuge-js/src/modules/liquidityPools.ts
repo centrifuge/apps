@@ -293,7 +293,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return pending(
           contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([permit, enable, requestDeposit], {
             ...options,
-            gasLimit: 300000,
+            gasLimit: 500000,
             value: estimate,
           })
         )
