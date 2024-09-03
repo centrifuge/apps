@@ -103,7 +103,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
 
   return (
     <Stack>
-      {renderGmp()}
+      {renderGmp(state.poolId, state.trancheId)}
       <Flex
         style={{
           boxShadow: `inset 0 -2px 0 ${theme.colors.borderPrimary}`,

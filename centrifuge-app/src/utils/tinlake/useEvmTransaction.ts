@@ -29,7 +29,12 @@ export function useEvmTransaction<T extends Array<any>>(
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: TransactionRequest }>()
   const { setGmpHash, gmpHash } = useGmp()
 
-  async function doTransaction(id: string, args: T, txOptions?: TransactionRequest, gmp?: boolean) {
+  async function doTransaction(
+    id: string,
+    args: T,
+    txOptions?: TransactionRequest,
+    gmpOptions?: { poolId: string; trancheId: string }
+  ) {
     try {
       const signer = provider!.getSigner()
       const connectedCent = centrifuge.connectEvm(selectedAddress!, signer)
@@ -38,8 +43,8 @@ export function useEvmTransaction<T extends Array<any>>(
       const lastResult = await lastValueFrom(
         transaction(args, txOptions).pipe(
           tap((result) => {
-            if (!gmpHash && gmp) {
-              setGmpHash(result.hash)
+            if (!gmpHash && gmpOptions) {
+              setGmpHash(result.hash, gmpOptions.poolId, gmpOptions.trancheId)
             }
             updateTransaction(id, { status: 'pending', hash: result.hash })
           })
@@ -55,7 +60,7 @@ export function useEvmTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T, options?: TransactionRequest, gmp?: boolean) {
+  function execute(args: T, options?: TransactionRequest, gmp?: { poolId: string; trancheId: string }) {
     const id = Math.random().toString(36).substring(2)
     const tx: Transaction = {
       id,

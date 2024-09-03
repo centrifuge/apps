@@ -7,8 +7,10 @@ import { useDebugFlags } from '../components/DebugFlags'
 
 export type Gmp = {
   txHash: string
-  gasPaid: boolean
-  executed: boolean
+  gasPaid: boolean | undefined
+  executed: boolean | undefined
+  poolId: string
+  trancheId: string
 } | null
 
 export function useGmp() {
@@ -32,8 +34,8 @@ export function useGmp() {
     }
   }, [gmp])
 
-  const setGmpHash = (txHash: string) => {
-    setGmp({ txHash, gasPaid: false, executed: false })
+  const setGmpHash = (txHash: string, poolId: string, trancheId: string) => {
+    setGmp({ txHash, gasPaid: undefined, executed: undefined, poolId, trancheId })
   }
 
   const fetchData = () =>
@@ -72,7 +74,7 @@ export function useGmp() {
               if (data.length > 0) {
                 const gasPaid = data[0].gas_status === 'gas_paid'
                 const executed = data[0].status === 'executed'
-                const updatedGmp = { txHash: gmp.txHash, gasPaid, executed }
+                const updatedGmp = { ...gmp, txHash: gmp.txHash, gasPaid, executed }
                 if (updatedGmp.gasPaid !== gmp.gasPaid || updatedGmp.executed !== gmp.executed) {
                   setGmp(updatedGmp)
                 }
@@ -93,46 +95,49 @@ export function useGmp() {
     }
   )
 
-  const render = React.useCallback(() => {
-    if (gmp && showGmp) {
-      return (
-        <Shelf p={1} backgroundColor="statusWarningBg" borderRadius={1} gap={1} alignItems="center">
-          <InlineFeedback>
-            {!gmp.executed ? (
-              <Shelf gap={1}>
-                <Text variant="body2">{gmp.gasPaid ? 'Gas paid, finalizing' : 'Awaiting gas payment'} </Text>
-                <Shelf
-                  as="a"
-                  style={{ color: 'inherit', textDecoration: 'underline' }}
-                  href={`${axelarScanUrl}${gmp.txHash}`}
-                  target="_blank"
-                >
-                  <Text variant="body2">on Axelar</Text>
-                  <IconExternalLink size="iconSmall" />
+  const render = React.useCallback(
+    (poolId: string, trancheId: string) => {
+      if (gmp && showGmp && gmp.poolId === poolId && gmp.trancheId === trancheId) {
+        return (
+          <Shelf p={1} backgroundColor="statusWarningBg" borderRadius={1} gap={1} alignItems="center">
+            <InlineFeedback>
+              {!gmp.executed ? (
+                <Shelf gap={1}>
+                  <Text variant="body2">{gmp.gasPaid ? 'Gas paid, finalizing' : 'Awaiting gas payment'} </Text>
+                  <Shelf
+                    as="a"
+                    style={{ color: 'inherit', textDecoration: 'underline' }}
+                    href={`${axelarScanUrl}${gmp.txHash}`}
+                    target="_blank"
+                  >
+                    <Text variant="body2">on Axelar</Text>
+                    <IconExternalLink size="iconSmall" />
+                  </Shelf>
                 </Shelf>
-              </Shelf>
-            ) : (
-              <Shelf gap={1}>
-                <Text variant="body2">Transaction executed on </Text>
-                <Shelf
-                  as="a"
-                  style={{ color: 'inherit', textDecoration: 'underline' }}
-                  href={`${axelarScanUrl}${gmp.txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Text variant="body2">Axelar</Text>
-                  <IconExternalLink size="iconSmall" />
+              ) : (
+                <Shelf gap={1}>
+                  <Text variant="body2">Transaction executed on </Text>
+                  <Shelf
+                    as="a"
+                    style={{ color: 'inherit', textDecoration: 'underline' }}
+                    href={`${axelarScanUrl}${gmp.txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Text variant="body2">Axelar</Text>
+                    <IconExternalLink size="iconSmall" />
+                  </Shelf>
                 </Shelf>
-              </Shelf>
-            )}
-          </InlineFeedback>
-        </Shelf>
-      )
-    } else {
-      return null
-    }
-  }, [gmp, showGmp])
+              )}
+            </InlineFeedback>
+          </Shelf>
+        )
+      } else {
+        return null
+      }
+    },
+    [gmp, showGmp]
+  )
 
   return { setGmpHash, render, gmpHash: gmp?.txHash }
 }

@@ -117,7 +117,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     name: InvestRedeemAction,
     fn: (arg: T) => any[] | Promise<any[]>,
     opt?: TransactionRequest,
-    gmp?: boolean // enable gmp to display pending messages in Axelar
+    gmp?: { poolId: string; trancheId: string } // enable gmp to display pending Axelar messages
   ): (args?: T) => void {
     return (args) => {
       txActions[name]?.execute(fn(args!) as any, opt, gmp)
@@ -230,16 +230,20 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         const connectedCent = cent.connectEvm(evmAddress!, signer)
         const permit = await connectedCent.liquidityPools.signPermit([lpInvest.currency.address, assets, chainId])
         console.log('permit', permit)
-        investWithPermit.execute([lpInvest.lpAddress, assets, lpInvest?.currency.address, permit, chainId], {}, true)
+        investWithPermit.execute(
+          [lpInvest.lpAddress, assets, lpInvest?.currency.address, permit, chainId],
+          {},
+          { poolId, trancheId }
+        )
         setPendingAction('investWithPermit')
       } else {
-        invest.execute([lpInvest.lpAddress, assets, chainId], {}, true)
+        invest.execute([lpInvest.lpAddress, assets, chainId], {}, { poolId, trancheId })
         setPendingAction('invest')
       }
     },
     redeem: async (newOrder: BN) => {
       if (!lpInvest) return
-      redeem.execute([lpInvest.lpAddress, newOrder, chainId], {}, true)
+      redeem.execute([lpInvest.lpAddress, newOrder, chainId], {}, { poolId, trancheId })
       setPendingAction('redeem')
     },
     collect: doAction('collect', () =>
@@ -251,8 +255,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       chainId,
     ]),
     approveTrancheToken: () => {},
-    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId], undefined, true),
-    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, chainId], undefined, true),
+    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId], undefined, { poolId, trancheId }),
+    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, chainId], undefined, { poolId, trancheId }),
     selectPoolCurrency(symbol) {
       setLpIndex(lps!.findIndex((lp) => lp.currency.symbol === symbol))
     },
