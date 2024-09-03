@@ -280,7 +280,15 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         // const enable = iface.encodeFunctionData('enable', [lpAddress])
         const enable = iface.encodeFunctionData('enableLockDepositRequest', [lpAddress, order.toString()])
         const requestDeposit = iface.encodeFunctionData('executeLockedDepositRequest', [lpAddress, user, estimate])
-        const permit = iface.encodeFunctionData('permit', [currencyAddress, user, order.toString(), deadline, v, r, s])
+        const permit = iface.encodeFunctionData('permit', [
+          currencyAddress,
+          centrifugeRouter,
+          order.toString(),
+          deadline,
+          v,
+          r,
+          s,
+        ])
 
         return pending(
           contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([permit, enable, requestDeposit], {
