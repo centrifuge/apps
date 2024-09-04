@@ -4,7 +4,6 @@ import Decimal from 'decimal.js-light'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
-import { Eththumbnail } from '../EthThumbnail'
 import { CardHeader } from '../ListItemCardStyles'
 import { RouterTextLink } from '../TextLink'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
@@ -117,13 +116,11 @@ export function PoolCard({
             {name}
           </Text>
         </Box>
-        <Eththumbnail show={poolId?.startsWith('0x')}>
-          {iconUri ? (
-            <Box as="img" src={iconUri} alt="" height={38} width={38} borderRadius="4px" />
-          ) : (
-            <Thumbnail type="pool" label="LP" size="small" />
-          )}
-        </Eththumbnail>
+        {iconUri ? (
+          <Box as="img" src={iconUri} alt="" height={38} width={38} borderRadius="4px" />
+        ) : (
+          <Thumbnail type="pool" label="LP" size="small" />
+        )}
       </CardHeader>
       <Divider />
       <Box display="flex" justifyContent="space-between" alignItems="center" marginY="8px">

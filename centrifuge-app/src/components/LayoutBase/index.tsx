@@ -32,7 +32,7 @@ export function LayoutBase(): JSX.Element {
       </WalletContainer>
       <Inner>
         <LogoContainer>
-          <LogoLink></LogoLink>
+          <LogoLink />
         </LogoContainer>
         <ToolbarContainer as="aside">
           <Menu />
