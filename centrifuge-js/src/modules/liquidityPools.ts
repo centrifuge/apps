@@ -5,7 +5,7 @@ import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
 import set from 'lodash/set'
-import { combineLatestWith, firstValueFrom, from, map, of, startWith, switchMap } from 'rxjs'
+import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { CurrencyBalance, TokenBalance } from '../utils/BN'
@@ -73,9 +73,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   function centrifugeRouter(chainId: number) {
     const centrifugeRouter = getCentrifugeRouterAddress(chainId)
     const getEstimate = from(contract(centrifugeRouter, ABI.CentrifugeRouter).estimate([0]))
-    return from(getEstimate).pipe(
-      switchMap((estimate) => {
-        return of({ estimate, centrifugeRouter })
+    return getEstimate.pipe(
+      map((estimate) => {
+        return { estimate, centrifugeRouter }
       })
     )
   }

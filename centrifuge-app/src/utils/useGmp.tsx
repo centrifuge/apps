@@ -2,7 +2,6 @@ import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { IconExternalLink, InlineFeedback, Shelf, Text } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
-import { catchError, from, interval, map, of, switchMap, tap } from 'rxjs'
 import { useDebugFlags } from '../components/DebugFlags'
 
 export type Gmp = {
@@ -38,60 +37,48 @@ export function useGmp() {
     setGmp({ txHash, gasPaid: undefined, executed: undefined, poolId, trancheId })
   }
 
-  const fetchData = () =>
-    from(
-      fetch(axelarApiUrl, {
+  async function fetchData() {
+    try {
+      const response = await fetch(axelarApiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          txHash: gmp?.txHash,
-        }),
+        body: JSON.stringify({ txHash: gmp?.txHash }),
       })
-    ).pipe(
-      switchMap((res) => res.json()),
-      map((data) => data.data),
-      catchError((error) => {
-        console.error('Error fetching data:', error)
-        return of([])
-      })
-    )
+      const result = await response.json()
+      return result.data
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      return []
+    }
+  }
 
   useQuery(
     ['gmp'],
-    () => {
-      return new Promise((resolve) => {
-        const subscription = interval(5000)
-          .pipe(
-            switchMap(() => fetchData()),
-            tap((data) => {
-              if (!gmp) {
-                throw new Error('No transaction hash found')
-              }
-              if (data.length === 0) {
-                resolve(null)
-                return subscription.unsubscribe()
-              }
-              if (data.length > 0) {
-                const gasPaid = data[0].gas_status === 'gas_paid'
-                const executed = data[0].status === 'executed'
-                const updatedGmp = { ...gmp, txHash: gmp.txHash, gasPaid, executed }
-                if (updatedGmp.gasPaid !== gmp.gasPaid || updatedGmp.executed !== gmp.executed) {
-                  setGmp(updatedGmp)
-                }
-                if (executed) {
-                  setGmp(null)
-                  subscription.unsubscribe()
-                  resolve(data)
-                }
-              }
-            })
-          )
-          .subscribe()
-      })
+    async () => {
+      if (!gmp) throw new Error('No transaction hash found')
+
+      const data = await fetchData()
+
+      if (data.length === 0) return null
+
+      const gasPaid = data[0].gas_status === 'gas_paid'
+      const executed = data[0].status === 'executed'
+      const updatedGmp = { ...gmp, txHash: gmp.txHash, gasPaid, executed }
+
+      if (updatedGmp.gasPaid !== gmp.gasPaid || updatedGmp.executed !== gmp.executed) {
+        setGmp(updatedGmp)
+      }
+
+      if (executed) {
+        setGmp(null)
+      }
+
+      return data
     },
     {
       enabled: !!gmp && !isEvmOnSubstrate && showGmp,
       refetchInterval: 5000,
+      refetchOnWindowFocus: true,
     }
   )
 
