@@ -436,7 +436,9 @@ function Mux({
                           })),
                         ]}
                         value={index.toString()}
-                        onChange={(event) => setSelectedAddressIndex(currencyKey, parseInt(event.target.value))}
+                        onChange={(event) => {
+                          setSelectedAddressIndex(currencyKey, parseInt(event.target.value))
+                        }}
                         small
                       />
                     </Flex>
@@ -524,6 +526,19 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
 
   const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
 
+  React.useEffect(() => {
+    if (withdrawAddresses.length > 0 && sortedBalances.length > 0) {
+      const initialSelectedAddresses: Record<string, number> = {}
+      sortedBalances.forEach((balance) => {
+        const currencyKey = currencyToString(balance.currency.key)
+        if (!(currencyKey in initialSelectedAddresses)) {
+          initialSelectedAddresses[currencyKey] = 0
+        }
+      })
+      setSelectedAddressIndexByCurrency(initialSelectedAddresses)
+    }
+  }, [withdrawAddresses])
+
   return {
     render: () => (
       <Mux
@@ -540,8 +555,9 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
         amount={amount}
       />
     ),
-    isValid: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
-      return source === 'reserve' ? amount.lte(totalAvailable) && !!values.withdraw : true
+    isValid: (_: { values: Pick<FinanceValues, 'withdraw'> }) => {
+      const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
+      return source === 'reserve' ? amount.lte(totalAvailable) && !!withdrawalAddresses.length : true
     },
     getBatch: () => {
       return combineLatest(
