@@ -330,6 +330,14 @@ export const tooltipText = {
     label: 'Linear accrual',
     body: 'If enabled, the price of the asset is updated continuously based on linear accrual from the latest known market price to the value at maturity.',
   },
+  unrealizedPL: {
+    label: 'Unrealized P&L',
+    body: 'Unrealized profit / loss from current holdings (based on FiFo-weighted sales at the current token price)',
+  },
+  realizedPL: {
+    label: 'Realized P&L',
+    body: 'Realized profit / loss from executed redemptions',
+  },
 }
 
 export type TooltipsProps = {
