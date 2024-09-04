@@ -104,6 +104,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
 
   React.useEffect(() => {
     financeForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source])
 
   const financeFormRef = React.useRef<HTMLFormElement>(null)

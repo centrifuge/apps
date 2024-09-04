@@ -123,6 +123,7 @@ export function useGmp() {
         return null
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [gmp, showGmp]
   )
 
