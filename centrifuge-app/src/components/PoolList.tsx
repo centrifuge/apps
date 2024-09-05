@@ -95,7 +95,7 @@ export function PoolList() {
         <>
           <Text
             style={{ cursor: 'pointer', marginBottom: 12 }}
-            color="textDisabled"
+            color="textSecondary"
             onClick={() => setShowArchived((show) => !show)}
             variant="body2"
           >
