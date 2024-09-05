@@ -124,6 +124,8 @@ const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
 
 const alchemyKey = import.meta.env.REACT_APP_ALCHEMY_KEY
 const onfinalityKey = import.meta.env.REACT_APP_ONFINALITY_KEY
+const tenderlyKey = import.meta.env.REACT_APP_TENDERLY_KEY
+
 export const ethConfig = {
   rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 1,
@@ -157,6 +159,7 @@ export const evmChains: EvmChains = {
     },
     blockExplorerUrl: 'https://etherscan.io/',
     urls: [
+      `https://mainnet.gateway.tenderly.co/${tenderlyKey}`,
       `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
       `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
     ],
