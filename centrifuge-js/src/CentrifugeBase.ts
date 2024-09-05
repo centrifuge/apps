@@ -1,6 +1,6 @@
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
-import { SignedBlock } from '@polkadot/types/interfaces'
+import { EventRecord, SignedBlock } from '@polkadot/types/interfaces'
 import { DefinitionRpc, DefinitionsCall, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
@@ -17,6 +17,7 @@ import {
   firstValueFrom,
   from,
   map,
+  mergeAll,
   mergeWith,
   of,
   share,
@@ -673,15 +674,12 @@ export class CentrifugeBase {
 
   async getTxCompletedEvents() {
     const parachainUrl = await this.getCachedParachainUrl()
-    if (!txCompletedEvents[parachainUrl]) {
-      txCompletedEvents[parachainUrl] = new Subject<Events>()
-    }
-    return txCompletedEvents[parachainUrl]
+    return txCompletedEvents[parachainUrl] || (txCompletedEvents[parachainUrl] = new Subject<EventRecord[]>())
   }
 
   getEvents() {
     return this.getBlockEvents().pipe(
-      mergeWith(from(this.getTxCompletedEvents())),
+      mergeWith(from(this.getTxCompletedEvents()).pipe(mergeAll())),
       combineLatestWith(this.getApi()),
       map(([events, api]) => ({ events, api }))
     )
