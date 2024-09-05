@@ -44,7 +44,7 @@ export function useEvmTransaction<T extends Array<any>>(
         transaction(args, txOptions).pipe(
           tap((result) => {
             if (!gmpHash && gmpOptions) {
-              setGmpHash(result.hash, gmpOptions.poolId, gmpOptions.trancheId)
+              setGmpHash(result.hash, gmpOptions.poolId, gmpOptions.trancheId, selectedAddress!)
             }
             updateTransaction(id, { status: 'pending', hash: result.hash })
           })

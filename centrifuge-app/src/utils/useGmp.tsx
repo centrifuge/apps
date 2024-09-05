@@ -1,48 +1,56 @@
 import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { IconExternalLink, InlineFeedback, Shelf, Text } from '@centrifuge/fabric'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useQuery } from 'react-query'
 import { useDebugFlags } from '../components/DebugFlags'
 
 export type Gmp = {
   txHash: string
-  gasPaid: boolean | undefined
-  executed: boolean | undefined
   poolId: string
   trancheId: string
+  address: string
 } | null
 
 export function useGmp() {
   const { showGmp } = useDebugFlags()
-  const { isEvmOnSubstrate } = useWallet()
+  const {
+    isEvmOnSubstrate,
+    evm: { selectedAddress },
+  } = useWallet()
   const centrifuge = useCentrifuge()
   const isDemo = centrifuge.config.centrifugeWsUrl.includes('k-f.dev')
   const axelarApiUrl = `https://${isDemo ? 'testnet' : ''}.api.axelarscan.io/gmp/searchGMP`
   const axelarScanUrl = `https://${isDemo ? 'testnet' : ''}.axelarscan.io/gmp/`
 
-  const [gmp, setGmp] = useState<Gmp>(() => {
-    const storedGmp = sessionStorage.getItem('gmp')
-    return storedGmp ? JSON.parse(storedGmp) : null
-  })
+  const [gmp, setGmp] = React.useState<Gmp | null>(null)
 
-  useEffect(() => {
-    if (gmp) {
-      sessionStorage.setItem('gmp', JSON.stringify(gmp))
-    } else {
-      sessionStorage.removeItem('gmp')
+  const setGmpHash = (txHash: string, poolId: string, trancheId: string, address: string) => {
+    const gmp = { txHash, poolId, trancheId, address }
+    sessionStorage.setItem('gmp', JSON.stringify(gmp))
+    setGmp(gmp)
+  }
+
+  React.useEffect(() => {
+    if (!gmp) {
+      const storedGmp = sessionStorage.getItem('gmp')
+      if (storedGmp) {
+        setGmp(JSON.parse(storedGmp))
+      }
+    }
+
+    if (executed) {
+      return () => {
+        sessionStorage.removeItem('gmp')
+      }
     }
   }, [gmp])
 
-  const setGmpHash = (txHash: string, poolId: string, trancheId: string) => {
-    setGmp({ txHash, gasPaid: undefined, executed: undefined, poolId, trancheId })
-  }
-
-  async function fetchData() {
+  async function fetchData(txHash: string) {
     try {
       const response = await fetch(axelarApiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ txHash: gmp?.txHash }),
+        body: JSON.stringify({ txHash }),
       })
       const result = await response.json()
       return result.data
@@ -52,27 +60,11 @@ export function useGmp() {
     }
   }
 
-  useQuery(
-    ['gmp'],
+  const { data } = useQuery(
+    ['gmp', gmp?.txHash],
     async () => {
-      if (!gmp) throw new Error('No transaction hash found')
-
-      const data = await fetchData()
-
-      if (data.length === 0) return null
-
-      const gasPaid = data[0].gas_status === 'gas_paid'
-      const executed = data[0].status === 'executed'
-      const updatedGmp = { ...gmp, txHash: gmp.txHash, gasPaid, executed }
-
-      if (updatedGmp.gasPaid !== gmp.gasPaid || updatedGmp.executed !== gmp.executed) {
-        setGmp(updatedGmp)
-      }
-
-      if (executed) {
-        setGmp(null)
-      }
-
+      if (!gmp?.txHash) throw new Error('No transaction hash found')
+      const data = await fetchData(gmp.txHash)
       return data
     },
     {
@@ -82,15 +74,18 @@ export function useGmp() {
     }
   )
 
+  const gasPaid = !!data?.[0]?.gas_paid
+  const executed = !!data?.[0]?.executed
+
   const render = React.useCallback(
     (poolId: string, trancheId: string) => {
-      if (gmp && showGmp && gmp.poolId === poolId && gmp.trancheId === trancheId) {
+      if (gmp && showGmp && gmp.poolId === poolId && gmp.trancheId === trancheId && gmp.address === selectedAddress) {
         return (
-          <Shelf p={1} backgroundColor="statusWarningBg" borderRadius={1} gap={1} alignItems="center">
+          <Shelf p={1} mb={2} backgroundColor="statusWarningBg" borderRadius={1} gap={1} alignItems="center">
             <InlineFeedback>
-              {!gmp.executed ? (
+              {!executed ? (
                 <Shelf gap={1}>
-                  <Text variant="body2">{gmp.gasPaid ? 'Gas paid, finalizing' : 'Awaiting gas payment'} </Text>
+                  <Text variant="body2">{gasPaid ? 'Gas paid, finalizing' : 'Awaiting gas payment'} </Text>
                   <Shelf
                     as="a"
                     style={{ color: 'inherit', textDecoration: 'underline' }}
@@ -124,7 +119,7 @@ export function useGmp() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [gmp, showGmp]
+    [gasPaid, executed]
   )
 
   return { setGmpHash, render, gmpHash: gmp?.txHash }
