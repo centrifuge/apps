@@ -1,37 +1,37 @@
-import { black, blackScale, centrifugeBlue, gold, grayScale, yellowScale } from './colors'
+import { black, blackScale, blueScale, centrifugeBlue, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
-const statusInfo = '#1253ff'
+const statusInfo = blueScale[500]
 const statusOk = '#519b10'
 const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
 const statusDefaultBg = grayScale[300]
-const statusInfoBg = grayScale[300]
+const statusInfoBg = blueScale[50]
 const statusOkBg = '#f1f7ec'
 const statusWarningBg = yellowScale[50]
 const statusCriticalBg = '#fcf0ee'
 const statusPromoteBg = '#f8107114'
 
 const colors = {
-  textPrimary: grayScale[900],
-  textSecondary: grayScale[800],
-  textDisabled: grayScale[500],
+  textPrimary: grayScale[800],
+  textSecondary: grayScale[500],
+  textDisabled: grayScale[300],
   textInverted: 'white',
   textGold: gold,
 
   backgroundPrimary: 'white',
-  backgroundSecondary: grayScale[100],
-  backgroundTertiary: grayScale[50],
-  backgroundAccentPrimary: '#dbe5ff',
-  backgroundAccentSecondary: '#e9eff2',
+  backgroundSecondary: grayScale[50],
+  backgroundTertiary: grayScale[100],
+  backgroundAccentPrimary: blueScale[50],
+  backgroundAccentSecondary: blueScale[100],
   backgroundPage: 'white',
   backgroundInput: 'white',
   backgroundThumbnail: grayScale[500],
-  backgroundInverted: grayScale[900],
+  backgroundInverted: grayScale[800],
 
-  borderPrimary: grayScale[300],
+  borderPrimary: grayScale[100],
   borderSecondary: grayScale[300],
 
   statusDefault,
@@ -50,7 +50,7 @@ const colors = {
   backgroundButtonPrimary: gold,
   backgroundButtonPrimaryFocus: gold,
   backgroundButtonPrimaryHover: gold,
-  backgroundButtonPrimaryPressed: yellowScale[500],
+  backgroundButtonPrimaryPressed: yellowScale[800],
   backgroundButtonPrimaryDisabled: grayScale[300],
   textButtonPrimary: black,
   textButtonPrimaryFocus: black,
@@ -88,7 +88,7 @@ const colors = {
   backgroundButtonTertiaryDisabled: 'transparent',
   textButtonTertiary: centrifugeBlue,
   textButtonTertiaryFocus: centrifugeBlue,
-  textButtonTertiaryHover: grayScale[900],
+  textButtonTertiaryHover: grayScale[800],
   textButtonTertiaryPressed: centrifugeBlue,
   textButtonTertiaryDisabled: grayScale[500],
   borderButtonTertiary: 'transparent',
