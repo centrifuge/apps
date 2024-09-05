@@ -163,6 +163,7 @@ export const evmChains: EvmChains = {
       `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
       `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
     ],
+    network: 'mainnet',
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
@@ -174,6 +175,7 @@ export const evmChains: EvmChains = {
       `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`,
       `https://eth-sepolia.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
     ],
+    network: 'sepolia',
     iconUrl: sepoliaLogo,
     isTestnet: true,
   },
@@ -183,6 +185,7 @@ export const evmChains: EvmChains = {
     blockExplorerUrl: 'https://basescan.org/',
     urls: ['https://mainnet.base.org'],
     iconUrl: baseLogo,
+    network: 'base-mainnet',
     isTestnet: false,
   },
   84532: {
@@ -191,6 +194,7 @@ export const evmChains: EvmChains = {
     blockExplorerUrl: 'https://sepolia.basescan.org/',
     urls: [`https://sepolia.base.org`],
     iconUrl: baseLogo,
+    network: 'base-sepolia',
     isTestnet: true,
   },
   42161: {
@@ -203,6 +207,7 @@ export const evmChains: EvmChains = {
     blockExplorerUrl: 'https://arbiscan.io/',
     urls: ['https://arb1.arbitrum.io/rpc'],
     iconUrl: arbitrumLogo,
+    network: 'arbitrum-mainnet',
     isTestnet: false,
   },
   42220: {
@@ -216,6 +221,7 @@ export const evmChains: EvmChains = {
     urls: ['https://forno.celo.org'],
     iconUrl: celoLogo,
     isTestnet: false,
+    network: 'celo-mainnet',
   },
   44787: {
     name: 'Celo Alfajores',
@@ -228,6 +234,7 @@ export const evmChains: EvmChains = {
     urls: ['https://alfajores-forno.celo-testnet.org'],
     iconUrl: celoLogo,
     isTestnet: true,
+    network: 'celo-alfajores',
   },
 }
 

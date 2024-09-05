@@ -7,6 +7,7 @@ type BasicChainInformation = {
 }
 
 type ExtendedChainInformation = BasicChainInformation & {
+  network: string
   name: string
   nativeCurrency: AddEthereumChainParameter['nativeCurrency']
   blockExplorerUrl: string
