@@ -36,6 +36,7 @@ type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
   originationDateSortKey: string
   status: 'Created' | 'Active' | 'Closed' | ''
+  maturityDate: string | null
 }
 
 type Props = {
@@ -96,6 +97,24 @@ export function LoanList({ loans }: Props) {
       }
     }) || []
 
+  const rows: Row[] = filters.data.map((loan) => ({
+    nftIdSortKey: loan.asset.nftId,
+    idSortKey: parseInt(loan.id, 10),
+    outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
+    originationDateSortKey:
+      loan.status === 'Active' &&
+      loan?.originationDate &&
+      'interestRate' in loan.pricing &&
+      !loan?.pricing.interestRate?.isZero() &&
+      !loan?.totalBorrowed?.isZero()
+        ? loan.originationDate
+        : '',
+    maturityDate: loan.pricing.maturityDate,
+    ...loan,
+  }))
+
+  const hasMaturityDate = rows.some((loan) => loan.maturityDate)
+
   const columns = [
     {
       align: 'left',
@@ -121,6 +140,23 @@ export function LoanList({ loans }: Props) {
             sortKey: 'originationDateSortKey',
           },
         ]),
+    ...(hasMaturityDate
+      ? [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Maturity date" />,
+            cell: (l: Row) => {
+              if (l.poolId.startsWith('0x') && l.id !== '0' && l.maturityDate) {
+                return formatDate(l.maturityDate)
+              }
+              return l?.maturityDate && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
+                ? formatDate(l.maturityDate)
+                : '-'
+            },
+            sortKey: 'maturityDate',
+          },
+        ]
+      : []),
     {
       align: 'right',
       header: <SortableTableHeader label="Amount" />,
@@ -146,21 +182,6 @@ export function LoanList({ loans }: Props) {
       width: '52px',
     },
   ].filter(Boolean) as Column[]
-
-  const rows: Row[] = filters.data.map((loan) => ({
-    nftIdSortKey: loan.asset.nftId,
-    idSortKey: parseInt(loan.id, 10),
-    outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
-    originationDateSortKey:
-      loan.status === 'Active' &&
-      loan?.originationDate &&
-      'interestRate' in loan.pricing &&
-      !loan?.pricing.interestRate?.isZero() &&
-      !loan?.totalBorrowed?.isZero()
-        ? loan.originationDate
-        : '',
-    ...loan,
-  }))
 
   const pinnedData: Row[] = [
     {
@@ -198,6 +219,7 @@ export function LoanList({ loans }: Props) {
               ? loan.originationDate
               : '',
           ...loan,
+          maturityDate: loan.pricing.maturityDate,
         }
       }),
   ]
@@ -216,6 +238,7 @@ export function LoanList({ loans }: Props) {
               pageSize={20}
               page={pagination.page}
               pinnedData={pinnedData}
+              defaultSortKey="maturityDate"
             />
           </Box>
         </LoadBoundary>

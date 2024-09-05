@@ -8,4 +8,9 @@ export const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   width: 100%;
   grid-template-columns: ${({ stacked, theme }) =>
     stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr ${theme.sizes.iconSmall}px`};
+  color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
+  background-color: transparent;
+  &:hover {
+    color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
+  }
 `

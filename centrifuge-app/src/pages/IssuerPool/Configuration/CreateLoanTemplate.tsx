@@ -6,7 +6,6 @@ import * as React from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { LoanTemplate } from '../../../types'
@@ -112,11 +111,7 @@ const initialSchemaJSON = `{
 }`
 
 export function IssuerPoolCreateLoanTemplatePage() {
-  return (
-    <LayoutBase>
-      <CreateLoanTemplate />
-    </LayoutBase>
-  )
+  return <CreateLoanTemplate />
 }
 
 export function CreateLoanTemplate() {

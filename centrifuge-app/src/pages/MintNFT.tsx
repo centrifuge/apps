@@ -5,7 +5,6 @@ import * as React from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../components/ButtonGroup'
-import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { RouterLinkButton } from '../components/RouterLinkButton'
@@ -34,11 +33,7 @@ const ALLOWED_TYPES = [
 const ACCEPT_STRING = ALLOWED_TYPES.join(',')
 
 export default function MintNFTPage() {
-  return (
-    <LayoutBase>
-      <MintNFT />
-    </LayoutBase>
-  )
+  return <MintNFT />
 }
 
 function MintNFT() {

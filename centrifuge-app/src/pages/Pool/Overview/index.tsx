@@ -7,7 +7,6 @@ import styled, { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LayoutSection } from '../../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { Cashflows } from '../../../components/PoolOverview/Cashflows'
@@ -43,19 +42,6 @@ export type Token = {
   yield30DaysAnnualized?: string | null
 }
 
-const FullHeightLayoutBase = styled(LayoutBase)`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-`
-
-const FullHeightStack = styled(Stack)`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`
-
 const FullHeightLayoutSection = styled(LayoutSection)`
   flex: 1;
   display: flex;
@@ -64,14 +50,12 @@ const FullHeightLayoutSection = styled(LayoutSection)`
 
 export function PoolDetailOverviewTab() {
   return (
-    <FullHeightLayoutBase>
-      <FullHeightStack>
-        <PoolDetailHeader />
-        <LoadBoundary>
-          <PoolDetailOverview />
-        </LoadBoundary>
-      </FullHeightStack>
-    </FullHeightLayoutBase>
+    <>
+      <PoolDetailHeader />
+      <LoadBoundary>
+        <PoolDetailOverview />
+      </LoadBoundary>
+    </>
   )
 }
 

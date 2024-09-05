@@ -4,7 +4,6 @@ import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'
 import { Identity } from '../components/Identity'
-import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { AnchorPillButton } from '../components/PillButton'
@@ -16,11 +15,7 @@ import { useCentNFT } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
 
 export default function NFTPage() {
-  return (
-    <LayoutBase>
-      <NFT />
-    </LayoutBase>
-  )
+  return <NFT />
 }
 
 function NFT() {

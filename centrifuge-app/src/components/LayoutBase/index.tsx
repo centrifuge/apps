@@ -1,18 +1,17 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Outlet } from 'react-router'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
-import { LoadBoundary } from '../LoadBoundary'
-import { LogoLink } from '../LogoLink'
+import { LogoLink } from '../LogoLink-deprecated'
 import { Menu } from '../Menu'
 import { BasePadding } from './BasePadding'
 import {
+  ContentWrapper,
   FooterContainer,
-  HeaderBackground,
   Inner,
   LogoContainer,
-  MainContainer,
   Root,
   ToolbarContainer,
   WalletContainer,
@@ -20,47 +19,33 @@ import {
   WalletPositioner,
 } from './styles'
 
-type LayoutBaseProps = {
-  children?: React.ReactNode
-  gap?: number | number[]
-}
-
-export function LayoutBase({ children, gap }: LayoutBaseProps) {
+export function LayoutBase(): JSX.Element {
   const isMedium = useIsAboveBreakpoint('M')
-
   return (
     <Root>
+      <WalletContainer>
+        <WalletPositioner>
+          <WalletInner>
+            <WalletMenu />
+          </WalletInner>
+        </WalletPositioner>
+      </WalletContainer>
       <Inner>
-        <HeaderBackground />
-
         <LogoContainer>
-          <LogoLink />
+          <LogoLink></LogoLink>
         </LogoContainer>
-
-        <WalletContainer px={[2, 2, 3, 3, 5]}>
-          <WalletPositioner>
-            <WalletInner minWidth={[200, 264]}>
-              <WalletMenu />
-            </WalletInner>
-          </WalletPositioner>
-        </WalletContainer>
-
         <ToolbarContainer as="aside">
           <Menu />
         </ToolbarContainer>
-
-        <LoadBoundary>
-          <MainContainer as="main" gap={gap}>
-            {children}
-          </MainContainer>
-        </LoadBoundary>
-
         {isMedium && (
           <FooterContainer>
             <Footer />
           </FooterContainer>
         )}
       </Inner>
+      <ContentWrapper>
+        <Outlet />
+      </ContentWrapper>
     </Root>
   )
 }

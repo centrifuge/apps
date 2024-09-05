@@ -1,7 +1,6 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Stack, Text } from '@centrifuge/fabric'
-import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
@@ -13,11 +12,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useTransactionsByAddress } from '../../utils/usePools'
 
 export default function PortfolioPage() {
-  return (
-    <LayoutBase gap={5}>
-      <Portfolio />
-    </LayoutBase>
-  )
+  return <Portfolio />
 }
 
 function Portfolio() {

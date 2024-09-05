@@ -2,18 +2,13 @@ import { computeMultisig } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Text, TextAreaInput } from '@centrifuge/fabric'
 import { useLocation } from 'react-router'
-import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { usePendingMultisigActions } from '../components/PendingMultisigs'
 import { truncate } from '../utils/web3'
 
 export default function MultisigApprovalPage() {
-  return (
-    <LayoutBase>
-      <MultisigApproval />
-    </LayoutBase>
-  )
+  return <MultisigApproval />
 }
 
 function MultisigApproval() {

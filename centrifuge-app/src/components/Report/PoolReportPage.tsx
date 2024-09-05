@@ -3,7 +3,6 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { ReportComponent } from '.'
 import { usePool } from '../../utils/usePools'
-import { LayoutBase } from '../LayoutBase'
 import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { ReportContextProvider } from './ReportContext'
@@ -17,15 +16,13 @@ export function PoolReportPage({ header }: { header: React.ReactNode }) {
 
   return (
     <ReportContextProvider>
-      <LayoutBase>
-        {header}
+      {header}
 
-        {pool && <ReportFilter pool={pool} />}
+      {pool && <ReportFilter pool={pool} />}
 
-        <LoadBoundary>
-          <PoolDetailReporting pool={pool} />
-        </LoadBoundary>
-      </LayoutBase>
+      <LoadBoundary>
+        <PoolDetailReporting pool={pool} />
+      </LoadBoundary>
     </ReportContextProvider>
   )
 }

@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { useParams } from 'react-router'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
@@ -9,12 +8,12 @@ import { LiquidityPools } from './LiquidityPools'
 
 export function IssuerPoolInvestorsPage() {
   return (
-    <LayoutBase>
+    <>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolInvestors />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 

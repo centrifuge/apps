@@ -2,7 +2,6 @@ import { CurrencyBalance, addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
-import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -12,11 +11,7 @@ import { usePools } from '../../utils/usePools'
 import { useSubquery } from '../../utils/useSubquery'
 
 export default function PrimePage() {
-  return (
-    <LayoutBase gap={5}>
-      <Prime />
-    </LayoutBase>
-  )
+  return <Prime />
 }
 
 function Prime() {
