@@ -20,7 +20,7 @@ type Row = TableDataRow & {
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
     const today = new Date()
@@ -71,6 +71,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
           <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
         ),
         width: '200px',
+        isLabel: true,
       },
     ]
       .concat(
@@ -88,6 +89,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
             </Text>
           ),
           width: '170px',
+          isLabel: false,
         }))
       )
       .concat({
@@ -95,6 +97,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         header: '',
         cell: () => <span />,
         width: '1fr',
+        isLabel: false,
       })
   }, [poolStates])
 
@@ -238,6 +241,12 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assetValuationRecords, trancheRecords])
+
+  React.useEffect(() => {
+    if (poolStates?.length) {
+      setReportData(poolStates)
+    }
+  }, [poolStates])
 
   if (!poolStates) {
     return <Spinner mt={2} />

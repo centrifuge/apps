@@ -13,6 +13,7 @@ import {
   usePagination,
 } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useTheme } from 'styled-components'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -43,6 +44,7 @@ type Row = {
 
 export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId }: TransactionsProps) {
   const explorer = useGetExplorerUrl()
+  const theme = useTheme()
   const columns = [
     {
       align: 'left',
@@ -206,7 +208,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
       </Stack>
     </PaginationProvider>
   ) : (
-    <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
+    <Shelf border={`1px solid ${theme.colors.backgroundTertiary}`} borderRadius="6px" justifyContent="center" p={2}>
       <Text color="textSecondary" variant="body2">
         No transactions displayed yet
       </Text>

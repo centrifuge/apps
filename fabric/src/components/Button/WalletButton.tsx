@@ -30,6 +30,12 @@ const StyledButton = styled.button`
   outline: 0;
   border-radius: 40px;
   white-space: nowrap;
+  & > span {
+    border-color: ${({ theme }) => theme.colors.backgroundPrimary};
+    :hover {
+      border-color: ${({ theme }) => theme.colors.backgroundPrimary};
+    }
+  }
 `
 
 const IdenticonWrapper = styled(Flex)({

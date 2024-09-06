@@ -29,7 +29,7 @@ export function Tabs({ selectedIndex, onChange, children }: TabsProps) {
   )
 }
 
-const StyledTabsItem = styled.button<{ $active?: boolean }>(
+const StyledTabsItem = styled.button<{ $active?: boolean; styleOverrides?: React.CSSProperties, showBorder?: boolean }>(
   {
     display: 'flex',
     alignItems: 'center',
@@ -43,34 +43,56 @@ const StyledTabsItem = styled.button<{ $active?: boolean }>(
     appearance: 'none',
     background: 'transparent',
   },
-  ({ $active, theme }) => {
+  ({ $active, theme, styleOverrides, showBorder }) => {
     return css({
       paddingTop: 1,
       paddingLeft: 2,
       paddingRight: 2,
       paddingBottom: 2,
-      color: 'textPrimary',
-      boxShadow: $active ? `inset 0 -2px 0 ${theme.colors.textGold}` : 'none',
+      color: $active ? 'textPrimary' : 'textSecondary',
+      boxShadow: $active ? `inset 0 -2px 0 ${theme.colors.textGold}` : showBorder ? `inset 0 -2px 0 ${theme.colors.textDisabled}` : 'none',
+      fontWeight: 400,
 
       '&:hover, &:active, &:focus-visible': {
         color: 'textGold',
       },
+      ...styleOverrides,
     })
   }
 )
 
-export type TabsItemProps = Omit<PropsOf<typeof StyledTabsItem>, '$active' | 'ariaLabel'>
-
+export type TabsItemProps = Omit<PropsOf<typeof StyledTabsItem>, '$active' | 'ariaLabel'> & {
+  styleOverrides?: React.CSSProperties
+  showBorder?: boolean
+}
 type TabsItemPrivateProps = TabsItemProps & {
   active?: boolean
   onClick?: () => void
   ariaLabel?: string
+  styleOverrides?: React.CSSProperties
+  showBorder?: boolean
 }
 
-export function TabsItem({ children, active, onClick, ariaLabel, ...rest }: TabsItemPrivateProps) {
+export function TabsItem({
+  children,
+  active,
+  onClick,
+  ariaLabel,
+  styleOverrides,
+  showBorder,
+  ...rest
+}: TabsItemPrivateProps) {
   return (
-    <StyledTabsItem onClick={onClick} $active={active} role="tab" aria-label={ariaLabel} {...rest}>
-      <Text variant="interactive1" color="inherit">
+    <StyledTabsItem
+      onClick={onClick}
+      $active={active}
+      role="tab"
+      aria-label={ariaLabel}
+      styleOverrides={styleOverrides}
+      showBorder={showBorder}
+      {...rest}
+    >
+      <Text variant="interactive1" color="inherit" fontWeight={400}>
         {children}
       </Text>
     </StyledTabsItem>

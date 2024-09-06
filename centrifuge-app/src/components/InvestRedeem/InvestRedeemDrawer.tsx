@@ -1,9 +1,14 @@
-import { Box, Drawer, Stack, Text } from '@centrifuge/fabric'
+import { DailyPoolState, Perquintill } from '@centrifuge/centrifuge-js'
+import { Box, Drawer, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LoadBoundary } from '../LoadBoundary'
 import { InvestRedeem } from './InvestRedeem'
+
+type DailyPoolStateProps = Pick<DailyPoolState, 'timestamp' | 'tranches'> & {
+  apy?: Perquintill | undefined
+}
 
 export function InvestRedeemDrawer({
   poolId,
@@ -18,34 +23,8 @@ export function InvestRedeemDrawer({
   trancheId: string
   defaultView?: 'invest' | 'redeem'
 }) {
-  return (
-    <Drawer isOpen={open} onClose={onClose}>
-      <LoadBoundary>
-        <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
-      </LoadBoundary>
-      <LoadBoundary>
-        <Stack gap={12}>
-          <Text variant="heading6" color="textPrimary" fontWeight={600}>
-            Price
-          </Text>
-          <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-            <TokenPriceChart poolId={poolId} trancheId={trancheId} />
-          </Box>
-        </Stack>
-      </LoadBoundary>
-    </Drawer>
-  )
-}
-
-const TokenPriceChart = React.memo(function TokenPriceChart({
-  poolId,
-  trancheId,
-}: {
-  poolId: string
-  trancheId: string
-}) {
   const [filter, setFilter] = React.useState<FilterOptions>('30days')
-  const pool = usePool(poolId)
+  const [index, setIndex] = React.useState(0)
 
   const dateFrom = React.useMemo(() => {
     if (filter === 'YTD') {
@@ -72,14 +51,79 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
 
   const { poolStates: dailyPoolStates } = useDailyPoolStates(poolId, new Date(dateFrom)) || {}
 
+  return (
+    <Drawer isOpen={open} onClose={onClose}>
+      <LoadBoundary>
+        <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
+      </LoadBoundary>
+      <LoadBoundary>
+        {dailyPoolStates?.length ? (
+          <Stack gap={12} borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="8px" p={2}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Text variant="heading6" color="textPrimary" fontWeight={600}>
+                Performance
+              </Text>
+              <Tabs selectedIndex={index} onChange={(index) => setIndex(index)}>
+                <TabsItem styleOverrides={{ padding: '4px' }} showBorder>
+                  Price
+                </TabsItem>
+                <TabsItem styleOverrides={{ padding: '4px' }} showBorder>
+                  APY
+                </TabsItem>
+              </Tabs>
+            </Box>
+
+            <TokenPriceChart
+              poolId={poolId}
+              trancheId={trancheId}
+              dailyPoolStates={dailyPoolStates}
+              filter={filter}
+              setFilter={setFilter}
+              index={index}
+            />
+          </Stack>
+        ) : null}
+      </LoadBoundary>
+    </Drawer>
+  )
+}
+
+const TokenPriceChart = React.memo(function TokenPriceChart({
+  poolId,
+  trancheId,
+  dailyPoolStates,
+  filter,
+  setFilter,
+  index,
+}: {
+  poolId: string
+  trancheId: string
+  dailyPoolStates: DailyPoolStateProps[]
+  filter: FilterOptions
+  setFilter: any
+  index: number
+}) {
+  const pool = usePool(poolId)
+
+  const apy = {
+    '30days': 'yield30DaysAnnualized',
+    '90days': 'yield90DaysAnnualized',
+    YTD: 'yieldYTD',
+  }
+
   const data = React.useMemo(() => {
     const tokenData =
-      dailyPoolStates?.map((state) => {
-        return { price: state.tranches[trancheId].price?.toFloat() || 0, day: new Date(state.timestamp) }
+      dailyPoolStates?.map((state: DailyPoolStateProps) => {
+        return {
+          price: state.tranches[trancheId].price?.toFloat() || 0,
+          day: new Date(state.timestamp),
+          apy: (state.tranches[trancheId] as any)[apy[filter]]?.toPercent().toNumber(),
+        }
       }) || []
     if (tokenData.length > 0) {
       tokenData.push({
         day: new Date(),
+        apy: null,
         price:
           pool?.tranches
             .find((tranche) => tranche.id === trancheId)
@@ -88,7 +132,9 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
       })
     }
     return tokenData
-  }, [dailyPoolStates, pool?.tranches, trancheId])
+  }, [dailyPoolStates, pool?.tranches, trancheId, filter])
+
+  if (!data.length) return
 
   return (
     <PriceChart
@@ -96,6 +142,7 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
       currency={pool.tranches.find((tranche) => tranche.id === trancheId)?.currency.displayName || ''}
       filter={filter}
       setFilter={setFilter}
+      isPrice={index === 0}
     />
   )
 })

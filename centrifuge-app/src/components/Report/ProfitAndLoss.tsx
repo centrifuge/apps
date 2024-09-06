@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -25,7 +25,7 @@ type Row = TableDataRow & {
 }
 
 export function ProfitAndLoss({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
@@ -89,6 +89,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
           ),
         width: '240px',
+        isLabel: true,
       },
     ]
       .concat(
@@ -102,6 +103,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             </Text>
           ),
           width: '170px',
+          isLabel: false,
         }))
       )
       .concat({
@@ -109,6 +111,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         header: '',
         cell: () => <span />,
         width: '1fr',
+        isLabel: false,
       })
   }, [poolStates, groupBy])
 
@@ -333,6 +336,18 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profitAndLossRecords, feesRecords, totalProfitRecords])
+
+  React.useEffect(() => {
+    if (poolStates && Object.keys(poolStates).length > 0) {
+      const fullPoolStates: DailyPoolState[] = Object.values(poolStates).map((partialState) => {
+        return {
+          ...partialState,
+        } as DailyPoolState
+      })
+
+      setReportData(fullPoolStates)
+    }
+  }, [poolStates])
 
   if (!poolStates) {
     return <Spinner mt={2} />

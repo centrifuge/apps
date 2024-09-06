@@ -195,6 +195,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 type="submit"
                 loading={isInvesting}
                 loadingMessage={loadingMessage}
+                variant="secondary"
                 disabled={
                   state.isPoolBusy || (state.poolCurrency?.symbol.toLowerCase().includes('lp') && hasPendingOrder)
                 }
