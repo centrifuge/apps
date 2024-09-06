@@ -78,7 +78,7 @@ const TrancheTokenCard = ({
   }
 
   return (
-    <Box p={2} backgroundColor="backgroundButtonSecondary" borderRadius="card" width="100%" overflow="auto">
+    <Box p={2} backgroundColor="white" borderRadius="card" width="100%" overflow="auto">
       <Stack height="100%" justifyContent="space-between" gap={2}>
         <Text fontSize="12px" variant="body3">
           {trancheToken.name} ({trancheToken.symbol})

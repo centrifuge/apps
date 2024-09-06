@@ -12,7 +12,7 @@ export type CardProps = Props &
 
 export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }) =>
   css({
-    bg: backgroundColor ?? 'backgroundPage',
+    bg: backgroundColor ?? 'white',
     borderRadius: 'card',
     borderWidth: variant === 'default' && !backgroundColor ? 1 : 0,
     borderStyle: 'solid',

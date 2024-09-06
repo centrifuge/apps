@@ -122,10 +122,7 @@ export function KeyMetrics({ pool, loan }: Props) {
           },
         ]
       : []),
-    ...(loan.pricing.maturityDate &&
-    'valuationMethod' in loan.pricing &&
-    loan.pricing.valuationMethod === 'oracle' &&
-    loan.pricing.notional.gtn(0)
+    ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
       ? [
           sumRealizedProfitFifo
             ? {

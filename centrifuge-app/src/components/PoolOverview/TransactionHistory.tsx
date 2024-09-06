@@ -21,6 +21,7 @@ type Row = {
   toAssetName?: string
   amount: CurrencyBalance | undefined
   hash: string
+  netFlow?: 'positive' | 'negative' | 'neutral'
 }
 
 const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
@@ -60,10 +61,17 @@ export const TransactionHistoryTable = ({
 }) => {
   const basePath = useBasePath('/pools')
   const getLabelAndAmount = (transaction: AssetTransaction) => {
+    const netFlow = activeAssetId
+      ? activeAssetId === transaction.toAsset?.id.split('-')[1]
+        ? 'positive'
+        : 'negative'
+      : 'neutral'
+
     if (transaction.type === 'CASH_TRANSFER') {
       return {
         label: 'Cash transfer',
         amount: transaction.amount,
+        netFlow,
       }
     }
 
@@ -71,6 +79,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Deposit from investments',
         amount: transaction.amount,
+        netFlow: 'positive',
       }
     }
 
@@ -78,6 +87,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Withdrawal for redemptions',
         amount: transaction.amount,
+        netFlow: 'negative',
       }
     }
 
@@ -85,6 +95,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Withdrawal for fees',
         amount: transaction.amount,
+        netFlow: 'negative',
       }
     }
 
@@ -92,6 +103,23 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Purchase',
         amount: transaction.amount,
+        netFlow,
+      }
+    }
+
+    if (transaction.type === 'INCREASE_DEBT') {
+      return {
+        label: 'Correction ↑',
+        amount: transaction.amount,
+        netFlow: 'positive',
+      }
+    }
+
+    if (transaction.type === 'DECREASE_DEBT') {
+      return {
+        label: 'Correction ↓',
+        amount: transaction.amount,
+        netFlow: 'negative',
       }
     }
 
@@ -107,6 +135,7 @@ export const TransactionHistoryTable = ({
           new BN(transaction.principalAmount || 0).add(new BN(transaction.interestAmount || 0)),
           transaction.principalAmount!.decimals
         ),
+        netFlow,
       }
     }
 
@@ -118,12 +147,14 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Interest payment',
         amount: transaction.interestAmount,
+        netFlow,
       }
     }
 
     return {
       label: 'Principal payment',
       amount: transaction.principalAmount,
+      netFlow,
     }
   }
 
@@ -167,9 +198,10 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { label, amount } = getLabelAndAmount(transaction)
+      const { label, amount, netFlow } = getLabelAndAmount(transaction)
       return {
         activeAssetId,
+        netFlow,
         type: label,
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
@@ -235,9 +267,9 @@ export const TransactionHistoryTable = ({
     {
       align: 'right',
       header: <SortableTableHeader label="Amount" />,
-      cell: ({ amount }: Row) => (
+      cell: ({ amount, netFlow }: Row) => (
         <Text as="span" variant="body3">
-          {amount ? formatBalance(amount, 'USD', 2, 2) : ''}
+          {amount ? `${activeAssetId && netFlow === 'negative' ? '-' : ''}${formatBalance(amount, 'USD', 2, 2)}` : ''}
         </Text>
       ),
       sortKey: 'amount',

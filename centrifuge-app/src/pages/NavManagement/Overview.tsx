@@ -1,5 +1,4 @@
 import { useParams } from 'react-router'
-import { LayoutBase } from '../../components/LayoutBase'
 import { PageSummary } from '../../components/PageSummary'
 import { Tooltips } from '../../components/Tooltips'
 import { formatBalance } from '../../utils/formatting'
@@ -16,7 +15,7 @@ export default function NavManagementOverviewPage() {
   const { pid } = useParams<{ pid: string }>()
   if (!pid) throw new Error('Pool not found')
   return (
-    <LayoutBase>
+    <>
       <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
         <Stack as="header" gap={1} ml={1}>
           <Text as="h1" variant="heading1">
@@ -29,7 +28,7 @@ export default function NavManagementOverviewPage() {
         <NavOverviewCard poolId={pid} />
       </LayoutSection>
       <NavManagementAssetTable key={pid} poolId={pid} />
-    </LayoutBase>
+    </>
   )
 }
 

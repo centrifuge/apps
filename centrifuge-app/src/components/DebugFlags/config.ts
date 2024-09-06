@@ -38,7 +38,6 @@ export type Key =
   | 'persistDebugFlags'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
-  | 'alternativeTheme'
   | 'editPoolConfig'
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
@@ -49,6 +48,7 @@ export type Key =
   | 'poolCreationType'
   | 'showTokenYields'
   | 'showOracleTx'
+  | 'showGmp'
 
 export const flagsConfig = {
   address: {
@@ -56,11 +56,6 @@ export const flagsConfig = {
     type: 'text',
   },
   allowInvestBelowMin: {
-    default: false,
-    type: 'checkbox',
-  },
-  alternativeTheme: {
-    alwaysShow: true,
     default: false,
     type: 'checkbox',
   },
@@ -132,6 +127,10 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showOracleTx: {
+    default: false,
+    type: 'checkbox',
+  },
+  showGmp: {
     default: false,
     type: 'checkbox',
   },

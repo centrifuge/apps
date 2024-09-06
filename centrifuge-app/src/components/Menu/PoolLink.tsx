@@ -14,6 +14,10 @@ const Root = styled(Text)`
   overflow: hidden;
   text-overflow: ellipsis;
   border-radius: ${({ theme }) => theme.radii.input}px;
+  color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
+  &:hover {
+    color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textGold)};
+  }
 `
 
 type PoolLinkProps = {
@@ -25,7 +29,6 @@ export function PoolLink({ pool, path = 'issuer' }: PoolLinkProps) {
   const match = useMatch(`/${path}/:pid/*`)
   const { data: metadata } = usePoolMetadata(pool)
   const to = `/${path}/${pool.id}`
-
   return (
     <Root
       forwardedAs={Link}

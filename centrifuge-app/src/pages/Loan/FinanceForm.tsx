@@ -323,7 +323,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                 loading={isFinanceLoading}
                 disabled={
                   !financeForm.values.principal ||
-                  !withdraw.isValid ||
+                  !withdraw.isValid(financeForm) ||
                   !poolFees.isValid(financeForm) ||
                   !financeForm.isValid ||
                   maxAvailable.eq(0)
@@ -339,7 +339,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   )
 }
 
-function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddress[] }) {
+function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: WithdrawAddress[]; poolId: string }) {
   const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
@@ -362,7 +362,15 @@ function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withdrawAddresses.length])
 
-  if (!withdrawAddresses.length) return null
+  if (!withdrawAddresses.length)
+    return (
+      <ErrorMessage type="warning" condition={!withdrawAddresses.length}>
+        <Stack gap={1}>
+          To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
+          <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+        </Stack>
+      </ErrorMessage>
+    )
 
   return (
     <Select
@@ -382,9 +390,11 @@ function Mux({
   withdrawAmounts,
   selectedAddressIndexByCurrency,
   setSelectedAddressIndex,
+  poolId,
 }: {
   amount: Decimal
   total: Decimal
+  poolId: string
   withdrawAmounts: WithdrawBucket[]
   selectedAddressIndexByCurrency: Record<string, number>
   setSelectedAddressIndex: (currency: string, index: number) => void
@@ -394,68 +404,76 @@ function Mux({
   const getIcon = useGetNetworkIcon()
   return (
     <Stack gap={1}>
-      <Text variant="body2">Transactions per network</Text>
-      <Grid columns={3} rowGap={1}>
-        <GridRow borderBottomColor="borderPrimary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
-          <Text variant="label2">Amount</Text>
-          <Text variant="label2">Address</Text>
-          <Text variant="label2">Network</Text>
-        </GridRow>
-        {!withdrawAmounts.length && (
-          <Text variant="body3" color="statusCritical">
-            No suitable withdraw addresses
-          </Text>
-        )}
-        {withdrawAmounts.map(({ currency, amount, addresses, currencyKey }) => {
-          const index = selectedAddressIndexByCurrency[currencyKey] ?? 0
-          const address = addresses.at(index >>> 0) // undefined when index is -1
-          return (
-            <GridRow>
-              <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
-              <Text variant="body3">
-                <Flex pr={1}>
-                  <SelectInner
-                    options={[
-                      { label: 'Ignore', value: '-1' },
-                      ...addresses.map((addr, index) => ({
-                        label: truncateAddress(utils.formatAddress(addr.address)),
-                        value: index.toString(),
-                      })),
-                    ]}
-                    value={index.toString()}
-                    onChange={(event) => setSelectedAddressIndex(currencyKey, parseInt(event.target.value))}
-                    small
-                  />
-                </Flex>
-              </Text>
-              <Text variant="body3">
-                {address && (
-                  <Shelf gap="4px">
-                    <Box
-                      as="img"
-                      src={
-                        typeof address.location !== 'string' && 'parachain' in address.location
-                          ? parachainIcons[address.location.parachain]
-                          : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
-                      }
-                      alt=""
-                      width="iconSmall"
-                      height="iconSmall"
-                      style={{ objectFit: 'contain' }}
-                      bleedY="4px"
-                    />
-                    {typeof address.location === 'string'
-                      ? getName(address.location as any)
-                      : 'parachain' in address.location
-                      ? parachainNames[address.location.parachain]
-                      : getName(address.location.evm)}
-                  </Shelf>
-                )}
-              </Text>
+      {!withdrawAmounts.length ? (
+        <ErrorMessage type="warning" condition={!withdrawAmounts.length}>
+          <Stack gap={1}>
+            To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
+            <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+          </Stack>
+        </ErrorMessage>
+      ) : (
+        <>
+          <Text variant="body2">Transactions per network</Text>
+          <Grid columns={3} rowGap={1}>
+            <GridRow borderBottomColor="borderPrimary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
+              <Text variant="label2">Amount</Text>
+              <Text variant="label2">Address</Text>
+              <Text variant="label2">Network</Text>
             </GridRow>
-          )
-        })}
-      </Grid>
+            {withdrawAmounts.map(({ currency, amount, addresses, currencyKey }) => {
+              const index = selectedAddressIndexByCurrency[currencyKey] ?? 0
+              const address = addresses.at(index >>> 0) // undefined when index is -1
+              return (
+                <GridRow>
+                  <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
+                  <Text variant="body3">
+                    <Flex pr={1}>
+                      <SelectInner
+                        options={[
+                          { label: 'Ignore', value: '-1' },
+                          ...addresses.map((addr, index) => ({
+                            label: truncateAddress(utils.formatAddress(addr.address)),
+                            value: index.toString(),
+                          })),
+                        ]}
+                        value={index.toString()}
+                        onChange={(event) => {
+                          setSelectedAddressIndex(currencyKey, parseInt(event.target.value))
+                        }}
+                        small
+                      />
+                    </Flex>
+                  </Text>
+                  <Text variant="body3">
+                    {address && (
+                      <Shelf gap="4px">
+                        <Box
+                          as="img"
+                          src={
+                            typeof address.location !== 'string' && 'parachain' in address.location
+                              ? parachainIcons[address.location.parachain]
+                              : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
+                          }
+                          alt=""
+                          width="iconSmall"
+                          height="iconSmall"
+                          style={{ objectFit: 'contain' }}
+                          bleedY="4px"
+                        />
+                        {typeof address.location === 'string'
+                          ? getName(address.location as any)
+                          : 'parachain' in address.location
+                          ? parachainNames[address.location.parachain]
+                          : getName(address.location.evm)}
+                      </Shelf>
+                    )}
+                  </Text>
+                </GridRow>
+              )
+            })}
+          </Grid>
+        </>
+      )}
     </Stack>
   )
 }
@@ -498,8 +516,10 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
 
   if (!isLocalAsset) {
     return {
-      render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} />,
-      isValid: true,
+      render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} poolId={poolId} />,
+      isValid: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
+        return source === 'reserve' ? !!values.withdraw : true
+      },
       getBatch: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
         if (!values.withdraw) return of([])
         return cent.pools
@@ -524,6 +544,7 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   return {
     render: () => (
       <Mux
+        poolId={poolId}
         withdrawAmounts={withdrawAmounts}
         selectedAddressIndexByCurrency={selectedAddressIndexByCurrency}
         setSelectedAddressIndex={(currencyKey, index) => {

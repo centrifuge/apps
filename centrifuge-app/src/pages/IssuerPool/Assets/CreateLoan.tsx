@@ -30,7 +30,6 @@ import * as React from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
@@ -45,11 +44,7 @@ import { validate } from '../../IssuerCreatePool/validate'
 import { PricingInput } from './PricingInput'
 
 export default function IssuerCreateLoanPage() {
-  return (
-    <LayoutBase>
-      <IssuerCreateLoan />
-    </LayoutBase>
-  )
+  return <IssuerCreateLoan />
 }
 
 export type CreateLoanFormValues = {
@@ -197,7 +192,7 @@ function IssuerCreateLoan() {
               wrapProxyCallsForAccount(api, api.tx.uniques.mint(collectionId, nftId, owner), account, 'PodOperation'),
               wrapProxyCallsForAccount(
                 api,
-                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, false),
                 account,
                 'PodOperation'
               ),
