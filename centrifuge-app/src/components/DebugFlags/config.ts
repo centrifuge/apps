@@ -48,6 +48,7 @@ export type Key =
   | 'poolCreationType'
   | 'showTokenYields'
   | 'showOracleTx'
+  | 'showGmp'
 
 export const flagsConfig = {
   address: {
@@ -126,6 +127,10 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showOracleTx: {
+    default: false,
+    type: 'checkbox',
+  },
+  showGmp: {
     default: false,
     type: 'checkbox',
   },
