@@ -161,10 +161,15 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    financeForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source])
+
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.principal || 0))
+  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.principal || 0), source)
 
   if (loan.status === 'Closed') {
     return null
@@ -455,7 +460,7 @@ function Mux({
   )
 }
 
-export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal) {
+export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal, source: string) {
   const pool = usePool(poolId)
   const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const access = usePoolAccess(poolId)

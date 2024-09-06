@@ -144,6 +144,11 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    repayForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destination])
+
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
