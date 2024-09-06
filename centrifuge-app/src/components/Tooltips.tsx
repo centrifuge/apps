@@ -3,9 +3,9 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
 
-const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
+function ValueLockedTooltipBody({ poolId }: { poolId?: string }) {
   const { pid: poolIdParam } = useParams<{ pid: string }>()
-  const pool = usePool(poolId || poolIdParam)
+  const pool = usePool(poolId || poolIdParam || '', false)
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
@@ -270,6 +270,10 @@ export const tooltipText = {
     label: 'Total pending fees',
     body: 'The total pending fees represent the sum of all added fees.',
   },
+  totalPaidFees: {
+    label: 'Total paid fees',
+    body: 'The total paid fees represent the sum of all paid fees since the inception of the fee system.',
+  },
   feeType: {
     label: 'Fee type',
     body: 'The protocol fee is mandatory and will be charged every epoch automatically. The fee amount is dependent on the asset class.',
@@ -310,6 +314,22 @@ export const tooltipText = {
     label: 'Token price',
     body: 'The token price is equal to the NAV divided by the outstanding supply of tokens.',
   },
+  additionalAmountInput: {
+    label: 'Additional amount',
+    body: 'This can be used to repay an additional amount beyond the outstanding principal and interest of the asset. This will lead to an increase in the NAV of the pool.',
+  },
+  repayFormAvailableBalance: {
+    label: 'Available balance',
+    body: 'Balance of the asset originator account on Centrifuge.',
+  },
+  repayFormAvailableBalanceUnlimited: {
+    label: 'Available balance',
+    body: 'Unlimited because this is a virtual accounting process.',
+  },
+  linearAccrual: {
+    label: 'Linear accrual',
+    body: 'If enabled, the price of the asset is updated continuously based on linear accrual from the latest known market price to the value at maturity.',
+  },
 }
 
 export type TooltipsProps = {
@@ -319,13 +339,7 @@ export type TooltipsProps = {
   props?: any
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export const Tooltips: React.FC<TooltipsProps> = ({
-  type,
-  label: labelOverride,
-  variant = 'primary',
-  props,
-  ...textProps
-}) => {
+export function Tooltips({ type, label: labelOverride, variant = 'primary', props, ...textProps }: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   const isPrimary = variant === 'primary'
   return (

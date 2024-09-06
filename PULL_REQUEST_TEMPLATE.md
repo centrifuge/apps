@@ -8,16 +8,13 @@ This pull request...
 
 <!-- This will link the pull request to a Github issue. Remove if there is no corresponding Github issue. -->
 
-Closes #<issue-number>
+#<issue-number>
 
 ### Approvals
 
 <!-- Depending on the nature of the pull request, remove the roles that are not necessary for this review. Intricate technical changes may require two dev approvals. Reviewers should check the corresponding box after they approve. -->
 
 - [ ] Dev
-- [ ] Dev
-- [ ] Designer
-- [ ] Product
 
 ### Screenshots
 

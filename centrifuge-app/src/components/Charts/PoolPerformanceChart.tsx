@@ -1,8 +1,9 @@
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Grid, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
@@ -34,6 +35,9 @@ function PoolPerformanceChart() {
   const theme = useTheme()
   const chartColor = theme.colors.accentPrimary
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
@@ -57,18 +61,46 @@ function PoolPerformanceChart() {
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
+  const isSingleTranche = pool?.tranches.length === 1
+
+  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
+  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
+  const todayPrice = pool?.tranches
+    ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
+    : null
+
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
-        const price = Object.values(day.tranches).length === 1 ? Object.values(day.tranches)[0].price!.toFloat() : null
-
-        return { day: new Date(day.timestamp), nav, price }
+        const price = (isSingleTranche && Object.values(day.tranches)[0].price?.toFloat()) || null
+        if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
+          return { day: new Date(day.timestamp), nav: todayAssetValue, price: Number(todayPrice) }
+        }
+        return { day: new Date(day.timestamp), nav: Number(nav), price: Number(price) }
       }) || [],
-    [truncatedPoolStates]
+    [isSingleTranche, truncatedPoolStates, todayAssetValue, todayPrice]
   )
 
+  const today = {
+    nav: todayAssetValue,
+    price: todayPrice,
+  }
+
   const chartData = data.slice(-rangeNumber)
+
+  const dataUrl: any = React.useMemo(() => {
+    if (!chartData || !chartData?.length) {
+      return undefined
+    }
+
+    const filteredData = chartData.map((data) => ({
+      day: data.day,
+      tokenPrice: data.price,
+    }))
+
+    return getCSVDownloadUrl(filteredData as any)
+  }, [chartData])
 
   const priceRange = React.useMemo(() => {
     if (!chartData) return [0, 100]
@@ -88,28 +120,39 @@ function PoolPerformanceChart() {
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
 
-  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
-  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
-  const todayPrice = data.length > 0 ? data[data.length - 1].price : null
+  const getOneDayPerMonth = (): any[] => {
+    const seenMonths = new Set<string>()
+    const result: any[] = []
 
-  const today = {
-    nav: todayAssetValue,
-    price: todayPrice,
-  }
+    chartData.forEach((item) => {
+      const date = new Date(item.day)
+      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' })
 
-  const getXAxisInterval = () => {
-    if (rangeNumber <= 30) return 5
-    if (rangeNumber > 30 && rangeNumber <= 90) {
-      return 14
-    }
-    if (rangeNumber > 90 && rangeNumber <= 180) {
-      return 30
-    }
-    return 45
+      if (!seenMonths.has(monthYear)) {
+        seenMonths.add(monthYear)
+        result.push(item.day)
+      }
+    })
+
+    return result
   }
 
   return (
     <Stack gap={2}>
+      <Stack flexDirection="row" justifyContent="space-between">
+        <Text fontSize="18px" fontWeight="500">
+          Pool performance
+        </Text>
+        <AnchorButton
+          download={`pool-${poolId}-timeseries.csv`}
+          href={dataUrl}
+          variant="secondary"
+          icon={IconDownload}
+          small
+        >
+          Download
+        </AnchorButton>
+      </Stack>
       <Stack>
         <CustomLegend data={today} />
         <Shelf justifyContent="flex-end">
@@ -136,7 +179,7 @@ function PoolPerformanceChart() {
 
       <Shelf gap={4} width="100%" color="textSecondary">
         {chartData?.length ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+          <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
             <ComposedChart data={chartData} margin={{ left: -36 }}>
               <defs>
                 <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -146,17 +189,13 @@ function PoolPerformanceChart() {
               </defs>
               <XAxis
                 dataKey="day"
+                dy={4}
+                interval={0}
+                minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tickFormatter={(tick: number) => {
-                  if (data.length > 180) {
-                    return new Date(tick).toLocaleString('en-US', { month: 'short' })
-                  }
-                  return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
-                }}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-                dy={4}
-                interval={getXAxisInterval()}
+                tick={<CustomTick tickCount={getOneDayPerMonth().length} />}
+                ticks={getOneDayPerMonth()}
               />
               <YAxis
                 stroke="none"
@@ -189,9 +228,9 @@ function PoolPerformanceChart() {
                             </Text>
                             <Text variant="label2">
                               {name === 'nav' && typeof value === 'number'
-                                ? formatBalance(value, 'USD' || '')
+                                ? formatBalance(value, 'USD')
                                 : typeof value === 'number'
-                                ? formatBalance(value, 'USD' || '', 6)
+                                ? formatBalance(value, 'USD', 6)
                                 : '-'}
                             </Text>
                           </Shelf>
@@ -234,25 +273,34 @@ function CustomLegend({
           borderLeftColor={theme.colors.accentPrimary}
           gap="4px"
         >
-          <Tooltips type={'nav'}>
-            <Text variant="body3" color="textSecondary">
-              NAV
-            </Text>
-          </Tooltips>
+          <Tooltips type="nav" />
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
         </Stack>
         {data.price && (
           <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
-            <Tooltips type={'singleTrancheTokenPrice'}>
-              <Text variant="body3" color="textSecondary">
-                Token price
-              </Text>
-            </Tooltips>
+            <Tooltips type="singleTrancheTokenPrice" />
             <Text variant="body1">{data.price ? formatBalance(data.price, 'USD', 6) : '-'}</Text>
           </Stack>
         )}
       </Grid>
     </Shelf>
+  )
+}
+
+const CustomTick = ({ x, y, payload }: any) => {
+  const theme = useTheme()
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+        x={0}
+        y={0}
+        dy={16}
+        textAnchor="middle"
+      >
+        {new Date(payload.value).toLocaleString('en-US', { month: 'short' })}
+      </text>
+    </g>
   )
 }
 

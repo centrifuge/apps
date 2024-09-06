@@ -17,6 +17,8 @@ type Row = {
 export function LoanTemplates() {
   const { pid: poolId } = useParams<{ pid: string }>()
 
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
 

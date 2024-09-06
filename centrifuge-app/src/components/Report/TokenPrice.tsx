@@ -70,7 +70,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool])
+  }, [poolStates, groupBy])
 
   const priceRecords: Row[] = React.useMemo(() => {
     return [
@@ -188,6 +188,26 @@ export function TokenPrice({ pool }: { pool: Pool }) {
       ...(!!showTokenYields
         ? [
             {
+              name: '7d APY',
+              value: poolStates?.map(() => '' as any) || [],
+              heading: false,
+            },
+          ]
+        : []),
+      ...(!!showTokenYields
+        ? pool?.tranches
+            .slice()
+            .reverse()
+            .map((token) => ({
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
+              value: poolStates?.map((state) => state.tranches[token.id].yield7DaysAnnualized.toFloat()) || [],
+              heading: false,
+              formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
+            }))
+        : []),
+      ...(!!showTokenYields
+        ? [
+            {
               name: '30d APY',
               value: poolStates?.map(() => '' as any) || [],
               heading: false,
@@ -242,6 +262,10 @@ export function TokenPrice({ pool }: { pool: Pool }) {
 
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to create CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-token-price-${formatDate(startDate, {
@@ -259,7 +283,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
 
     return () => {
       setCsvData(undefined)
-      URL.revokeObjectURL(dataUrl)
+      URL.revokeObjectURL(dataUrl || '')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [priceRecords])

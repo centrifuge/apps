@@ -4,7 +4,7 @@ import { Button, Grid, NumberInput, Shelf, Stack, StatusChip, Text, Thumbnail } 
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { combineLatest, switchMap } from 'rxjs'
+import { combineLatest, of, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Column, DataTable } from '../../../components/DataTable'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
@@ -22,6 +22,9 @@ type Row = Values['tranches'][0]
 
 export function EpochAndTranches() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
@@ -109,13 +112,15 @@ export function EpochAndTranches() {
       const [poolId, metadata, updates] = args
       return combineLatest([
         cent.getApi(),
-        cent.pools.setMetadata([poolId, metadata], { batch: true }),
-        cent.pools.updatePool([poolId, updates], { batch: true }),
+        metadata ? cent.pools.setMetadata([poolId, metadata], { batch: true }) : of(null),
+        updates ? cent.pools.updatePool([poolId, updates], { batch: true }) : of(null),
       ]).pipe(
         switchMap(([api, setMetadataSubmittable, updatePoolSubmittable]) => {
           return cent.wrapSignAndSend(
             api,
-            api.tx.utility.batchAll([setMetadataSubmittable, updatePoolSubmittable]),
+            updatePoolSubmittable && setMetadataSubmittable
+              ? api.tx.utility.batchAll([setMetadataSubmittable, updatePoolSubmittable])
+              : setMetadataSubmittable || updatePoolSubmittable,
             options
           )
         })
@@ -182,7 +187,16 @@ export function EpochAndTranches() {
         })),
       ]
       execute(
-        [poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches: hasTrancheChanges ? tranches : undefined }],
+        [
+          poolId,
+          hasMetaChanges ? newPoolMetadata : null,
+          hasEpochChanges || hasTrancheChanges
+            ? {
+                minEpochTime: hasEpochChanges ? epochSeconds : undefined,
+                tranches: hasTrancheChanges ? tranches : undefined,
+              }
+            : null,
+        ],
         { account, forceProxyType: 'Borrow' }
       )
       actions.setSubmitting(false)
@@ -202,7 +216,22 @@ export function EpochAndTranches() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing])
 
-  const hasChanges = Object.entries(form.values).some(([k, v]) => (initialValues as any)[k] !== v)
+  const hasMetaChanges = initialValues.tranches.some((t1, i) => {
+    const t2 = form.values.tranches[i]
+    return t1.minInvestment !== t2.minInvestment
+  })
+  const hasTrancheChanges = initialValues.tranches.some((t1, i) => {
+    const t2 = form.values.tranches[i]
+    return (
+      t1.tokenName !== t2.tokenName ||
+      t1.symbolName !== t2.symbolName ||
+      t1.interestRate !== t2.interestRate ||
+      t1.minRiskBuffer !== t2.minRiskBuffer
+    )
+  })
+  const epochSeconds = ((form.values.epochHours as number) * 60 + (form.values.epochMinutes as number)) * 60
+  const hasEpochChanges = pool.parameters.minEpochTime !== epochSeconds
+  const hasChanges = hasMetaChanges || hasTrancheChanges || hasEpochChanges
 
   const delay = consts.poolSystem.minUpdateDelay / (60 * 60 * 24)
 
@@ -292,11 +321,7 @@ export function EpochAndTranches() {
             <Stack gap={2}>
               <Text variant="heading3">Tranches</Text>
 
-              {isEditing ? (
-                <TrancheInput currency={pool?.currency.symbol} isUpdating />
-              ) : (
-                <DataTable data={trancheData} columns={columns} />
-              )}
+              {isEditing ? <TrancheInput isUpdating /> : <DataTable data={trancheData} columns={columns} />}
             </Stack>
           </Stack>
         </PageSection>

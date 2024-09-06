@@ -14,7 +14,7 @@ import type { TableDataRow } from './index'
 const noop = (v: any) => v
 
 export function OracleTransactions({ pool }: { pool: Pool }) {
-  const { startDate, endDate, setCsvData, txType } = React.useContext(ReportContext)
+  const { startDate, endDate, setCsvData } = React.useContext(ReportContext)
   const transactions = useOracleTransactions(new Date(startDate), new Date(endDate))
 
   const columnConfig = [
@@ -38,17 +38,12 @@ export function OracleTransactions({ pool }: { pool: Pool }) {
     },
   ]
 
-  const data: TableDataRow[] = React.useMemo(() => {
-    if (!transactions) {
-      return []
-    }
-
-    return transactions.map((tx) => ({
+  const data: TableDataRow[] =
+    transactions?.map((tx) => ({
       name: '',
       value: [tx.timestamp.toISOString(), tx.key?.substring(2) || '-', tx.value?.toFloat() ?? '-'],
       heading: false,
-    }))
-  }, [transactions, txType, pool.currency.symbol])
+    })) || []
 
   const columns = columnConfig
     .map((col, index) => ({
@@ -68,6 +63,10 @@ export function OracleTransactions({ pool }: { pool: Pool }) {
       Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
     )
     const dataUrl = getCSVDownloadUrl(formatted)
+
+    if (!dataUrl) {
+      throw new Error('Failed to create CSV')
+    }
 
     setCsvData({
       dataUrl,

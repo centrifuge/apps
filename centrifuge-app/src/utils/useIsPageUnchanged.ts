@@ -1,6 +1,9 @@
-import { useRouteMatch } from 'react-router'
+import { useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 
 export function useIsPageUnchanged(): () => boolean {
-  const routeMatch = useRouteMatch()
-  return () => routeMatch.url === window.location.pathname
+  const location = useLocation()
+  const initialPath = useRef(location.pathname)
+
+  return () => initialPath.current === location.pathname
 }

@@ -43,6 +43,9 @@ type OnboardingSettingsInput = {
 
 export const OnboardingSettings = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool) as { data: PoolMetadata }
   const [isEditing, setIsEditing] = React.useState(false)

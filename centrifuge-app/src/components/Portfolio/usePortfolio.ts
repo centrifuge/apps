@@ -95,7 +95,7 @@ export function useDailyPortfolioValue(address: string, rangeValue?: number) {
           )
         })
     }
-  }, [dailyTrancheStatesByTrancheId, rangeValue, transactionsByTrancheId])
+  }, [dailyTrancheStatesByTrancheId, daysSinceFirstTx, rangeDays, rangeValue, transactionsByTrancheId])
 }
 
 const getPriceAtDate = (
@@ -131,6 +131,7 @@ export function usePortfolio(substrateAddress?: string) {
   // })
   // return result
 
+  const pools = usePools()
   const { data: subData } = useSubquery(
     `query ($account: String!) {
     account(
@@ -166,6 +167,15 @@ export function usePortfolio(substrateAddress?: string) {
           }
         }
       }
+      investorPositions {
+        nodes {
+          holdingQuantity
+          poolId
+          purchasePrice
+          timestamp
+          trancheId
+        }
+      }
     }
   }`,
     {
@@ -177,70 +187,86 @@ export function usePortfolio(substrateAddress?: string) {
   )
 
   const data = useMemo(() => {
-    return (
-      (subData?.account as undefined | {}) &&
-      (Object.fromEntries(
-        subData.account.trancheBalances.nodes.map((tranche: any) => {
-          const decimals = tranche.pool.currency.decimals
-          const tokenPrice = new Price(tranche.tranche.tokenPrice)
-          let freeTrancheTokens = new CurrencyBalance(0, decimals)
+    const trancheBalances: Record<string, { totalTrancheTokens: TokenBalance; tokenPrice: Price }> = {}
 
-          const claimableCurrency = new CurrencyBalance(tranche.claimableCurrency, decimals)
-          const claimableTrancheTokens = new TokenBalance(tranche.claimableTrancheTokens, decimals)
-          const pendingInvestCurrency = new CurrencyBalance(tranche.pendingInvestCurrency, decimals)
-          const pendingRedeemTrancheTokens = new TokenBalance(tranche.pendingRedeemTrancheTokens, decimals)
-          const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
-          const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
+    subData?.account?.investorPositions.nodes.forEach((position: any) => {
+      const pool = pools?.find((p) => p.id === position.poolId)
+      const trancheId = position.trancheId.split('-')[1]
+      const decimals = pool?.currency.decimals ?? 18
+      const tokenPrice = pool?.tranches.find((t) => trancheId === t.id)?.tokenPrice ?? Price.fromFloat(1)
+      const balance = new TokenBalance(position.holdingQuantity, decimals)
+      const existing = trancheBalances[trancheId]
+      if (existing) {
+        existing.totalTrancheTokens.iadd(balance)
+      } else {
+        trancheBalances[trancheId] = { totalTrancheTokens: balance, tokenPrice }
+      }
+    })
+    // return (
+    //   (subData?.account as undefined | {}) &&
+    //   (Object.fromEntries(
+    //     subData.account.trancheBalances.nodes.map((tranche: any) => {
+    //       const decimals = tranche.pool.currency.decimals
+    //       const tokenPrice = new Price(tranche.tranche.tokenPrice)
+    //       let freeTrancheTokens = new CurrencyBalance(0, decimals)
 
-          const currencyAmounts = subData.account.currencyBalances.nodes.filter(
-            (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
-          )
-          if (currencyAmounts.length) {
-            freeTrancheTokens = new CurrencyBalance(
-              currencyAmounts.reduce((acc: BN, cur: any) => acc.add(new BN(cur.amount)), new BN(0)),
-              decimals
-            )
-          }
+    //       const claimableCurrency = new CurrencyBalance(tranche.claimableCurrency, decimals)
+    //       const claimableTrancheTokens = new TokenBalance(tranche.claimableTrancheTokens, decimals)
+    //       const pendingInvestCurrency = new CurrencyBalance(tranche.pendingInvestCurrency, decimals)
+    //       const pendingRedeemTrancheTokens = new TokenBalance(tranche.pendingRedeemTrancheTokens, decimals)
+    //       const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
+    //       const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
 
-          const totalTrancheTokens = new CurrencyBalance(
-            new BN(tranche.claimableTrancheTokens)
-              .add(new BN(tranche.pendingRedeemTrancheTokens))
-              .add(freeTrancheTokens),
-            decimals
-          )
+    //       const currencyAmounts = subData.account.currencyBalances.nodes.filter(
+    //         (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
+    //       )
+    //       if (currencyAmounts.length) {
+    //         freeTrancheTokens = new CurrencyBalance(
+    //           currencyAmounts.reduce((acc: BN, cur: any) => acc.add(new BN(cur.amount)), new BN(0)),
+    //           decimals
+    //         )
+    //       }
 
-          return [
-            tranche.trancheId.split('-')[1],
-            {
-              claimableCurrency,
-              claimableTrancheTokens,
-              pendingInvestCurrency,
-              pendingRedeemTrancheTokens,
-              sumClaimedCurrency,
-              sumClaimedTrancheTokens,
-              totalTrancheTokens,
-              freeTrancheTokens,
-              tokenPrice,
-            },
-          ]
-        })
-      ) as Record<
-        string,
-        {
-          claimableCurrency: CurrencyBalance
-          claimableTrancheTokens: TokenBalance
-          pendingInvestCurrency: CurrencyBalance
-          pendingRedeemTrancheTokens: TokenBalance
-          sumClaimedCurrency: CurrencyBalance
-          sumClaimedTrancheTokens: TokenBalance
-          totalTrancheTokens: TokenBalance
-          freeTrancheTokens: TokenBalance
-          tokenPrice: Price
-          // TODO: add reservedTrancheTokens
-        }
-      >)
-    )
-  }, [subData])
+    //       const totalTrancheTokens = new CurrencyBalance(
+    //         new BN(tranche.claimableTrancheTokens)
+    //           .add(new BN(tranche.pendingRedeemTrancheTokens))
+    //           .add(freeTrancheTokens),
+    //         decimals
+    //       )
+
+    //       return [
+    //         tranche.trancheId.split('-')[1],
+    //         {
+    //           claimableCurrency,
+    //           claimableTrancheTokens,
+    //           pendingInvestCurrency,
+    //           pendingRedeemTrancheTokens,
+    //           sumClaimedCurrency,
+    //           sumClaimedTrancheTokens,
+    //           totalTrancheTokens,
+    //           freeTrancheTokens,
+    //           tokenPrice,
+    //         },
+    //       ]
+    //     })
+    //   ) satisfies Record<
+    //     string,
+    //     {
+    //       claimableCurrency: CurrencyBalance
+    //       claimableTrancheTokens: TokenBalance
+    //       pendingInvestCurrency: CurrencyBalance
+    //       pendingRedeemTrancheTokens: TokenBalance
+    //       sumClaimedCurrency: CurrencyBalance
+    //       sumClaimedTrancheTokens: TokenBalance
+    //       totalTrancheTokens: TokenBalance
+    //       freeTrancheTokens: TokenBalance
+    //       tokenPrice: Price
+    //       // TODO: add reservedTrancheTokens
+    //     }
+    //   >)
+    // )
+    return trancheBalances
+  }, [subData, pools])
 
   return data
 }

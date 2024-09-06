@@ -1,7 +1,8 @@
-import { Box, IconChevronDown, IconChevronRight, IconUser } from '@centrifuge/fabric'
+import { Box, IconChevronDown, IconChevronRight, IconUser, Menu as Panel, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
+import { useMatch } from 'react-router'
 import { useTheme } from 'styled-components'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Toggle } from './Toggle'
 
 type IssuerMenuProps = {
@@ -10,24 +11,27 @@ type IssuerMenuProps = {
   children?: React.ReactNode
 }
 
-export function IssuerMenu({ defaultOpen = false, stacked, children }: IssuerMenuProps) {
-  const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
+export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
+  const match = useMatch('/issuer/*')
   const isActive = !!match
   const [open, setOpen] = React.useState(defaultOpen)
   const { space } = useTheme()
   const fullWidth = `calc(100vw - 2 * ${space[1]}px)`
   const offset = `calc(100% + 2 * ${space[1]}px)`
   const id = React.useId()
+  const isLarge = useIsAboveBreakpoint('L')
+  const isMedium = useIsAboveBreakpoint('M')
+  const theme = useTheme()
 
   React.useEffect(() => {
     setOpen(defaultOpen)
   }, [defaultOpen])
 
   return (
-    <Box position={['static', 'static', 'relative', 'static']}>
+    <Box position={['static', 'static', 'relative', 'relative', 'static']}>
       {open && (
         <Box
-          display={['block', 'block', 'block', 'none']}
+          display={['block', 'block', 'block', 'block', 'none']}
           position="fixed"
           top="0"
           left="0"
@@ -44,12 +48,13 @@ export function IssuerMenu({ defaultOpen = false, stacked, children }: IssuerMen
         aria-controls={`${id}-menu`}
         aria-label={open ? 'Hide menu' : 'Show menu'}
         onClick={() => setOpen(!open)}
+        stacked={!isLarge}
+        isMedium={isMedium}
         isActive={isActive}
-        stacked={stacked}
       >
         <IconUser size={['iconMedium', 'iconMedium', 'iconSmall']} />
         Issuer
-        {!stacked &&
+        {isLarge &&
           (open ? (
             <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
           ) : (
@@ -63,14 +68,21 @@ export function IssuerMenu({ defaultOpen = false, stacked, children }: IssuerMen
         id={`${id}-menu`}
         aria-labelledby={`${id}-button`}
         aria-expanded={!!open}
-        position={['absolute', 'absolute', 'absolute', 'static']}
-        top={['auto', 'auto', 0, 0, 'auto']}
+        position={['absolute', 'absolute', 'absolute', 'relative', 'static']}
+        top={['auto', 'auto', 0, 'auto']}
         bottom={[offset, offset, 'auto']}
-        left={[1, 1, offset, offset, 'auto']}
-        width={[fullWidth, fullWidth, 150, '100%']}
+        left={[1, 1, offset, 'auto', 'auto']}
+        width={[fullWidth, fullWidth, 200, '100%']}
         mt={[0, 0, 0, 1]}
+        zIndex={20}
       >
-        {children}
+        {isLarge ? (
+          <Stack as="ul" gap={1}>
+            {children}
+          </Stack>
+        ) : (
+          <Panel backgroundColor={theme.colors.backgroundInverted}>{children}</Panel>
+        )}
       </Box>
     </Box>
   )

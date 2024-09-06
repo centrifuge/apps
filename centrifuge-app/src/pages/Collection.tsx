@@ -1,9 +1,8 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import { Identity } from '../components/Identity'
-import { LayoutBase } from '../components/LayoutBase'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
@@ -17,20 +16,18 @@ import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
 import { useSuitableAccounts } from '../utils/usePermissions'
 
+interface Params extends Record<string, string | undefined> {
+  cid: string
+}
+
 export default function CollectionPage() {
-  return (
-    <LayoutBase>
-      <Collection />
-    </LayoutBase>
-  )
+  return <Collection />
 }
 
 const COUNT_PER_PAGE = 16
 
-const Collection: React.FC = () => {
-  const {
-    params: { cid: collectionId },
-  } = useRouteMatch<{ cid: string }>()
+function Collection() {
+  const { cid: collectionId } = useParams<Params>()
   const collection = useCollection(collectionId)
 
   if (!collection) throw new Error('Collection not found')

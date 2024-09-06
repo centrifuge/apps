@@ -36,6 +36,8 @@ import { getPolkadotApi } from './utils/web3'
 type ProxyType = string
 
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
+const WEIGHT_PER_GAS = 25_000
+const GAS_LIMIT_POV_SIZE_RATIO = 4
 const EVM_DISPATCH_OVERHEAD_GAS = 1_000_000
 
 export type Config = {
@@ -261,7 +263,7 @@ const parachainRuntimeApi: DefinitionsCall = {
           params: [
             {
               name: 'location',
-              type: 'XcmV3MultiLocation',
+              type: 'StagingXcmV3MultiLocation',
             },
           ],
           type: 'Option<AccountId32>',
@@ -413,7 +415,9 @@ export class CentrifugeBase {
 
       if (options?.signOnly) {
         return $checkBalance.pipe(
-          switchMap(() => actualSubmittable.signAsync(signingAddress, { signer, era: options?.era }))
+          switchMap(() =>
+            actualSubmittable.signAsync(signingAddress, { signer, era: options?.era, withSignedTransaction: true })
+          )
         )
       }
 
@@ -421,7 +425,13 @@ export class CentrifugeBase {
         options?.sendOnly
           ? actualSubmittable.send()
           : $checkBalance.pipe(
-              switchMap(() => actualSubmittable.signAndSend(signingAddress, { signer, era: options?.era }))
+              switchMap(() =>
+                actualSubmittable.signAndSend(signingAddress, {
+                  signer,
+                  era: options?.era,
+                  withSignedTransaction: true,
+                })
+              )
             )
       ).pipe(
         map((result) => {
@@ -470,7 +480,7 @@ export class CentrifugeBase {
     return submittable.paymentInfo(address).pipe(
       switchMap((paymentInfo) => {
         const weight = paymentInfo.weight.refTime.toPrimitive() as number
-        const gas = Math.ceil(weight / 20_000) + EVM_DISPATCH_OVERHEAD_GAS
+        const gas = (Math.ceil(weight / WEIGHT_PER_GAS) + EVM_DISPATCH_OVERHEAD_GAS) * GAS_LIMIT_POV_SIZE_RATIO
         const tx: TransactionRequest = {
           // type: 2,
           to: EVM_DISPATCH_PRECOMPILE,
@@ -485,11 +495,14 @@ export class CentrifugeBase {
             return from(response.wait()).pipe(
               map((receipt) => [response, receipt] as const),
               startWith([response, null] as const),
-              map(([response, receipt]) => {
+              switchMap(([response, receipt]) => {
+                const $events = receipt?.blockNumber ? this.getEventsByBlockNumber(receipt.blockNumber) : of(null)
+                return combineLatest([of(response), of(receipt), $events])
+              }),
+              map(([response, receipt, events]) => {
                 const result: TransactionResult = {
                   data: { response, receipt: receipt ?? undefined },
-                  // TODO: Events
-                  events: [],
+                  events: (events as any) ?? [],
                   status: receipt ? 'InBlock' : 'Broadcast',
                   error: receipt?.status === 0 ? new Error('failed') : undefined,
                   txHash: response.hash,
@@ -643,6 +656,16 @@ export class CentrifugeBase {
     return combineLatest([$api, $hash]).pipe(
       switchMap(([api, hashByBlockNumber]) => {
         return api.rpc.chain.getBlock(hashByBlockNumber?.toHex())
+      })
+    )
+  }
+
+  getEventsByBlockNumber(blockNumber: number) {
+    const $api = this.getApi()
+    const $hash = $api.pipe(switchMap((api) => api.rpc.chain.getBlockHash(blockNumber)))
+    return combineLatest([$api, $hash]).pipe(
+      switchMap(([api, hashByBlockNumber]) => {
+        return api.query.system.events.at(hashByBlockNumber)
       })
     )
   }

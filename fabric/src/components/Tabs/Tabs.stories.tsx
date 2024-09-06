@@ -5,7 +5,7 @@ export default {
   title: 'Components/Tabs',
 }
 
-export const Default: React.FC = () => {
+export function Default() {
   return (
     <Tabs selectedIndex={0}>
       <TabsItem>Tab 1</TabsItem>

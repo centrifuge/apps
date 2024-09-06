@@ -14,7 +14,7 @@ type BannerProps = {
   children?: React.ReactNode
 }
 
-export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => {
+export function Banner({ children, title, ...props }: BannerProps) {
   const theme = useTheme()
   const ref = React.useRef<HTMLDivElement>(null)
   const { overlayProps } = useOverlay({ ...props }, ref)
@@ -39,7 +39,7 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
         py="2"
         px="2"
         maxWidth="540px"
-        backgroundColor={theme.colors.accentPrimary}
+        backgroundColor={theme.colors.backgroundInverted}
         style={{ boxShadow: theme.shadows.cardInteractive }}
       >
         <Shelf gap="1">

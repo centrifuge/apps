@@ -36,8 +36,8 @@ type WalletMenuProps = {
 
 export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
-  const { connectedType, isEvmOnSubstrate } = ctx
-  const accounts = connectedType && ctx[isEvmOnSubstrate ? 'substrate' : 'evm'].accounts
+  const { connectedType } = ctx
+  const accounts = connectedType && ctx[connectedType].accounts
   const address = useAddress()
   return address ? (
     <ConnectedMenu menuItems={menuItems} />
@@ -111,7 +111,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
       )}
       renderContent={(props, ref, state) => (
         <Box {...props} ref={ref} width={220}>
-          <Menu>
+          <Menu backgroundColor="white">
             <MenuItemGroup>
               {!isEvmOnSubstrate && (
                 <Stack pt={2} pb={0} px={2} gap="4px" alignItems="center">

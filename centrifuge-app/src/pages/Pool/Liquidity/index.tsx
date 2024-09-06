@@ -2,7 +2,6 @@ import { Button, Drawer } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
@@ -13,22 +12,24 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
-const CashDragChart = React.lazy(() => import('../../../components/Charts/CashDragChart'))
 const LiquidityTransactionsSection = React.lazy(() => import('../../../components/LiquidityTransactionsSection'))
 
 export function PoolDetailLiquidityTab() {
   return (
-    <LayoutBase>
+    <>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailLiquidity />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 
 export function PoolDetailLiquidity() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { colors } = useTheme()
   const [showReserveForm, setShowReserveForm] = React.useState(false)
@@ -61,27 +62,23 @@ export function PoolDetailLiquidity() {
       </PageSummary>
       {!('addresses' in pool) && (
         <>
-          <LoadBoundary>
-            <LiquidityTransactionsSection
-              pool={pool}
-              title="Originations & repayments"
-              dataKeys={['sumRepaidAmountByPeriod', 'sumBorrowedAmountByPeriod']}
-              dataNames={['Repayment', 'Origination']}
-              dataColors={[colors.grayScale[500], colors.blueScale[500]]}
-              tooltips={['repayment', 'origination']}
-            />
-          </LoadBoundary>
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Originations & repayments"
+            dataKeys={['sumRepaidAmountByPeriod', 'sumBorrowedAmountByPeriod']}
+            dataNames={['Repayment', 'Origination']}
+            dataColors={[colors.grayScale[500], colors.blueScale[500]]}
+            tooltips={['repayment', 'origination']}
+          />
 
-          <LoadBoundary>
-            <LiquidityTransactionsSection
-              pool={pool}
-              title="Investments & redemptions"
-              dataKeys={['sumInvestedAmountByPeriod', 'sumRedeemedAmountByPeriod']}
-              dataNames={['Investment', 'Redemption']}
-              dataColors={[colors.statusOk, colors.statusCritical]}
-              tooltips={['investment', 'redemption']}
-            />
-          </LoadBoundary>
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Investments & redemptions"
+            dataKeys={['sumInvestedAmountByPeriod', 'sumRedeemedAmountByPeriod']}
+            dataNames={['Investment', 'Redemption']}
+            dataColors={[colors.statusOk, colors.statusCritical]}
+            tooltips={['investment', 'redemption']}
+          />
           {/* 
           <PageSection title="Cash drag">
             <Stack height="290px">

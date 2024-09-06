@@ -30,7 +30,19 @@ export const nonNegativeNumber = (err?: CustomError) => (val?: any) => {
   return Number.isFinite(num) && num >= 0 ? '' : getError(`Value must be positive or zero`, err, num)
 }
 
+export const nonNegativeNumberNotRequired = (err?: CustomError) => (val?: any) => {
+  if (!val) return ''
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return Number.isFinite(num) && num >= 0 ? '' : getError(`Value must be positive or zero`, err, num)
+}
+
 export const positiveNumber = (err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
+}
+
+export const positiveNumberNotRequired = (err?: CustomError) => (val?: any) => {
+  if (!val) return ''
   const num = val instanceof Decimal ? val.toNumber() : val
   return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
 }
@@ -38,6 +50,7 @@ export const positiveNumber = (err?: CustomError) => (val?: any) => {
 const maxVariationFraction = Dec(99.99) // 9999%
 
 export const maxPriceVariance = (pricing: ExternalPricingInfo, err?: CustomError) => (val?: any) => {
+  if (!pricing?.oracle.length) return ''
   let latestOraclePrice = pricing.oracle[0]
   pricing.oracle.forEach((price) => {
     if (price.timestamp > latestOraclePrice.timestamp) {
@@ -73,6 +86,12 @@ export const min = (minValue: number, err?: CustomError) => (val?: any) => {
 }
 
 export const max = (maxValue: number, err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return num <= maxValue ? '' : getError(`Value too large`, err, num)
+}
+
+export const maxNotRequired = (maxValue: number, err?: CustomError) => (val?: any) => {
+  if (!val) return ''
   const num = val instanceof Decimal ? val.toNumber() : val
   return num <= maxValue ? '' : getError(`Value too large`, err, num)
 }
@@ -143,7 +162,7 @@ const calcISINCheck = (code: string) => {
   }
   // group by odd and even, multiply digits from group containing rightmost character by 2
   for (let i = 0; i < conv.length; i++) {
-    digits += (parseInt(conv[i]) * (i % 2 == (conv.length % 2 != 0 ? 0 : 1) ? 2 : 1)).toString()
+    digits += (parseInt(conv[i]) * (i % 2 === (conv.length % 2 !== 0 ? 0 : 1) ? 2 : 1)).toString()
   }
   // sum all digits
   for (let i = 0; i < digits.length; i++) {

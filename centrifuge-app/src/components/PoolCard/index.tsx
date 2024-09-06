@@ -1,7 +1,7 @@
+import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { Rate } from '@centrifuge/centrifuge-js'
 import { Box, Grid, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
@@ -9,7 +9,6 @@ import { Eththumbnail } from '../EthThumbnail'
 import { Anchor, Ellipsis, Root } from '../ListItemCardStyles'
 import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
-
 const columns_base = 'minmax(150px, 2fr) minmax(100px, 1fr) 140px 70px 150px'
 const columns_extended = 'minmax(200px, 2fr) minmax(100px, 1fr) 140px 100px 150px'
 export const COLUMNS = ['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', columns_base, columns_extended]
@@ -39,7 +38,7 @@ export function PoolCard({
   isLoading,
 }: PoolCardProps) {
   const isMedium = useIsAboveBreakpoint('M')
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
+  const basePath = useBasePath('/pools')
   const { sizes, zIndices } = useTheme()
 
   return (

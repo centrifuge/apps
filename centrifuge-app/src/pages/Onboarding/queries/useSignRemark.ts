@@ -48,7 +48,7 @@ export const useSignRemark = (
   const { authToken } = useOnboardingAuth()
   const [account] = useSuitableAccounts({ actingAddress: [selectedAddress || ''] })
 
-  const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
+  const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.remarkWithEvent, {
     onSuccess: async (_, result) => {
       try {
         const chainId = connectedNetwork === 'centrifuge' ? await centrifuge.getChainId() : connectedNetwork
@@ -120,7 +120,7 @@ export const useSignRemark = (
         const signer = selectedAccount?.signer || (await evmProvider?.getSigner())
         const api = await centrifuge.connect(address!, signer as any)
         const paymentInfo = await lastValueFrom(
-          api.remark.signRemark(
+          api.remark.remarkWithEvent(
             [
               `I hereby sign the subscription agreement of pool [POOL_ID] and tranche [TRANCHE_ID]: [IPFS_HASH_OF_TEMPLATE]`,
             ],

@@ -13,10 +13,12 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
-import { useLPEvents, useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
+import { useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
+
+const PERMITS_DISABLED = true
 
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
@@ -32,9 +34,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
   const pool = usePool(poolId) as Pool
   const cent = useCentrifuge()
-  const [pendingActionState, setPendingAction] = React.useState<
-    InvestRedeemAction | 'investWithPermit' | 'decreaseInvest'
-  >()
+  const [pendingActionState, setPendingAction] = React.useState<InvestRedeemAction>()
+  // | 'investWithPermit'
   const { isLoading: isLpsLoading, data: lps } = useLiquidityPools(poolId, trancheId)
   const {
     data: lpInvest,
@@ -43,7 +44,6 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   } = useLiquidityPoolInvestment(poolId, trancheId, lpIndex)
   const provider = useEvmProvider()
 
-  const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
   const isAllowedToInvest = lpInvest?.isAllowedToInvest
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
@@ -64,26 +64,43 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
-  const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
+  const collectType = currencyToCollect.gt(0)
+    ? 'redeem'
+    : investToCollect.gt(0)
+    ? 'invest'
+    : lpInvest?.claimableCancelDepositRequest.gtn(0)
+    ? 'cancelInvest'
+    : lpInvest?.claimableCancelRedeemRequest.gtn(0)
+    ? 'cancelRedeem'
+    : null
 
   const minOrder = consts.orderBook.minFulfillment.toDecimal()
 
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrder)
-  const decreaseInvest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.decreaseInvestOrder)
-  const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrderWithPermit)
+  // const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrderWithPermit)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.increaseRedeemOrder)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Withdraw', (cent) => cent.liquidityPools.withdraw)
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelRedeemOrder)
+  const collectCancelInvest = useEvmTransaction('Claim', (cent) => cent.liquidityPools.claimCancelDeposit)
+  const collectCancelRedeem = useEvmTransaction('Claim', (cent) => cent.liquidityPools.claimCancelRedeem)
 
   const txActions = {
     invest,
-    investWithPermit,
-    decreaseInvest,
+    // investWithPermit,
     redeem,
-    collect: collectType === 'invest' ? collectInvest : collectRedeem,
+    collect:
+      collectType === 'invest'
+        ? collectInvest
+        : collectType === 'redeem'
+        ? collectRedeem
+        : collectType === 'cancelInvest'
+        ? collectCancelInvest
+        : collectType === 'cancelRedeem'
+        ? collectCancelRedeem
+        : undefined,
     approvePoolCurrency: approve,
     approveTrancheToken: approve,
     cancelInvest,
@@ -94,18 +111,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     : (pendingActionState as InvestRedeemAction | undefined)
   const pendingTransaction = pendingActionState && txActions[pendingActionState]?.lastCreatedTransaction
   let statusMessage
-  if (
-    lpInvest?.pendingInvest &&
-    !lpInvest.pendingInvest.isZero() &&
-    lpEvents?.find((e) => e.event === 'CancelDepositRequest')
-  ) {
-    statusMessage = 'Order cancellation is currently being bridged and will show up soon'
-  } else if (
-    lpInvest?.pendingRedeem &&
-    !lpInvest.pendingRedeem.isZero() &&
-    lpEvents?.find((e) => e.event === 'CancelRedeemRequest')
-  ) {
-    statusMessage = 'Order cancellation is currently being bridged and will show up soon'
+  if (lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest) {
+    statusMessage = 'Order cancellation is currently being processed and will show up soon'
   }
 
   function doAction<T = any>(
@@ -144,7 +151,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }
   }, [lps])
 
-  const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet && selectedWallet?.id !== 'finoa'
+  const supportsPermits =
+    !PERMITS_DISABLED && lpInvest?.currencySupportsPermit && !isSmartContractWallet && selectedWallet?.id !== 'finoa'
+  const canChangeOrder = false // LP contracts don't support changing orders
 
   const state: InvestRedeemState = {
     poolId,
@@ -174,20 +183,30 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       ? {
           investCurrency: lpInvest.pendingInvest.toDecimal(),
           redeemToken: lpInvest.pendingRedeem.toDecimal(),
-          payoutCurrencyAmount: lpInvest.maxDeposit.toDecimal(),
+          payoutCurrencyAmount: lpInvest.maxWithdraw.toDecimal(),
           payoutTokenAmount: lpInvest.maxMint.toDecimal(),
+          investClaimableCurrencyAmount: lpInvest.maxDeposit.toDecimal(),
+          redeemClaimableTokenAmount: lpInvest.maxRedeem.toDecimal(),
           remainingInvestCurrency: lpInvest.pendingInvest.toDecimal(),
           remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
         }
       : null,
-    collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
+    collectAmount: investToCollect.gt(0)
+      ? investToCollect
+      : currencyToCollect.gt(0)
+      ? currencyToCollect
+      : lpInvest?.claimableCancelDepositRequest.gtn(0)
+      ? lpInvest.claimableCancelDepositRequest.toDecimal()
+      : lpInvest?.claimableCancelRedeemRequest.gtn(0)
+      ? lpInvest.claimableCancelRedeemRequest.toDecimal()
+      : Dec(0),
     collectType,
     needsToCollectBeforeOrder: true,
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
-    canChangeOrder: false, // LP contracts don't suuport changing orders yet, TypeError: contract(...).decreaseDepositRequest is not a function
-    canCancelOrder: false, // LP contracts don't suuport canceling orders yet
+    canChangeOrder,
+    canCancelOrder: !(lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest),
     pendingAction,
     pendingTransaction,
     statusMessage,
@@ -198,11 +217,11 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     invest: async (newOrder: BN) => {
       if (!lpInvest) return
 
+      if (!lpInvest.pendingInvest.isZero() && !canChangeOrder) throw new Error('Cannot change order')
+
       let assets = newOrder.sub(lpInvest.pendingInvest)
       if (assets.lt(new BN(0))) {
-        assets = assets.abs()
-        decreaseInvest.execute([lpInvest.lpAddress, assets])
-        setPendingAction('invest')
+        throw new Error('Cannot decrease order')
       }
 
       // If the last tx was an approve, we may not have refetched the allowance yet,
@@ -216,8 +235,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
           assets,
         ])
         console.log('permit', permit)
-        investWithPermit.execute([lpInvest.lpAddress, assets, permit])
-        setPendingAction('investWithPermit')
+        // investWithPermit.execute([lpInvest.lpAddress, assets, permit])
+        // setPendingAction('investWithPermit')
       } else {
         invest.execute([lpInvest.lpAddress, assets])
         setPendingAction('invest')

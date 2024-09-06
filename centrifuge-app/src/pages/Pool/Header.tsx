@@ -1,22 +1,24 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation, useParams, useRouteMatch } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Eththumbnail } from '../../components/EthThumbnail'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
+import { useBasePath } from '../../utils/useBasePath'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
   actions?: React.ReactNode
 }
 
-export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
+export function PoolDetailHeader({ actions }: Props) {
   const { pid } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
-  const { state } = useLocation<{ token: string }>()
+  if (!pid) throw new Error('Pool not foud')
+  const basePath = useBasePath()
+  const { state } = useLocation()
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
@@ -61,7 +63,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         }}
         color="textSelected"
       >
-        <NavigationTabs basePath={`${basePath}/${pid}`}>
+        <NavigationTabs>
           <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>

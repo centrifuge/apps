@@ -26,7 +26,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
 import { useQuery } from 'react-query'
-import { useHistory, useLocation, useRouteMatch } from 'react-router'
+import { useLocation, useMatch, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { Dec } from '../../utils/Decimal'
@@ -48,9 +48,9 @@ type TransferTokensProps = {
 export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferTokensProps) => {
   const centBalances = useBalances(address)
   const CFGPrice = useCFGTokenPrice()
-  const isPortfolioPage = useRouteMatch('/portfolio')
+  const isPortfolioPage = useMatch('/portfolio')
   const { search } = useLocation()
-  const history = useHistory()
+  const navigate = useNavigate()
   const params = new URLSearchParams(search)
   const transferCurrencySymbol = params.get('receive') || params.get('send')
   const isNativeTransfer = transferCurrencySymbol?.toLowerCase() === centBalances?.native.currency.symbol.toLowerCase()
@@ -65,7 +65,7 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
       }
     }
     return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
-  }, [centBalances, transferCurrencySymbol])
+  }, [centBalances, isNativeTransfer, transferCurrencySymbol])
 
   const tokenPrice = isNativeTransfer ? CFGPrice : 1
 
@@ -100,7 +100,7 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
             <Tabs
               selectedIndex={params.get('send') ? 0 : 1}
               onChange={(index) =>
-                history.push({
+                navigate({
                   search: index === 0 ? `send=${transferCurrencySymbol}` : `receive=${transferCurrencySymbol}`,
                 })
               }
@@ -299,10 +299,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
 const ReceiveToken = ({ address }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
   const [copied, setCopied] = React.useState(false)
-  const centAddress = useMemo(
-    () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
-    [address]
-  )
+  const centAddress = address && address.startsWith('0x') ? utils.formatAddress(address) : address
 
   return (
     <Stack gap={2} px={1} py={2} backgroundColor="backgroundSecondary">
@@ -365,7 +362,7 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
       })
     }
     return tokenData
-  }, [tokenDayData, filter])
+  }, [tokenDayData?.data?.tokenDayDatas, currentCFGPrice])
 
   return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
 })

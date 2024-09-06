@@ -4,7 +4,6 @@ import * as React from 'react'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
-import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { VisibilityChecker } from '../components/VisibilityChecker'
@@ -16,16 +15,12 @@ import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
 export default function CollectionsPage() {
-  return (
-    <LayoutBase>
-      <Collections />
-    </LayoutBase>
-  )
+  return <Collections />
 }
 
 const COUNT_PER_PAGE = 12
 
-const Collections: React.FC = () => {
+function Collections() {
   const [createOpen, setCreateOpen] = React.useState(false)
   const address = useAddress('substrate')
   const collections = useCollections()

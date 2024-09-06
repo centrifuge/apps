@@ -55,7 +55,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       to.setHours(0, 0, 0, 0)
       return [new Date(startDate), to]
     }
-  }, [groupBy, startDate, endDate])
+  }, [groupBy, startDate, endDate, pool.createdAt])
 
   const poolStates = useAggregatedPoolStatesByGroup(
     pool.id,
@@ -140,7 +140,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool, poolFeeStates])
+  }, [poolStates, groupBy])
 
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
@@ -198,41 +198,35 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates])
+  }, [pool.currency.displayName, poolMetadata?.pool?.asset.class, poolStates])
 
   const netCashflowRecords: Row[] = React.useMemo(() => {
     return [
-      ...(poolFeeStates
-        ?.map((poolFeeStateByPeriod) => {
-          return Object.values(poolFeeStateByPeriod)
-            ?.map((feeState) => {
-              // some fee data may be incomplete since fees may have been added sometime after pool creation
-              // this fill the nonexistant fee data with zero values
-              let missingStates: {
-                timestamp: string
-                sumPaidAmountByPeriod: CurrencyBalance
-              }[] = []
-              if (feeState.length !== poolStates?.length) {
-                const missingTimestamps = poolStates
-                  ?.map((state) => state.timestamp)
-                  .filter((timestamp) => !feeState.find((state) => state.timestamp === timestamp))
-                missingStates =
-                  missingTimestamps?.map((timestamp) => {
-                    return {
-                      timestamp,
-                      sumPaidAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
-                    }
-                  }) || []
-              }
+      ...(Object.entries(poolFeeStates || {})?.flatMap(([, feeState]) => {
+        // some fee data may be incomplete since fees may have been added sometime after pool creation
+        // this fill the nonexistant fee data with zero values
+        let missingStates: {
+          timestamp: string
+          sumPaidAmountByPeriod: CurrencyBalance
+        }[] = []
+        if (feeState.length !== poolStates?.length) {
+          const missingTimestamps = poolStates
+            ?.map((state) => state.timestamp)
+            .filter((timestamp) => !feeState.find((state) => state.timestamp.slice(0, 10) === timestamp.slice(0, 10)))
+          missingStates =
+            missingTimestamps?.map((timestamp) => {
               return {
-                name: feeState[0].poolFee.name,
-                value: [...missingStates, ...feeState].map((state) => state.sumPaidAmountByPeriod.toDecimal().neg()),
-                formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+                timestamp,
+                sumPaidAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
               }
-            })
-            .flat()
-        })
-        .flat() || []),
+            }) || []
+        }
+        return {
+          name: feeState[0].poolFee.name,
+          value: [...missingStates, ...feeState].map((state) => state.sumPaidAmountByPeriod.toDecimal().neg()),
+          formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+        }
+      }) || []),
       {
         name: 'Net cash flow after fees',
         value:
@@ -306,7 +300,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStatesNotAggregated, pool])
+  }, [poolStates, poolStatesNotAggregated, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
@@ -324,6 +318,10 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     }
 
     const dataUrl = getCSVDownloadUrl(formatted)
+
+    if (!dataUrl) {
+      throw new Error('Failed to generate CSV')
+    }
 
     setCsvData({
       dataUrl,

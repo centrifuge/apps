@@ -104,61 +104,64 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
       <Form noValidate ref={formRef}>
         <Stack gap={2}>
           <EpochBusy busy={calculatingOrders} />
-
-          <Field name="amount" validate={positiveNumber()}>
-            {({ field, meta }: FieldProps) => (
-              <CurrencyInput
-                {...field}
-                // when the value is a decimal we assume the user clicked the max button
-                // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
-                value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
-                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-                label="Amount"
-                disabled={isRedeeming}
-                onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
-                onChange={(value) => form.setFieldValue('amount', value)}
-                currency={
-                  state?.poolCurrencies.length > 1 ? (
-                    <SelectInner
-                      {...field}
-                      onChange={(e) => {
-                        actions.selectPoolCurrency(e.target.value)
-                      }}
-                      value={state.poolCurrency?.symbol}
-                      options={state?.poolCurrencies
-                        .sort((_, b) => (b.displayName.toLowerCase().includes('usdc') ? 1 : -1))
-                        .map((c) => ({ value: c.symbol, label: c.displayName }))}
-                      style={{ textAlign: 'right' }}
-                    />
-                  ) : (
-                    state.poolCurrency?.displayName
-                  )
-                }
-                secondaryLabel={`${formatBalance(
-                  roundDown(maxRedeemCurrency),
-                  state.poolCurrency?.displayName,
-                  2
-                )} available`}
-                autoFocus={autoFocus}
-              />
-            )}
-          </Field>
-          {inputToNumber(form.values.amount) > 0 && (
-            <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
-              <Text variant="body3">
-                Token amount{' '}
-                <Text variant="body3" fontWeight="bold" width={12} variance={0}>
-                  {!state.tokenPrice.isZero() &&
-                    `~${formatBalance(
-                      form.values.amount instanceof Decimal
-                        ? form.values.amount
-                        : Dec(form.values.amount).div(state.tokenPrice),
-                      tokenSymbol
-                    )}`}
-                </Text>
-              </Text>
-            </Box>
-          )}
+          {(!state.collectType || claimDismissed) && (state.canChangeOrder || !hasPendingOrder) ? (
+            <>
+              <Field name="amount" validate={positiveNumber()}>
+                {({ field, meta }: FieldProps) => (
+                  <CurrencyInput
+                    {...field}
+                    // when the value is a decimal we assume the user clicked the max button
+                    // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
+                    value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
+                    errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
+                    label="Amount"
+                    disabled={isRedeeming}
+                    onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
+                    onChange={(value) => form.setFieldValue('amount', value)}
+                    currency={
+                      state?.poolCurrencies.length > 1 ? (
+                        <SelectInner
+                          {...field}
+                          onChange={(e) => {
+                            actions.selectPoolCurrency(e.target.value)
+                          }}
+                          value={state.poolCurrency?.symbol}
+                          options={state?.poolCurrencies
+                            .sort((_, b) => (b.displayName.toLowerCase().includes('usdc') ? 1 : -1))
+                            .map((c) => ({ value: c.symbol, label: c.displayName }))}
+                          style={{ textAlign: 'right' }}
+                        />
+                      ) : (
+                        state.poolCurrency?.displayName
+                      )
+                    }
+                    secondaryLabel={`${formatBalance(
+                      roundDown(maxRedeemCurrency),
+                      state.poolCurrency?.displayName,
+                      2
+                    )} available`}
+                    autoFocus={autoFocus}
+                  />
+                )}
+              </Field>
+              {inputToNumber(form.values.amount) > 0 && (
+                <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
+                  <Text variant="body3">
+                    Token amount{' '}
+                    <Text variant="body3" fontWeight="bold" width={12} variance={0}>
+                      {!state.tokenPrice.isZero() &&
+                        `~${formatBalance(
+                          form.values.amount instanceof Decimal
+                            ? form.values.amount
+                            : Dec(form.values.amount).div(state.tokenPrice),
+                          tokenSymbol
+                        )}`}
+                    </Text>
+                  </Text>
+                </Box>
+              )}
+            </>
+          ) : null}
           {hasPendingOrder ? <PendingOrder type="redeem" pool={pool} amount={pendingRedeem} /> : null}
           <ButtonGroup>
             {state.collectType && !claimDismissed ? (

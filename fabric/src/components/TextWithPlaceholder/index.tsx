@@ -36,7 +36,7 @@ export type TextWithPlaceholderProps = TextProps &
     isLoading?: boolean
   }>
 
-export const TextWithPlaceholder: React.FC<TextWithPlaceholderProps> = ({
+export function TextWithPlaceholder({
   words = 1,
   maxLines = 3,
   variance = 2,
@@ -44,7 +44,7 @@ export const TextWithPlaceholder: React.FC<TextWithPlaceholderProps> = ({
   isLoading,
   children,
   ...textProps
-}) => {
+}: TextWithPlaceholderProps) {
   const [rand] = React.useState(() => Math.random())
   return (
     <Text {...textProps} textOverflow="ellipsis" textDecoration={isLoading ? 'none' : textProps.textDecoration}>

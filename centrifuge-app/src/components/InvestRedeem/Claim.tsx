@@ -33,7 +33,7 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
             </Stack>
           }
         />
-      ) : (
+      ) : state.collectType === 'redeem' ? (
         <SuccessBanner
           title="Redemption successful"
           body={
@@ -47,6 +47,8 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
             </Stack>
           }
         />
+      ) : (
+        <div>Cancellation successful</div>
       )}
       {state.needsToCollectBeforeOrder && <InlineFeedback>Claim tokens before placing another order</InlineFeedback>}
       <ButtonGroup>
@@ -55,13 +57,17 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
           loading={isCollecting}
           aria-label={`Claim ${formatBalanceAbbreviated(
             state.collectAmount,
-            state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol
+            ['invest', 'cancelRedeem'].includes(state.collectType)
+              ? state.trancheCurrency?.symbol
+              : state.poolCurrency?.symbol
           )}`}
         >
           Claim{' '}
           {formatBalanceAbbreviated(
             state.collectAmount,
-            state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol
+            ['invest', 'cancelRedeem'].includes(state.collectType)
+              ? state.trancheCurrency?.symbol
+              : state.poolCurrency?.symbol
           )}
         </Button>
         {!state.needsToCollectBeforeOrder && (

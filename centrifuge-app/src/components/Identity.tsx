@@ -1,4 +1,4 @@
-import { isSameAddress } from '@centrifuge/centrifuge-js'
+import { isEvm, isSameAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { Flex, Shelf, Text, TextProps } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
@@ -23,13 +23,7 @@ const IdenticonWrapper = styled(Flex)({
 })
 
 // TODO: Fix for when connected with a proxy
-export const Identity: React.FC<Props> = ({
-  showIcon,
-  address,
-  clickToCopy,
-  labelForConnectedAddress = true,
-  ...textProps
-}) => {
+export function Identity({ showIcon, address, clickToCopy, labelForConnectedAddress = true, ...textProps }: Props) {
   const identity = useIdentity(address)
   const myAddress = useAddress('substrate')
   const utils = useCentrifugeUtils()
@@ -37,7 +31,7 @@ export const Identity: React.FC<Props> = ({
 
   const addr = utils.formatAddress(address)
   const isMe = React.useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
-  const truncated = truncate(utils.formatAddress(address))
+  const truncated = isEvm(address) ? truncate(address.substring(0, 42)) : truncate(utils.formatAddress(address))
   const display = identity?.display || truncated
   const meLabel =
     !isMe || !labelForConnectedAddress
@@ -65,7 +59,7 @@ export const Identity: React.FC<Props> = ({
     return (
       <Shelf gap={2}>
         <IdenticonWrapper>
-          <Identicon value={address} size={24} theme="polkadot" />
+          <Identicon value={address} size={24} theme={isEvm(address) ? 'ethereum' : 'polkadot'} />
         </IdenticonWrapper>
         {label}
       </Shelf>

@@ -7,7 +7,6 @@ import {
   IconSwitch,
   IconWallet,
   MenuItemGroup,
-  Menu as Panel,
   Shelf,
   Stack,
 } from '@centrifuge/fabric'
@@ -39,6 +38,7 @@ export function Menu() {
       flexDirection={['row', 'row', 'column']}
       alignItems={['center', 'center', 'stretch']}
       justifyContent={['space-between', 'space-between']}
+      backgroundColor="backgroundInverted"
     >
       <Box width="100%">
         <PageLink to="/pools" stacked={!isLarge}>
@@ -90,7 +90,7 @@ export function Menu() {
               )}
             </Stack>
           ) : (
-            <Panel>
+            <Stack as="ul" gap={1}>
               {!!pools.length &&
                 pools.map((pool) => (
                   <MenuItemGroup key={pool.id}>
@@ -104,7 +104,7 @@ export function Menu() {
                   <CreatePool />
                 </Box>
               )}
-            </Panel>
+            </Stack>
           )}
         </IssuerMenu>
       )}

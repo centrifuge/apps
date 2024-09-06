@@ -27,10 +27,9 @@ import {
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { Redirect, useHistory, useParams } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
@@ -45,11 +44,7 @@ import { validate } from '../../IssuerCreatePool/validate'
 import { PricingInput } from './PricingInput'
 
 export default function IssuerCreateLoanPage() {
-  return (
-    <LayoutBase>
-      <IssuerCreateLoan />
-    </LayoutBase>
-  )
+  return <IssuerCreateLoan />
 }
 
 export type CreateLoanFormValues = {
@@ -165,9 +160,10 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
 
 function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
-  const history = useHistory()
+  const navigate = useNavigate()
   const centrifuge = useCentrifuge()
 
   const {
@@ -196,7 +192,7 @@ function IssuerCreateLoan() {
               wrapProxyCallsForAccount(api, api.tx.uniques.mint(collectionId, nftId, owner), account, 'PodOperation'),
               wrapProxyCallsForAccount(
                 api,
-                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, false),
                 account,
                 'PodOperation'
               ),
@@ -274,6 +270,17 @@ function IssuerCreateLoan() {
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
           withLinearPricing: values.pricing.withLinearPricing,
         }
+      } else if (values.pricing.valuationMethod === 'outstandingDebt') {
+        pricingInfo = {
+          valuationMethod: values.pricing.valuationMethod,
+          maxBorrowAmount: values.pricing.maxBorrowAmount,
+          value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
+          maturityExtensionDays:
+            values.pricing.maturity === 'fixedWithExtension' ? values.pricing.maturityExtensionDays : null,
+          advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+          interestRate: Rate.fromPercent(values.pricing.interestRate),
+        }
       } else {
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
@@ -333,7 +340,7 @@ function IssuerCreateLoan() {
   }, [form.values])
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    return <Navigate to={redirect} />
   }
 
   const isPending = isTxLoading || form.isSubmitting
@@ -381,7 +388,13 @@ function IssuerCreateLoan() {
                   <Select
                     {...field}
                     label="Asset type"
-                    onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
+                    onChange={(event) => {
+                      const val = event.target.value
+                      form.setFieldValue('pricing.valuationMethod', val, false)
+                      if (val === 'cash') {
+                        form.setFieldValue('pricing.maturity', 'none')
+                      }
+                    }}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     options={[
                       { value: 'discountedCashFlow', label: 'Non-fungible asset - DCF' },
@@ -395,9 +408,11 @@ function IssuerCreateLoan() {
               </Field>
             </Grid>
           </PageSection>
-          <PageSection title="Pricing">
-            <PricingInput poolId={pid} />
-          </PageSection>
+          {form.values.pricing.valuationMethod === 'cash' ? null : (
+            <PageSection title="Pricing">
+              <PricingInput poolId={pid} />
+            </PageSection>
+          )}
           {form.values.pricing.valuationMethod !== 'cash' &&
             templateMetadata?.sections?.map((section) => (
               <PageSection
@@ -455,7 +470,7 @@ function IssuerCreateLoan() {
           <PageSection>
             <Shelf gap={1} justifyContent="end">
               {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
-              <Button variant="secondary" onClick={() => history.goBack()}>
+              <Button variant="secondary" onClick={() => navigate(-1)}>
                 Cancel
               </Button>
               <Button

@@ -1,12 +1,11 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { EvmChains } from '@centrifuge/centrifuge-react'
-import { altairDark, centrifugeLight } from '@centrifuge/fabric'
+import { centrifugeTheme } from '@centrifuge/fabric'
 import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
 import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
-import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import sepoliaLogo from '@centrifuge/fabric/assets/logos/sepolia.png'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
@@ -24,37 +23,17 @@ export const FEATURED_COLLECTIONS = [
 ]
 
 const lightTheme: DefaultTheme = {
-  ...centrifugeLight,
+  ...centrifugeTheme,
   sizes: {
-    ...centrifugeLight.sizes,
+    ...centrifugeTheme.sizes,
     mainContent: 1800,
   },
   colors: {
-    ...centrifugeLight.colors,
-    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
+    ...centrifugeTheme.colors,
+    placeholderBackground: centrifugeTheme.colors.backgroundSecondary,
   },
   typography: {
-    ...centrifugeLight.typography,
-    headingLarge: {
-      fontSize: [24, 24, 36],
-      lineHeight: 1.25,
-      fontWeight: 600,
-      color: 'textPrimary',
-    },
-  },
-}
-const darkTheme: DefaultTheme = {
-  ...altairDark,
-  sizes: {
-    ...altairDark.sizes,
-    mainContent: 1800,
-  },
-  colors: {
-    ...altairDark.colors,
-    placeholderBackground: altairDark.colors.backgroundSecondary,
-  },
-  typography: {
-    ...altairDark.typography,
+    ...centrifugeTheme.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,
@@ -68,10 +47,7 @@ type EnvironmentConfig = {
   name: string
   logo: React.ComponentType<any>[]
   network: 'altair' | 'centrifuge'
-  themes: {
-    light: DefaultTheme
-    dark: DefaultTheme
-  }
+  themes: { light: DefaultTheme }
   defaultTheme: 'light' | 'dark'
   baseCurrency: 'USD'
   assetClasses: Record<'Public credit' | 'Private credit', string[]>
@@ -87,10 +63,7 @@ const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
   logo: [LogoAltair, LogoAltairText],
   network: 'altair',
-  themes: {
-    light: lightTheme,
-    dark: darkTheme,
-  },
+  themes: { light: lightTheme },
   defaultTheme: 'dark',
   baseCurrency: 'USD',
   assetClasses: { 'Private credit': ['Art NFTs'], 'Public credit': [] },
@@ -103,7 +76,6 @@ const CENTRIFUGE: EnvironmentConfig = {
   network: 'centrifuge',
   themes: {
     light: lightTheme,
-    dark: darkTheme,
   },
   defaultTheme: 'light',
   baseCurrency: 'USD',
@@ -121,44 +93,32 @@ const CENTRIFUGE: EnvironmentConfig = {
   },
   poolCreationType,
 }
-
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
-const onfinalityKey = import.meta.env.REACT_APP_ONFINALITY_KEY
 
-const goerliConfig = {
-  rpcUrl: `https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
-  chainId: 5,
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
-  tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
-  blockExplorerUrl: 'https://goerli.etherscan.io',
-}
-const mainnetConfig = {
-  rpcUrl: `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
+const alchemyKey = import.meta.env.REACT_APP_ALCHEMY_KEY
+
+export const ethConfig = {
+  rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 1,
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  poolRegistryAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmaMA1VYSKuuYhBcQCyf5Ek4VoiiEG6oLGp3iGbsQPGpkS', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
-}
-
-export const ethConfig = {
   network: ethNetwork,
-  multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
+  multicallContractAddress: '0xcA11bde05977b3631167028862bE2a173976CA11', // Same for all networks
   remarkerAddress: '0x3E39db43035981c2C31F7Ffa4392f25231bE4477', // Same for all networks
-  ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
 }
 
 export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE
 
+const assetHubChainId = import.meta.env.REACT_APP_IS_DEMO ? 1001 : 1000
+
 export const parachainNames: Record<number, string> = {
-  1000: 'Asset Hub',
+  [assetHubChainId]: 'Asset Hub',
 }
 export const parachainIcons: Record<number, string> = {
-  1000: assetHubLogo,
+  [assetHubChainId]: assetHubLogo,
 }
-
-const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
 export const evmChains: EvmChains = {
   1: {
@@ -169,27 +129,15 @@ export const evmChains: EvmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://etherscan.io/',
-    urls: [`https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`],
     iconUrl: ethereumLogo,
     isTestnet: false,
-  },
-  5: {
-    name: 'Ethereum Goerli',
-    nativeCurrency: {
-      name: 'Görli Ether',
-      symbol: 'görETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.etherscan.io/',
-    urls: [`https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
-    iconUrl: goerliLogo,
-    isTestnet: true,
   },
   11155111: {
     name: 'Ethereum Sepolia',
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
     blockExplorerUrl: 'https://sepolia.etherscan.io/',
-    urls: [`https://eth-sepolia.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`],
     iconUrl: sepoliaLogo,
     isTestnet: true,
   },
@@ -201,11 +149,11 @@ export const evmChains: EvmChains = {
     iconUrl: baseLogo,
     isTestnet: false,
   },
-  84531: {
-    name: 'Base Goerli',
-    nativeCurrency: { name: 'Base Goerli Ether', symbol: 'gbETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.basescan.org/',
-    urls: [`https://goerli.base.org`],
+  84532: {
+    name: 'Base Sepolia',
+    nativeCurrency: { name: 'Base Sepolia Ether', symbol: 'sbETH', decimals: 18 },
+    blockExplorerUrl: 'https://sepolia.basescan.org/',
+    urls: [`https://sepolia.base.org`],
     iconUrl: baseLogo,
     isTestnet: true,
   },
@@ -220,18 +168,6 @@ export const evmChains: EvmChains = {
     urls: ['https://arb1.arbitrum.io/rpc'],
     iconUrl: arbitrumLogo,
     isTestnet: false,
-  },
-  421613: {
-    name: 'Arbitrum Goerli',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: arbitrumLogo,
-    isTestnet: true,
   },
   42220: {
     name: 'Celo',
@@ -258,3 +194,5 @@ export const evmChains: EvmChains = {
     isTestnet: true,
   },
 }
+
+export const feeCategories = ['Trading', 'Fund admin', 'Custodian', 'Investor onboarding', 'Auditor']

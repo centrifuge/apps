@@ -30,17 +30,16 @@ import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 import { combineLatest, firstValueFrom, lastValueFrom, switchMap, tap } from 'rxjs'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../components/LayoutBase'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
-import { config } from '../../config'
+import { config, isTestEnv } from '../../config'
 import { isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
@@ -65,11 +64,7 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
 }))
 
 export default function IssuerCreatePoolPage() {
-  return (
-    <LayoutBase>
-      <CreatePoolForm />
-    </LayoutBase>
-  )
+  return <CreatePoolForm />
 }
 
 export interface Tranche {
@@ -85,12 +80,12 @@ export interface WriteOffGroupInput {
   penaltyInterest: number | ''
 }
 
-export const createEmptyTranche = (junior?: boolean): Tranche => ({
-  tokenName: '',
+export const createEmptyTranche = (trancheName: string): Tranche => ({
+  tokenName: trancheName,
   symbolName: '',
-  interestRate: junior ? '' : 0,
-  minRiskBuffer: junior ? '' : 0,
-  minInvestment: 0,
+  interestRate: trancheName === 'Junior' ? '' : 0,
+  minRiskBuffer: trancheName === 'Junior' ? '' : 0,
+  minInvestment: 1000,
 })
 
 export type CreatePoolValues = Omit<
@@ -113,6 +108,7 @@ export type CreatePoolValues = Omit<
     percentOfNav: number | ''
     walletAddress: string
     feePosition: 'Top of waterfall'
+    category: string
   }[]
   poolType: 'open' | 'closed'
 }
@@ -122,8 +118,8 @@ const initialValues: CreatePoolValues = {
   poolName: '',
   assetClass: 'Private credit',
   subAssetClass: '',
-  currency: '',
-  maxReserve: '',
+  currency: isTestEnv ? 'USDC' : 'Native USDC',
+  maxReserve: 1000000,
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
@@ -143,7 +139,7 @@ const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
-  tranches: [createEmptyTranche(true)],
+  tranches: [createEmptyTranche('')],
   adminMultisig: {
     signers: [],
     threshold: 1,
@@ -153,7 +149,7 @@ const initialValues: CreatePoolValues = {
   poolType: 'open',
 }
 
-const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
+function PoolIcon({ icon, children }: { icon?: File | null; children: string }) {
   const [uri, setUri] = React.useState('')
   React.useEffect(() => {
     ;(async () => {
@@ -174,7 +170,7 @@ function CreatePoolForm() {
   const currencies = usePoolCurrencies()
   const { chainDecimals } = useCentrifugeConsts()
   const pools = usePools()
-  const history = useHistory()
+  const navigate = useNavigate()
   const balances = useBalances(address)
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
@@ -203,7 +199,7 @@ function CreatePoolForm() {
       // Redirecting only when we find the newly created pool in the data from usePools
       // Otherwise the Issue Overview page will throw an error when it can't find the pool
       // It can take a second for the new data to come in after creating the pool
-      history.push(`/issuer/${createdPoolId}`)
+      navigate(`/issuer/${createdPoolId}`)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pools, createdPoolId])
@@ -218,6 +214,7 @@ function CreatePoolForm() {
     (cent) =>
       (
         args: [
+          values: CreatePoolValues,
           transferToMultisig: BN,
           aoProxy: string,
           adminProxy: string,
@@ -230,15 +227,17 @@ function CreatePoolForm() {
         ],
         options
       ) => {
-        const [transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig }] = args
+        const [values, transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
-        const poolArgs = args.slice(2) as any
+        const poolArgs = args.slice(3) as any
         return combineLatest([
           cent.getApi(),
           cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
         ]).pipe(
           switchMap(([api, poolSubmittable]) => {
-            const adminProxyDelegate = multisigAddr ?? address
+            const adminProxyDelegates = multisigAddr
+              ? [multisigAddr]
+              : (adminMultisig && values.adminMultisig?.signers?.filter((addr) => addr !== address)) ?? []
             const otherMultisigSigners =
               multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
@@ -249,14 +248,16 @@ function CreatePoolForm() {
                   aoProxy,
                   consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
                 ),
-                adminProxyDelegate !== address &&
+                adminProxyDelegates.length > 0 &&
                   api.tx.proxy.proxy(
                     adminProxy,
                     undefined,
-                    api.tx.utility.batchAll([
-                      api.tx.proxy.addProxy(adminProxyDelegate, 'Any', 0),
-                      api.tx.proxy.removeProxy(address, 'Any', 0),
-                    ])
+                    api.tx.utility.batchAll(
+                      [
+                        ...adminProxyDelegates.map((addr) => api.tx.proxy.addProxy(addr, 'Any', 0)),
+                        multisigAddr ? api.tx.proxy.removeProxy(address, 'Any', 0) : null,
+                      ].filter(Boolean)
+                    )
                   ),
                 api.tx.proxy.proxy(
                   aoProxy,
@@ -278,8 +279,8 @@ function CreatePoolForm() {
       },
     {
       onSuccess: (args) => {
-        if (form.values.adminMultisigEnabled) setIsMultisigDialogOpen(true)
-        const [, , , poolId] = args
+        if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) setIsMultisigDialogOpen(true)
+        const [, , , , poolId] = args
         if (createType === 'immediate') {
           setCreatedPoolId(poolId)
         }
@@ -383,29 +384,42 @@ function CreatePoolForm() {
 
       const metadataValues: PoolMetadataInput = { ...values } as any
 
-      metadataValues.adminMultisig = values.adminMultisigEnabled
-        ? {
-            ...values.adminMultisig,
-            signers: sortAddresses(values.adminMultisig.signers),
-          }
-        : undefined
+      metadataValues.adminMultisig =
+        values.adminMultisigEnabled && values.adminMultisig.threshold > 1
+          ? {
+              ...values.adminMultisig,
+              signers: sortAddresses(values.adminMultisig.signers),
+            }
+          : undefined
 
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
-      if (!values.poolIcon || !values.executiveSummary) {
+      if (!values.poolIcon || (!isTestEnv && !values.executiveSummary)) {
         return
       }
-      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all([
-        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon))),
-        values.issuerLogo ? lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))) : null,
-        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))),
-      ])
+
+      const promises = [lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon)))]
+
+      if (values.issuerLogo) {
+        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))))
+      }
+
+      if (!isTestEnv && values.executiveSummary) {
+        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))))
+      }
+
+      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
 
       metadataValues.issuerLogo = pinnedIssuerLogo?.uri
         ? { uri: pinnedIssuerLogo.uri, mime: values?.issuerLogo?.type || '' }
         : null
-      metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+
+      metadataValues.executiveSummary =
+        !isTestEnv && values.executiveSummary
+          ? { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+          : null
+
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
       if (values.reportUrl) {
@@ -455,7 +469,7 @@ function CreatePoolForm() {
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
-      if (metadataValues.adminMultisig) {
+      if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
         addMultisig(metadataValues.adminMultisig)
       }
 
@@ -463,6 +477,7 @@ function CreatePoolForm() {
         (aoProxy, adminProxy) => {
           createPoolTx(
             [
+              values,
               CurrencyBalance.fromFloat(createDeposit, chainDecimals),
               aoProxy,
               adminProxy,
@@ -530,6 +545,14 @@ function CreatePoolForm() {
       label,
       value: label,
     })) ?? []
+
+  // Use useEffect to update tranche name when poolName changes
+  React.useEffect(() => {
+    if (form.values.poolName) {
+      form.setFieldValue('tranches', [createEmptyTranche(form.values.poolName)])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.values.poolName])
 
   return (
     <>
@@ -644,18 +667,20 @@ function CreatePoolForm() {
               </Box>
               <Box gridColumn="span 2">
                 <Field name="currency" validate={validate.currency}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <Select
-                      name="currency"
-                      label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                      onChange={(event) => form.setFieldValue('currency', event.target.value)}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
-                      placeholder="Select..."
-                    />
-                  )}
+                  {({ field, form, meta }: FieldProps) => {
+                    return (
+                      <Select
+                        name="currency"
+                        label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
+                        onChange={(event) => form.setFieldValue('currency', event.target.value)}
+                        onBlur={field.onBlur}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        value={field.value}
+                        options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
+                        placeholder="Select..."
+                      />
+                    )
+                  }}
                 </Field>
               </Box>
               <Box gridColumn="span 2">
@@ -691,7 +716,7 @@ function CreatePoolForm() {
                 <Text variant="body3">
                   Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
                 </Text>
-                <Button variant="secondary" onClick={() => history.goBack()}>
+                <Button variant="secondary" onClick={() => navigate(-1)}>
                   Cancel
                 </Button>
                 <Button

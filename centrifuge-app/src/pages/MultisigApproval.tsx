@@ -2,13 +2,16 @@ import { computeMultisig } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Text, TextAreaInput } from '@centrifuge/fabric'
 import { useLocation } from 'react-router'
-import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { usePendingMultisigActions } from '../components/PendingMultisigs'
 import { truncate } from '../utils/web3'
 
 export default function MultisigApprovalPage() {
+  return <MultisigApproval />
+}
+
+function MultisigApproval() {
   const { search } = useLocation()
   const {
     substrate: { accounts, selectedAddress, selectAccount },
@@ -45,7 +48,7 @@ export default function MultisigApprovalPage() {
 
   const suitableAccount = accounts?.find((acc) => multisig.signers.includes(acc.address))
   return (
-    <LayoutBase>
+    <>
       <PageHeader title="Approve multisig transaction" subtitle={`Call hash: ${truncate(hash)}`}></PageHeader>
       <PageSection>
         <Shelf justifyContent="space-between">
@@ -90,6 +93,6 @@ export default function MultisigApprovalPage() {
           )}
         </Shelf>
       </PageSection>
-    </LayoutBase>
+    </>
   )
 }

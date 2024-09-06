@@ -14,7 +14,7 @@ const StyledAnchor = styled.a<{ $disabled?: boolean }>(
   (props) => props.$disabled && { pointerEvents: 'none' }
 )
 
-export const AnchorButton: React.FC<AnchorButtonProps> = ({
+export function AnchorButton({
   variant,
   small,
   icon,
@@ -25,7 +25,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
   children,
   active,
   ...anchorProps
-}) => {
+}: AnchorButtonProps) {
   return (
     <StyledAnchor $disabled={loading || disabled} rel="noopener noreferrer" {...anchorProps}>
       <VisualButton

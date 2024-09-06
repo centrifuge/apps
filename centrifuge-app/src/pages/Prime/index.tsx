@@ -1,9 +1,7 @@
 import { CurrencyBalance, addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
-import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -13,11 +11,7 @@ import { usePools } from '../../utils/usePools'
 import { useSubquery } from '../../utils/useSubquery'
 
 export default function PrimePage() {
-  return (
-    <LayoutBase gap={5}>
-      <Prime />
-    </LayoutBase>
-  )
+  return <Prime />
 }
 
 function Prime() {
@@ -105,6 +99,15 @@ function DaoPortfoliosTable() {
               }
             }
           }
+          investorPositions {
+            nodes {
+              holdingQuantity
+              poolId
+              purchasePrice
+              timestamp
+              trancheId
+            }
+          }
         }
       }
     }`,
@@ -116,30 +119,45 @@ function DaoPortfoliosTable() {
   const mapped: Row[] = daos.map((dao, i) => {
     const account = subData?.accounts.nodes.find((n: any) => n.id === dao.centAddress)
     const investTxs = account?.investorTransactions.nodes
-    const trancheBalances = !!account
-      ? Object.fromEntries(
-          account.trancheBalances.nodes.map((tranche: any) => {
-            const pool = pools?.find((p) => p.id === tranche.poolId)
-            const decimals = pool?.currency.decimals ?? 18
-            const tokenPrice = pool?.tranches.find((t) => tranche.trancheId.endsWith(t.id))?.tokenPrice?.toFloat() ?? 1
-            let balance = new CurrencyBalance(
-              new BN(tranche.claimableTrancheTokens).add(new BN(tranche.pendingRedeemTrancheTokens)),
-              decimals
-            ).toFloat()
+    const trancheBalances: Record<string, { balance: number; tokenPrice: number }> = {}
 
-            const subqueryCurrencies = account?.currencyBalances.nodes.filter(
-              (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
-            )
-            if (subqueryCurrencies.length) {
-              balance += subqueryCurrencies.reduce(
-                (acc: number, cur: any) => acc + new CurrencyBalance(cur.amount, decimals).toFloat(),
-                0
-              )
-            }
-            return [tranche.trancheId.split('-')[1], { balance, tokenPrice }]
-          })
-        )
-      : {}
+    account?.investorPositions.nodes.forEach((position: any) => {
+      const pool = pools?.find((p) => p.id === position.poolId)
+      const trancheId = position.trancheId.split('-')[1]
+      const decimals = pool?.currency.decimals ?? 18
+      const tokenPrice = pool?.tranches.find((t) => trancheId === t.id)?.tokenPrice?.toFloat() ?? 1
+      const balance = new CurrencyBalance(position.holdingQuantity, decimals).toFloat()
+      const existing = trancheBalances[trancheId]
+      if (existing) {
+        existing.balance += balance
+      } else {
+        trancheBalances[trancheId] = { balance, tokenPrice }
+      }
+    })
+    // const trancheBalances = !!account
+    //   ? Object.fromEntries(
+    //       account.trancheBalances.nodes.map((tranche: any) => {
+    //         const pool = pools?.find((p) => p.id === tranche.poolId)
+    //         const decimals = pool?.currency.decimals ?? 18
+    //         const tokenPrice = pool?.tranches.find((t) => tranche.trancheId.endsWith(t.id))?.tokenPrice?.toFloat() ?? 1
+    //         let balance = new CurrencyBalance(
+    //           new BN(tranche.claimableTrancheTokens).add(new BN(tranche.pendingRedeemTrancheTokens)),
+    //           decimals
+    //         ).toFloat()
+
+    //         const subqueryCurrencies = account?.currencyBalances.nodes.filter(
+    //           (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
+    //         )
+    //         if (subqueryCurrencies.length) {
+    //           balance += subqueryCurrencies.reduce(
+    //             (acc: number, cur: any) => acc + new CurrencyBalance(cur.amount, decimals).toFloat(),
+    //             0
+    //           )
+    //         }
+    //         return [tranche.trancheId.split('-')[1], { balance, tokenPrice }]
+    //       })
+    //     )
+    //   : {}
     const totalValue = Object.values(trancheBalances)?.reduce(
       (acc, { balance, tokenPrice }) => acc + balance * tokenPrice,
       0

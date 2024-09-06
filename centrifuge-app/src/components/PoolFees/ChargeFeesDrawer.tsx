@@ -18,6 +18,8 @@ type ChargeFeesProps = {
 
 export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
@@ -26,10 +28,11 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const feeIndex = params.get('charge')
   const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const feeChainData = feeIndex ? poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
-  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.aum.toDecimal()).div(100)
+  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.aum.toDecimal())
   const [updateCharge, setUpdateCharge] = React.useState(false)
   const address = useAddress()
   const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
+  const maxFee = formatPercentage(feeChainData?.amounts.percentOfNav.toPercent() || 0)
 
   const { execute: chargeFeeTx, isLoading: isChargeFeeLoading } = useCentrifugeTransaction('Charge fee', (cent) => {
     return cent.pools.chargePoolFee
@@ -144,7 +147,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           secondaryLabel={`Maximum charge ${formatBalance(
                             maxCharge || 0,
                             pool.currency.symbol
-                          )} (${formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} NAV)`}
+                          )} (${maxFee} NAV)`}
                           onChange={(value) => form.setFieldValue('amount', value)}
                         />
                       )
@@ -152,7 +155,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                   </Field>
                   <Box bg="backgroundButtonSecondary" p={1} borderRadius="2px">
                     <Text variant="body3" color="textSecondary">
-                      Charging of fees will be finalized by the issuer of the pool when executing orders
+                      Fees charged will be paid during the execution of the epoch, if sufficient liquidity is available
                     </Text>
                   </Box>
                   <ButtonGroup variant="small">

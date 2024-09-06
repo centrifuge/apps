@@ -51,7 +51,7 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
     )
 
     return weightedSum.div(sumOfAmounts)
-  }, [transactions])
+  }, [pool.currency.decimals, transactions])
 
   const metrics = [
     ...(pricing.notional.gtn(0)

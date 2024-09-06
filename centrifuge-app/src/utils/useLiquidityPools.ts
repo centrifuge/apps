@@ -25,13 +25,16 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
     ['activeDomains', poolId, routers?.length],
     async () => {
       const results = await Promise.allSettled(
-        routers!.map(async (r) => {
-          const rpcProvider = getProvider(r.chainId)
-          const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
-            rpcProvider,
-          })
-          const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
-          return [manager, pool] as const
+        routers!.map((r) => {
+          async function getManager() {
+            const rpcProvider = getProvider(r.chainId)
+            const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
+              rpcProvider,
+            })
+            const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
+            return [manager, pool] as const
+          }
+          return withTimeout(getManager(), 15000)
         })
       )
       return results
@@ -46,9 +49,9 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
             ...pool,
             chainId: router.chainId,
             managerAddress: manager,
-            hasDeployedLp: Object.values(pool.liquidityPools).some(
-              (tranche) => !!Object.values(tranche).some((p) => !!p)
-            ),
+            hasDeployedLp:
+              pool.liquidityPools &&
+              Object.values(pool.liquidityPools).some((tranche) => !!Object.values(tranche).some((p) => !!p)),
           }
           return domain
         })
@@ -87,36 +90,12 @@ export function useLiquidityPools(poolId: string, trancheId: string) {
   return query
 }
 
-export function useLPEvents(poolId: string, trancheId: string, lpAddress?: string) {
-  const {
-    evm: { chainId, getProvider, selectedAddress },
-  } = useWallet()
-  const cent = useCentrifuge()
-  const { data: lps } = useLiquidityPools(poolId, trancheId)
-  const lp = lps?.find((l) => l.lpAddress === lpAddress)
-
-  const query = useQuery(
-    ['lpDepositedEvents', chainId, lp?.lpAddress, selectedAddress],
-    () =>
-      cent.liquidityPools.getRecentLPEvents([lp!.lpAddress, selectedAddress!], {
-        rpcProvider: getProvider(chainId!),
-      }),
-
-    {
-      enabled: !!lp && !!selectedAddress,
-    }
-  )
-  return query
-}
-
 export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lpIndex?: number) {
   const {
     evm: { chainId, getProvider },
   } = useWallet()
   const address = useAddress('evm')
   const cent = useCentrifuge()
-  const { data: domains } = useActiveDomains(poolId)
-  const managerAddress = domains?.find((d) => d.chainId === chainId)?.managerAddress
 
   const { data: lps } = useLiquidityPools(poolId, trancheId)
   const lp = lps?.[lpIndex ?? 0]
@@ -124,19 +103,22 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   const query = useQuery(
     ['lpInvestment', chainId, lp?.lpAddress, address],
     async () => ({
-      ...(await cent.liquidityPools.getLiquidityPoolInvestment(
-        [address!, managerAddress!, lp!.lpAddress, lp!.currency.address],
-        {
-          rpcProvider: getProvider(chainId!),
-        }
-      )),
+      ...(await cent.liquidityPools.getLiquidityPoolInvestment([address!, lp!], {
+        rpcProvider: getProvider(chainId!),
+      })),
       ...lp!,
     }),
-
     {
       enabled: !!lp && !!address,
     }
   )
 
   return query
+}
+
+function timeout(ms: number): Promise<never> {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Operation timed out')), ms))
+}
+function withTimeout<T>(promise: Promise<T>, ms: number) {
+  return Promise.race([promise, timeout(ms)])
 }

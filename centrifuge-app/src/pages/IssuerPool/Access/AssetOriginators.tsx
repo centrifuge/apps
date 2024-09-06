@@ -1,6 +1,7 @@
 import {
   addressToHex,
   computeTrancheId,
+  evmToSubstrateAddress,
   getCurrencyLocation,
   isSameAddress,
   PoolMetadata,
@@ -8,6 +9,7 @@ import {
   WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import {
+  useCentEvmChainId,
   useCentrifuge,
   useCentrifugeApi,
   useCentrifugeConsts,
@@ -118,6 +120,7 @@ function AOForm({
   poolId: string
 }) {
   const [isEditing, setIsEditing] = React.useState(false)
+  const chainId = useCentEvmChainId()
   const [account] = useSuitableAccounts({ poolId, actingAddress: [ao.address] }).filter((a) => a.proxies?.length === 2)
   const identity = useIdentity(ao.address)
   const api = useCentrifugeApi()
@@ -311,8 +314,8 @@ function AOForm({
       }
       execute(
         [
-          addedWithdraw.map((w) => getKeyForReceiver(api, w)),
-          removedWithdraw.map((w) => getKeyForReceiver(api, w)),
+          addedWithdraw.filter((w) => Object.keys(w).length !== 0).map((w) => getKeyForReceiver(api, w)),
+          removedWithdraw.filter((w) => Object.keys(w).length !== 0).map((w) => getKeyForReceiver(api, w)),
           null,
           addedPermissions,
           addedDelegates,
@@ -438,7 +441,9 @@ function AOForm({
                       <AddAddressInput
                         existingAddresses={[...form.values.delegates, ao.address]}
                         onAdd={(address) => {
-                          fldArr.push(addressToHex(address))
+                          fldArr.push(
+                            isEvmAddress(address) ? evmToSubstrateAddress(address, chainId ?? 0) : addressToHex(address)
+                          )
                         }}
                       />
                     )}

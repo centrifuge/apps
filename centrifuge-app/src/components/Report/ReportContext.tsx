@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { useSearchParams } from 'react-router-dom'
 
 export type GroupBy = 'day' | 'month' | 'quarter' | 'year' | 'daily'
 
@@ -27,7 +28,6 @@ export type ReportContextType = {
   setEndDate: (date: string) => void
 
   report: Report
-  setReport: (report: Report) => void
 
   groupBy: GroupBy
   setGroupBy: (groupBy: GroupBy) => void
@@ -62,28 +62,89 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [csvData, setCsvData] = React.useState<CsvDataProps | undefined>(undefined)
 
   // Global filters
-  const { report: reportParam } = useParams<{ report: string }>()
+  const { report: reportParam } = useParams<{ report: Report }>()
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  React.useEffect(() => {
-    if (reportParam === undefined) return
-    setReport(reportParam as Report)
-  }, [reportParam])
+  const report = reportParam || 'balance-sheet'
 
-  const [report, setReport] = React.useState<Report>('balance-sheet')
-
-  const [startDate, setStartDate] = React.useState(
-    new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10)
-  )
+  const [startDate, setStartDate] = React.useState<string>('')
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
 
   // Custom filters for specific reports
-  const [loanStatus, setLoanStatus] = React.useState('all')
-  const [groupBy, setGroupBy] = React.useState<GroupBy>('month')
-  const [activeTranche, setActiveTranche] = React.useState('all')
-  const [txType, setTxType] = React.useState('all')
-  const [address, setAddress] = React.useState('')
-  const [network, setNetwork] = React.useState<string | number>('all')
-  const [loan, setLoan] = React.useState('all')
+  const [loanStatus, setLoanStatus] = React.useState<string>(searchParams.get('loanStatus') || 'all')
+  const [groupBy, setGroupBy] = React.useState<GroupBy>((searchParams.get('groupBy') as GroupBy) || 'month')
+  const [activeTranche, setActiveTranche] = React.useState(searchParams.get('activeTranche') || 'all')
+  const [txType, setTxType] = React.useState(searchParams.get('transactionType') || 'all')
+  const [address, setAddress] = React.useState(searchParams.get('address') || '')
+  const [network, setNetwork] = React.useState<string | number>(searchParams.get('network') || 'all')
+  const [loan, setLoan] = React.useState(searchParams.get('loan') || '')
+
+  React.useEffect(() => {
+    const startDate = searchParams.get('from')
+    const loan = searchParams.get('loanStatus')
+    if (reportParam === 'asset-list') {
+      setStartDate(startDate || new Date().toISOString().slice(0, 10))
+      setLoanStatus(loan || 'ongoing')
+    } else {
+      setStartDate(startDate || new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10))
+      setLoanStatus(loan || 'all')
+    }
+  }, [reportParam, setLoanStatus, setStartDate, searchParams])
+
+  const updateParamValues = (key: string, value: any) => {
+    const currentParams = new URLSearchParams()
+    const params = Object.fromEntries([...searchParams])
+    switch (key) {
+      case 'groupBy':
+        setGroupBy(value as GroupBy)
+        if (value === 'quarter' || value === 'year') {
+          delete params.from
+          delete params.to
+          currentParams.delete('to')
+        }
+        if (value === 'day') {
+          delete params.to
+        }
+        currentParams.set('groupBy', value)
+        break
+      case 'token':
+        setActiveTranche(value)
+        currentParams.set('token', value)
+        break
+      case 'loanStatus':
+        setLoanStatus(value)
+        currentParams.set('loanStatus', value)
+        break
+      case 'txType':
+        setTxType(value)
+        currentParams.set('transactionType', value)
+        break
+      case 'address':
+        setAddress(value)
+        currentParams.set('address', value)
+        break
+      case 'network':
+        setNetwork(value)
+        currentParams.set('network', value)
+        break
+      case 'asset':
+        setLoan(value)
+        currentParams.set('asset', value)
+        break
+      case 'from':
+        setStartDate(value)
+        currentParams.set('from', value)
+        break
+      case 'to':
+        setEndDate(value)
+        currentParams.set('to', value)
+        break
+      default:
+        break
+    }
+
+    setSearchParams({ ...params, ...Object.fromEntries(currentParams) })
+  }
 
   return (
     <ReportContext.Provider
@@ -91,25 +152,24 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         csvData,
         setCsvData,
         startDate,
-        setStartDate,
+        setStartDate: (value: string) => updateParamValues('from', value),
         endDate,
-        setEndDate,
+        setEndDate: (value) => updateParamValues('to', value),
         report,
-        setReport,
         loanStatus,
-        setLoanStatus,
+        setLoanStatus: (value: string) => updateParamValues('loanStatus', value),
         txType,
-        setTxType,
+        setTxType: (value: string) => updateParamValues('txType', value),
         groupBy,
-        setGroupBy,
+        setGroupBy: (value: string) => updateParamValues('groupBy', value),
         activeTranche,
-        setActiveTranche,
+        setActiveTranche: (value: string) => updateParamValues('token', value),
         address,
-        setAddress,
+        setAddress: (value: string) => updateParamValues('address', value),
         network,
-        setNetwork,
+        setNetwork: (value: any) => updateParamValues('network', value),
         loan,
-        setLoan,
+        setLoan: (value: string) => updateParamValues('asset', value),
       }}
     >
       {children}

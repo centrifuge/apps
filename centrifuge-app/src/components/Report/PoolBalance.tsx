@@ -148,6 +148,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
 
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to create CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-pool-balance-${formatDate(startDate, {

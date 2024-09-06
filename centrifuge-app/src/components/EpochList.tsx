@@ -43,7 +43,7 @@ export const columns: Column[] = [
   // },
 ]
 
-export const EpochList: React.FC<Props> = ({ pool }) => {
+export function EpochList({ pool }: Props) {
   // const theme = useTheme()
   const {
     // sumOfExecutableInvestments,
@@ -155,15 +155,18 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
   )
 }
 
-const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+function LockedRow({ row }: { row: LiquidityTableRow }) {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   return (
     <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked as Decimal, pool.currency.symbol)}</>
   )
 }
 
-// const ExecutingRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+// function ExecutingRow({ row }: { row: LiquidityTableRow }) {
 //   const { pid: poolId } = useParams<{ pid: string }>()
 //   const pool = usePool(poolId)
 //   return (
@@ -171,7 +174,7 @@ const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
 //   )
 // }
 
-// const ExecutingPercentageRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+// function ExecutingPercentageRow({ row }: { row: LiquidityTableRow }) {
 //   return (
 //     <>
 //       {React.isValidElement(row.executingPercentage)

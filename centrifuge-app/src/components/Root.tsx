@@ -9,15 +9,15 @@ import { GlobalStyle as FabricGlobalStyle, FabricProvider } from '@centrifuge/fa
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { LinkProps, Redirect, Route, RouteProps, BrowserRouter as Router, Switch, matchPath } from 'react-router-dom'
+import { NavLinkProps, Navigate, RouterProvider, createHashRouter, matchRoutes } from 'react-router-dom'
 import { config, evmChains } from '../config'
-import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { ExpiringCFGRewardsBanner } from './ExpiringCFGRewardsBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
+import { LayoutBase } from './LayoutBase'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
@@ -55,62 +55,6 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
-export function Root() {
-  const [debugState, setDebugState] = React.useState(initialFlagsState)
-  const isThemeToggled = debugState.alternativeTheme
-
-  return (
-    <>
-      <HelmetProvider>
-        <Head />
-      </HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <FabricProvider
-          theme={
-            !isThemeToggled
-              ? config.themes[config.defaultTheme]
-              : config.defaultTheme === 'dark'
-              ? config.themes.light
-              : config.themes.dark
-          }
-        >
-          <GlobalStyle />
-          <FabricGlobalStyle />
-          <CentrifugeProvider config={centConfig}>
-            <Router>
-              <DemoBanner />
-
-              <WalletProvider
-                evmChains={evmChains}
-                subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-                walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-                showAdvancedAccounts={debugState.showAdvancedAccounts as any}
-                showTestNets={debugState.showTestNets as any}
-                showFinoa={debugState.showFinoa as any}
-              >
-                <SupportedBrowserBanner />
-                <OnboardingAuthProvider>
-                  <OnboardingProvider>
-                    <DebugFlags onChange={(state) => setDebugState(state)}>
-                      <ExpiringCFGRewardsBanner />
-                      <TransactionProvider>
-                        <TransactionToasts />
-                        <LoadBoundary>
-                          <Routes />
-                        </LoadBoundary>
-                      </TransactionProvider>
-                    </DebugFlags>
-                  </OnboardingProvider>
-                </OnboardingAuthProvider>
-              </WalletProvider>
-            </Router>
-          </CentrifugeProvider>
-        </FabricProvider>
-      </QueryClientProvider>
-    </>
-  )
-}
-
 const AccountNFTsPage = React.lazy(() => import('../pages/AccountNFTs'))
 const CollectionPage = React.lazy(() => import('../pages/Collection'))
 const CollectionsPage = React.lazy(() => import('../pages/Collections'))
@@ -130,68 +74,140 @@ const PoolDetailPage = React.lazy(() => import('../pages/Pool'))
 const SwapsPage = React.lazy(() => import('../pages/Swaps'))
 const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
 const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
-const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
+const PoolsPage = React.lazy(() => import('../pages/Pools'))
 
-const routes: RouteProps[] = [
-  { path: '/nfts/collection/:cid/object/mint', component: MintNFTPage },
-  { path: '/nfts/collection/:cid/object/:nftid', component: NFTPage },
-  { path: '/nfts/collection/:cid', component: CollectionPage },
-  { path: '/nfts/account', component: AccountNFTsPage },
-  { path: '/nfts', component: CollectionsPage },
-  { path: '/issuer/create-pool', component: IssuerCreatePoolPage },
-  { path: '/issuer/:pid/assets/create', component: IssuerCreateLoanPage },
-  { path: '/issuer/:pid/assets/:aid', component: LoanPage, exact: true },
-  { path: '/issuer/:pid', component: IssuerPoolPage },
-  { path: '/pools/:pid/assets/:aid', component: LoanPage },
-  { path: '/pools/tokens', component: TokenOverviewPage },
-  { path: '/pools/:pid/transactions', component: PoolTransactionsPage },
-  { path: '/pools/:pid', component: PoolDetailPage },
-  { path: '/pools', component: PoolsPage },
-  { path: '/history/:address', component: TransactionHistoryPage },
-  { path: '/history', component: TransactionHistoryPage },
-  { path: '/portfolio', component: PortfolioPage },
-  { path: '/prime/:dao', component: PrimeDetailPage },
-  { path: '/prime', component: PrimePage },
-  { path: '/disclaimer', component: InvestmentDisclaimerPage },
-  { path: '/onboarding', component: OnboardingPage, exact: true },
-  { path: '/onboarding/verifyEmail', component: EmailVerified, exact: true },
-  { path: '/onboarding/updateInvestorStatus', component: UpdateInvestorStatus, exact: true },
-  { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
-  { path: '/swaps', component: SwapsPage },
-  { path: '/utils/address-format-converter', component: ConvertAddressPage },
-  { path: '/nav-management/:pid', component: NavManagementPage },
-  { path: '/', children: <Redirect to="/pools" /> },
+const router = createHashRouter([
   {
-    children: <NotFoundPage />,
+    path: '/',
+    element: <LayoutBase />,
+    children: [
+      {
+        path: '/',
+        element: <Navigate to="/pools" replace />,
+      },
+      {
+        path: '/pools',
+        element: <PoolsPage />,
+        handle: { component: PoolsPage },
+      },
+      {
+        path: '/pools/:pid/*',
+        element: <PoolDetailPage />,
+        handle: { component: PoolDetailPage },
+      },
+      {
+        path: '/issuer/:pid/*',
+        element: <IssuerPoolPage />,
+        handle: { component: IssuerPoolPage },
+      },
+      { path: '/nfts/collection/:cid/object/mint', element: <MintNFTPage />, handle: { component: MintNFTPage } },
+      { path: '/nfts/collection/:cid/object/:nftid', element: <NFTPage />, handle: { component: NFTPage } },
+      { path: '/nfts/collection/:cid', element: <CollectionPage />, handle: { component: CollectionPage } },
+      { path: '/nfts/account', element: <AccountNFTsPage />, handle: { component: AccountNFTsPage } },
+      { path: '/nfts', element: <CollectionsPage />, handle: { component: CollectionsPage } },
+      { path: '/issuer/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
+      { path: '/history/:address', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
+      { path: '/history', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
+      { path: '/pools/:pid/assets/:aid', element: <LoanPage />, handle: { component: LoanPage } },
+      {
+        path: '/pools/:pid/transactions',
+        element: <PoolTransactionsPage />,
+        handle: { component: PoolTransactionsPage },
+      },
+      {
+        path: '/issuer/:pid/assets/create',
+        element: <IssuerCreateLoanPage />,
+        handle: { component: IssuerCreateLoanPage },
+      },
+      { path: '/portfolio', element: <PortfolioPage />, handle: { component: PortfolioPage } },
+      { path: '/prime/:dao', element: <PrimeDetailPage />, handle: { component: PrimeDetailPage } },
+      { path: '/prime', element: <PrimePage />, handle: { component: PrimePage } },
+      { path: '/disclaimer', element: <InvestmentDisclaimerPage />, handle: { component: InvestmentDisclaimerPage } },
+      { path: '/onboarding', element: <OnboardingPage />, handle: { component: OnboardingPage } },
+      { path: '/onboarding/verifyEmail', element: <EmailVerified />, handle: { component: EmailVerified } },
+      {
+        path: '/onboarding/updateInvestorStatus',
+        element: <UpdateInvestorStatus />,
+        handle: { component: UpdateInvestorStatus },
+      },
+      { path: '/multisig-approval', element: <MultisigApprovalPage />, handle: { component: MultisigApprovalPage } },
+      { path: '/swaps', element: <SwapsPage />, handle: { component: SwapsPage } },
+      {
+        path: '/utils/address-format-converter',
+        element: <ConvertAddressPage />,
+        handle: { component: ConvertAddressPage },
+      },
+      { path: '/nav-management/:pid', element: <NavManagementPage />, handle: { component: NavManagementPage } },
+      { path: '*', element: <NotFoundPage />, handle: { component: NotFoundPage } },
+    ],
+    errorElement: <NotFoundPage />,
   },
-]
+])
 
 export function findRoute(pathname: string) {
-  return routes.find((r) => {
-    return r.path ? matchPath(pathname, r) : true
-  })
+  const matchedRoutes = matchRoutes(router.routes, { pathname })
+  return matchedRoutes ? matchedRoutes[0] : null
 }
 
-export function prefetchRoute(to: string | LinkProps['to']) {
+export function prefetchRoute(to: string | NavLinkProps['to']) {
   const pathname = typeof to === 'string' ? to : 'pathname' in to ? to.pathname : null
   const route = pathname ? findRoute(pathname) : null
-  const Comp = route?.component as any
+  const Comp = route?.route.handle?.component
+
   try {
-    if (Comp && '_init' in Comp && '_payload' in Comp) Comp._init(Comp._payload)
-  } catch {}
+    if (Comp && '_init' in Comp && '_payload' in Comp) {
+      ;(Comp as any)._init(Comp._payload)
+    }
+  } catch (error) {
+    console.error('Error prefetching route:', error)
+  }
 }
 
-function Routes() {
+export function Root() {
+  const [debugState, setDebugState] = React.useState(initialFlagsState)
+
   return (
-    <Switch>
-      {routes.map((route, i) => (
-        <Route {...route} key={i} />
-      ))}
-    </Switch>
+    <>
+      <HelmetProvider>
+        <Head />
+      </HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <FabricProvider theme={config.themes.light}>
+          <GlobalStyle />
+          <FabricGlobalStyle />
+          <CentrifugeProvider config={centConfig}>
+            <DemoBanner />
+            <WalletProvider
+              evmChains={evmChains}
+              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+              walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+              showAdvancedAccounts={debugState.showAdvancedAccounts}
+              showTestNets={debugState.showTestNets}
+              showFinoa={debugState.showFinoa}
+            >
+              <SupportedBrowserBanner />
+              <OnboardingAuthProvider>
+                <OnboardingProvider>
+                  <DebugFlags onChange={(state) => setDebugState(state)}>
+                    <ExpiringCFGRewardsBanner />
+                    <TransactionProvider>
+                      <TransactionToasts />
+                      <LoadBoundary>
+                        <RouterProvider router={router} />
+                      </LoadBoundary>
+                    </TransactionProvider>
+                  </DebugFlags>
+                </OnboardingProvider>
+              </OnboardingAuthProvider>
+            </WalletProvider>
+          </CentrifugeProvider>
+        </FabricProvider>
+      </QueryClientProvider>
+    </>
   )
 }

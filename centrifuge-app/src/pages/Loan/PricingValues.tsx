@@ -1,9 +1,11 @@
 import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { Card, Stack, Text } from '@centrifuge/fabric'
+import { Tooltips } from '../../components/Tooltips'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
+import { useAvailableFinancing } from '../../utils/useLoans'
 import { useAssetTransactions } from '../../utils/usePools'
 import { MetricsTable } from './MetricsTable'
 
@@ -16,6 +18,7 @@ export function PricingValues({ loan, pool }: Props) {
   const { pricing } = loan
 
   const assetTransactions = useAssetTransactions(loan.poolId)
+  const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
 
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
@@ -31,12 +34,14 @@ export function PricingValues({ loan, pool }: Props) {
       }
     })
 
-    const days = getAge(new Date(latestOraclePrice.timestamp).toISOString())
-
     const borrowerAssetTransactions = assetTransactions?.filter(
       (assetTransaction) => assetTransaction.asset.id === `${loan.poolId}-${loan.id}`
     )
-    const latestPrice = getLatestPrice(latestOraclePrice.value, borrowerAssetTransactions, pool.currency.decimals)
+    const latestPrice = getLatestPrice(latestOraclePrice, borrowerAssetTransactions, pool.currency.decimals)
+
+    const days = latestPrice.timestamp > 0 ? getAge(new Date(latestPrice.timestamp).toISOString()) : undefined
+
+    const accruedPrice = 'currentPrice' in loan && loan.currentPrice
 
     return (
       <Card p={3}>
@@ -48,10 +53,28 @@ export function PricingValues({ loan, pool }: Props) {
             metrics={[
               ...('isin' in pricing.priceId ? [{ label: 'ISIN', value: pricing.priceId.isin }] : []),
               {
-                label: `Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
-                value: latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-',
+                label: `Current price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
+                value: accruedPrice
+                  ? `${formatBalance(accruedPrice || latestPrice, pool.currency.symbol, 6, 2)}`
+                  : latestPrice
+                  ? `${formatBalance(latestPrice.value, pool.currency.symbol, 6, 2)}`
+                  : '-',
               },
-              { label: 'Price last updated', value: days === '0' ? `${days} ago` : `Today` },
+              {
+                label: <Tooltips type="linearAccrual" />,
+                value: pricing.withLinearPricing ? 'Enabled' : 'Disabled',
+              },
+              ...(!pricing.withLinearPricing
+                ? [{ label: 'Price last updated', value: days ? `${days} ago` : `Today` }]
+                : [{ label: 'Last manual price update', value: days ? `${days} ago` : `Today` }]),
+              ...(pricing.interestRate.gtn(0)
+                ? [
+                    {
+                      label: 'Interest rate',
+                      value: pricing.interestRate && formatPercentage(pricing.interestRate.toPercent()),
+                    },
+                  ]
+                : []),
             ]}
           />
         </Stack>
@@ -67,9 +90,30 @@ export function PricingValues({ loan, pool }: Props) {
         </Text>
         <MetricsTable
           metrics={[
+            ...('valuationMethod' in pricing && pricing.valuationMethod !== 'cash'
+              ? [
+                  { label: 'Available financing', value: formatBalance(availableFinancing, pool.currency.displayName) },
+                  {
+                    label: 'Total financed',
+                    value: formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2),
+                  },
+                ]
+              : []),
+            ...(loan.status === 'Active'
+              ? [
+                  {
+                    label: 'Outstanding',
+                    value: formatBalance(loan.outstandingDebt?.toDecimal() ?? 0, pool?.currency.symbol, 2),
+                  },
+                  {
+                    label: 'Total repaid',
+                    value: formatBalance(loan.totalRepaid?.toDecimal() ?? 0, pool?.currency.symbol, 2),
+                  },
+                ]
+              : []),
             ...(pricing.maturityDate ? [{ label: 'Maturity date', value: formatDate(pricing.maturityDate) }] : []),
             ...('maturityExtensionDays' in pricing && pricing.valuationMethod !== 'cash'
-              ? [{ label: 'Extension period', value: `${pricing.maturityExtensionDays} days` }]
+              ? [{ label: 'Extension period', value: `${pricing.maturityExtensionDays ?? 0} days` }]
               : []),
             ...(isOutstandingDebtOrDiscountedCashFlow
               ? [

@@ -1,5 +1,7 @@
 import Centrifuge, {
   AccountCurrencyBalance,
+  ActiveLoan,
+  CreatedLoan,
   CurrencyBalance,
   CurrencyMetadata,
   ExternalLoan,
@@ -23,65 +25,109 @@ import {
 import {
   Box,
   Button,
-  Card,
   CurrencyInput,
+  Flex,
   Grid,
   GridRow,
   InlineFeedback,
   Select,
+  SelectInner,
   Shelf,
   Stack,
   Text,
+  Tooltip,
 } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
+import { AnchorTextLink } from '../../components/TextLink'
 import { parachainIcons, parachainNames } from '../../config'
-import { Dec } from '../../utils/Decimal'
-import { formatBalance, roundDown } from '../../utils/formatting'
+import { Dec, min } from '../../utils/Decimal'
+import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { useAvailableFinancing } from '../../utils/useLoans'
+import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, positiveNumber } from '../../utils/validation'
+import { combine, positiveNumber } from '../../utils/validation'
+import { useChargePoolFees } from './ChargeFeesFields'
+import { ErrorMessage } from './ErrorMessage'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
-import { isExternalLoan } from './utils'
+import { SourceSelect } from './SourceSelect'
+import { isCashLoan, isExternalLoan } from './utils'
 
 const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
 
-type Key = `${'parachain' | 'evm'}:${number}`
+type Key = `${'parachain' | 'evm'}:${number}` | 'centrifuge'
 type FinanceValues = {
-  amount: number | '' | Decimal
+  principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
+  fees: { id: string; amount: '' | number | Decimal }[]
+  category: 'interest' | 'miscellaneous' | undefined
 }
 
+const UNLIMITED = Dec(1000000000000000)
+
 export function FinanceForm({ loan }: { loan: LoanType }) {
-  return isExternalLoan(loan) ? (
-    <ExternalFinanceForm loan={loan as ExternalLoan} />
-  ) : (
-    <InternalFinanceForm loan={loan} />
+  const [source, setSource] = React.useState<string>('reserve')
+
+  if (isExternalLoan(loan)) {
+    return (
+      <Stack gap={2} p={1}>
+        <Text variant="heading2">Purchase</Text>
+        <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
+        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
+      </Stack>
+    )
+  }
+
+  return (
+    <Stack gap={2} p={1}>
+      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
+      <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
+      <InternalFinanceForm loan={loan} source={source} />
+    </Stack>
   )
 }
 
-function InternalFinanceForm({ loan }: { loan: LoanType }) {
+/**
+ * Finance form for loans with `valuationMethod: outstandingDebt, discountedCashflow, cash`
+ */
+function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  if (!account) throw new Error('No borrower')
+  const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const loans = useLoans(loan.poolId)
+  const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
-
+  const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
-    'Finance asset',
-    (cent) => (args: [poolId: string, loanId: string, amount: BN], options) => {
-      const [poolId, loanId, amount] = args
-      return combineLatest([
-        cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
-        withdraw.getBatch(financeForm),
-      ]).pipe(
-        switchMap(([loanTx, batch]) => {
+    isCashLoan(loan) ? 'Deposit funds' : 'Finance asset',
+    (cent) => (args: [poolId: string, loanId: string, principal: BN], options) => {
+      if (!account) throw new Error('No borrower')
+      const [poolId, loanId, principal] = args
+      let financeTx
+      if (source === 'reserve') {
+        financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
+      } else if (source === 'other') {
+        if (!financeForm.values.category) throw new Error('No category selected')
+        const increaseDebtTx = api.tx.loans.increaseDebt(poolId, loan.id, { internal: principal })
+        const encoded = new TextEncoder().encode(financeForm.values.category)
+        const categoryHex = Array.from(encoded)
+          .map((byte) => byte.toString(16).padStart(2, '0'))
+          .join('')
+        financeTx = cent.remark.remark([[{ Named: categoryHex }], increaseDebtTx], { batch: true })
+      } else {
+        const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
+        let borrow = { amount: principal }
+        financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
+      }
+      return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
+        switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
+          const batch = [...withdrawBatch, ...poolFeesBatch]
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
@@ -99,21 +145,30 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
-      amount: '',
+      principal: '',
       withdraw: undefined,
+      fees: [],
+      category: 'interest',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
+      const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
+      doFinanceTransaction([loan.poolId, loan.id, principal], {
+        account,
+        forceProxyType: 'Borrow',
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    financeForm.validateForm()
+  }, [source])
+
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const withdraw = useWithdraw(loan.poolId, account, Dec(financeForm.values.amount || 0))
+  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.principal || 0), source)
 
   if (loan.status === 'Closed') {
     return null
@@ -121,72 +176,169 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-  const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
+  const totalFinance = Dec(financeForm.values.principal || 0)
+
+  const maxAvailable =
+    source === 'reserve'
+      ? min(poolReserve, availableFinancing)
+      : source === 'other'
+      ? UNLIMITED
+      : sourceLoan.outstandingDebt.toDecimal()
 
   return (
-    <Stack as={Card} gap={2} p={2}>
-      <Stack>
-        {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
-          <Shelf justifyContent="space-between">
-            <Text variant="heading3">Available financing</Text>
-            {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
-          </Shelf>
-        )}
-        <Shelf justifyContent="space-between">
-          <Text variant="label1">Total financed</Text>
-          <Text variant="label1">{formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}</Text>
-        </Shelf>
-      </Stack>
-      {availableFinancing.greaterThan(0) && !maturityDatePassed && (
+    <>
+      {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field
-              name="amount"
-              validate={combine(
-                positiveNumber(),
-                max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
-                max(
-                  maxBorrow.toNumber(),
-                  `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
-                )
-              )}
+              name="principal"
+              validate={combine(positiveNumber(), (val) => {
+                const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
+                if (maxAvailable !== UNLIMITED && principalValue.gt(maxAvailable)) {
+                  return `Principal exceeds available financing`
+                }
+                return ''
+              })}
             >
-              {({ field, meta, form }: FieldProps) => {
+              {({ field, form }: FieldProps) => {
                 return (
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Amount"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
-                    currency={pool?.currency.symbol}
-                    onChange={(value) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
+                    label={isCashLoan(loan) ? 'Amount' : 'Principal'}
+                    currency={displayCurrency}
+                    onChange={(value) => form.setFieldValue('principal', value)}
+                    onSetMax={
+                      maxAvailable !== UNLIMITED ? () => form.setFieldValue('principal', maxAvailable) : undefined
+                    }
                   />
                 )
               }}
             </Field>
-            {withdraw.render()}
-            {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
-              <InlineFeedback>
-                The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
-                the available financing
-              </InlineFeedback>
+            {source === 'other' && (
+              <Field name="category">
+                {({ field }: FieldProps) => {
+                  return (
+                    <Select
+                      options={[
+                        { label: 'Interest', value: 'interest' },
+                        { label: 'Correction', value: 'correction' },
+                        { label: 'Miscellaneous', value: 'miscellaneous' },
+                      ]}
+                      label="Category"
+                      {...field}
+                    />
+                  )
+                }}
+              </Field>
             )}
-            <Stack px={1}>
-              <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
-                Finance asset
+            {source === 'reserve' && withdraw.render()}
+
+            {poolFees.render()}
+
+            <ErrorMessage
+              type="critical"
+              condition={totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable)}
+            >
+              {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
+              {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
+              {formatBalance(maxAvailable, displayCurrency, 2)}).
+            </ErrorMessage>
+
+            <ErrorMessage
+              type="default"
+              condition={
+                source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available)
+              }
+            >
+              There is an additional{' '}
+              {formatBalance(
+                new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
+                displayCurrency
+              )}{' '}
+              available from repayments or deposits. This requires first executing the orders on the{' '}
+              <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
+            </ErrorMessage>
+
+            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+              <Text variant="heading4">Transaction summary</Text>
+              <Stack gap={1}>
+                <Shelf justifyContent="space-between">
+                  <Text variant="label2" color="textPrimary">
+                    Available balance
+                  </Text>
+                  <Text variant="label2">
+                    <Tooltip
+                      body={
+                        maxAvailable === UNLIMITED
+                          ? 'Unlimited because this is a virtual accounting process.'
+                          : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
+                      }
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+                    </Tooltip>
+                  </Text>
+                </Shelf>
+
+                <Stack gap={1}>
+                  <Shelf justifyContent="space-between">
+                    <Text variant="label2" color="textPrimary">
+                      {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
+                    </Text>
+                    <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                  </Shelf>
+                </Stack>
+
+                {poolFees.renderSummary()}
+              </Stack>
+
+              {source === 'reserve' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Stablecoins will be transferred to the specified withdrawal addresses, on the specified networks. A
+                    delay until the transfer is completed is to be expected.
+                  </Text>
+                </InlineFeedback>
+              ) : source === 'other' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to
+                    an increase in the NAV of the pool.
+                  </Text>
+                </InlineFeedback>
+              ) : (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stablecoin transfers are expected.
+                  </Text>
+                </InlineFeedback>
+              )}
+            </Stack>
+
+            <Stack>
+              <Button
+                type="submit"
+                loading={isFinanceLoading}
+                disabled={
+                  !financeForm.values.principal ||
+                  !withdraw.isValid(financeForm) ||
+                  !poolFees.isValid(financeForm) ||
+                  !financeForm.isValid ||
+                  maxAvailable.eq(0)
+                }
+              >
+                {isCashLoan(loan) ? 'Deposit' : 'Finance'}
               </Button>
             </Stack>
           </Stack>
         </FormikProvider>
       )}
-    </Stack>
+    </>
   )
 }
 
-function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddress[] }) {
+function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: WithdrawAddress[]; poolId: string }) {
   const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
@@ -209,7 +361,15 @@ function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withdrawAddresses.length])
 
-  if (!withdrawAddresses.length) return null
+  if (!withdrawAddresses.length)
+    return (
+      <ErrorMessage type="warning" condition={!withdrawAddresses.length}>
+        <Stack gap={1}>
+          To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
+          <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+        </Stack>
+      </ErrorMessage>
+    )
 
   return (
     <Select
@@ -226,88 +386,113 @@ function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddr
 }
 
 function Mux({
-  withdrawAddressesByDomain,
   withdrawAmounts,
+  selectedAddressIndexByCurrency,
+  setSelectedAddressIndex,
+  poolId,
 }: {
   amount: Decimal
   total: Decimal
-  withdrawAddressesByDomain: Record<string, WithdrawAddress[]>
+  poolId: string
   withdrawAmounts: WithdrawBucket[]
+  selectedAddressIndexByCurrency: Record<string, number>
+  setSelectedAddressIndex: (currency: string, index: number) => void
 }) {
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
   const getIcon = useGetNetworkIcon()
-
   return (
     <Stack gap={1}>
-      <Text variant="body2">Transactions per network</Text>
-      <Grid columns={3} rowGap={1}>
-        <GridRow borderBottomColor="borderPrimary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
-          <Text variant="label2">Amount</Text>
-          <Text variant="label2">Address</Text>
-          <Text variant="label2">Network</Text>
-        </GridRow>
-        {!withdrawAmounts.length && (
-          <Text variant="body3" color="statusCritical">
-            No suitable withdraw addresses
-          </Text>
-        )}
-        {withdrawAmounts.map(({ currency, amount, locationKey }) => {
-          const address = withdrawAddressesByDomain[locationKey][0]
-          return (
-            <GridRow>
-              <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
-              <Text variant="body3">{truncateAddress(utils.formatAddress(address.address))}</Text>
-              <Text variant="body3">
-                <Shelf gap="4px">
-                  <Box
-                    as="img"
-                    src={
-                      typeof address.location !== 'string' && 'parachain' in address.location
-                        ? parachainIcons[address.location.parachain]
-                        : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
-                    }
-                    alt=""
-                    width="iconSmall"
-                    height="iconSmall"
-                    style={{ objectFit: 'contain' }}
-                  />
-                  {typeof address.location === 'string'
-                    ? getName(address.location as any)
-                    : 'parachain' in address.location
-                    ? parachainNames[address.location.parachain]
-                    : getName(address.location.evm)}
-                </Shelf>
-              </Text>
+      {!withdrawAmounts.length ? (
+        <ErrorMessage type="warning" condition={!withdrawAmounts.length}>
+          <Stack gap={1}>
+            To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
+            <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+          </Stack>
+        </ErrorMessage>
+      ) : (
+        <>
+          <Text variant="body2">Transactions per network</Text>
+          <Grid columns={3} rowGap={1}>
+            <GridRow borderBottomColor="borderPrimary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
+              <Text variant="label2">Amount</Text>
+              <Text variant="label2">Address</Text>
+              <Text variant="label2">Network</Text>
             </GridRow>
-          )
-        })}
-      </Grid>
+            {withdrawAmounts.map(({ currency, amount, addresses, currencyKey }) => {
+              const index = selectedAddressIndexByCurrency[currencyKey] ?? 0
+              const address = addresses.at(index >>> 0) // undefined when index is -1
+              return (
+                <GridRow>
+                  <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
+                  <Text variant="body3">
+                    <Flex pr={1}>
+                      <SelectInner
+                        options={[
+                          { label: 'Ignore', value: '-1' },
+                          ...addresses.map((addr, index) => ({
+                            label: truncateAddress(utils.formatAddress(addr.address)),
+                            value: index.toString(),
+                          })),
+                        ]}
+                        value={index.toString()}
+                        onChange={(event) => setSelectedAddressIndex(currencyKey, parseInt(event.target.value))}
+                        small
+                      />
+                    </Flex>
+                  </Text>
+                  <Text variant="body3">
+                    {address && (
+                      <Shelf gap="4px">
+                        <Box
+                          as="img"
+                          src={
+                            typeof address.location !== 'string' && 'parachain' in address.location
+                              ? parachainIcons[address.location.parachain]
+                              : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
+                          }
+                          alt=""
+                          width="iconSmall"
+                          height="iconSmall"
+                          style={{ objectFit: 'contain' }}
+                          bleedY="4px"
+                        />
+                        {typeof address.location === 'string'
+                          ? getName(address.location as any)
+                          : 'parachain' in address.location
+                          ? parachainNames[address.location.parachain]
+                          : getName(address.location.evm)}
+                      </Shelf>
+                    )}
+                  </Text>
+                </GridRow>
+              )
+            })}
+          </Grid>
+        </>
+      )}
     </Stack>
   )
 }
 
-export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal) {
+export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal, source: string) {
   const pool = usePool(poolId)
   const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const access = usePoolAccess(poolId)
   const muxBalances = useBalances(TOKENMUX_PALLET_ACCOUNTID)
   const cent: Centrifuge = useCentrifuge()
   const api = useCentrifugeApi()
+  const [selectedAddressIndexByCurrency, setSelectedAddressIndexByCurrency] = React.useState<Record<string, number>>({})
 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
   const withdrawAddresses = ao?.transferAllowlist ?? []
 
   if (!isLocalAsset) {
-    if (!withdrawAddresses.length)
-      return {
-        render: () => null,
-        isValid: true,
-        getBatch: () => of([]),
-      }
     return {
-      render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} />,
-      isValid: true,
+      render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} poolId={poolId} />,
+      isValid: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
+        return source === 'reserve' ? !!values.withdraw : true
+      },
       getBatch: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
         if (!values.withdraw) return of([])
         return cent.pools
@@ -330,35 +515,39 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   }
 
   const sortedBalances = sortBalances(muxBalances?.currencies || [], pool.currency)
-  const withdrawAmounts = muxBalances?.currencies
-    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses)
-    : []
-  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
-  const withdrawAddressesByDomain: Record<string, WithdrawAddress[]> = {}
-  withdrawAddresses.forEach((addr) => {
-    const key = locationToKey(addr.location)
-    if (withdrawAddressesByDomain[key]) {
-      withdrawAddressesByDomain[key].push(addr)
-    } else {
-      withdrawAddressesByDomain[key] = [addr]
-    }
+  const ignoredCurrencies = Object.entries(selectedAddressIndexByCurrency).flatMap(([key, index]) => {
+    return index === -1 ? [key] : []
   })
+  const { buckets: withdrawAmounts } = muxBalances?.currencies
+    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses, ignoredCurrencies)
+    : { buckets: [] }
+
+  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
 
   return {
     render: () => (
       <Mux
-        withdrawAddressesByDomain={withdrawAddressesByDomain}
+        poolId={poolId}
         withdrawAmounts={withdrawAmounts}
+        selectedAddressIndexByCurrency={selectedAddressIndexByCurrency}
+        setSelectedAddressIndex={(currencyKey, index) => {
+          setSelectedAddressIndexByCurrency((prev) => ({
+            ...prev,
+            [currencyToString(currencyKey)]: index,
+          }))
+        }}
         total={totalAvailable}
         amount={amount}
       />
     ),
-    isValid: amount.lte(totalAvailable),
+    isValid: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
+      return source === 'reserve' ? amount.lte(totalAvailable) && !!values.withdraw : true
+    },
     getBatch: () => {
       return combineLatest(
         withdrawAmounts.flatMap((bucket) => {
-          // TODO: Select specific withdraw address for a domain if there's multiple
-          const withdraw = withdrawAddressesByDomain[bucket.locationKey][0]
+          const index = selectedAddressIndexByCurrency[bucket.currencyKey] ?? 0
+          const withdraw = bucket.addresses[index]
           if (bucket.amount.isZero()) return []
           return [
             of(
@@ -394,6 +583,8 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
 const order: Record<string, number> = {
   'evm:8453': 5,
   'evm:84531': 5,
+  'parachain:1000': 4,
+  'parachain:1001': 4,
   'parachain:2000': 4,
   'evm:42220': 3,
   'evm:44787': 3,
@@ -418,37 +609,70 @@ function sortBalances(balances: AccountCurrencyBalance[], localPoolCurrency: Cur
 }
 
 function locationToKey(location: WithdrawAddress['location']) {
-  return Object.entries(location)[0].join(':') as Key
+  return typeof location === 'string' ? location : (Object.entries(location)[0].join(':') as Key)
 }
 
-type WithdrawBucket = { currency: CurrencyMetadata; amount: Decimal; locationKey: Key }
+function currencyToString(currencyKey: CurrencyMetadata['key']) {
+  return JSON.stringify(currencyKey).replace(/"/g, '')
+}
+
+type WithdrawBucket = {
+  currency: CurrencyMetadata
+  amount: Decimal
+  locationKey: Key
+  currencyKey: string
+  addresses: WithdrawAddress[]
+}
 function divideBetweenCurrencies(
   amount: Decimal,
   balances: AccountCurrencyBalance[],
   withdrawAddresses: WithdrawAddress[],
+  ignoredCurrencies: string[],
   result: WithdrawBucket[] = []
 ) {
   const [next, ...rest] = balances
 
-  if (!next) return result
+  if (!next) {
+    return {
+      buckets: result,
+      remainder: amount,
+    }
+  }
 
-  const hasAddress = !!withdrawAddresses.find(
-    (addr) => locationToKey(addr.location) === locationToKey(getCurrencyLocation(next.currency))
+  const addresses = withdrawAddresses.filter((addr) =>
+    [locationToKey(getCurrencyLocation(next.currency)), 'centrifuge'].includes(locationToKey(addr.location))
   )
   const key = locationToKey(getCurrencyLocation(next.currency))
 
   let combinedResult = [...result]
   let remainder = amount
-  if (hasAddress) {
+  if (addresses.length) {
     const balanceDec = next.balance.toDecimal()
-    if (remainder.lte(balanceDec)) {
-      combinedResult.push({ amount: remainder, currency: next.currency, locationKey: key })
+    let obj = {
+      currency: next.currency,
+      locationKey: key,
+      addresses,
+      currencyKey: currencyToString(next.currency.key),
+    }
+    if (ignoredCurrencies.includes(obj.currencyKey)) {
+      combinedResult.push({
+        amount: Dec(0),
+        ...obj,
+      })
+    } else if (remainder.lte(balanceDec)) {
+      combinedResult.push({
+        amount: remainder,
+        ...obj,
+      })
       remainder = Dec(0)
     } else {
       remainder = remainder.sub(balanceDec)
-      combinedResult.push({ amount: balanceDec, currency: next.currency, locationKey: key })
+      combinedResult.push({
+        amount: balanceDec,
+        ...obj,
+      })
     }
   }
 
-  return divideBetweenCurrencies(remainder, rest, withdrawAddresses, combinedResult)
+  return divideBetweenCurrencies(remainder, rest, withdrawAddresses, ignoredCurrencies, combinedResult)
 }

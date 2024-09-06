@@ -15,6 +15,9 @@ type ChartData = {
 export default function CashDragChart() {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
 

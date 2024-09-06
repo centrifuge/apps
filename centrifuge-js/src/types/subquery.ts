@@ -8,9 +8,9 @@ export type SubqueryPoolSnapshot = {
   totalReserve: number
   offchainCashValue: number
   portfolioValuation: number
-  sumPoolFeesChargedAmountByPeriod: string | null
-  sumPoolFeesAccruedAmountByPeriod: string | null
-  sumPoolFeesPaidAmountByPeriod: string | null
+  sumPoolFeesChargedAmountByPeriod: string
+  sumPoolFeesAccruedAmountByPeriod: string
+  sumPoolFeesPaidAmountByPeriod: string
   sumBorrowedAmountByPeriod: string
   sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
@@ -44,6 +44,7 @@ export type SubqueryTrancheSnapshot = {
   sumOutstandingRedeemOrdersByPeriod: string
   sumFulfilledInvestOrdersByPeriod: string
   sumFulfilledRedeemOrdersByPeriod: string
+  yield7DaysAnnualized: string
   yield30DaysAnnualized: string
   yield90DaysAnnualized: string
   yieldSinceInception: string
@@ -97,6 +98,8 @@ export type AssetTransactionType =
   | 'DEPOSIT_FROM_INVESTMENTS'
   | 'WITHDRAWAL_FOR_REDEMPTIONS'
   | 'WITHDRAWAL_FOR_FEES'
+  | 'INCREASE_DEBT'
+  | 'DECREASE_DEBT'
 
 export enum AssetType {
   OnchainCash = 'OnchainCash',
@@ -124,6 +127,8 @@ export type SubqueryAssetTransaction = {
     metadata: string
     name: string
     type: AssetType
+    sumRealizedProfitFifo: string
+    unrealizedProfitAtMarketPrice: string
   }
   fromAsset?: {
     id: string
@@ -140,24 +145,50 @@ export type SubqueryAssetTransaction = {
 }
 
 export type SubqueryAssetSnapshot = {
-  __typename?: 'AssetSnapshot'
+  __typename?: 'allAssetSnapshots'
   asset: {
+    actualOriginationDate: number
+    advanceRate: string | undefined
+    collateralValue: string | undefined
+    discountRate: string | undefined
     id: string
-    metadata: string
+    lossGivenDefault: string | undefined
+    actualMaturityDate: string | undefined
     name: string
-    type: AssetType
+    probabilityOfDefault: string | undefined
+    status: string
+    sumRealizedProfitFifo: string | undefined
+    unrealizedProfitAtMarketPrice: string | undefined
+    valuationMethod: string
+    notional: string | undefined
   }
   timestamp: string
-  presentValue: string
-  currentPrice: string
-  outstandingPrincipal: string
-  outstandingInterest: string
-  outstandingDebt: string
-  outstandingQuantity: string
-  totalBorrowed: string
-  totalRepaidPrincipal: string
-  totalRepaidInterest: string
-  totalRepaidUnscheduled: string
+  assetId: string
+  presentValue: string | undefined
+  currentPrice: string | undefined
+  outstandingPrincipal: string | undefined
+  outstandingInterest: string | undefined
+  outstandingDebt: string | undefined
+  outstandingQuantity: string | undefined
+  totalRepaidPrincipal: string | undefined
+  totalRepaidInterest: string | undefined
+  totalRepaidUnscheduled: string | undefined
+}
+
+export type SubqueryPoolAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
+  timestamp: string | undefined
+  assetId: string
+  presentValue: string | undefined
+  currentPrice: string | undefined
+  outstandingPrincipal: string | undefined
+  outstandingInterest: string | undefined
+  outstandingDebt: string | undefined
+  outstandingQuantity: string | undefined
+  totalBorrowed: string | undefined
+  totalRepaidPrincipal: string | undefined
+  totalRepaidInterest: string | undefined
+  totalRepaidUnscheduled: string | undefined
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'

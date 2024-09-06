@@ -3,10 +3,9 @@ import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-
 import { Box, Button, Shelf, TextAreaInput } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { Redirect, useHistory, useParams } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { LoanTemplate } from '../../../types'
@@ -112,18 +111,17 @@ const initialSchemaJSON = `{
 }`
 
 export function IssuerPoolCreateLoanTemplatePage() {
-  return (
-    <LayoutBase>
-      <CreateLoanTemplate />
-    </LayoutBase>
-  )
+  return <CreateLoanTemplate />
 }
 
 export function CreateLoanTemplate() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const history = useHistory()
+  const navigate = useNavigate()
   const prefetchMetadata = usePrefetchMetadata()
   const [redirect, setRedirect] = React.useState('')
   const cent = useCentrifuge()
@@ -195,7 +193,7 @@ export function CreateLoanTemplate() {
   const isUpdating = !!poolMetadata.loanTemplates?.[0]
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    ;<Navigate to={redirect} />
   }
 
   return (
@@ -211,7 +209,7 @@ export function CreateLoanTemplate() {
         <Box position="sticky" bottom={0} backgroundColor="backgroundPage">
           <PageSection>
             <Shelf gap={1} justifyContent="end">
-              <Button variant="secondary" small onClick={() => history.goBack()}>
+              <Button variant="secondary" small onClick={() => navigate(-1)}>
                 Cancel
               </Button>
               <Button

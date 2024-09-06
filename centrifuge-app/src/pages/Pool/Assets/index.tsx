@@ -5,7 +5,6 @@ import { useParams } from 'react-router'
 import currencyDollar from '../../../assets/images/currency-dollar.svg'
 import daiLogo from '../../../assets/images/dai-logo.svg'
 import usdcLogo from '../../../assets/images/usdc-logo.svg'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -20,17 +19,20 @@ import { PoolDetailHeader } from '../Header'
 
 export function PoolDetailAssetsTab() {
   return (
-    <LayoutBase>
+    <>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 
 export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
   const isTinlakePool = poolId.startsWith('0x')
@@ -46,11 +48,23 @@ export function PoolDetailAssets() {
     )
   }
 
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssets = (loans &&
-    [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())) as ActiveLoan[]
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    )) as ActiveLoan[]
 
   const offchainAssets = !isTinlakePool
-    ? loans.filter((loan) => (loan as Loan).pricing.valuationMethod === 'cash')
+    ? loans.filter(
+        (loan) => hasValuationMethod((loan as Loan).pricing) && (loan as Loan).pricing.valuationMethod === 'cash'
+      )
     : null
   const offchainReserve = offchainAssets?.reduce<any>(
     (curr, prev) => curr.add(prev.status === 'Active' ? prev.outstandingDebt.toDecimal() : Dec(0)),
@@ -92,7 +106,8 @@ export function PoolDetailAssets() {
           },
           {
             label: 'Total assets',
-            value: loans.length,
+            value: loans.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash')
+              .length,
           },
           { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
           {

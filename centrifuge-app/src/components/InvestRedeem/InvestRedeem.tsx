@@ -15,7 +15,7 @@ import {
   TextWithPlaceholder,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ethConfig } from '../../config'
 import { formatBalance } from '../../utils/formatting'
@@ -49,7 +49,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
 
   const { data: domains } = useActiveDomains(poolId, isLiquidityPools)
   const domainsWithAtLeastOneLP =
-    domains && domains.filter((domain) => Object.values(domain.liquidityPools[trancheId]).some((p) => !!p))
+    domains && domains.filter((domain) => Object.values(domain.liquidityPools[trancheId] ?? {}).some((p) => !!p))
 
   const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
   if (domainsWithAtLeastOneLP) {
@@ -221,7 +221,7 @@ function OnboardingButton() {
   const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
   const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'
@@ -253,7 +253,7 @@ function OnboardingButton() {
     } else if (metadata?.onboarding?.externalOnboardingUrl) {
       window.open(metadata.onboarding.externalOnboardingUrl)
     } else {
-      history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
+      navigate(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
     }
   }
 

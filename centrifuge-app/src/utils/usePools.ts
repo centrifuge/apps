@@ -21,11 +21,11 @@ export function usePool<T extends boolean = true>(
   id: string,
   required?: T
 ): T extends true ? Pool | TinlakePool : Pool | TinlakePool | undefined {
-  const isTinlakePool = id.startsWith('0x')
+  const isTinlakePool = id?.startsWith('0x')
   const tinlakePools = useTinlakePools(isTinlakePool)
   const pools = usePools()
   const pool = isTinlakePool
-    ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id.toLowerCase())
+    ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id?.toLowerCase())
     : pools?.find((p) => p.id === id)
 
   if (!pool && required !== false) {
@@ -152,6 +152,18 @@ export function useAssetSnapshots(poolId: string, loanId: string, from?: Date, t
   const [result] = useCentrifugeQuery(
     ['assetSnapshots', poolId, loanId, from, to],
     (cent) => cent.pools.getAssetSnapshots([poolId, loanId, from, to]),
+    {
+      enabled: !poolId.startsWith('0x'),
+    }
+  )
+
+  return result
+}
+
+export function useAllPoolAssetSnapshots(poolId: string, date: string) {
+  const [result] = useCentrifugeQuery(
+    ['allAssetSnapshots', poolId, date],
+    (cent) => cent.pools.getAllPoolAssetSnapshots([poolId, new Date(date)]),
     {
       enabled: !poolId.startsWith('0x'),
     }

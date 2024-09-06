@@ -4,9 +4,10 @@ import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
+import { useBasePath } from '../../utils/useBasePath'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
-import { AnchorTextLink } from '../TextLink'
+import { RouterTextLink } from '../TextLink'
 
 type Row = {
   type: string
@@ -20,103 +21,12 @@ type Row = {
   toAssetName?: string
   amount: CurrencyBalance | undefined
   hash: string
+  netFlow?: 'positive' | 'negative' | 'neutral'
 }
 
 const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
   return 'default'
 }
-
-export const columns = [
-  {
-    align: 'left',
-    header: 'Type',
-    cell: ({ type }: Row) => <StatusChip status={getTransactionTypeStatus(type)}>{type}</StatusChip>,
-  },
-  {
-    align: 'left',
-    header: <SortableTableHeader label="Transaction date" />,
-    cell: ({ transactionDate }: Row) => (
-      <Text as="span" variant="body3">
-        {formatDate(transactionDate)}
-      </Text>
-    ),
-    sortKey: 'transactionDate',
-  },
-  {
-    align: 'left',
-    header: 'Asset',
-    cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
-      return fromAssetId && toAssetId && activeAssetId == fromAssetId.split('-')[1] ? (
-        <Text as="span" variant="body3">
-          {fromAssetName} &rarr;{' '}
-          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
-            {toAssetName}
-          </AnchorTextLink>
-        </Text>
-      ) : fromAssetId && toAssetId && activeAssetId == toAssetId.split('-')[1] ? (
-        <Text as="span" variant="body3">
-          <AnchorTextLink
-            target="_self"
-            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
-          >
-            {fromAssetName}
-          </AnchorTextLink>{' '}
-          &rarr; {toAssetName}
-        </Text>
-      ) : fromAssetId && toAssetId ? (
-        <Text as="span" variant="body3">
-          <AnchorTextLink
-            target="_self"
-            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
-          >
-            {fromAssetName}
-          </AnchorTextLink>{' '}
-          &rarr;{' '}
-          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
-            {toAssetName}
-          </AnchorTextLink>
-        </Text>
-      ) : activeAssetId != assetId?.split('-')[1] ? (
-        <Text as="span" variant="body3">
-          <AnchorTextLink target="_self" href={`/pools/${assetId?.split('-')[0]}/assets/${assetId?.split('-')[1]}`}>
-            {assetName || `Asset ${assetId?.split('-')[1]}`}
-          </AnchorTextLink>
-        </Text>
-      ) : (
-        <Text as="span" variant="body3">
-          {assetName || `Asset ${assetId?.split('-')[1]}`}
-        </Text>
-      )
-    },
-  },
-  {
-    align: 'right',
-    header: <SortableTableHeader label="Amount" />,
-    cell: ({ amount }: Row) => (
-      <Text as="span" variant="body3">
-        {amount ? formatBalance(amount, 'USD', 2, 2) : ''}
-      </Text>
-    ),
-    sortKey: 'amount',
-  },
-  {
-    align: 'right',
-    header: 'View transaction',
-    cell: ({ hash }: Row) => {
-      return (
-        <Stack
-          as="a"
-          href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Transaction on Subscan.io"
-        >
-          <IconExternalLink size="iconSmall" color="textPrimary" />
-        </Stack>
-      )
-    },
-  },
-]
 
 export const TransactionHistory = ({
   poolId,
@@ -149,11 +59,19 @@ export const TransactionHistoryTable = ({
   activeAssetId?: string
   preview?: boolean
 }) => {
+  const basePath = useBasePath('/pools')
   const getLabelAndAmount = (transaction: AssetTransaction) => {
+    const netFlow = activeAssetId
+      ? activeAssetId === transaction.toAsset?.id.split('-')[1]
+        ? 'positive'
+        : 'negative'
+      : 'neutral'
+
     if (transaction.type === 'CASH_TRANSFER') {
       return {
         label: 'Cash transfer',
         amount: transaction.amount,
+        netFlow,
       }
     }
 
@@ -161,6 +79,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Deposit from investments',
         amount: transaction.amount,
+        netFlow: 'positive',
       }
     }
 
@@ -168,6 +87,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Withdrawal for redemptions',
         amount: transaction.amount,
+        netFlow: 'negative',
       }
     }
 
@@ -175,6 +95,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Withdrawal for fees',
         amount: transaction.amount,
+        netFlow: 'negative',
       }
     }
 
@@ -182,6 +103,23 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Purchase',
         amount: transaction.amount,
+        netFlow,
+      }
+    }
+
+    if (transaction.type === 'INCREASE_DEBT') {
+      return {
+        label: 'Correction',
+        amount: transaction.amount,
+        netFlow: 'positive',
+      }
+    }
+
+    if (transaction.type === 'DECREASE_DEBT') {
+      return {
+        label: 'Correction',
+        amount: transaction.amount,
+        netFlow: 'negative',
       }
     }
 
@@ -197,6 +135,7 @@ export const TransactionHistoryTable = ({
           new BN(transaction.principalAmount || 0).add(new BN(transaction.interestAmount || 0)),
           transaction.principalAmount!.decimals
         ),
+        netFlow,
       }
     }
 
@@ -208,12 +147,14 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Interest payment',
         amount: transaction.interestAmount,
+        netFlow,
       }
     }
 
     return {
       label: 'Principal payment',
       amount: transaction.principalAmount,
+      netFlow,
     }
   }
 
@@ -253,13 +194,14 @@ export const TransactionHistoryTable = ({
     }
   })
 
-  const csvUrl = csvData?.length ? getCSVDownloadUrl(csvData) : ''
+  const csvUrl = (csvData?.length && getCSVDownloadUrl(csvData)) || ''
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { label, amount } = getLabelAndAmount(transaction)
+      const { label, amount, netFlow } = getLabelAndAmount(transaction)
       return {
         activeAssetId,
+        netFlow,
         type: label,
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
@@ -272,6 +214,84 @@ export const TransactionHistoryTable = ({
         hash: transaction.hash,
       }
     }) || []
+
+  const columns = [
+    {
+      align: 'left',
+      header: 'Type',
+      cell: ({ type }: Row) => <StatusChip status={getTransactionTypeStatus(type)}>{type}</StatusChip>,
+    },
+    {
+      align: 'left',
+      header: <SortableTableHeader label="Transaction date" />,
+      cell: ({ transactionDate }: Row) => (
+        <Text as="span" variant="body3">
+          {formatDate(transactionDate)}
+        </Text>
+      ),
+      sortKey: 'transactionDate',
+    },
+    {
+      align: 'left',
+      header: 'Asset',
+      cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
+        const base = `${basePath}/${poolId}/assets/`
+        return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
+          <Text as="span" variant="body3">
+            {fromAssetName} &rarr;{' '}
+            <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}>{toAssetName}</RouterTextLink>
+          </Text>
+        ) : fromAssetId && toAssetId && activeAssetId === toAssetId.split('-')[1] ? (
+          <Text as="span" variant="body3">
+            <RouterTextLink to={`${base}${fromAssetId?.split('-')[1]}`}>{fromAssetName}</RouterTextLink> &rarr;{' '}
+            {toAssetName}
+          </Text>
+        ) : fromAssetId && toAssetId ? (
+          <Text as="span" variant="body3">
+            <RouterTextLink to={`${base}${fromAssetId?.split('-')[1]}`}>{fromAssetName}</RouterTextLink> &rarr;{' '}
+            <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}>{toAssetName}</RouterTextLink>
+          </Text>
+        ) : activeAssetId !== assetId?.split('-')[1] ? (
+          <Text as="span" variant="body3">
+            <RouterTextLink to={`${base}${assetId?.split('-')[1]}`}>
+              {assetName || `Asset ${assetId?.split('-')[1]}`}
+            </RouterTextLink>
+          </Text>
+        ) : (
+          <Text as="span" variant="body3">
+            {assetName || `Asset ${assetId?.split('-')[1]}`}
+          </Text>
+        )
+      },
+    },
+    {
+      align: 'right',
+      header: <SortableTableHeader label="Amount" />,
+      cell: ({ amount, netFlow }: Row) => (
+        <Text as="span" variant="body3">
+          {amount ? `${activeAssetId && netFlow === 'negative' ? '-' : ''}${formatBalance(amount, 'USD', 2, 2)}` : ''}
+        </Text>
+      ),
+      sortKey: 'amount',
+    },
+    {
+      align: 'right',
+      header: 'View transaction',
+      cell: ({ hash }: Row) => {
+        return (
+          <Stack
+            as="a"
+            href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Transaction on Subscan.io"
+          >
+            <IconExternalLink size="iconSmall" color="textPrimary" />
+          </Stack>
+        )
+      },
+    },
+  ]
 
   return (
     <Stack gap={2}>
@@ -295,7 +315,7 @@ export const TransactionHistoryTable = ({
       <DataTable data={tableData} columns={columns} />
       {transactions?.length! > 8 && preview && (
         <Text variant="body2" color="textSecondary">
-          <AnchorTextLink href={`/pools/${poolId}/transactions`}>View all</AnchorTextLink>
+          <RouterTextLink to={`/pools/${poolId}/transactions`}>View all</RouterTextLink>
         </Text>
       )}
     </Stack>

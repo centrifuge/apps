@@ -1,12 +1,11 @@
 import { Pool, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
-import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useAddress } from '../../utils/useAddress'
 import { usePendingCollect, usePool } from '../../utils/usePools'
-import { useAccountStakes, useComputeLiquidityRewards, useRewardCurrencyGroup } from './hooks'
 import { LiquidityRewardsContext } from './LiquidityRewardsContext'
+import { useAccountStakes, useComputeLiquidityRewards, useRewardCurrencyGroup } from './hooks'
 import { LiquidityRewardsActions, LiquidityRewardsProviderProps, LiquidityRewardsState } from './types'
 
 export function LiquidityRewardsProvider(props: LiquidityRewardsProviderProps) {
