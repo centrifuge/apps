@@ -109,7 +109,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'INCREASE_DEBT') {
       return {
-        label: 'Correction',
+        label: 'Correction ↑',
         amount: transaction.amount,
         netFlow: 'positive',
       }
@@ -117,7 +117,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'DECREASE_DEBT') {
       return {
-        label: 'Correction',
+        label: 'Correction ↓',
         amount: transaction.amount,
         netFlow: 'negative',
       }
