@@ -49,8 +49,9 @@ const StyledTabsItem = styled.button<{ $active?: boolean }>(
       paddingLeft: 2,
       paddingRight: 2,
       paddingBottom: 2,
-      color: 'textPrimary',
+      color: $active ? 'textPrimary' : 'textSecondary',
       boxShadow: $active ? `inset 0 -2px 0 ${theme.colors.textGold}` : 'none',
+      fontWeight: 400,
 
       '&:hover, &:active, &:focus-visible': {
         color: 'textGold',
@@ -70,7 +71,7 @@ type TabsItemPrivateProps = TabsItemProps & {
 export function TabsItem({ children, active, onClick, ariaLabel, ...rest }: TabsItemPrivateProps) {
   return (
     <StyledTabsItem onClick={onClick} $active={active} role="tab" aria-label={ariaLabel} {...rest}>
-      <Text variant="interactive1" color="inherit">
+      <Text variant="interactive1" color="inherit" fontWeight={400}>
         {children}
       </Text>
     </StyledTabsItem>

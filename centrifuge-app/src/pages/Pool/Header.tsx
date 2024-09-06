@@ -30,14 +30,11 @@ export function PoolDetailHeader({ actions }: Props) {
   return (
     <PageHeader
       title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
-      subtitle={
-        <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
-      }
       parent={{ to: `/pools${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
       icon={
         <Eththumbnail show={isTinlakePool}>
           {metadata?.pool?.icon ? (
-            <Box as="img" width="iconLarge" height="iconLarge" src={iconUri} />
+            <Box as="img" width="iconLarge" height="iconLarge" src={iconUri} borderRadius={4} />
           ) : (
             <Shelf
               width="iconLarge"
