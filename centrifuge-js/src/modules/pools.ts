@@ -3471,7 +3471,6 @@ export function getPoolsModule(inst: Centrifuge) {
               currency {
                 trancheId
               }
-              currencyId
               amount
             }
           }
