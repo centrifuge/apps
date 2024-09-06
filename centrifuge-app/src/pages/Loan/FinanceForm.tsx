@@ -437,7 +437,9 @@ function Mux({
                           })),
                         ]}
                         value={index.toString()}
-                        onChange={(event) => setSelectedAddressIndex(currencyKey, parseInt(event.target.value))}
+                        onChange={(event) => {
+                          setSelectedAddressIndex(currencyKey, parseInt(event.target.value))
+                        }}
                         small
                       />
                     </Flex>
@@ -538,7 +540,6 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
       },
     }
   }
-
   return {
     render: () => (
       <Mux
