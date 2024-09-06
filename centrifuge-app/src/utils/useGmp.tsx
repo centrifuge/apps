@@ -30,36 +30,6 @@ export function useGmp() {
     setGmp(gmp)
   }
 
-  React.useEffect(() => {
-    if (!gmp) {
-      const storedGmp = sessionStorage.getItem('gmp')
-      if (storedGmp) {
-        setGmp(JSON.parse(storedGmp))
-      }
-    }
-
-    if (executed) {
-      return () => {
-        sessionStorage.removeItem('gmp')
-      }
-    }
-  }, [gmp])
-
-  async function fetchData(txHash: string) {
-    try {
-      const response = await fetch(axelarApiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ txHash }),
-      })
-      const result = await response.json()
-      return result.data
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      return []
-    }
-  }
-
   const { data } = useQuery(
     ['gmp', gmp?.txHash],
     async () => {
@@ -76,6 +46,36 @@ export function useGmp() {
 
   const gasPaid = !!data?.[0]?.gas_paid
   const executed = !!data?.[0]?.executed
+
+  React.useEffect(() => {
+    if (!gmp) {
+      const storedGmp = sessionStorage.getItem('gmp')
+      if (storedGmp) {
+        setGmp(JSON.parse(storedGmp))
+      }
+    }
+
+    if (executed) {
+      return () => {
+        sessionStorage.removeItem('gmp')
+      }
+    }
+  }, [gmp, executed])
+
+  async function fetchData(txHash: string) {
+    try {
+      const response = await fetch(axelarApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ txHash }),
+      })
+      const result = await response.json()
+      return result.data
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      return []
+    }
+  }
 
   const render = React.useCallback(
     (poolId: string, trancheId: string) => {
