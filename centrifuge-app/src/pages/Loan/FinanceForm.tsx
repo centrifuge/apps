@@ -127,7 +127,10 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       }
       return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
         switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
-          const batch = [...withdrawBatch, ...poolFeesBatch]
+          let batch = []
+          if (withdrawBatch.length) {
+          }
+          batch = [...withdrawBatch, ...poolFeesBatch]
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
@@ -536,6 +539,8 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
       return source === 'reserve' ? amount.lte(totalAvailable) && !!withdrawalAddresses.length : true
     },
     getBatch: () => {
+      const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
+      if (!withdrawalAddresses.length) return of([])
       return combineLatest(
         withdrawAmounts.flatMap((bucket) => {
           const index = selectedAddressIndexByCurrency[bucket.currencyKey] ?? 0
