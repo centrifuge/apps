@@ -127,10 +127,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       }
       return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
         switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
-          let batch = []
-          if (withdrawBatch.length) {
-          }
-          batch = [...withdrawBatch, ...poolFeesBatch]
+          const batch = [...withdrawBatch, ...poolFeesBatch]
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
