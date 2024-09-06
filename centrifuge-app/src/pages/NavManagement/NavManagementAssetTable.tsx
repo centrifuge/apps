@@ -19,7 +19,7 @@ import { switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
-import { DataCol, DataRow, DataTable } from '../../components/DataTable'
+import { DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { RouterTextLink } from '../../components/TextLink'
@@ -371,29 +371,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             )
           }
         >
-          <DataTable
-            data={[...reserveRow, ...cashLoans, ...form.values.feed]}
-            columns={columns}
-            footer={
-              <DataRow>
-                <DataCol align="left">
-                  <Text color="accentPrimary" variant="body2">
-                    Total
-                  </Text>
-                </DataCol>
-                <DataCol />
-                <DataCol />
-                <DataCol />
-                <DataCol />
-                {isEditing && <DataCol />}
-                <DataCol>
-                  <Text color="accentPrimary" variant="body2">
-                    {formatBalance(newNav, pool.currency.symbol)}
-                  </Text>
-                </DataCol>
-              </DataRow>
-            }
-          />
+          <DataTable data={[...reserveRow, ...cashLoans, ...form.values.feed]} columns={columns} />
         </LayoutSection>
       </FormikProvider>
     </Stack>
