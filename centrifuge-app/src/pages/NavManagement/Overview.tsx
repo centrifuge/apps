@@ -109,7 +109,11 @@ export function NavOverviewCard({ poolId }: { poolId: string }) {
       current={pool.nav.total.toFloat()}
       change={changeInValuation ? new CurrencyBalance(changeInValuation, pool.currency.decimals).toFloat() : 0}
       pendingFees={pendingFees.toFloat()}
-      pendingNav={pool.nav.total.toFloat() - pendingFees.toFloat()}
+      pendingNav={new CurrencyBalance(changeInValuation, pool.currency.decimals)
+        .toDecimal()
+        .add(pool.nav.total.toDecimal())
+        .sub(pendingFees.toDecimal())
+        .toNumber()}
     />
   )
 }

@@ -181,6 +181,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
 
   React.useEffect(() => {
     repayForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destination])
 
   const repayFormRef = React.useRef<HTMLFormElement>(null)

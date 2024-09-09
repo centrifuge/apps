@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
+import { useGmp } from '../../utils/useGmp'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
@@ -87,6 +88,7 @@ type InputProps = {
 
 function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
   const { state } = useInvestRedeem()
+  const { render: renderGmp } = useGmp()
   const pool = usePool(state.poolId)
   let defaultView = defaultViewProp
   if (state.order && !defaultView) {
@@ -100,6 +102,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
 
   return (
     <Stack>
+      {renderGmp(state.poolId, state.trancheId)}
       <Flex
         style={{
           boxShadow: `inset 0 -2px 0 ${theme.colors.borderPrimary}`,

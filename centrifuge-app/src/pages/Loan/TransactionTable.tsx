@@ -133,6 +133,8 @@ export const TransactionTable = ({
   const getStatusText = (type: AssetTransactionType) => {
     if (type === 'BORROWED') return 'Financed'
     if (type === 'REPAID') return 'Repaid'
+    if (type === 'INCREASE_DEBT') return 'Correction ↑'
+    if (type === 'DECREASE_DEBT') return 'Correction ↓'
 
     return `${type[0]}${type.slice(1).toLowerCase()}`
   }

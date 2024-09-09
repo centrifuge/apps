@@ -163,6 +163,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
   React.useEffect(() => {
     financeForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source])
 
   const financeFormRef = React.useRef<HTMLFormElement>(null)
@@ -436,7 +437,9 @@ function Mux({
                           })),
                         ]}
                         value={index.toString()}
-                        onChange={(event) => setSelectedAddressIndex(currencyKey, parseInt(event.target.value))}
+                        onChange={(event) => {
+                          setSelectedAddressIndex(currencyKey, parseInt(event.target.value))
+                        }}
                         small
                       />
                     </Flex>
@@ -487,6 +490,30 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
   const withdrawAddresses = ao?.transferAllowlist ?? []
 
+  const sortedBalances = sortBalances(muxBalances?.currencies || [], pool.currency)
+  const ignoredCurrencies = Object.entries(selectedAddressIndexByCurrency).flatMap(([key, index]) => {
+    return index === -1 ? [key] : []
+  })
+  const { buckets: withdrawAmounts } = muxBalances?.currencies
+    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses, ignoredCurrencies)
+    : { buckets: [] }
+
+  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
+
+  React.useEffect(() => {
+    if (withdrawAddresses.length > 0 && sortedBalances.length > 0) {
+      const initialSelectedAddresses: Record<string, number> = {}
+      sortedBalances.forEach((balance) => {
+        const currencyKey = currencyToString(balance.currency.key)
+        if (!(currencyKey in initialSelectedAddresses)) {
+          initialSelectedAddresses[currencyKey] = 0
+        }
+      })
+      setSelectedAddressIndexByCurrency(initialSelectedAddresses)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withdrawAddresses])
+
   if (!isLocalAsset) {
     return {
       render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} poolId={poolId} />,
@@ -514,16 +541,6 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
     }
   }
 
-  const sortedBalances = sortBalances(muxBalances?.currencies || [], pool.currency)
-  const ignoredCurrencies = Object.entries(selectedAddressIndexByCurrency).flatMap(([key, index]) => {
-    return index === -1 ? [key] : []
-  })
-  const { buckets: withdrawAmounts } = muxBalances?.currencies
-    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses, ignoredCurrencies)
-    : { buckets: [] }
-
-  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
-
   return {
     render: () => (
       <Mux
@@ -540,10 +557,13 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
         amount={amount}
       />
     ),
-    isValid: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
-      return source === 'reserve' ? amount.lte(totalAvailable) && !!values.withdraw : true
+    isValid: (_: { values: Pick<FinanceValues, 'withdraw'> }) => {
+      const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
+      return source === 'reserve' ? amount.lte(totalAvailable) && !!withdrawalAddresses.length : true
     },
     getBatch: () => {
+      const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
+      if (!withdrawalAddresses.length) return of([])
       return combineLatest(
         withdrawAmounts.flatMap((bucket) => {
           const index = selectedAddressIndexByCurrency[bucket.currencyKey] ?? 0

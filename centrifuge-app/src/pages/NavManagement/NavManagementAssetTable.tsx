@@ -1,4 +1,4 @@
-import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CreatedLoan, CurrencyBalance, CurrencyKey, ExternalLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -15,16 +15,17 @@ import {
 import { BN } from 'bn.js'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { switchMap } from 'rxjs'
+import { combineLatest, switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
-import { DataCol, DataRow, DataTable } from '../../components/DataTable'
+import { DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { RouterTextLink } from '../../components/TextLink'
 import { formatBalance } from '../../utils/formatting'
 import { useLiquidity } from '../../utils/useLiquidity'
+import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolAccountOrders, usePoolFees } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
@@ -49,6 +50,7 @@ type Row = FormValues['feed'][0] | ActiveLoan | CreatedLoan
 const MAX_COLLECT = 100 // maximum number of transactions to collect in one batch
 
 export function NavManagementAssetTable({ poolId }: { poolId: string }) {
+  const { data: domains } = useActiveDomains(poolId)
   const allowedPools = usePoolsForWhichAccountIsFeeder()
   const isFeeder = !!allowedPools?.find((p) => p.id === poolId)
   const [isEditing, setIsEditing] = React.useState(false)
@@ -91,8 +93,20 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
-      return cent.pools.closeEpoch([poolId, false], { batch: true }).pipe(
-        switchMap((closeTx) => {
+      const domain = domains?.find((domain) => domain.isActive && domain.hasDeployedLp)
+      const updateTokenPrices = domain
+        ? Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+            return domain.currencies
+              .filter((cur) => !!poolsByCurrency[cur.address])
+              .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+              .map(([tid, curKey]) =>
+                cent.liquidityPools.updateTokenPrice([poolId, tid, curKey, domain.chainId], { batch: true })
+              )
+          })
+        : []
+
+      return combineLatest([cent.pools.closeEpoch([poolId, false], { batch: true }), ...updateTokenPrices]).pipe(
+        switchMap(([closeTx, ...updateTokenPricesTxs]) => {
           const [values] = args
           const batch = [
             ...values.feed
@@ -103,6 +117,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               }),
             api.tx.oraclePriceCollection.updateCollection(poolId),
             api.tx.loans.updatePortfolioValuation(poolId),
+            ...updateTokenPricesTxs,
           ]
 
           if (liquidityAdminAccount && orders?.length) {
@@ -371,29 +386,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             )
           }
         >
-          <DataTable
-            data={[...reserveRow, ...cashLoans, ...form.values.feed]}
-            columns={columns}
-            footer={
-              <DataRow>
-                <DataCol align="left">
-                  <Text color="accentPrimary" variant="body2">
-                    Total
-                  </Text>
-                </DataCol>
-                <DataCol />
-                <DataCol />
-                <DataCol />
-                <DataCol />
-                {isEditing && <DataCol />}
-                <DataCol>
-                  <Text color="accentPrimary" variant="body2">
-                    {formatBalance(newNav, pool.currency.symbol)}
-                  </Text>
-                </DataCol>
-              </DataRow>
-            }
-          />
+          <DataTable data={[...reserveRow, ...cashLoans, ...form.values.feed]} columns={columns} />
         </LayoutSection>
       </FormikProvider>
     </Stack>
