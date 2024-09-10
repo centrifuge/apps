@@ -3739,6 +3739,65 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getPoolAccountOrders(args: [poolId: string]) {
+    const [poolId] = args
+
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) =>
+            api.events.poolSystem.EpochClosed.is(event) ||
+            api.events.poolSystem.EpochExecuted.is(event) ||
+            api.events.investments.InvestOrderUpdated.is(event) ||
+            api.events.investments.RedeemOrderUpdated.is(event)
+        )
+        return !!event
+      })
+    )
+    return inst.getApi().pipe(
+      switchMap((api) =>
+        combineLatest([api.query.investments.investOrders.keys(), api.query.investments.redeemOrders.keys()]).pipe(
+          switchMap(([investKeys, redeemKeys]) => {
+            console.log('investKeys', investKeys)
+            const keys = [...investKeys, ...redeemKeys]
+              .map((k, i) => {
+                const key = k.toHuman() as [string, [poolId: string, trancheId: string]]
+                return {
+                  accountId: addressToHex(key[0]),
+                  poolId: key[1][0].replace(/\D/g, ''),
+                  trancheId: key[1][1],
+                  type: i >= investKeys.length ? 'redeem' : 'invest',
+                }
+              })
+              .filter((k) => k.poolId === poolId && k)
+            return api
+              .queryMulti(
+                keys.map((key) => [
+                  key.type === 'invest' ? api.query.investments.investOrders : api.query.investments.redeemOrders,
+                  [key.accountId, [key.poolId, key.trancheId]],
+                ])
+              )
+              .pipe(
+                map((orders) => {
+                  return keys
+                    .map((key, i) => {
+                      const order = orders[i].toPrimitive() as { amount: string; submittedAt: number }
+                      return {
+                        ...key,
+                        amount: new BN(order.amount),
+                        submittedAt: order.submittedAt,
+                      }
+                    })
+                    .filter((order) => order.amount.gt(new BN(0)))
+                })
+              )
+          })
+        )
+      ),
+      repeatWhen(() => $events)
+    )
+  }
+
   function getPoolOrders(args: [poolId: string]) {
     const [poolId] = args
 
@@ -4504,6 +4563,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getBalances,
     getOrder,
     getPoolOrders,
+    getPoolAccountOrders,
     getPortfolio,
     getLoans,
     getPoolFees,

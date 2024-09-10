@@ -88,6 +88,44 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return options?.rpcProvider ?? inst.config.evmSigner?.provider
   }
 
+  function transferTrancheTokens(
+    args: [
+      receiverAddress: string,
+      amount: BN,
+      vault: string,
+      currencyAddress: string,
+      chainId: number,
+      destinationNetwork: 'centrifuge' | { evm: number }
+    ],
+    options: TransactionRequest = {}
+  ) {
+    const [receiverAddress, amount, vault, currencyAddress, chainId, destinationNetwork] = args
+    return centrifugeRouter(chainId).pipe(
+      switchMap(({ estimate, centrifugeRouter }) => {
+        const isToSameNetwork = typeof destinationNetwork !== 'string' && chainId === destinationNetwork.evm
+        if (isToSameNetwork) {
+          return pending(contract(currencyAddress, ABI.Currency).transfer(receiverAddress, amount.toString(), options))
+        }
+        const domain = destinationNetwork === 'centrifuge' ? 0 : 1
+        const destinationId = destinationNetwork === 'centrifuge' ? 0 : destinationNetwork.evm
+        return pending(
+          contract(centrifugeRouter, ABI.CentrifugeRouter).transferTrancheTokens(
+            vault,
+            domain,
+            destinationId,
+            receiverAddress,
+            amount.toString(),
+            0,
+            {
+              ...options,
+              value: estimate,
+            }
+          )
+        )
+      })
+    )
+  }
+
   function enablePoolOnDomain(
     args: [
       poolId: string,
@@ -755,6 +793,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   return {
+    transferTrancheTokens,
     enablePoolOnDomain,
     deployTranche,
     deployLiquidityPool,

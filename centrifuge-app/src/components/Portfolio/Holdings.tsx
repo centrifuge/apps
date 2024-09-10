@@ -26,7 +26,7 @@ import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
 import { usePortfolioTokens } from './usePortfolio'
 
-type Row = {
+export type Holding = {
   currency: Token['currency']
   poolId: string
   trancheId: string
@@ -42,13 +42,13 @@ const columns: Column[] = [
   {
     align: 'left',
     header: 'Token',
-    cell: (token: Row) => {
+    cell: (token: Holding) => {
       return <TokenWithIcon {...token} />
     },
   },
   {
     header: <Tooltips type="cfgPrice" label="Token price" />,
-    cell: ({ tokenPrice }: Row) => {
+    cell: ({ tokenPrice }: Holding) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
           {formatBalance(tokenPrice || 1, 'USD', 4)}
@@ -59,7 +59,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Position" />,
-    cell: ({ currency, position }: Row) => {
+    cell: ({ currency, position }: Holding) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
           {formatBalanceAbbreviated(position || 0, currency?.symbol, 2)}
@@ -71,7 +71,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Market value" />,
-    cell: ({ marketValue }: Row) => {
+    cell: ({ marketValue }: Holding) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
           {formatBalanceAbbreviated(marketValue || 0, 'USD', 2)}
@@ -84,12 +84,18 @@ const columns: Column[] = [
   {
     align: 'left',
     header: '', // invest redeem buttons
-    cell: ({ showActions, poolId, trancheId, currency, connectedNetwork }: Row) => {
+    cell: ({ showActions, poolId, trancheId, currency, connectedNetwork }: Holding) => {
       return (
         <Grid gap={1} justifySelf="end">
           {showActions ? (
             trancheId ? (
               <Shelf>
+                <RouterLinkButton to={`?receive=${poolId}.${trancheId}`} small variant="tertiary" icon={IconDownload}>
+                  Receive
+                </RouterLinkButton>
+                <RouterLinkButton to={`?send=${poolId}.${trancheId}`} small variant="tertiary" icon={IconSend}>
+                  Send
+                </RouterLinkButton>
                 <RouterLinkButton to={`?redeem=${poolId}.${trancheId}`} small variant="tertiary" icon={IconMinus}>
                   Redeem
                 </RouterLinkButton>
@@ -127,7 +133,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
   const currencies = usePoolCurrencies()
   const CFGPrice = useCFGTokenPrice()
 
-  const tokens: Row[] = [
+  const tokens: Holding[] = [
     ...portfolioTokens.map((token) => ({
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
@@ -179,7 +185,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
           connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
-    ...((wallet.connectedNetworkName === 'Centrifuge' && showActions) || centBalances?.native.balance.gtn(0)
+    ...((wallet.connectedNetwork === 'centrifuge' && showActions) || centBalances?.native.balance.gtn(0)
       ? [
           {
             currency: {
@@ -239,7 +245,6 @@ export function Holdings({
         defaultView={openRedeemDrawer ? 'redeem' : 'invest'}
       />
       <TransferTokensDrawer
-        address={address}
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
@@ -254,7 +259,7 @@ export function Holdings({
   )
 }
 
-const TokenWithIcon = ({ poolId, currency }: Row) => {
+const TokenWithIcon = ({ poolId, currency }: Holding) => {
   const pool = usePool(poolId, false)
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()

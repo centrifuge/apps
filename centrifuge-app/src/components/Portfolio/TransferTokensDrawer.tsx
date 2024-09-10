@@ -1,9 +1,11 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import {
-  useBalances,
+  getChainInfo,
   useCentEvmChainId,
+  useCentrifugeConsts,
   useCentrifugeTransaction,
   useCentrifugeUtils,
+  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   AddressInput,
@@ -14,6 +16,7 @@ import {
   Drawer,
   IconCheckCircle,
   IconCopy,
+  Select,
   Shelf,
   Stack,
   Tabs,
@@ -21,203 +24,270 @@ import {
   Text,
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
-import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
+import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import React, { useMemo } from 'react'
-import { useQuery } from 'react-query'
+import React from 'react'
 import { useLocation, useMatch, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
+import { useAddress } from '../../utils/useAddress'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
-import { useTransactionFeeEstimate } from '../../utils/useTransactionFeeEstimate'
+import { useActiveDomains, useLiquidityPools } from '../../utils/useLiquidityPools'
+import { combine, max, positiveNumber, required } from '../../utils/validation'
 import { truncate } from '../../utils/web3'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
+import { LoadBoundary } from '../LoadBoundary'
+import { Spinner } from '../Spinner'
 import { Tooltips } from '../Tooltips'
+import { Holding, useHoldings } from './Holdings'
 
 type TransferTokensProps = {
-  address: string
   onClose: () => void
   isOpen: boolean
 }
 
-export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferTokensProps) => {
-  const centBalances = useBalances(address)
-  const CFGPrice = useCFGTokenPrice()
-  const isPortfolioPage = useMatch('/portfolio')
-  const { search } = useLocation()
-  const navigate = useNavigate()
-  const params = new URLSearchParams(search)
-  const transferCurrencySymbol = params.get('receive') || params.get('send')
-  const isNativeTransfer = transferCurrencySymbol?.toLowerCase() === centBalances?.native.currency.symbol.toLowerCase()
-  const currency = useMemo(() => {
-    if (isNativeTransfer && centBalances?.native) {
-      return {
-        ...centBalances.native,
-        balance: new CurrencyBalance(
-          centBalances?.native.balance.sub(centBalances.native.locked),
-          centBalances.native.currency.decimals
-        ),
-      }
-    }
-    return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
-  }, [centBalances, isNativeTransfer, transferCurrencySymbol])
-
-  const tokenPrice = isNativeTransfer ? CFGPrice : 1
-
+export function TransferTokensDrawer({ onClose, isOpen }: TransferTokensProps) {
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
-      <Stack gap={3}>
-        <Text textAlign="center" variant="heading2">
-          {transferCurrencySymbol || 'CFG'} Holdings
-        </Text>
-        <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
-          <LabelValueStack
-            label="Position"
-            value={formatBalanceAbbreviated(currency?.balance || 0, currency?.currency.symbol, 2)}
-          />
-          <LabelValueStack
-            label="Value"
-            value={formatBalanceAbbreviated(currency?.balance.toDecimal().mul(tokenPrice || 0) || 0, 'USD', 2)}
-          />
-          <LabelValueStack
-            label={
-              isNativeTransfer ? (
-                <Tooltips type="cfgPrice" label={`${currency?.currency.symbol || 'CFG'} Price`} />
-              ) : (
-                'Price'
-              )
-            }
-            value={formatBalance(tokenPrice || 0, 'USD', 4)}
-          />
-        </Shelf>
-        {isPortfolioPage && (
-          <Stack>
-            <Tabs
-              selectedIndex={params.get('send') ? 0 : 1}
-              onChange={(index) =>
-                navigate({
-                  search: index === 0 ? `send=${transferCurrencySymbol}` : `receive=${transferCurrencySymbol}`,
-                })
-              }
-            >
-              <TabsItem>Send</TabsItem>
-              <TabsItem>Receive</TabsItem>
-            </Tabs>
-            {params.get('send') ? (
-              <SendToken
-                address={address}
-                currency={currency as SendReceiveProps['currency']}
-                isNativeTransfer={isNativeTransfer}
-              />
-            ) : (
-              <ReceiveToken address={address} currency={currency as SendReceiveProps['currency']} />
-            )}
-          </Stack>
-        )}
-        {isNativeTransfer && (
-          <Stack gap={12}>
-            <Text variant="heading4" color="textPrimary" fontWeight={600}>
-              Price
-            </Text>
-            <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-              <CFGPriceChart />
-            </Box>
-          </Stack>
-        )}
-      </Stack>
+      <LoadBoundary>
+        <TransferTokensDrawerInner />
+      </LoadBoundary>
     </Drawer>
   )
 }
 
-type SendReceiveProps = {
-  address: string
-  currency?: {
-    balance: CurrencyBalance
-    currency: { symbol: string; decimals: number; key: string | { ForeignAsset: number } }
+function TransferTokensDrawerInner() {
+  const address = useAddress()
+  const consts = useCentrifugeConsts()
+  const tokens = useHoldings(address)
+  const isPortfolioPage = useMatch('/portfolio')
+
+  const { search } = useLocation()
+  const navigate = useNavigate()
+  const params = new URLSearchParams(search)
+  const transferKey = params.get('receive') || params.get('send') || ''
+  const isSend = !!params.get('send')
+  const isNativeTransfer = transferKey.toLowerCase() === consts.chainSymbol.toLowerCase()
+
+  function getHolding() {
+    if (!transferKey) return null
+
+    if (transferKey?.includes('.')) {
+      const [poolId, trancheId] = transferKey.split('.')
+      return tokens?.find((token) => token.poolId === poolId && token.trancheId === trancheId)
+      // } else if (isNativeTransfer) {
+    } else {
+      return tokens?.find((token) => token.currency.symbol === transferKey)
+    }
   }
+
+  const holding = getHolding()
+
+  console.log('holding', holding)
+
+  return holding || true ? (
+    <Stack gap={3}>
+      <Text textAlign="center" variant="heading2">
+        {holding?.currency.symbol} Holdings
+      </Text>
+      <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
+        <LabelValueStack
+          label="Position"
+          value={formatBalanceAbbreviated(holding?.position || 0, holding?.currency.symbol, 2)}
+        />
+        <LabelValueStack
+          label="Value"
+          value={formatBalanceAbbreviated(holding?.position.mul(holding?.tokenPrice) ?? 0, 'USD', 2)}
+        />
+        <LabelValueStack
+          label={isNativeTransfer ? <Tooltips type="cfgPrice" label={`${consts.chainSymbol} Price`} /> : 'Price'}
+          value={formatBalance(holding?.tokenPrice || 0, 'USD', 4)}
+        />
+      </Shelf>
+      {isPortfolioPage && (
+        <Stack>
+          <Tabs
+            selectedIndex={isSend ? 0 : 1}
+            onChange={(index) =>
+              navigate({
+                search: index === 0 ? `send=${transferKey}` : `receive=${transferKey}`,
+              })
+            }
+          >
+            <TabsItem>Send</TabsItem>
+            <TabsItem>Receive</TabsItem>
+          </Tabs>
+          {isSend ? (
+            <SendToken
+              address={address!}
+              holding={{
+                currency: {
+                  symbol: 'TPPP',
+                  key: { Tranche: ['2779829532', '0xac6bffc5fd68f7772ceddec7b0a316ca'] },
+                  decimals: 6,
+                  name: 'THE PP',
+                  isPoolCurrency: false,
+                  isPermissioned: true,
+                  displayName: 'Tropical Pool Token',
+                },
+                poolId: '2779829532',
+                trancheId: '0xac6bffc5fd68f7772ceddec7b0a316ca',
+                marketValue: Dec(10000),
+                position: Dec(10000),
+                tokenPrice: Dec(1),
+              }}
+              isNativeTransfer={isNativeTransfer}
+            />
+          ) : (
+            <ReceiveToken address={address!} />
+          )}
+        </Stack>
+      )}
+      {isNativeTransfer && (
+        <Stack gap={12}>
+          <Text variant="heading4" color="textPrimary" fontWeight={600}>
+            Price
+          </Text>
+          <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
+            <CFGPriceChart />
+          </Box>
+        </Stack>
+      )}
+    </Stack>
+  ) : (
+    <Spinner />
+  )
+}
+
+type SendProps = {
+  address: string
+  holding: Holding
   isNativeTransfer?: boolean
 }
 
-const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) => {
+const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
+  const { data: domains } = useActiveDomains(holding.poolId)
+  const activeDomains = domains?.filter((domain) => domain.hasDeployedLp) ?? []
+  const {
+    connectedNetwork,
+    isEvmOnSubstrate,
+    evm: { chains, chainId: connectedEvmChainId },
+  } = useWallet()
+
   const utils = useCentrifugeUtils()
-  const chainId = useCentEvmChainId()
+  const centEvmChainId = useCentEvmChainId()
 
   const { execute: transfer, isLoading } = useCentrifugeTransaction(
-    `Send ${currency?.currency.symbol || 'CFG'}`,
+    `Send ${holding.currency.symbol}`,
     (cent) => cent.tokens.transfer,
     {
       onSuccess: () => form.resetForm(),
     }
   )
-
-  const { txFee, execute: estimatedTxFee } = useTransactionFeeEstimate((cent) => cent.tokens.transfer)
-  useQuery(
-    ['paymentInfo', address],
-    async () => {
-      if (!currency) return
-      await estimatedTxFee([
-        address,
-        currency?.currency.key,
-        CurrencyBalance.fromFloat(currency.balance.toDecimal(), currency?.currency.decimals),
-      ])
-    },
+  const { execute: evmTransfer, isLoading: evmIsLoading } = useEvmTransaction(
+    `Send ${holding.currency.symbol}`,
+    (cent) => cent.liquidityPools.transferTrancheTokens,
     {
-      enabled: !!address,
+      onSuccess: () => form.resetForm(),
     }
   )
 
-  const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string; isDisclaimerAgreed: boolean }>({
+  const form = useFormik<{
+    amount: Decimal | number | ''
+    chain: number | ''
+    recipientAddress: string
+    isDisclaimerAgreed: boolean
+  }>({
     initialValues: {
-      amount: undefined,
+      amount: '',
+      chain: '',
       recipientAddress: '',
       isDisclaimerAgreed: false,
     },
     validate(values) {
       const errors: Partial<{ amount: string; recipientAddress: string; isDisclaimerAgreed: string }> = {}
+      const { chain, recipientAddress } = values
+      const validator = chain ? isEvmAddress : isAddress
+      const validAddress = validator(recipientAddress) ? recipientAddress : undefined
+      if (!validAddress) {
+        errors.recipientAddress = 'Invalid address'
+      }
       if (!values.isDisclaimerAgreed && values.recipientAddress.startsWith('0x') && isNativeTransfer) {
         errors.isDisclaimerAgreed = 'Please read and accept the above'
-      }
-      if (values.amount && Dec(values.amount).gt(currency?.balance.toDecimal() || Dec(0))) {
-        errors.amount = 'Amount exceeds wallet balance'
-      }
-      if (!values.amount || Dec(values.amount).lte(0)) {
-        errors.amount = 'Amount must be greater than 0'
-      }
-      if (!(isSubstrateAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
-        errors.recipientAddress = 'Invalid address format'
       }
 
       return errors
     },
     onSubmit: (values, actions) => {
-      if (typeof values.amount === 'undefined') {
-        actions.setErrors({ amount: 'Amount must be greater than 0' })
-      } else if (!currency) {
-        actions.setErrors({ amount: 'Invalid currency' })
-      } else {
-        if (isEvmAddress(values.recipientAddress)) {
-          values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, chainId || 2031)
-        }
+      if (!liquidityPools?.[0]) return
+      let { recipientAddress, chain } = values
+      if (isEvmAddress(recipientAddress) && chain === '') {
+        recipientAddress = utils.evmToSubstrateAddress(recipientAddress, centEvmChainId!)
+      }
+      if (connectedNetwork === 'centrifuge' || isEvmOnSubstrate) {
         transfer([
-          values.recipientAddress,
-          currency?.currency.key,
-          CurrencyBalance.fromFloat(values.amount.toString(), currency?.currency.decimals),
+          recipientAddress,
+          holding.currency.key,
+          CurrencyBalance.fromFloat(values.amount.toString(), holding.currency.decimals),
+          chain === '' ? undefined : { evm: chain },
+        ])
+      } else {
+        evmTransfer([
+          recipientAddress,
+          CurrencyBalance.fromFloat(values.amount || 0, holding.currency.decimals),
+          liquidityPools[0].lpAddress,
+          liquidityPools[0].trancheTokenAddress,
+          connectedEvmChainId!,
+          chain === '' ? 'centrifuge' : { evm: chain },
         ])
       }
       actions.setSubmitting(false)
     },
   })
 
+  console.log('form.values.chain', form.values.chain, typeof form.values.chain === 'number')
+  const { data: liquidityPools } = useLiquidityPools(
+    holding.poolId,
+    holding.trancheId,
+    typeof form.values.chain === 'number' ? form.values.chain : -1
+  )
+  console.log('liquidityPools', liquidityPools)
+
+  console.log('isNativeTransfer', isNativeTransfer)
+  console.log('activeDomains', activeDomains)
   return (
     <Stack px={2} py={4} backgroundColor="backgroundSecondary">
       <FormikProvider value={form}>
         <Form>
           <Stack gap="2">
+            <Field name="chain">
+              {({ field, form, meta }: FieldProps) => (
+                <Select
+                  name="chain"
+                  label="Destination"
+                  value={field.value}
+                  options={[
+                    { value: '', label: 'Centrifuge' },
+                    ...(activeDomains.map((domain) => ({
+                      value: String(domain.chainId),
+                      label: getChainInfo(chains, domain.chainId).name,
+                    })) || []),
+                  ]}
+                  disabled={!activeDomains.length}
+                  onChange={(event) =>
+                    form.setFieldValue('chain', event.target.value === '' ? '' : Number(event.target.value))
+                  }
+                  onBlur={field.onBlur}
+                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                />
+              )}
+            </Field>
             <Field name="recipientAddress">
               {({ field, meta }: FieldProps) => {
                 return (
@@ -232,7 +302,14 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
                 )
               }}
             </Field>
-            <Field name="amount">
+            <Field
+              name="amount"
+              validate={combine(
+                positiveNumber('Amount must be greater than 0'),
+                max(holding.position.toNumber(), 'Amount exceeds wallet balance'),
+                required()
+              )}
+            >
               {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput
                   {...field}
@@ -240,10 +317,10 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
                   size={0}
                   placeholder="0.00"
                   label="Amount"
-                  onSetMax={async () => form.setFieldValue('amount', currency?.balance.toDecimal().sub(txFee || 0))}
+                  onSetMax={isNativeTransfer ? undefined : async () => form.setFieldValue('amount', holding.position)}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
-                  currency={currency?.currency.symbol || 'CFG'}
+                  currency={holding.currency.symbol || 'CFG'}
                   onChange={(value) => form.setFieldValue('amount', value)}
                   required
                 />
@@ -251,7 +328,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
             </Field>
             <Shelf pl={1}>
               <Text variant="label2">
-                Wallet balance: {formatBalance(currency?.balance || 0, currency?.currency.symbol, 2)}
+                Wallet balance: {formatBalance(holding.position, holding.currency.symbol, 2)}
               </Text>
             </Shelf>
             {form.values.recipientAddress.startsWith('0x') && isNativeTransfer && (
@@ -285,7 +362,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
               </>
             )}
             <Shelf>
-              <Button variant="primary" type="submit" loading={isLoading} loadingMessage={'Confirming'}>
+              <Button variant="primary" type="submit" loading={isLoading || evmIsLoading}>
                 Send
               </Button>
             </Shelf>
@@ -296,16 +373,18 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
   )
 }
 
-const ReceiveToken = ({ address }: SendReceiveProps) => {
+const ReceiveToken = ({ address }: { address: string }) => {
+  const { evm, connectedNetworkName } = useWallet()
+  const chainId = evm.chainId ?? undefined
   const utils = useCentrifugeUtils()
   const [copied, setCopied] = React.useState(false)
-  const centAddress = address && address.startsWith('0x') ? utils.formatAddress(address) : address
+  const formattedAddr = utils.formatAddress(address)
 
   return (
     <Stack gap={2} px={1} py={2} backgroundColor="backgroundSecondary">
       <Stack gap={3}>
         <Text variant="interactive2" color="textSecondary">
-          Your address on Centrifuge Chain
+          Your address on {connectedNetworkName}
         </Text>
         <Shelf gap={1}>
           <Button
@@ -314,7 +393,7 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
             onClick={() => {
               setTimeout(() => setCopied(true), 100)
               setTimeout(() => setCopied(false), 1100)
-              copyToClipboard(centAddress)
+              copyToClipboard(formattedAddr)
             }}
             title="Copy to clipboard"
           >
@@ -322,7 +401,7 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
               <Container>
                 <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
               </Container>
-              {truncate(centAddress, 10, 10)}
+              {truncate(formattedAddr, 10, 10)}
               {copied ? <IconCheckCircle size="16px" /> : <IconCopy size="16px" />}
             </Shelf>
           </Button>

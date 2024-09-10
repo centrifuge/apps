@@ -15,7 +15,7 @@ export type Domain = (ReturnType<Centrifuge['liquidityPools']['getPool']> extend
   hasDeployedLp: boolean
 }
 
-export function useActiveDomains(poolId: string, suspense?: boolean) {
+export function useActiveDomains(poolId?: string, suspense?: boolean) {
   const {
     evm: { getProvider },
   } = useWallet()
@@ -31,7 +31,7 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
             const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
               rpcProvider,
             })
-            const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
+            const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId!], { rpcProvider })
             return [manager, pool] as const
           }
           return withTimeout(getManager(), 15000)
@@ -58,7 +58,7 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
         .filter(Boolean)
     },
     {
-      enabled: !!routers?.length && !poolId.startsWith('0x'),
+      enabled: !!routers?.length && !!poolId && !poolId.startsWith('0x'),
       staleTime: Infinity,
       suspense,
     }
@@ -67,10 +67,11 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
   return query
 }
 
-export function useLiquidityPools(poolId: string, trancheId: string) {
+export function useLiquidityPools(poolId: string, trancheId: string, chainIdOverride?: number) {
   const {
-    evm: { chainId, getProvider },
+    evm: { chainId: connectedChainId, getProvider },
   } = useWallet()
+  const chainId = chainIdOverride ?? connectedChainId
   const cent = useCentrifuge()
   const { data: domains } = useActiveDomains(poolId)
   const managerAddress = domains?.find((d) => d.chainId === chainId)?.managerAddress

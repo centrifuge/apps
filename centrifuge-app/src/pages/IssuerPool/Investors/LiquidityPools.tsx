@@ -34,7 +34,8 @@ function getDomainStatus(domain: Domain) {
   if (!domain.isActive) {
     return 'inactive'
   }
-  if (Object.values(domain.liquidityPools).every((t) => Object.values(t).every((p) => !!p))) {
+  // if (Object.values(domain.liquidityPools).every((t) => Object.values(t).every((p) => !!p))) {
+  if (domain.hasDeployedLp) {
     return 'deployed'
   }
   return 'deploying'
@@ -97,6 +98,8 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
   const api = useCentrifugeApi()
 
   const status = getDomainStatus(domain)
+  console.log('status', status)
+  console.log('domain', domain)
 
   const { execute, isLoading } = useCentrifugeTransaction(
     `Update token prices`,
@@ -150,7 +153,7 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
       {domain.currencies.length > 0 &&
         (status === 'inactive' ? (
           <EnableButton poolId={poolId} domain={domain} />
-        ) : status === 'deploying' ? (
+        ) : (
           <ConnectionGuard networks={[domain.chainId]} body="Connect to the right network to continue" variant="plain">
             {pool.tranches.map((t) => (
               <React.Fragment key={t.id}>
@@ -170,20 +173,19 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
                     )}
                   </React.Fragment>
                 ))}
+                {domain.trancheTokens[t.id] && (
+                  <a href={explorer.address(domain.trancheTokens[t.id])} target="_blank" rel="noopener noreferrer">
+                    <Button variant="secondary" small style={{ width: '100%' }}>
+                      <Shelf gap={1}>
+                        <span>View {t.currency.symbol} token</span>
+                        <IconExternalLink size="iconSmall" />
+                      </Shelf>
+                    </Button>
+                  </a>
+                )}
               </React.Fragment>
             ))}
           </ConnectionGuard>
-        ) : (
-          pool.tranches.map((tranche) => (
-            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank" rel="noopener noreferrer">
-              <Button variant="secondary" small style={{ width: '100%' }}>
-                <Shelf gap={1}>
-                  <span>View {tranche.currency.symbol} token</span>
-                  <IconExternalLink size="iconSmall" />
-                </Shelf>
-              </Button>
-            </a>
-          ))
         ))}
     </Stack>
   )
