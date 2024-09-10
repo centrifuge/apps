@@ -104,6 +104,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
 
   React.useEffect(() => {
     financeForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source])
 
   const financeFormRef = React.useRef<HTMLFormElement>(null)
@@ -114,6 +115,11 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
     source === 'reserve' ? pool.reserve.available.toDecimal() : sourceLoan.outstandingDebt.toDecimal()
 
   const withdraw = useWithdraw(loan.poolId, account!, totalFinance, source)
+
+  React.useEffect(() => {
+    financeForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source])
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null

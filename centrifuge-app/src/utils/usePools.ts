@@ -326,11 +326,11 @@ export function usePoolAccountOrders(poolId: string) {
       switchMap(([investKeys, redeemKeys]) => {
         const keys = [...investKeys, ...redeemKeys]
           .map((k, i) => {
-            const key = k.toHuman() as [string, { poolId: string; trancheId: string }]
+            const key = k.toHuman() as [string, [poolId: string, trancheId: string]]
             return {
               accountId: addressToHex(key[0]),
-              poolId: key[1].poolId.replace(/\D/g, ''),
-              trancheId: key[1].trancheId,
+              poolId: key[1][0].replace(/\D/g, ''),
+              trancheId: key[1][1],
               type: i >= investKeys.length ? 'redeem' : 'invest',
             }
           })

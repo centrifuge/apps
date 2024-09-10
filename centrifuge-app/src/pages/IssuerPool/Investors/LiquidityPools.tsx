@@ -175,7 +175,7 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
           </ConnectionGuard>
         ) : (
           pool.tranches.map((tranche) => (
-            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank">
+            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank" rel="noopener noreferrer">
               <Button variant="secondary" small style={{ width: '100%' }}>
                 <Shelf gap={1}>
                   <span>View {tranche.currency.symbol} token</span>
@@ -252,6 +252,10 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
     (cent) => cent.liquidityPools.enablePoolOnDomain
   )
 
+  const tokenPricesToUpdate = Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+    return domain.currencies.map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+  })
+
   const currenciesToAdd = domain.currencies
     .filter((cur) => domain.currencyNeedsAdding[cur.address])
     .map((cur) => cur.key)
@@ -259,7 +263,11 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
   return (
     <Button
       loading={isLoading}
-      onClick={() => execute([poolId, domain.chainId, currenciesToAdd], { account: poolAdmin })}
+      onClick={() =>
+        execute([poolId, domain.chainId, currenciesToAdd, tokenPricesToUpdate, domain.chainId], {
+          account: poolAdmin,
+        })
+      }
       small
     >
       Enable

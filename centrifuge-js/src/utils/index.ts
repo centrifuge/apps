@@ -151,3 +151,9 @@ export function isEvm(address: string) {
   const suffix = '45564d00'
   return address.length === 66 && address.endsWith(suffix)
 }
+
+export function isValidDate(value: string | Date | undefined) {
+  if (value === undefined) return false
+  const date = new Date(value)
+  return !isNaN(date.getTime())
+}
