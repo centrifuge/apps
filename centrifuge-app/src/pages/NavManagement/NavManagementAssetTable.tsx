@@ -202,17 +202,17 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     )
   }, [poolFees, pool.currency.decimals])
 
-  const changeInValuation = form.values.feed.reduce(
+  const changeInValuation =
+    form.values.feed.reduce(
       (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
       0
-  ) || 0
+    ) || 0
 
-
-  const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal())
-  const pendingNav = totalAum.toDecimal().add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
+  const pendingNav = totalAum.add(changeInValuation).sub(pendingFees.toDecimal())
 
   // Only for single tranche pools
-  const newPrice = pendingNav.toFloat() / pool.tranches[0].totalIssuance.toFloat()
+  const newPrice = pendingNav.toNumber() / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
 
   const columns = [
@@ -324,10 +324,10 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 <Text variant="heading3">Confirm NAV</Text>
                 <VisualNavCard
                   currency={pool.currency}
-                  aum={totalAum.toFloat()}
-                  change={changeInValuation ? changeInValuation.toDecimal().toNumber() : 0}
+                  aum={totalAum.toNumber()}
+                  change={changeInValuation}
                   pendingFees={pendingFees.toFloat()}
-                  pendingNav={pendingNav.toFloat()}
+                  pendingNav={pendingNav.toNumber()}
                 />
               </Stack>
               {pool.tranches.length === 1 && (
@@ -447,16 +447,15 @@ export function NavOverviewCard({ poolId, updatedPrices }: { poolId: string; upd
     }, new CurrencyBalance(0, pool.currency.decimals))
   }, [externalLoans, pool?.nav, updatedPrices])
 
-
-  const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal())
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
 
   return (
     <VisualNavCard
       currency={pool.currency}
-      aum={totalAum.toFloat()}
+      aum={totalAum.toNumber()}
       change={changeInValuation ? changeInValuation.toDecimal().toNumber() : 0}
       pendingFees={pendingFees.toFloat()}
-      pendingNav={totalAum.toDecimal().add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal()).toNumber()}
+      pendingNav={totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal()).toNumber()}
     />
   )
 }
