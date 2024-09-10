@@ -202,14 +202,20 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     )
   }, [poolFees, pool.currency.decimals])
 
-  const changeInValuation =
-    form.values.feed.reduce(
-      (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
-      0
-    ) || 0
+  const changeInValuation = React.useMemo(() => {
+    return (externalLoans as ActiveLoan[]).reduce((prev, curr) => {
+      const price = curr.currentPrice.toDecimal()
+      const quantity = (curr as ExternalLoan).pricing.outstandingQuantity.toDecimal()
+      const updatedPrice = Dec(form.values.feed.find((p) => p.id === curr.id)?.value || 0)
+      return CurrencyBalance.fromFloat(
+        prev.toDecimal().add(updatedPrice.sub(price).mul(quantity)).toString(),
+        pool.currency.decimals
+      )
+    }, new CurrencyBalance(0, pool.currency.decimals))
+  }, [externalLoans, pool?.nav, form.values.feed])
 
-  const totalAum = pool.nav.total.toDecimal().add(pendingFees.toDecimal())
-  const pendingNav = totalAum.add(changeInValuation).sub(pendingFees.toDecimal())
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
+  const pendingNav = totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
 
   // Only for single tranche pools
   const newPrice = pendingNav.toNumber() / pool.tranches[0].totalIssuance.toFloat()
@@ -313,7 +319,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   return (
     <>
       <LayoutSection pt={3}>
-        <NavOverviewCard poolId={pool.id} updatedPrices={form.values.feed} />
+        <NavOverviewCard poolId={pool.id} changeInValuation={changeInValuation.toDecimal().toNumber()} />
       </LayoutSection>
 
       <Stack pb={8}>
@@ -325,7 +331,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 <VisualNavCard
                   currency={pool.currency}
                   aum={totalAum.toNumber()}
-                  change={changeInValuation}
+                  change={changeInValuation.toDecimal().toNumber()}
                   pendingFees={pendingFees.toFloat()}
                   pendingNav={pendingNav.toNumber()}
                 />
@@ -405,7 +411,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   )
 }
 
-export function NavOverviewCard({ poolId, updatedPrices }: { poolId: string; updatedPrices: FormValues['feed'] }) {
+export function NavOverviewCard({ poolId, changeInValuation }: { poolId: string; changeInValuation: number }) {
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const today = new Date()
@@ -418,44 +424,15 @@ export function NavOverviewCard({ poolId, updatedPrices }: { poolId: string; upd
     )
   }, [poolFees, pool.currency.decimals])
 
-  const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
-    enabled: !!poolId && !!pool,
-  })
-
-  const externalLoans = React.useMemo(
-    () =>
-      (allLoans?.filter(
-        // Keep external loans, except ones that are fully repaid
-        (l) =>
-          isExternalLoan(l) &&
-          l.status !== 'Closed' &&
-          l.status !== 'Created' &&
-          (!('presentValue' in l) || !l.presentValue.isZero())
-      ) as ActiveLoan[]) ?? [],
-    [allLoans]
-  )
-
-  const changeInValuation = React.useMemo(() => {
-    return externalLoans.reduce((prev, curr) => {
-      const price = curr.currentPrice.toDecimal()
-      const quantity = (curr as ExternalLoan).pricing.outstandingQuantity.toDecimal()
-      const updatedPrice = Dec(updatedPrices.find((p) => p.id === curr.id)?.value || 0)
-      return CurrencyBalance.fromFloat(
-        prev.toDecimal().add(updatedPrice.sub(price).mul(quantity)).toString(),
-        pool.currency.decimals
-      )
-    }, new CurrencyBalance(0, pool.currency.decimals))
-  }, [externalLoans, pool?.nav, updatedPrices])
-
-  const totalAum = pool.nav.total.toDecimal().add(pendingFees.toDecimal())
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
 
   return (
     <VisualNavCard
       currency={pool.currency}
       aum={totalAum.toNumber()}
-      change={1234}
+      change={changeInValuation ?? 0}
       pendingFees={pendingFees.toFloat()}
-      pendingNav={totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal()).toNumber()}
+      pendingNav={totalAum.add(changeInValuation).sub(pendingFees.toDecimal()).toNumber()}
     />
   )
 }
