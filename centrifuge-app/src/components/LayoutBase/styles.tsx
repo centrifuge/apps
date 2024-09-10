@@ -42,7 +42,7 @@ export const Inner = styled(Grid)`
   padding-bottom: 1rem;
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
-    width: 7vw;
+    width: 6vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     overflow: visible;
   }
@@ -77,13 +77,19 @@ export const LogoContainer = styled(Stack)`
   z-index: ${({ theme }) => theme.zIndices.header};
   position: sticky;
   top: 0;
-  width: 100%;
 
-  grid-area: logo;
   height: ${HEADER_HEIGHT}px;
   justify-content: center;
+  padding-left: 12px;
 
-  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
+      theme.breakpoints['L']}) {
+    justify-content: start;
+    padding-top: ${({ theme }) => theme.space[2]}px;
+    padding-left: 12px;
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     justify-content: start;
     padding-top: ${({ theme }) => theme.space[2]}px;
   }

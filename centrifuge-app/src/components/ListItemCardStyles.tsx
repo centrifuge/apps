@@ -34,3 +34,7 @@ export const Ellipsis = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
 `
+export const CardHeader = styled(Box)`
+  display: flex;
+  justify-content: space-between;
+`

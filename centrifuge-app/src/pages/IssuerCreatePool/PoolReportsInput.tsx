@@ -45,6 +45,9 @@ export function PoolReportsInput() {
           />
         )}
       </Field>
+      <FieldWithErrorMessage name="ratingAgency" as={TextInput} label="Rating agency" placeholder="Agency Name..." />
+      <FieldWithErrorMessage name="ratingValue" as={TextInput} label="Rating" placeholder="Rating value..." />
+      <FieldWithErrorMessage name="ratingReport" as={TextInput} label="Rating report URL" placeholder="https://..." />
     </Grid>
   )
 }

@@ -639,13 +639,13 @@ export type DailyPoolState = {
   sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
-
 interface TrancheFormValues {
   tokenName: string
   symbolName: string
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
+  targetAPY: number | ''
 }
 
 export type IssuerDetail = {
@@ -675,12 +675,14 @@ export interface PoolMetadataInput {
   epochHours: number | ''
   epochMinutes: number | ''
   listed?: boolean
+  investorType: string
 
   // issuer
   issuerName: string
   issuerRepName: string
   issuerLogo?: FileType | null
   issuerDescription: string
+  issuerShortDescription: string
 
   poolReport?: {
     authorName: string
@@ -724,6 +726,7 @@ export type PoolMetadata = {
       class: 'Public credit' | 'Private credit'
       subClass: string
     }
+    investorType: string
     poolFees?: {
       id: number
       name: string
@@ -737,6 +740,7 @@ export type PoolMetadata = {
       description: string
       email: string
       logo?: FileType | null
+      shortDescription: string
     }
     links: {
       executiveSummary: FileType | null
@@ -1110,7 +1114,9 @@ export function getPoolsModule(inst: Centrifuge) {
           description: metadata.issuerDescription,
           email: metadata.email,
           logo: metadata.issuerLogo,
+          shortDescription: metadata.issuerShortDescription,
         },
+        investorType: metadata.investorType,
         links: {
           executiveSummary: metadata.executiveSummary,
           forum: metadata.forum,
