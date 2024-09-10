@@ -3097,12 +3097,63 @@ export function getPoolsModule(inst: Centrifuge) {
   function getAssetTransactions(args: [poolId: string, from?: Date, to?: Date]) {
     const [poolId, from, to] = args
 
-    const $query = inst.getSubqueryObservable<{
-      assetTransactions: { nodes: SubqueryAssetTransaction[] }
+    return of({ assetTransactions: [], endCursor: null, hasNextPage: true }).pipe(
+      expand(({ assetTransactions, endCursor, hasNextPage }) => {
+        if (!hasNextPage) return EMPTY
+        return getAssetTransactionsWithCursor(poolId, endCursor, from, to).pipe(
+          map((response) => {
+            if (response?.assetTransactions) {
+              const { endCursor, hasNextPage } = response.assetTransactions.pageInfo
+
+              return {
+                endCursor,
+                hasNextPage,
+                assetTransactions: [...assetTransactions, ...response.assetTransactions.nodes],
+              }
+            }
+            return {}
+          })
+        )
+      }),
+      takeLast(1),
+      switchMap(({ assetTransactions }) => combineLatest([of(assetTransactions), getPoolCurrency([poolId])])),
+      map(([transactions, currency]) => {
+        return (
+          transactions?.map((tx) => ({
+            ...tx,
+            amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+            principalAmount: tx.principalAmount
+              ? new CurrencyBalance(tx.principalAmount, currency.decimals)
+              : undefined,
+            interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
+            realizedProfitFifo: tx.realizedProfitFifo
+              ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+              : undefined,
+            sumRealizedProfitFifo: tx.asset.sumRealizedProfitFifo
+              ? new CurrencyBalance(tx.asset.sumRealizedProfitFifo, currency.decimals)
+              : undefined,
+            unrealizedProfitAtMarketPrice: tx.asset.unrealizedProfitAtMarketPrice
+              ? new CurrencyBalance(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals)
+              : undefined,
+            timestamp: new Date(`${tx.timestamp}+00:00`),
+          })) || ([] satisfies AssetTransaction[])
+        )
+      })
+    )
+  }
+
+  function getAssetTransactionsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {
+    return inst.getSubqueryObservable<{
+      assetTransactions: {
+        nodes: SubqueryAssetTransaction[]
+        pageInfo: { hasNextPage: boolean; endCursor: string }
+      }
     }>(
-      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!, $after: Cursor) {
         assetTransactions(
+          first: 100,
           orderBy: TIMESTAMP_ASC,
+          after: $after,
           filter: {
             poolId: { equalTo: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to },
@@ -3139,37 +3190,19 @@ export function getPoolsModule(inst: Centrifuge) {
               type
             }
           }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
         }
-      }
-      `,
+      }`,
       {
         poolId,
         from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
         to: to ? to.toISOString() : new Date().toISOString(),
+        after: endCursor,
       },
       false
-    )
-
-    return $query.pipe(
-      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
-      map(([data, currency]) => {
-        return data!.assetTransactions.nodes.map((tx) => ({
-          ...tx,
-          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
-          principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
-          interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
-          realizedProfitFifo: tx.realizedProfitFifo
-            ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
-            : undefined,
-          sumRealizedProfitFifo: tx.asset.sumRealizedProfitFifo
-            ? new CurrencyBalance(tx.asset.sumRealizedProfitFifo, currency.decimals)
-            : undefined,
-          unrealizedProfitAtMarketPrice: tx.asset.unrealizedProfitAtMarketPrice
-            ? new CurrencyBalance(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals)
-            : undefined,
-          timestamp: new Date(`${tx.timestamp}+00:00`),
-        })) satisfies AssetTransaction[]
-      })
     )
   }
 

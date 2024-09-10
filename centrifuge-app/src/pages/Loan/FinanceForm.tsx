@@ -540,6 +540,7 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
       },
     }
   }
+
   return {
     render: () => (
       <Mux
@@ -561,6 +562,8 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
       return source === 'reserve' ? amount.lte(totalAvailable) && !!withdrawalAddresses.length : true
     },
     getBatch: () => {
+      const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
+      if (!withdrawalAddresses.length) return of([])
       return combineLatest(
         withdrawAmounts.flatMap((bucket) => {
           const index = selectedAddressIndexByCurrency[bucket.currencyKey] ?? 0
