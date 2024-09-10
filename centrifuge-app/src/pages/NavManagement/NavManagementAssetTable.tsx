@@ -208,11 +208,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   ) || 0
 
 
-  const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal()).toNumber()
-  const pendingNav = totalAum.toDecimal().add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal()).toNumber()
+  const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal())
+  const pendingNav = totalAum.toDecimal().add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
 
   // Only for single tranche pools
-  const newPrice = pendingNav / pool.tranches[0].totalIssuance.toFloat()
+  const newPrice = pendingNav.toFloat() / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
 
   const columns = [
@@ -324,10 +324,10 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 <Text variant="heading3">Confirm NAV</Text>
                 <VisualNavCard
                   currency={pool.currency}
-                  aum={totalAum}
+                  aum={totalAum.toFloat()}
                   change={changeInValuation ? changeInValuation.toDecimal().toNumber() : 0}
                   pendingFees={pendingFees.toFloat()}
-                  pendingNav={pendingNav}
+                  pendingNav={pendingNav.toFloat()}
                 />
               </Stack>
               {pool.tranches.length === 1 && (
@@ -448,12 +448,12 @@ export function NavOverviewCard({ poolId, updatedPrices }: { poolId: string; upd
   }, [externalLoans, pool?.nav, updatedPrices])
 
 
-  const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal()).toNumber()
+  const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal())
 
   return (
     <VisualNavCard
       currency={pool.currency}
-      aum={totalAum}
+      aum={totalAum.toFloat()}
       change={changeInValuation ? changeInValuation.toDecimal().toNumber() : 0}
       pendingFees={pendingFees.toFloat()}
       pendingNav={totalAum.toDecimal().add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal()).toNumber()}
