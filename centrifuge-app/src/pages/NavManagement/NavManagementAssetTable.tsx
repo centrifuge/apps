@@ -208,7 +208,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       0
     ) || 0
 
-  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
+  const totalAum = pool.nav.total.toDecimal().add(pendingFees.toDecimal())
   const pendingNav = totalAum.add(changeInValuation).sub(pendingFees.toDecimal())
 
   // Only for single tranche pools
@@ -447,13 +447,13 @@ export function NavOverviewCard({ poolId, updatedPrices }: { poolId: string; upd
     }, new CurrencyBalance(0, pool.currency.decimals))
   }, [externalLoans, pool?.nav, updatedPrices])
 
-  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
+  const totalAum = pool.nav.total.toDecimal().add(pendingFees.toDecimal())
 
   return (
     <VisualNavCard
       currency={pool.currency}
       aum={totalAum.toNumber()}
-      change={changeInValuation ? changeInValuation.toDecimal().toNumber() : 0}
+      change={1234}
       pendingFees={pendingFees.toFloat()}
       pendingNav={totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal()).toNumber()}
     />
