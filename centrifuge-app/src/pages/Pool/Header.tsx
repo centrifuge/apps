@@ -3,7 +3,6 @@ import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { Eththumbnail } from '../../components/EthThumbnail'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
@@ -32,7 +31,7 @@ export function PoolDetailHeader({ actions }: Props) {
       title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
       parent={{ to: `/pools${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
       icon={
-        <Eththumbnail show={isTinlakePool}>
+        <>
           {metadata?.pool?.icon ? (
             <Box as="img" width="iconLarge" height="iconLarge" src={iconUri} borderRadius={4} />
           ) : (
@@ -46,7 +45,7 @@ export function PoolDetailHeader({ actions }: Props) {
               <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
             </Shelf>
           )}
-        </Eththumbnail>
+        </>
       }
       border={false}
       actions={actions}

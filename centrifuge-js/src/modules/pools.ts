@@ -341,6 +341,7 @@ export type Pool = {
   metadata?: string
   value: CurrencyBalance
   createdAt: string | null
+  investorType: string
   tranches: Token[]
   reserve: {
     max: CurrencyBalance
@@ -2474,13 +2475,19 @@ export function getPoolsModule(inst: Centrifuge) {
       }),
       takeLast(1),
       map(({ trancheSnapshots }) => {
-        const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
+        const trancheStates: Record<
+          string,
+          { timestamp: string; tokenPrice: Price; yield30DaysAnnualized: Perquintill }[]
+        > = {}
         trancheSnapshots?.forEach((state) => {
           const tid = state.tranche.trancheId
           const entry = {
             timestamp: state.timestamp,
             tokenPrice: new Price(state.tokenPrice),
             pool: state.tranche.poolId,
+            yield30DaysAnnualized: state.yield30DaysAnnualized
+              ? new Perquintill(hexToBN(state.yield30DaysAnnualized))
+              : new Perquintill(0),
           }
           if (trancheStates[tid]) {
             trancheStates[tid].push(entry)
@@ -4634,7 +4641,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 }
 
-function hexToBN(value?: string | number | null) {
+export function hexToBN(value?: string | number | null) {
   if (typeof value === 'number' || value == null) return new BN(value ?? 0)
   return new BN(value.toString().substring(2), 'hex')
 }

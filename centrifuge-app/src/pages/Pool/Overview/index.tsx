@@ -125,6 +125,9 @@ export function PoolDetailOverview() {
               averageMaturity={averageMaturity}
               loans={loans}
               poolId={poolId}
+              pool={pool}
+              poolMetadata={metadata}
+              poolFees={poolFees}
             />
           </React.Suspense>
         </Grid>

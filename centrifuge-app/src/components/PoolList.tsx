@@ -136,7 +136,6 @@ export function poolsToPoolCardProps(
   cent: Centrifuge
 ): PoolCardProps[] {
   return pools.map((pool) => {
-    const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
     const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
 
     return {
@@ -145,19 +144,30 @@ export function poolsToPoolCardProps(
       assetClass: metaData?.pool?.asset.subClass,
       valueLocked: getPoolValueLocked(pool),
       currencySymbol: pool.currency.symbol,
-      status:
-        tinlakePool && tinlakePool.tinlakeMetadata.isArchived
-          ? 'Archived'
-          : tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
-          ? 'Closed'
-          : pool.tranches.at(0)?.capacity?.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
-          ? 'Open for investments'
-          : ('Closed' as PoolStatusKey),
+      status: getPoolStatus(pool),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
       tranches: pool.tranches as Tranche[],
       metaData: metaData as MetaData,
     }
   })
+}
+
+export function getPoolStatus(pool: Pool | TinlakePool): PoolStatusKey {
+  const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
+
+  if (tinlakePool && tinlakePool.tinlakeMetadata.isArchived) {
+    return 'Archived'
+  }
+
+  if (tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk) {
+    return 'Closed'
+  }
+
+  if (pool.tranches.at(0)?.capacity?.toFloat()) {
+    return 'Open for investments'
+  }
+
+  return 'Closed'
 }
 
 function getMetasById(pools: Pool[], poolMetas: PoolMetaDataPartial[]) {

@@ -338,6 +338,10 @@ export const tooltipText = {
     label: 'Target APY',
     body: 'The target APY for the tranche.',
   },
+  expenseRatio: {
+    label: 'Expense Ratio',
+    body: 'The operating expenses of the fund as a percentage of the total NAV',
+  },
 }
 
 export type TooltipsProps = {
@@ -345,15 +349,28 @@ export type TooltipsProps = {
   variant?: 'primary' | 'secondary'
   label?: string | React.ReactNode
   props?: any
+  size?: 'med' | 'sm'
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export function Tooltips({ type, label: labelOverride, variant = 'primary', props, ...textProps }: TooltipsProps) {
+export function Tooltips({
+  type,
+  label: labelOverride,
+  variant = 'primary',
+  size = 'sm',
+  props,
+  ...textProps
+}: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
       {typeof label === 'string' ? (
-        <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
+        <Text
+          textAlign="left"
+          variant={size === 'sm' ? 'label2' : 'label1'}
+          color={isPrimary ? 'textPrimary' : 'textSecondary'}
+          fontWeight={size === 'sm' ? 'inherit' : 400}
+        >
           {labelOverride || label}
         </Text>
       ) : (
