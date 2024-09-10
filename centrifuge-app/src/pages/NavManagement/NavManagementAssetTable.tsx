@@ -202,12 +202,10 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     )
   }, [poolFees, pool.currency.decimals])
 
-  /////////////// XXXXXXXXXXXXXXXXXXXXXXXXXXX --------------------------------------START----------------------------------
-
   const changeInValuation = form.values.feed.reduce(
       (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
       0
-  )
+  ) || 0
 
 
   const totalAum = pool.nav.aum.toDecimal().add(pool.nav.reserve.toDecimal()).toNumber()
