@@ -1,10 +1,16 @@
-import { addressToHex } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { addressToHex, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import {
+  useCentEvmChainId,
+  useCentrifugeApi,
+  useCentrifugeQuery,
+  useCentrifugeTransaction,
+} from '@centrifuge/centrifuge-react'
 import { Box, Button, IconMinusCircle, Stack, Text } from '@centrifuge/fabric'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import { FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
+import { isEvmAddress } from '../../../../src/utils/address'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
@@ -27,6 +33,7 @@ type Row = {
 
 export function OracleFeeders({ poolId }: { poolId: string }) {
   const admin = usePoolAdmin(poolId)
+  const chainId = useCentEvmChainId()
   const [isEditing, setIsEditing] = React.useState(false)
 
   const api = useCentrifugeApi()
@@ -164,7 +171,9 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
                       <AddAddressInput
                         existingAddresses={form.values.feeders}
                         onAdd={(address) => {
-                          fldArr.push(addressToHex(address))
+                          fldArr.push(
+                            isEvmAddress(address) ? evmToSubstrateAddress(address, chainId ?? 0) : addressToHex(address)
+                          )
                         }}
                       />
                     )}

@@ -133,6 +133,8 @@ export const TransactionTable = ({
   const getStatusText = (type: AssetTransactionType) => {
     if (type === 'BORROWED') return 'Financed'
     if (type === 'REPAID') return 'Repaid'
+    if (type === 'INCREASE_DEBT') return 'Correction ↑'
+    if (type === 'DECREASE_DEBT') return 'Correction ↓'
 
     return `${type[0]}${type.slice(1).toLowerCase()}`
   }
@@ -209,14 +211,20 @@ export const TransactionTable = ({
           {
             align: 'left',
             header: `Amount (${currency})`,
-            cell: (row: Row) =>
-              row.amount ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            cell: (row: Row) => (row.amount ? `${formatBalance(row.amount, undefined, 2, 2)}` : '-'),
           },
           {
             align: 'left',
             header: `Principal (${currency})`,
+            cell: (row: Row) => (row.position ? `${formatBalance(row.position, undefined, 2, 2)}` : '-'),
+          },
+          {
+            align: 'left',
+            header: `Realized P&L`,
             cell: (row: Row) =>
-              row.position ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}` : '-',
+              row.realizedProfitFifo
+                ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                : '-',
           },
         ]),
   ] as Column[]

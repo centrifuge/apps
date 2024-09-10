@@ -326,6 +326,18 @@ export const tooltipText = {
     label: 'Available balance',
     body: 'Unlimited because this is a virtual accounting process.',
   },
+  linearAccrual: {
+    label: 'Linear accrual',
+    body: 'If enabled, the price of the asset is updated continuously based on linear accrual from the latest known market price to the value at maturity.',
+  },
+  investorType: {
+    label: 'Investor type',
+    body: 'Who is able to participate.',
+  },
+  targetAPY: {
+    label: 'Target APY',
+    body: 'The target APY for the tranche.',
+  },
 }
 
 export type TooltipsProps = {

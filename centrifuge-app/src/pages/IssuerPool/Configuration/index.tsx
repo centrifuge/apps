@@ -1,10 +1,10 @@
 import { Stack } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { useCanBorrow, usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
+import { OnboardingSettings } from '../Investors/OnboardingSettings'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
@@ -13,12 +13,12 @@ import { PoolConfig } from './PoolConfig'
 
 export function IssuerPoolConfigurationPage() {
   return (
-    <LayoutBase>
+    <>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolConfiguration />
       </LoadBoundary>
-    </LayoutBase>
+    </>
   )
 }
 
@@ -39,6 +39,7 @@ function IssuerPoolConfiguration() {
           <Issuer />
           <EpochAndTranches />
           <LoanTemplates />
+          {isPoolAdmin && <OnboardingSettings />}
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}

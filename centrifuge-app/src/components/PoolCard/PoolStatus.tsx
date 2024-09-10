@@ -3,7 +3,7 @@ import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
 export type PoolStatusKey = 'Open for investments' | 'Closed' | 'Upcoming' | 'Archived'
 
 const statusColor: { [key in PoolStatusKey]: StatusChipProps['status'] } = {
-  'Open for investments': 'ok',
+  'Open for investments': 'warning',
   Closed: 'default',
   Upcoming: 'default',
   Archived: 'default',

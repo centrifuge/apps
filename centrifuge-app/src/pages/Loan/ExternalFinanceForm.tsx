@@ -102,6 +102,11 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
     validateOnMount: true,
   })
 
+  React.useEffect(() => {
+    financeForm.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source])
+
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
@@ -249,7 +254,10 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                 type="submit"
                 loading={isFinanceLoading}
                 disabled={
-                  !withdraw.isValid || !poolFees.isValid(financeForm) || !financeForm.isValid || maxAvailable.eq(0)
+                  !withdraw.isValid(financeForm) ||
+                  !poolFees.isValid(financeForm) ||
+                  !financeForm.isValid ||
+                  maxAvailable.eq(0)
                 }
               >
                 Purchase

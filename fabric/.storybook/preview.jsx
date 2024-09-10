@@ -3,14 +3,12 @@ import { ThemeProvider } from 'styled-components'
 import { Box, GlobalStyle } from '../src'
 import altairDark from '../src/theme/altairDark'
 import altairLight from '../src/theme/altairLight'
-import centrifugeDark from '../src/theme/centrifugeDark'
-import centrifugeLight from '../src/theme/centrifugeLight'
+import centrifugeTheme from '../src/theme/centrifugeTheme'
 
 const themes = {
   altairDark,
   altairLight,
-  centrifugeDark,
-  centrifugeLight,
+  centrifugeTheme,
 }
 
 export const parameters = {
@@ -40,7 +38,7 @@ export const globalTypes = {
 
 export const decorators = [
   (Story, context) => (
-    <ThemeProvider theme={themes[context.globals.theme] || themes.centrifugeLight}>
+    <ThemeProvider theme={themes[context.globals.theme] || themes.centrifugeTheme}>
       <>
         <GlobalStyle />
         <Box p={3} bg="backgroundPage" minHeight="100vh">

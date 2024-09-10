@@ -4,15 +4,26 @@ import {
   useCentrifugeApi,
   useCentrifugeTransaction,
   useGetExplorerUrl,
+  useGetNetworkIcon,
   useGetNetworkName,
   useNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Accordion, Button, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Accordion,
+  Box,
+  Button,
+  Grid,
+  IconExternalLink,
+  InlineFeedback,
+  Shelf,
+  Spinner,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import React from 'react'
 import { useParams } from 'react-router'
 import { combineLatest, switchMap } from 'rxjs'
 import { PageSection } from '../../../components/PageSection'
-import { AnchorTextLink } from '../../../components/TextLink'
 import { find } from '../../../utils/helpers'
 import { useEvmTransaction } from '../../../utils/tinlake/useEvmTransaction'
 import { Domain, useActiveDomains } from '../../../utils/useLiquidityPools'
@@ -36,30 +47,45 @@ export function LiquidityPools() {
 
   const { data: domains, refetch } = useActiveDomains(poolId)
   const getName = useGetNetworkName()
-
-  const titles = {
-    inactive: 'Not active',
-    deploying: 'Action needed',
-    deployed: 'Active',
-  }
+  const getIcon = useGetNetworkIcon()
 
   return (
     <PageSection
       title="Connected blockchains"
       subtitle="View liquidity on all blockchains that this pool is connected to, and enable investments on new blockchains."
     >
-      <Accordion
-        items={
-          domains?.map((domain) => ({
-            title: (
-              <>
-                {getName(domain.chainId)} <Text fontWeight={400}>- {titles[getDomainStatus(domain)]}</Text>
-              </>
-            ),
-            body: <PoolDomain poolId={poolId} domain={domain} refetch={refetch} />,
-          })) ?? []
-        }
-      />
+      <Grid height="fit-content" gridTemplateColumns={['1fr 1fr 1fr 1fr']} gap={[2, 2]}>
+        {domains ? (
+          domains.map((domain) => (
+            <Accordion
+              items={[
+                {
+                  title: (
+                    <Shelf gap="12px">
+                      <Box
+                        as="img"
+                        src={getIcon(domain.chainId)}
+                        alt=""
+                        width="iconSmall"
+                        height="iconSmall"
+                        style={{ objectFit: 'contain' }}
+                        bleedY="12px"
+                      />
+                      <Text>
+                        {getName(domain.chainId)}{' '}
+                        {getDomainStatus(domain) === 'deploying' && <Text fontWeight={400}>- Action needed</Text>}
+                      </Text>
+                    </Shelf>
+                  ),
+                  body: <PoolDomain poolId={poolId} domain={domain} refetch={refetch} />,
+                },
+              ]}
+            />
+          ))
+        ) : (
+          <Spinner />
+        )}
+      </Grid>
     </PageSection>
   )
 }
@@ -67,7 +93,6 @@ export function LiquidityPools() {
 function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domain; refetch: () => void }) {
   const pool = usePool(poolId)
   const poolAdmin = usePoolAdmin(poolId)
-  const getName = useGetNetworkName()
   const explorer = useGetExplorerUrl(domain.chainId)
   const api = useCentrifugeApi()
 
@@ -82,7 +107,17 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
         )
       ).pipe(
         switchMap((txs) => {
-          return cent.wrapSignAndSend(api, txs.length > 1 ? api.tx.utility.batchAll(txs) : txs[0], options)
+          return cent.wrapSignAndSend(
+            api,
+            txs.length > 1
+              ? api.tx.utility.batchAll([
+                  api.tx.liquidityPoolsGateway.startBatchMessage({ EVM: domain.chainId }),
+                  ...txs,
+                  api.tx.liquidityPoolsGateway.endBatchMessage({ EVM: domain.chainId }),
+                ])
+              : txs[0],
+            options
+          )
         })
       )
     }
@@ -99,48 +134,57 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
 
   return (
     <Stack gap={1}>
-      {status === 'inactive' ? (
-        <EnableButton poolId={poolId} domain={domain} />
-      ) : status === 'deploying' ? (
-        <ConnectionGuard networks={[domain.chainId]} body="Connect to the right network to continue" variant="plain">
-          {pool.tranches.map((t) => (
-            <React.Fragment key={t.id}>
-              {domain.canTrancheBeDeployed[t.id] && (
-                <DeployTrancheButton poolId={poolId} trancheId={t.id} domain={domain} onSuccess={refetch} />
-              )}
-              {domain.currencies.map((currency, i) => (
-                <React.Fragment key={i}>
-                  {domain.trancheTokens[t.id] && !domain.liquidityPools[t.id][currency.address] && (
-                    <DeployLPButton
-                      poolId={poolId}
-                      trancheId={t.id}
-                      domain={domain}
-                      currencyIndex={i}
-                      onSuccess={refetch}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          ))}
-        </ConnectionGuard>
-      ) : (
-        pool.tranches.map((tranche) => (
-          <AnchorTextLink href={explorer.address(domain.trancheTokens[tranche.id])}>
-            <Shelf gap={1}>
-              <span>
-                See {tranche.currency.name} token on {getName(domain.chainId)}
-              </span>
-              <IconExternalLink size="iconSmall" />
-            </Shelf>
-          </AnchorTextLink>
-        ))
-      )}
       {domain.hasDeployedLp && (
-        <Button onClick={updateTokenPrices} loading={isLoading} small>
+        <Button onClick={updateTokenPrices} variant="primary" loading={isLoading} small>
           Update token prices
         </Button>
       )}
+
+      {domain.currencies.length === 0 && (
+        <Box bg={'statusCriticalBg'} p={1}>
+          <InlineFeedback status="critical">
+            <Text color={'statusCritical'}>There is no assets setup yet for this chain.</Text>
+          </InlineFeedback>
+        </Box>
+      )}
+      {domain.currencies.length > 0 &&
+        (status === 'inactive' ? (
+          <EnableButton poolId={poolId} domain={domain} />
+        ) : status === 'deploying' ? (
+          <ConnectionGuard networks={[domain.chainId]} body="Connect to the right network to continue" variant="plain">
+            {pool.tranches.map((t) => (
+              <React.Fragment key={t.id}>
+                {domain.canTrancheBeDeployed[t.id] && (
+                  <DeployTrancheButton poolId={poolId} trancheId={t.id} domain={domain} onSuccess={refetch} />
+                )}
+                {domain.currencies.map((currency, i) => (
+                  <React.Fragment key={i}>
+                    {domain.trancheTokens[t.id] && !domain.liquidityPools[t.id][currency.address] && (
+                      <DeployLPButton
+                        poolId={poolId}
+                        trancheId={t.id}
+                        domain={domain}
+                        currencyIndex={i}
+                        onSuccess={refetch}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </React.Fragment>
+            ))}
+          </ConnectionGuard>
+        ) : (
+          pool.tranches.map((tranche) => (
+            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary" small style={{ width: '100%' }}>
+                <Shelf gap={1}>
+                  <span>View {tranche.currency.symbol} token</span>
+                  <IconExternalLink size="iconSmall" />
+                </Shelf>
+              </Button>
+            </a>
+          ))
+        ))}
     </Stack>
   )
 }
@@ -157,14 +201,14 @@ function DeployTrancheButton({
   onSuccess: () => void
 }) {
   const pool = usePool(poolId)
-  const { execute, isLoading } = useEvmTransaction(`Deploy tranche`, (cent) => cent.liquidityPools.deployTranche, {
+  const { execute, isLoading } = useEvmTransaction(`Deploy token`, (cent) => cent.liquidityPools.deployTranche, {
     onSuccess,
   })
   const tranche = find(pool.tranches, (t) => t.id === trancheId)!
 
   return (
     <Button loading={isLoading} onClick={() => execute([domain.poolManager, poolId, trancheId])} small>
-      Deploy tranche: {tranche.currency.name}
+      Deploy {tranche.currency.symbol} token
     </Button>
   )
 }
@@ -184,11 +228,9 @@ function DeployLPButton({
 }) {
   const pool = usePool(poolId)
 
-  const { execute, isLoading } = useEvmTransaction(
-    `Deploy liquidity pool`,
-    (cent) => cent.liquidityPools.deployLiquidityPool,
-    { onSuccess }
-  )
+  const { execute, isLoading } = useEvmTransaction(`Deploy vault`, (cent) => cent.liquidityPools.deployLiquidityPool, {
+    onSuccess,
+  })
   const tranche = find(pool.tranches, (t) => t.id === trancheId)!
 
   return (
@@ -197,7 +239,7 @@ function DeployLPButton({
       onClick={() => execute([domain.poolManager, poolId, trancheId, domain.currencies[currencyIndex].address])}
       small
     >
-      Deploy tranche/currency liquidity pool: {tranche.currency.name} / {domain.currencies[currencyIndex].name}
+      Deploy {tranche.currency.symbol} / {domain.currencies[currencyIndex].symbol} vault
     </Button>
   )
 }
@@ -210,6 +252,10 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
     (cent) => cent.liquidityPools.enablePoolOnDomain
   )
 
+  const tokenPricesToUpdate = Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+    return domain.currencies.map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+  })
+
   const currenciesToAdd = domain.currencies
     .filter((cur) => domain.currencyNeedsAdding[cur.address])
     .map((cur) => cur.key)
@@ -217,7 +263,11 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
   return (
     <Button
       loading={isLoading}
-      onClick={() => execute([poolId, domain.chainId, currenciesToAdd], { account: poolAdmin })}
+      onClick={() =>
+        execute([poolId, domain.chainId, currenciesToAdd, tokenPricesToUpdate, domain.chainId], {
+          account: poolAdmin,
+        })
+      }
       small
     >
       Enable

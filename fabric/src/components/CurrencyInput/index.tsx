@@ -17,7 +17,7 @@ const StyledMaxButton = styled(Box)`
   padding: 0 8px;
   border: 0;
   border-radius: 12px;
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.textInverted};
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
   cursor: pointer;
   appearance: none;

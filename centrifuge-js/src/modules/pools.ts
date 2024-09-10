@@ -36,6 +36,7 @@ import {
   getDateYearsFromNow,
   getRandomUint,
   isSameAddress,
+  isValidDate,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -572,6 +573,7 @@ export type DailyTrancheState = {
   fulfilledRedeemOrders: CurrencyBalance
   outstandingInvestOrders: CurrencyBalance
   outstandingRedeemOrders: CurrencyBalance
+  yield7DaysAnnualized: Perquintill
   yield30DaysAnnualized: Perquintill
   yield90DaysAnnualized: Perquintill
   yieldSinceInception: Perquintill
@@ -637,13 +639,13 @@ export type DailyPoolState = {
   sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
-
 interface TrancheFormValues {
   tokenName: string
   symbolName: string
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
+  targetAPY: number | ''
 }
 
 export type IssuerDetail = {
@@ -673,12 +675,14 @@ export interface PoolMetadataInput {
   epochHours: number | ''
   epochMinutes: number | ''
   listed?: boolean
+  investorType: string
 
   // issuer
   issuerName: string
   issuerRepName: string
   issuerLogo?: FileType | null
   issuerDescription: string
+  issuerShortDescription: string
 
   poolReport?: {
     authorName: string
@@ -722,6 +726,7 @@ export type PoolMetadata = {
       class: 'Public credit' | 'Private credit'
       subClass: string
     }
+    investorType: string
     poolFees?: {
       id: number
       name: string
@@ -735,6 +740,7 @@ export type PoolMetadata = {
       description: string
       email: string
       logo?: FileType | null
+      shortDescription: string
     }
     links: {
       executiveSummary: FileType | null
@@ -1108,7 +1114,9 @@ export function getPoolsModule(inst: Centrifuge) {
           description: metadata.issuerDescription,
           email: metadata.email,
           logo: metadata.issuerLogo,
+          shortDescription: metadata.issuerShortDescription,
         },
+        investorType: metadata.investorType,
         links: {
           executiveSummary: metadata.executiveSummary,
           forum: metadata.forum,
@@ -2291,8 +2299,15 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     )
   }
-
   function getPoolSnapshotsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {
+    // Default values for invalid dates
+    const defaultFrom = getDateYearsFromNow(-10).toISOString()
+    const defaultTo = getDateYearsFromNow(10).toISOString()
+
+    // Use valid dates or default values
+    const validFrom = isValidDate(from) ? from?.toISOString() : defaultFrom
+    const validTo = isValidDate(to) ? to?.toISOString() : defaultTo
+
     return inst.getSubqueryObservable<{
       poolSnapshots: { nodes: SubqueryPoolSnapshot[]; pageInfo: { hasNextPage: boolean; endCursor: string } }
     }>(
@@ -2300,7 +2315,7 @@ export function getPoolsModule(inst: Centrifuge) {
       poolSnapshots(
         orderBy: BLOCK_NUMBER_ASC,
         filter: {
-          id: { startsWith: $poolId },
+          poolId: { equalTo: $poolId },
           timestamp: { greaterThan: $from, lessThan: $to }
         }
         after: $poolCursor
@@ -2340,8 +2355,8 @@ export function getPoolsModule(inst: Centrifuge) {
     `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: validFrom,
+        to: validTo,
         poolCursor: endCursor,
       }
     )
@@ -2353,10 +2368,16 @@ export function getPoolsModule(inst: Centrifuge) {
     from?: Date,
     to?: Date
   ) {
+    const defaultFrom = getDateYearsFromNow(-10).toISOString()
+    const defaultTo = getDateYearsFromNow(10).toISOString()
+
+    const validFrom = isValidDate(from) ? from?.toISOString() : defaultFrom
+    const validTo = isValidDate(to) ? to?.toISOString() : defaultTo
+
     const filter: any = {
       timestamp: {
-        greaterThan: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        lessThan: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        greaterThan: validFrom,
+        lessThan: validTo,
       },
     }
     if ('poolId' in filterBy) {
@@ -2386,6 +2407,7 @@ export function getPoolsModule(inst: Centrifuge) {
             sumOutstandingRedeemOrdersByPeriod
             sumFulfilledInvestOrdersByPeriod
             sumFulfilledRedeemOrdersByPeriod
+            yield7DaysAnnualized
             yield30DaysAnnualized
             yield90DaysAnnualized
             yieldSinceInception
@@ -2507,13 +2529,16 @@ export function getPoolsModule(inst: Centrifuge) {
             trancheStates[tid] = [entry]
           }
         })
-        const poolSeenDay = new Set<string>()
+
+        // One day may have multiple snapshots
+        // Fields ending with an ByPeriod are reset to 0 in between each snapshot
+        // So those fields need to be summed up
+        const snapshotByDay = new Map<string, any>()
         return {
           poolStates:
             poolSnapshots?.flatMap((state) => {
               const timestamp = state.timestamp.slice(0, 10)
-              if (poolSeenDay.has(timestamp)) return []
-              poolSeenDay.add(timestamp)
+              const snapshotToday = snapshotByDay.get(timestamp)
               const poolState = {
                 id: state.id,
                 netAssetValue: new CurrencyBalance(state.netAssetValue, poolCurrency.decimals),
@@ -2521,41 +2546,60 @@ export function getPoolsModule(inst: Centrifuge) {
                 offchainCashValue: new CurrencyBalance(state.offchainCashValue, poolCurrency.decimals),
                 portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
                 sumPoolFeesChargedAmountByPeriod: new CurrencyBalance(
-                  state.sumPoolFeesChargedAmountByPeriod ?? 0,
+                  BigInt(state.sumPoolFeesChargedAmountByPeriod) +
+                    BigInt(snapshotToday?.sumPoolFeesChargedAmountByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumPoolFeesAccruedAmountByPeriod: new CurrencyBalance(
-                  state.sumPoolFeesAccruedAmountByPeriod ?? 0,
+                  BigInt(state.sumPoolFeesAccruedAmountByPeriod) +
+                    BigInt(snapshotToday?.sumPoolFeesAccruedAmountByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumPoolFeesPaidAmountByPeriod: new CurrencyBalance(
-                  state.sumPoolFeesPaidAmountByPeriod ?? 0,
+                  BigInt(state.sumPoolFeesPaidAmountByPeriod) +
+                    BigInt(snapshotToday?.sumPoolFeesPaidAmountByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumBorrowedAmountByPeriod: new CurrencyBalance(state.sumBorrowedAmountByPeriod, poolCurrency.decimals),
                 sumPrincipalRepaidAmountByPeriod: new CurrencyBalance(
-                  state.sumPrincipalRepaidAmountByPeriod,
+                  BigInt(state.sumPrincipalRepaidAmountByPeriod) +
+                    BigInt(snapshotToday?.sumPrincipalRepaidAmountByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumInterestRepaidAmountByPeriod: new CurrencyBalance(
-                  state.sumInterestRepaidAmountByPeriod,
+                  BigInt(state.sumInterestRepaidAmountByPeriod) +
+                    BigInt(snapshotToday?.sumInterestRepaidAmountByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumUnscheduledRepaidAmountByPeriod: new CurrencyBalance(
-                  state.sumUnscheduledRepaidAmountByPeriod,
+                  BigInt(state.sumUnscheduledRepaidAmountByPeriod) +
+                    BigInt(snapshotToday?.sumUnscheduledRepaidAmountByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
-                sumRepaidAmountByPeriod: new CurrencyBalance(state.sumRepaidAmountByPeriod, poolCurrency.decimals),
-                sumInvestedAmountByPeriod: new CurrencyBalance(state.sumInvestedAmountByPeriod, poolCurrency.decimals),
-                sumRedeemedAmountByPeriod: new CurrencyBalance(state.sumRedeemedAmountByPeriod, poolCurrency.decimals),
+                sumRepaidAmountByPeriod: new CurrencyBalance(
+                  BigInt(state.sumRepaidAmountByPeriod) + BigInt(snapshotToday?.sumRepaidAmountByPeriod ?? 0),
+                  poolCurrency.decimals
+                ),
+                sumInvestedAmountByPeriod: new CurrencyBalance(
+                  BigInt(state.sumInvestedAmountByPeriod) + BigInt(snapshotToday?.sumInvestedAmountByPeriod ?? 0),
+                  poolCurrency.decimals
+                ),
+                sumRedeemedAmountByPeriod: new CurrencyBalance(
+                  BigInt(state.sumRedeemedAmountByPeriod) + BigInt(snapshotToday?.sumRedeemedAmountByPeriod ?? 0),
+                  poolCurrency.decimals
+                ),
                 sumPoolFeesPendingAmount: new CurrencyBalance(state.sumPoolFeesPendingAmount, poolCurrency.decimals),
-                sumDebtWrittenOffByPeriod: new CurrencyBalance(state.sumDebtWrittenOffByPeriod, poolCurrency.decimals),
+                sumDebtWrittenOffByPeriod: new CurrencyBalance(
+                  BigInt(state.sumDebtWrittenOffByPeriod) + BigInt(snapshotToday?.sumDebtWrittenOffByPeriod ?? 0),
+                  poolCurrency.decimals
+                ),
                 sumInterestAccruedByPeriod: new CurrencyBalance(
-                  state.sumInterestAccruedByPeriod,
+                  BigInt(state.sumInterestAccruedByPeriod) + BigInt(snapshotToday?.sumInterestAccruedByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumRealizedProfitFifoByPeriod: new CurrencyBalance(
-                  state.sumRealizedProfitFifoByPeriod,
+                  BigInt(state.sumRealizedProfitFifoByPeriod) +
+                    BigInt(snapshotToday?.sumRealizedProfitFifoByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
                 sumUnrealizedProfitAtMarketPrice: new CurrencyBalance(
@@ -2567,10 +2611,17 @@ export function getPoolsModule(inst: Centrifuge) {
                   poolCurrency.decimals
                 ),
                 sumUnrealizedProfitByPeriod: new CurrencyBalance(
-                  state.sumUnrealizedProfitByPeriod,
+                  BigInt(state.sumUnrealizedProfitByPeriod) + BigInt(snapshotToday?.sumUnrealizedProfitByPeriod ?? 0),
                   poolCurrency.decimals
                 ),
               }
+
+              snapshotByDay.set(timestamp, poolState)
+              if (snapshotToday) {
+                Object.assign(snapshotToday, poolState)
+                return []
+              }
+
               const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
               // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
@@ -2599,6 +2650,9 @@ export function getPoolsModule(inst: Centrifuge) {
                     tranche.sumOutstandingRedeemOrdersByPeriod,
                     poolCurrency.decimals
                   ),
+                  yield7DaysAnnualized: tranche.yield7DaysAnnualized
+                    ? new Perquintill(hexToBN(tranche.yield7DaysAnnualized))
+                    : new Perquintill(0),
                   yield30DaysAnnualized: tranche.yield30DaysAnnualized
                     ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized))
                     : new Perquintill(0),
@@ -2757,23 +2811,45 @@ export function getPoolsModule(inst: Centrifuge) {
       )
   }
 
-  function getPoolFeeStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
+  function getPoolFeeStatesByGroup(
+    args: [poolId: string, from?: Date, to?: Date],
+    groupBy: GroupBy = 'month'
+  ): Observable<Record<string, DailyPoolFeesState[]>> {
     return getDailyPoolFeeStates(args).pipe(
       map((poolFees) => {
-        return Object.entries(poolFees).map(([feeId, feeStates]) => {
-          if (!feeStates.length) return []
-          const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+        return Object.fromEntries(
+          Object.entries(poolFees).map(([feeId, feeStates]) => {
+            if (!feeStates.length) return []
+            const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
 
-          feeStates.forEach((feeState) => {
-            const date = new Date(feeState.timestamp)
-            const period = getGroupByPeriod(date, groupBy)
-            if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
-              poolStatesByGroup[period] = feeState
-            }
+            feeStates.forEach((feeState) => {
+              const date = new Date(feeState.timestamp)
+              const period = getGroupByPeriod(date, groupBy)
+              if (!poolStatesByGroup[period]) {
+                poolStatesByGroup[period] = feeState
+              } else {
+                const existing = poolStatesByGroup[period]
+                poolStatesByGroup[period] = {
+                  ...feeState,
+                  sumAccruedAmountByPeriod: new CurrencyBalance(
+                    feeState.sumAccruedAmountByPeriod.add(existing?.sumAccruedAmountByPeriod ?? new BN(0)),
+                    feeState.sumAccruedAmountByPeriod.decimals
+                  ),
+                  sumChargedAmountByPeriod: new CurrencyBalance(
+                    feeState.sumChargedAmountByPeriod.add(existing?.sumChargedAmountByPeriod ?? new BN(0)),
+                    feeState.sumChargedAmountByPeriod.decimals
+                  ),
+                  sumPaidAmountByPeriod: new CurrencyBalance(
+                    feeState.sumPaidAmountByPeriod.add(existing?.sumPaidAmountByPeriod ?? new BN(0)),
+                    feeState.sumPaidAmountByPeriod.decimals
+                  ),
+                }
+              }
+            })
+
+            return [feeId, Object.values(poolStatesByGroup)]
           })
-
-          return { [feeId]: Object.values(poolStatesByGroup) }
-        })
+        )
       })
     )
   }
@@ -3448,7 +3524,6 @@ export function getPoolsModule(inst: Centrifuge) {
               currency {
                 trancheId
               }
-              currencyId
               amount
             }
           }
@@ -4307,7 +4382,8 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.poolFees.lastFeeId()),
       take(1),
       combineLatestWith($api),
-      switchMap(([lastFeeId, api]) => {
+      combineLatestWith(getPoolFees([poolId])),
+      switchMap(([[lastFeeId, api], poolFees]) => {
         const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee([feeId]))
         const addSubmittables = add.map(({ poolId, fee }) => {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
@@ -4316,15 +4392,14 @@ export function getPoolsModule(inst: Centrifuge) {
             feeType: { [fee.feeType]: { limit: { [fee.limit]: fee.amount } } },
           })
         })
+        const removedFeeIds = new Set(remove)
+        const remainingFeeIds = new Set(poolFees.map((fee) => fee.id).filter((id) => !removedFeeIds.has(id)))
         const updatedMetadata = {
           ...metadata,
           pool: {
             ...metadata.pool,
             poolFees: [
-              ...(metadata?.pool?.poolFees?.filter((fee) => {
-                if (remove.length) return remove.find((f) => f !== fee.id)
-                return true
-              }) || []),
+              ...(metadata?.pool?.poolFees?.filter((fee) => remainingFeeIds.has(fee.id)) || []),
               ...add.map((metadata, index) => {
                 return {
                   id: parseInt(lastFeeId.toHuman() as string, 10) + index + 1,

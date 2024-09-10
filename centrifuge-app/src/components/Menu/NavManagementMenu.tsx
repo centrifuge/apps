@@ -19,6 +19,7 @@ export function NavManagementMenu({ stacked }: NavManagementMenuProps) {
   const offset = `calc(100% + 2 * ${space[1]}px)`
   const id = React.useId()
   const allowedPools = usePoolsForWhichAccountIsFeeder()
+  const theme = useTheme()
 
   return (
     allowedPools &&
@@ -73,7 +74,7 @@ export function NavManagementMenu({ stacked }: NavManagementMenuProps) {
               ))}
             </Stack>
           ) : (
-            <Menu>
+            <Menu backgroundColor={theme.colors.backgroundInverted}>
               {allowedPools.map((pool) => (
                 <MenuItemGroup key={pool.id}>
                   <Box px={2} py={1}>

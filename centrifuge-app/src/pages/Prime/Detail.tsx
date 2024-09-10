@@ -2,7 +2,6 @@ import { addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
-import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings } from '../../components/Portfolio/Holdings'
@@ -12,11 +11,7 @@ import { RouterTextLink } from '../../components/TextLink'
 import { useDAOConfig } from '../../utils/useDAOConfig'
 
 export default function PrimeDetailPage() {
-  return (
-    <LayoutBase gap={5}>
-      <PrimeDetail />
-    </LayoutBase>
-  )
+  return <PrimeDetail />
 }
 
 function PrimeDetail() {
@@ -32,7 +27,7 @@ function PrimeDetail() {
 
   return !isLoading && dao && centAddress ? (
     <>
-      <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
+      <LayoutSection backgroundColor="backgroundSecondary" pt={12} pb={12}>
         <Text variant="body3">
           <Text color="textSecondary">
             <RouterTextLink to="/prime" style={{ textDecoration: 'none' }}>
@@ -47,10 +42,10 @@ function PrimeDetail() {
         </Shelf>
         <CardPortfolioValue address={centAddress} />
       </LayoutSection>
-      <LayoutSection title="Holdings">
+      <LayoutSection title="Holdings" pt={12} pb={12}>
         <Holdings address={centAddress} showActions={false} />
       </LayoutSection>
-      <LayoutSection title="Transaction history">
+      <LayoutSection title="Transaction history" pt={12} pb={12}>
         <Transactions onlyMostRecent address={centAddress} />
       </LayoutSection>
       <Resolutions dao={dao} />

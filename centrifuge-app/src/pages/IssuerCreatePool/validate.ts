@@ -30,6 +30,8 @@ export const validate = {
   subAssetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   poolType: required(),
+  investorType: required(),
+  minPoolInvestment: required(),
 
   epochHours: combine(required(), nonNegativeNumber(), integer(), max(24 * 7 /* 1 week */)),
   epochMinutes: combine(required(), nonNegativeNumber(), integer(), max(59)),
@@ -38,6 +40,7 @@ export const validate = {
   issuerName: combine(required(), maxLength(100)),
   issuerRepName: combine(required(), maxLength(100)),
   issuerDescription: combine(minLength(100), maxLength(1000)),
+  issuerShortDescription: combine(minLength(50), maxLength(100)),
   issuerLogo: combineAsync(imageFile(), maxFileSize(1 * MB), maxImageSize(480, 480)),
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
   website: combine(required(), pattern(/^https?:\/\/.{4,}/, 'Not a valid URL')),

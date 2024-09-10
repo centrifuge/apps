@@ -49,11 +49,11 @@ const StyledTabsItem = styled.button<{ $active?: boolean }>(
       paddingLeft: 2,
       paddingRight: 2,
       paddingBottom: 2,
-      color: $active ? 'textSelected' : 'textPrimary',
-      boxShadow: $active ? `inset 0 -2px 0 ${theme.colors.borderSelected}` : 'none',
+      color: 'textPrimary',
+      boxShadow: $active ? `inset 0 -2px 0 ${theme.colors.textGold}` : 'none',
 
       '&:hover, &:active, &:focus-visible': {
-        color: 'textSelected',
+        color: 'textGold',
       },
     })
   }
