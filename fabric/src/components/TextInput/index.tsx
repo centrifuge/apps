@@ -49,12 +49,11 @@ export const StyledTextInput = styled.input`
     margin: 0;
   }
 `
-
-export const StyledInputBox = styled(Shelf)`
+export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean }>`
   width: 100%;
   position: relative;
   background: ${({ theme }) => theme.colors.backgroundPage};
-  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
+  border: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `1px solid ${theme.colors.borderPrimary}`)};
   border-radius: ${({ theme }) => theme.radii.input}px;
 
   &::before {

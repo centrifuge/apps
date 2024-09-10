@@ -115,94 +115,96 @@ export function PoolDetailOverview() {
     .reverse()
 
   return (
-    <FullHeightLayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
-      <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
-        <PoolPerformance />
+    <FullHeightLayoutSection bg={theme.colors.backgroundPage}>
+      <Box>
+        <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
+          <PoolPerformance />
+          <React.Suspense fallback={<Spinner />}>
+            <KeyMetrics
+              assetType={metadata?.pool?.asset}
+              averageMaturity={averageMaturity}
+              loans={loans}
+              poolId={poolId}
+            />
+          </React.Suspense>
+        </Grid>
+        {tokens.length > 0 && (
+          <React.Suspense fallback={<Spinner />}>
+            <TrancheTokenCards
+              trancheTokens={tokens}
+              poolId={poolId}
+              createdAt={pool.createdAt}
+              poolCurrencySymbol={pool.currency.symbol}
+            />
+          </React.Suspense>
+        )}
         <React.Suspense fallback={<Spinner />}>
-          <KeyMetrics
-            assetType={metadata?.pool?.asset}
-            averageMaturity={averageMaturity}
-            loans={loans}
-            poolId={poolId}
-          />
-        </React.Suspense>
-      </Grid>
-      {tokens.length > 0 && (
-        <React.Suspense fallback={<Spinner />}>
-          <TrancheTokenCards
-            trancheTokens={tokens}
-            poolId={poolId}
-            createdAt={pool.createdAt}
-            poolCurrencySymbol={pool.currency.symbol}
-          />
-        </React.Suspense>
-      )}
-      <React.Suspense fallback={<Spinner />}>
-        {metadata?.pool?.reports?.length || !isTinlakePool ? (
-          <Card p={3}>
-            <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
-              <Stack gap={2}>
-                <Box display="flex" flexDirection="row" alignItems="center">
-                  <IconFileText />
-                  <Text style={{ marginLeft: 8 }} variant="heading2">
-                    Reports
-                  </Text>
-                </Box>
-                <ReportDetails metadata={metadata} />
-              </Stack>
+          {metadata?.pool?.reports?.length || !isTinlakePool ? (
+            <Card p={3}>
+              <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
+                <Stack gap={2}>
+                  <Box display="flex" flexDirection="row" alignItems="center">
+                    <IconFileText />
+                    <Text style={{ marginLeft: 8 }} variant="heading2">
+                      Reports
+                    </Text>
+                  </Box>
+                  <ReportDetails metadata={metadata} />
+                </Stack>
+                <Stack gap={2}>
+                  <Text variant="heading2">Issuer details</Text>
+                  <IssuerDetails metadata={metadata} />
+                </Stack>
+              </Grid>
+            </Card>
+          ) : null}
+          {isTinlakePool && (
+            <Card p={3}>
               <Stack gap={2}>
                 <Text variant="heading2">Issuer details</Text>
                 <IssuerDetails metadata={metadata} />
               </Stack>
-            </Grid>
-          </Card>
-        ) : null}
-        {isTinlakePool && (
-          <Card p={3}>
-            <Stack gap={2}>
-              <Text variant="heading2">Issuer details</Text>
-              <IssuerDetails metadata={metadata} />
-            </Stack>
-          </Card>
-        )}
-      </React.Suspense>
-      {!isTinlakePool && (
-        <>
-          <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
-            <React.Suspense fallback={<Spinner />}>
-              <PoolStructure
-                numOfTranches={pool.tranches.length}
-                poolId={poolId}
-                poolStatus={metadata?.pool?.status}
-                poolFees={
-                  metadata?.pool?.poolFees?.map((fee) => {
-                    return {
-                      fee: poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
-                      name: fee.name,
-                      id: fee.id,
-                    }
-                  }) || []
-                }
-              />
-            </React.Suspense>
-            {/* <React.Suspense fallback={<Spinner />}>
+            </Card>
+          )}
+        </React.Suspense>
+        {!isTinlakePool && (
+          <>
+            <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
+              <React.Suspense fallback={<Spinner />}>
+                <PoolStructure
+                  numOfTranches={pool.tranches.length}
+                  poolId={poolId}
+                  poolStatus={metadata?.pool?.status}
+                  poolFees={
+                    metadata?.pool?.poolFees?.map((fee) => {
+                      return {
+                        fee: poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
+                        name: fee.name,
+                        id: fee.id,
+                      }
+                    }) || []
+                  }
+                />
+              </React.Suspense>
+              {/* <React.Suspense fallback={<Spinner />}>
                 <AssetsByMaturity />
               </React.Suspense> */}
-          </Grid>
-          {isMedium && (
+            </Grid>
+            {isMedium && (
+              <React.Suspense fallback={<Spinner />}>
+                <Card p={3}>
+                  <Cashflows />
+                </Card>
+              </React.Suspense>
+            )}
             <React.Suspense fallback={<Spinner />}>
               <Card p={3}>
-                <Cashflows />
+                <TransactionHistory poolId={poolId} />
               </Card>
             </React.Suspense>
-          )}
-          <React.Suspense fallback={<Spinner />}>
-            <Card p={3}>
-              <TransactionHistory poolId={poolId} />
-            </Card>
-          </React.Suspense>
-        </>
-      )}
+          </>
+        )}
+      </Box>
     </FullHeightLayoutSection>
   )
 }

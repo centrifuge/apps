@@ -1,11 +1,12 @@
-import { AnchorButton, Box, Grid, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconDownload, Select, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { daysBetween, formatDate } from '../../utils/date'
-import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Tooltips } from '../Tooltips'
@@ -15,25 +16,57 @@ import { getRangeNumber } from './utils'
 type ChartData = {
   day: Date
   nav: number
-  price: number | null
+  juniorTokenPrice: number | null
+  seniorTokenPrice?: number | null
+  currency?: string
+  seniorAPY: Decimal | null
+  juniorAPY: Decimal
+  isToday: boolean
 }
 
-const RangeFilterButton = styled(Stack)`
-  &:hover {
-    cursor: pointer;
-  }
-`
+type Tranche = {
+  seniority: number
+  tokenPrice: number
+}
 
 const rangeFilters = [
+  { value: 'all', label: 'All' },
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
   { value: 'ytd', label: 'Year to date' },
-  { value: 'all', label: 'All' },
-] as const
+]
+
+function calculateTranchePrices(pool: any) {
+  if (!pool?.tranches) return { juniorPrice: null, seniorPrice: null }
+
+  const juniorTranche = pool.tranches.find((t: Tranche) => t.seniority === 0)
+  const seniorTranche = pool.tranches.length > 1 ? pool.tranches.find((t: Tranche) => t.seniority === 1) : null
+
+  const juniorTokenPrice = juniorTranche ? Number(formatBalance(juniorTranche.tokenPrice, undefined, 5, 5)) : null
+  const seniorTokenPrice = seniorTranche ? Number(formatBalance(seniorTranche.tokenPrice, undefined, 5, 5)) : null
+
+  return { juniorTokenPrice, seniorTokenPrice }
+}
+
+function getYieldFieldForFilter(tranche: any, filter: string) {
+  switch (filter) {
+    case '30d':
+      return tranche.yield30DaysAnnualized || 0
+    case '90d':
+      return tranche.yield90DaysAnnualized || 0
+    case 'ytd':
+      return tranche.yieldYTD || 0
+    case 'all':
+      return tranche.yieldSinceInception || 0
+    default:
+      return 0
+  }
+}
 
 function PoolPerformanceChart() {
   const theme = useTheme()
-  const chartColor = theme.colors.accentPrimary
+  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0)
+  const chartColor = theme.colors.textGold
   const { pid: poolId } = useParams<{ pid: string }>()
 
   if (!poolId) throw new Error('Pool not found')
@@ -69,22 +102,61 @@ function PoolPerformanceChart() {
     ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
     : null
 
+  const trancheTodayPrice = calculateTranchePrices(pool)
+
   const data: ChartData[] = React.useMemo(
     () =>
-      truncatedPoolStates?.map((day) => {
+      truncatedPoolStates?.map((day: any) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
-        const price = (isSingleTranche && Object.values(day.tranches)[0].price?.toFloat()) || null
+
+        const trancheKeys = Object.keys(day.tranches)
+        const juniorTrancheKey = trancheKeys[0]
+        const seniorTrancheKey = trancheKeys[1] || null
+
+        const juniorTokenPrice = day.tranches[juniorTrancheKey]?.price?.toFloat() ?? null
+        const seniorTokenPrice = seniorTrancheKey ? day.tranches[seniorTrancheKey]?.price?.toFloat() ?? null : null
+
+        const juniorAPY = getYieldFieldForFilter(day.tranches[juniorTrancheKey], range.value).toPercent().toNumber()
+        const seniorAPY = seniorTrancheKey
+          ? getYieldFieldForFilter(day.tranches[seniorTrancheKey], range.value).toPercent().toNumber()
+          : null
+
         if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
-          return { day: new Date(day.timestamp), nav: todayAssetValue, price: Number(todayPrice) }
+          const tranchePrices = calculateTranchePrices(pool)
+
+          return {
+            day: new Date(day.timestamp),
+            nav: todayAssetValue,
+            juniorTokenPrice: tranchePrices.juniorTokenPrice ?? null,
+            seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
+            juniorAPY,
+            seniorAPY,
+            isToday: true,
+          }
         }
-        return { day: new Date(day.timestamp), nav: Number(nav), price: Number(price) }
+
+        return {
+          day: new Date(day.timestamp),
+          nav: Number(nav),
+          juniorTokenPrice: juniorTokenPrice !== 0 ? juniorTokenPrice : null,
+          seniorTokenPrice: seniorTokenPrice !== 0 ? seniorTokenPrice : null,
+          juniorAPY,
+          seniorAPY,
+          isToday: false,
+        }
       }) || [],
-    [isSingleTranche, truncatedPoolStates, todayAssetValue, todayPrice]
+    [isSingleTranche, truncatedPoolStates, todayAssetValue, todayPrice, pool, range]
   )
+
+  const todayData = data.find((day) => day.isToday)
 
   const today = {
     nav: todayAssetValue,
     price: todayPrice,
+    currency: pool.currency.symbol,
+    juniorAPY: todayData?.juniorAPY,
+    seniorAPY: todayData?.seniorAPY,
+    ...trancheTodayPrice,
   }
 
   const chartData = data.slice(-rangeNumber)
@@ -94,26 +166,42 @@ function PoolPerformanceChart() {
       return undefined
     }
 
-    const filteredData = chartData.map((data) => ({
-      day: data.day,
-      tokenPrice: data.price,
-    }))
+    const filteredData = chartData.map((data) => {
+      const base = {
+        day: data.day,
+        nav: data.nav,
+        juniorTokenPrice: data.juniorTokenPrice,
+        juniorAPY: data.juniorAPY,
+      }
+      if (data.seniorTokenPrice && data.seniorAPY) {
+        return {
+          ...base,
+          seniorTokenPrice: data.seniorTokenPrice,
+          seniorAPY: data.seniorAPY,
+        }
+      } else return { ...base }
+    })
 
     return getCSVDownloadUrl(filteredData as any)
-  }, [chartData])
+  }, [chartData, selectedTabIndex])
 
   const priceRange = React.useMemo(() => {
     if (!chartData) return [0, 100]
 
     const min =
-      chartData?.reduce((prev, curr) => {
-        return prev.price! < curr.price! ? prev : curr
-      }, chartData[0])?.price || 0
+      chartData.reduce((prev, curr) => {
+        const currMin = Math.min(curr.juniorTokenPrice ?? Infinity, curr.seniorTokenPrice ?? Infinity)
+        const prevMin = Math.min(prev.juniorTokenPrice ?? Infinity, prev.seniorTokenPrice ?? Infinity)
+        return currMin < prevMin ? curr : prev
+      }, chartData[0])?.juniorTokenPrice ?? 0
 
     const max =
-      chartData?.reduce((prev, curr) => {
-        return prev.price! > curr.price! ? prev : curr
-      }, chartData[0])?.price || 1
+      chartData.reduce((prev, curr) => {
+        const currMax = Math.max(curr.juniorTokenPrice ?? -Infinity, curr.seniorTokenPrice ?? -Infinity)
+        const prevMax = Math.max(prev.juniorTokenPrice ?? -Infinity, prev.seniorTokenPrice ?? -Infinity)
+        return currMax > prevMax ? curr : prev
+      }, chartData[0])?.juniorTokenPrice ?? 1
+
     return [min, max]
   }, [chartData])
 
@@ -138,46 +226,31 @@ function PoolPerformanceChart() {
   }
 
   return (
-    <Stack gap={2}>
-      <Stack flexDirection="row" justifyContent="space-between">
-        <Text fontSize="18px" fontWeight="500">
+    <Stack gap={2} padding={20}>
+      <Stack flexDirection="row" justifyContent="space-between" alignItems="center" mb={12}>
+        <Text variant="body2" fontWeight="500">
           Pool performance
         </Text>
+        <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+            Price
+          </TabsItem>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+            APY
+          </TabsItem>
+        </Tabs>
         <AnchorButton
           download={`pool-${poolId}-timeseries.csv`}
           href={dataUrl}
-          variant="secondary"
+          variant="inverted"
           icon={IconDownload}
           small
         >
           Download
         </AnchorButton>
       </Stack>
-      <Stack>
-        <CustomLegend data={today} />
-        <Shelf justifyContent="flex-end">
-          {chartData.length > 0 &&
-            rangeFilters.map((rangeFilter, index) => (
-              <React.Fragment key={rangeFilter.label}>
-                <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
-                  <Text variant="body3" whiteSpace="nowrap">
-                    <Text variant={rangeFilter.value === range.value && 'emphasized'}>{rangeFilter.label}</Text>
-                  </Text>
-                  <Box
-                    width="100%"
-                    backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}
-                    height="2px"
-                  />
-                </RangeFilterButton>
-                {index !== rangeFilters.length - 1 && (
-                  <Box width="24px" backgroundColor="#E0E0E0" height="2px" alignSelf="flex-end" />
-                )}
-              </React.Fragment>
-            ))}
-        </Shelf>
-      </Stack>
-
-      <Shelf gap={4} width="100%" color="textSecondary">
+      <CustomLegend selectedTabIndex={selectedTabIndex} data={today} setRange={setRange} />
+      <Shelf gap={4} width="100%" color="textSecondary" mt={4}>
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
             <ComposedChart data={chartData} margin={{ left: -36 }}>
@@ -200,7 +273,7 @@ function PoolPerformanceChart() {
               <YAxis
                 stroke="none"
                 tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
+                style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
                 yAxisId="left"
                 width={80}
@@ -208,11 +281,12 @@ function PoolPerformanceChart() {
               <YAxis
                 stroke="none"
                 tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
+                style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 6)}
                 yAxisId="right"
                 orientation="right"
                 domain={priceRange}
+                hide={true}
               />
               <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
@@ -221,28 +295,101 @@ function PoolPerformanceChart() {
                     return (
                       <TooltipContainer>
                         <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
-                        {payload.map(({ name, value }, index) => (
-                          <Shelf justifyContent="space-between" pl="4px" key={index}>
-                            <Text variant="label2">
-                              {name === 'nav' ? 'NAV' : name === 'price' ? 'Token price' : 'Cash'}
-                            </Text>
-                            <Text variant="label2">
-                              {name === 'nav' && typeof value === 'number'
-                                ? formatBalance(value, 'USD')
-                                : typeof value === 'number'
-                                ? formatBalance(value, 'USD', 6)
-                                : '-'}
-                            </Text>
-                          </Shelf>
-                        ))}
+                        {payload.map(({ name, value }, index) => {
+                          const labelMap: Record<string, string> = {
+                            nav: 'NAV',
+                            juniorTokenPrice: 'Junior Token Price',
+                            seniorTokenPrice: 'Senior Token Price',
+                            juniorAPY: 'Junior APY',
+                            seniorAPY: 'Senior APY',
+                            default: 'Cash',
+                          }
+
+                          const label = typeof name === 'string' ? labelMap[name] ?? labelMap.default : labelMap.default
+
+                          const formattedValue = (() => {
+                            if (typeof value === 'undefined' || Array.isArray(value)) {
+                              return '-'
+                            }
+
+                            if (name === 'juniorAPY' || name === 'seniorAPY') {
+                              return formatPercentage(value)
+                            }
+
+                            return formatBalance(
+                              Number(value),
+                              name === 'nav' ? pool.currency.symbol ?? 'USD' : '',
+                              name === 'juniorTokenPrice' || name === 'seniorTokenPrice' ? 6 : 0
+                            )
+                          })()
+
+                          return (
+                            <Shelf justifyContent="space-between" pl="4px" key={index}>
+                              <Text color="textPrimary" variant="label2">
+                                {label}
+                              </Text>
+                              <Text color="textPrimary" variant="label2">
+                                {formattedValue}
+                              </Text>
+                            </Shelf>
+                          )
+                        })}
                       </TooltipContainer>
                     )
                   }
                   return null
                 }}
               />
-              <Bar type="monotone" dataKey="nav" strokeWidth={0} fillOpacity={1} fill="#dbe5ff" yAxisId="left" />
-              <Line type="monotone" dataKey="price" stroke="#FFC012" strokeWidth={2} dot={false} yAxisId="right" />
+              <Bar
+                type="monotone"
+                dataKey="nav"
+                strokeWidth={0}
+                fillOpacity={1}
+                fill={theme.colors.backgroundTertiary}
+                yAxisId="left"
+              />
+              <Line
+                type="monotone"
+                dataKey="juniorTokenPrice"
+                stroke={theme.colors.textGold}
+                strokeWidth={2}
+                dot={false}
+                yAxisId="right"
+                name="juniorTokenPrice"
+                hide={selectedTabIndex === 1}
+              />
+              {chartData.some((d) => d.seniorTokenPrice !== null) && (
+                <Line
+                  type="monotone"
+                  dataKey="seniorTokenPrice"
+                  stroke={theme.colors.backgroundInverted}
+                  strokeWidth={2}
+                  dot={false}
+                  yAxisId="right"
+                  name="seniorTokenPrice"
+                  hide={selectedTabIndex === 1}
+                />
+              )}
+              <Line
+                type="monotone"
+                dataKey="juniorAPY"
+                stroke={theme.colors.textGold}
+                strokeWidth={2}
+                dot={false}
+                yAxisId="right"
+                name="juniorAPY"
+                hide={selectedTabIndex === 0}
+              />
+              <Line
+                type="monotone"
+                dataKey="seniorAPY"
+                stroke={theme.colors.backgroundInverted}
+                strokeWidth={2}
+                dot={false}
+                yAxisId="right"
+                name="seniorAPY"
+                hide={selectedTabIndex === 0}
+              />
             </ComposedChart>
           </ResponsiveContainer>
         ) : (
@@ -255,35 +402,96 @@ function PoolPerformanceChart() {
 
 function CustomLegend({
   data,
+  setRange,
+  selectedTabIndex,
 }: {
   data: {
+    currency: string
     nav: number
-    price: number | null
+    juniorTokenPrice: number
+    seniorTokenPrice?: number | null
+    juniorAPY: number
+    seniorAPY: number
   }
+  setRange: (value: { value: string; label: string }) => void
+  selectedTabIndex: number
 }) {
-  const theme = useTheme()
+  const Dot = ({ color }: { color: string }) => (
+    <Box width="8px" height="8px" borderRadius="50%" backgroundColor={color} marginRight="4px" />
+  )
+
+  const navObj = {
+    color: 'backgroundTertiary',
+    label: `NAV ${data.currency}`,
+    value: formatBalance(data.nav),
+    type: 'nav',
+    show: true,
+  }
+
+  const tokenData = [
+    navObj,
+    {
+      color: 'textGold',
+      label: 'Junior token price',
+      value: data.juniorTokenPrice ?? 0,
+      type: 'singleTrancheTokenPrice',
+      show: true,
+    },
+    {
+      color: 'textPrimary',
+      label: 'Senior token price',
+      value: data.seniorTokenPrice ?? 0,
+      type: 'singleTrancheTokenPrice',
+      show: !!data.seniorTokenPrice,
+    },
+  ]
+
+  const apyData = [
+    navObj,
+    {
+      color: 'textGold',
+      label: 'Junior APY',
+      value: formatPercentage(data.juniorAPY ?? 0),
+      type: 'singleTrancheTokenPrice',
+      show: true,
+    },
+    {
+      color: 'textPrimary',
+      label: 'Senior APY',
+      value: formatPercentage(data.seniorAPY ?? 0),
+      type: 'singleTrancheTokenPrice',
+      show: !!data.seniorAPY,
+    },
+  ]
+
+  const graphData = selectedTabIndex === 0 ? tokenData : apyData
+
+  const toggleRange = (e: any) => {
+    const value = e.target.value
+    const range = rangeFilters.find((range) => range.value === value)
+    setRange(range ?? rangeFilters[0])
+  }
 
   return (
-    <Shelf bg="backgroundPage" width="100%" gap={2}>
-      <Grid pb={2} gridTemplateColumns="fit-content(100%) fit-content(100%) fit-content(100%)" width="100%" gap={8}>
-        <Stack
-          borderLeftWidth="3px"
-          pl={1}
-          borderLeftStyle="solid"
-          borderLeftColor={theme.colors.accentPrimary}
-          gap="4px"
-        >
-          <Tooltips type="nav" />
-          <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
-        </Stack>
-        {data.price && (
-          <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
-            <Tooltips type="singleTrancheTokenPrice" />
-            <Text variant="body1">{data.price ? formatBalance(data.price, 'USD', 6) : '-'}</Text>
-          </Stack>
-        )}
-      </Grid>
-    </Shelf>
+    <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box display="flex" justifyContent="space-evenly">
+        {graphData.map((item: any, index: any) => {
+          if (!item.show) return
+          return (
+            <Stack key={index} pl={1} display="flex" marginRight="20px">
+              <Box display="flex" alignItems="center">
+                <Dot color={item.color} />
+                <Tooltips type={item.type} label={item.label} />
+              </Box>
+              <Text variant="heading1">{item.value}</Text>
+            </Stack>
+          )
+        })}
+      </Box>
+      <Box>
+        <Select options={rangeFilters} onChange={toggleRange} hideBorder />
+      </Box>
+    </Box>
   )
 }
 
@@ -292,7 +500,7 @@ const CustomTick = ({ x, y, payload }: any) => {
   return (
     <g transform={`translate(${x},${y})`}>
       <text
-        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+        style={{ fontSize: '10px', fill: theme.colors.textPrimary, letterSpacing: '-0.5px' }}
         x={0}
         y={0}
         dy={16}
