@@ -1,9 +1,7 @@
-import { Interface } from '@ethersproject/abi'
-import { Contract } from '@ethersproject/contracts'
-import type { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
-import { Provider } from 'ethers'
+import type { TransactionRequest, TransactionResponse } from 'ethers'
+import { Contract, Interface, Provider } from 'ethers'
 import set from 'lodash/set'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
@@ -72,7 +70,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function centrifugeRouter(chainId: number) {
     const centrifugeRouter = getCentrifugeRouterAddress(chainId)
-    const getEstimate = from(contract(centrifugeRouter, ABI.CentrifugeRouter).estimate([0]))
+    const getEstimate = from(contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).estimate([0]))
     return getEstimate.pipe(
       map((estimate) => {
         return { estimate, centrifugeRouter }
@@ -175,11 +173,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [currencyAddress, amount, chainId] = args
     const centrifugeRouterAddress = getCentrifugeRouterAddress(chainId)
 
-    return pending(contract(currencyAddress, ABI.Currency).approve(centrifugeRouterAddress, amount, options))
+    return pending(
+      contract(currencyAddress, new Interface(ABI.Currency)).approve(centrifugeRouterAddress, amount, options)
+    )
   }
 
   async function signPermit(args: [currencyAddress: string, amount: BN, chainId: number]) {
-    const [currencyAddress, amount] = args
+    const [currencyAddress, amount, chainId] = args
     if (!inst.config.evmSigner) throw new Error('EVM signer not set')
 
     let domainOrCurrency: any = currencyAddress
@@ -226,7 +226,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         const enable = iface.encodeFunctionData('enableLockDepositRequest', [lpAddress, order.toString()])
         const requestDeposit = iface.encodeFunctionData('executeLockedDepositRequest', [lpAddress, user, estimate])
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, requestDeposit], {
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).multicall([enable, requestDeposit], {
             ...options,
             gasLimit: 500000,
             value: estimate,
@@ -245,7 +245,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).requestRedeem(
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).requestRedeem(
             lpAddress,
             order.toString(),
             user,
@@ -293,7 +293,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         ])
 
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([permit, enable, requestDeposit], {
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).multicall([permit, enable, requestDeposit], {
             ...options,
             gasLimit: 500000,
             value: estimate,
@@ -308,7 +308,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).cancelRedeemRequest(lpAddress, estimate, {
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).cancelRedeemRequest(lpAddress, estimate, {
             ...options,
             value: estimate,
           })
@@ -323,7 +323,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).cancelDepositRequest(lpAddress, estimate, {
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).cancelDepositRequest(lpAddress, estimate, {
             ...options,
             value: estimate,
           })
@@ -338,10 +338,15 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).claimCancelDepositRequest(lpAddress, user, user, {
-            ...options,
-            value: estimate,
-          })
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).claimCancelDepositRequest(
+            lpAddress,
+            user,
+            user,
+            {
+              ...options,
+              value: estimate,
+            }
+          )
         )
       })
     )
@@ -353,10 +358,15 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).claimCancelRedeemRequest(lpAddress, user, user, {
-            ...options,
-            value: estimate,
-          })
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).claimCancelRedeemRequest(
+            lpAddress,
+            user,
+            user,
+            {
+              ...options,
+              value: estimate,
+            }
+          )
         )
       })
     )
@@ -368,11 +378,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).claimDeposit(lpAddress, receiver ?? user, user, {
-            ...options,
-            value: estimate,
-            gasLimit: 200000,
-          })
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).claimDeposit(
+            lpAddress,
+            receiver ?? user,
+            user,
+            {
+              ...options,
+              value: estimate,
+              gasLimit: 200000,
+            }
+          )
         )
       })
     )
@@ -387,7 +402,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).claimRedeem(
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).claimRedeem(
             lpAddress,
             withdraw.toString(),
             receiver ?? user,
@@ -523,7 +538,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         ...(currencies.flatMap((currency) => ({
           target: poolManager,
           call: ['function assetToId(address) view returns (uint128)', currency.address],
-          returns: [[`currencyNeedsAdding[${currency.address}]`, (id: BigInt) => id === BigInt(0)]],
+          returns: [[`currencyNeedsAdding[${currency.address}]`, (id: bigint) => id === 0n]],
         })) as Call[]),
       ],
       {
