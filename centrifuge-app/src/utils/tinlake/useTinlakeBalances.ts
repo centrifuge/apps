@@ -32,8 +32,8 @@ const WCFG_ADDRESS = '0xc221b7e65ffc80de234bbb6667abdd46593d34f0'
 
 async function getBalances(pools: TinlakePool[], address: string, provider: Provider) {
   const calls: EvmMulticallCall[] = []
-  const toTokenBalance = (val: BigInt) => new TokenBalance(val.toString(), 18)
-  const toCurrencyBalance = (val: BigInt) => new CurrencyBalance(val.toString(), 18)
+  const toTokenBalance = (val: bigint) => new TokenBalance(val.toString(), 18)
+  const toCurrencyBalance = (val: bigint) => new CurrencyBalance(val.toString(), 18)
 
   const seenCurrencies = new Set<string>()
 

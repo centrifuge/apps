@@ -23,7 +23,7 @@ export enum TinlakeTranche {
 }
 
 async function getTinlakePortfolio(ipfsPools: IpfsPools, address: string) {
-  const toBN = (val: BigInt) => new CurrencyBalance(val.toString(), 18)
+  const toBN = (val: bigint) => new CurrencyBalance(val.toString(), 18)
 
   const calls: Call[] = ipfsPools.active.flatMap((pool) => [
     {

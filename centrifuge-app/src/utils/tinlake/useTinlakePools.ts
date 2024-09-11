@@ -345,12 +345,12 @@ export async function getWriteOffPercentages(pool: TinlakePool, loans: any[]) {
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
-  const toDateString = (val: BigInt) => new Date(Number(val) * 1000).toISOString()
-  const toNumber = (val: BigInt) => Number(val)
-  const toCurrencyBalance = (val: BigInt) => new CurrencyBalance(val.toString(), 18)
-  const toTokenBalance = (val: BigInt) => new TokenBalance(val.toString(), 18)
-  const toRate = (val: BigInt) => new Rate(val.toString())
-  const toPrice = (val: BigInt) => new Rate(val.toString())
+  const toDateString = (val: bigint) => new Date(Number(val) * 1000).toISOString()
+  const toNumber = (val: bigint) => Number(val)
+  const toCurrencyBalance = (val: bigint) => new CurrencyBalance(val.toString(), 18)
+  const toTokenBalance = (val: bigint) => new TokenBalance(val.toString(), 18)
+  const toRate = (val: bigint) => new Rate(val.toString())
+  const toPrice = (val: bigint) => new Rate(val.toString())
 
   const calls: Call[] = []
   pools.active.forEach((pool) => {
@@ -827,6 +827,6 @@ interface State {
   submissionPeriod: boolean
 }
 
-function toBN(val: BigInt) {
+function toBN(val: bigint) {
   return new BN(val.toString())
 }
