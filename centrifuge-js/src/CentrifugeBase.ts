@@ -313,38 +313,35 @@ export class CentrifugeBase {
   }
 
   private async findHealthyWs(): Promise<string | null> {
-    for (const url of this.rpcEndpoints) {
-      const isHealthy = await this.checkWsHealth(url)
-      if (isHealthy) {
-        console.log(`Connection to ${url} established`)
-        return url
-      }
+    const url = await Promise.any(this.rpcEndpoints.map((url) => this.checkWsHealth(url)))
+    if (url) {
+      console.log(`Connection to ${url} established`)
+      return url
     }
-
     console.error('Error: No healthy parachain URL found')
     return null
   }
 
-  private checkWsHealth(url: string, timeoutMs: number = 5000): Promise<boolean> {
-    return new Promise((resolve) => {
+  private checkWsHealth(url: string, timeoutMs: number = 5000): Promise<string> {
+    return new Promise((resolve, reject) => {
       const ws = new WebSocket(url)
       const timer = setTimeout(() => {
         ws.close()
         console.log(`Connection to ${url} timed out`)
-        resolve(false)
+        reject()
       }, timeoutMs)
 
       ws.onopen = () => {
         clearTimeout(timer)
         ws.close()
-        resolve(true)
+        resolve(url)
       }
 
       ws.onerror = () => {
         clearTimeout(timer)
         ws.close()
         console.log(`Connection to ${url} failed`)
-        resolve(false)
+        reject()
       }
     })
   }
@@ -508,14 +505,10 @@ export class CentrifugeBase {
             blockNumber: (result as any).blockNumber ? Number((result as any).blockNumber?.toString()) : undefined,
           }
         }),
-        tap((result) => {
+        tap(async (result) => {
           options?.onStatusChange?.(result)
           if (result.status === 'InBlock') {
-            from(this.getTxCompletedEvents())
-              .pipe(take(1))
-              .subscribe((subject) => {
-                subject.next(result.events)
-              })
+            ;(await this.getTxCompletedEvents()).next(result.events)
           }
         }),
         takeWhile((result) => {
