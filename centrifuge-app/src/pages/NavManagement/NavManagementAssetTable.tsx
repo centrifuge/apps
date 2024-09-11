@@ -1,11 +1,20 @@
-import { ActiveLoan, CreatedLoan, CurrencyBalance, CurrencyKey, ExternalLoan } from '@centrifuge/centrifuge-js'
+import {
+  ActiveLoan,
+  CreatedLoan,
+  CurrencyBalance,
+  CurrencyKey,
+  CurrencyMetadata,
+  ExternalLoan,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
   CurrencyInput,
+  Divider,
   Drawer,
   IconArrowRight,
+  IconClockForward,
   IconDownload,
   Shelf,
   Stack,
@@ -23,15 +32,15 @@ import { DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { RouterTextLink } from '../../components/TextLink'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useLiquidity } from '../../utils/useLiquidity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolAccountOrders, usePoolFees } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
-import { positiveNumber } from '../../utils/validation'
+import { nonNegativeNumber } from '../../utils/validation'
 import { isCashLoan, isExternalLoan } from '../Loan/utils'
-import { VisualNavCard } from './Overview'
 
 type FormValues = {
   feed: {
@@ -193,20 +202,23 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     )
   }, [poolFees, pool.currency.decimals])
 
-  const poolReserve = pool.reserve.total.toDecimal().toNumber() || 0
-  const newNavExternal = form.values.feed.reduce(
-    (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
-    0
-  )
-  const newNavInternal =
-    allLoans?.reduce(
-      (acc, cur) => acc + (!isExternalLoan(cur) && 'presentValue' in cur ? cur.presentValue.toFloat() : 0),
-      0
-    ) || 0
-  const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavInternal + newNavCash + poolReserve - pendingFees.toFloat()
+  const changeInValuation = React.useMemo(() => {
+    return (externalLoans as ActiveLoan[]).reduce((prev, curr) => {
+      const price = curr.currentPrice.toDecimal()
+      const quantity = (curr as ExternalLoan).pricing.outstandingQuantity.toDecimal()
+      const updatedPrice = Dec(form.values.feed.find((p) => p.id === curr.id)?.value || 0)
+      return CurrencyBalance.fromFloat(
+        prev.toDecimal().add(updatedPrice.sub(price).mul(quantity)).toString(),
+        pool.currency.decimals
+      )
+    }, new CurrencyBalance(0, pool.currency.decimals))
+  }, [externalLoans, pool?.nav, form.values.feed])
+
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
+  const pendingNav = totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
+
   // Only for single tranche pools
-  const newPrice = newNav / pool.tranches[0].totalIssuance.toFloat()
+  const newPrice = pendingNav.toNumber() / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
 
   const columns = [
@@ -267,7 +279,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       header: 'New price',
       cell: (row: Row) => {
         return 'oldValue' in row && row.id !== 'reserve' && isEditing ? (
-          <Field name={`feed.${row.formIndex}.value`} validate={positiveNumber()}>
+          <Field name={`feed.${row.formIndex}.value`} validate={nonNegativeNumber()}>
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
                 {...field}
@@ -305,90 +317,178 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   }
 
   return (
-    <Stack pb={8}>
-      <FormikProvider value={form}>
-        <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
-          <Stack gap={2}>
-            <Stack gap={2}>
-              <Text variant="heading3">Confirm NAV</Text>
-              <VisualNavCard
-                currency={pool.currency}
-                current={pool.nav.total.toFloat()}
-                change={newNav - pool.nav.total.toFloat()}
-                pendingFees={pendingFees.toFloat()}
-                pendingNav={newNav}
-              />
-            </Stack>
-            {pool.tranches.length === 1 && (
-              <Stack gap={2}>
-                <Text variant="heading3">Token price update</Text>
-                <Shelf bg="backgroundSecondary" p={1} gap={1}>
-                  <Text variant="body2">
-                    {pool.tranches[0].currency.symbol} price:{' '}
-                    {formatBalance(pool.tranches[0].tokenPrice ?? 0, pool.currency.symbol, 5)}
-                  </Text>
-                  <IconArrowRight size={16} />{' '}
-                  <Text variant="body2" color="accentPrimary">
-                    {pool.tranches[0].currency.symbol} price: {formatBalance(newPrice ?? 0, pool.currency.symbol, 5)}
-                  </Text>
-                </Shelf>
-              </Stack>
-            )}
-            <ButtonGroup>
-              <Button
-                onClick={() => {
-                  form.submitForm()
-                  setIsConfirming(false)
-                }}
-              >
-                Update NAV
-              </Button>
-              <Button variant="secondary" onClick={() => setIsConfirming(false)}>
-                Cancel
-              </Button>
-            </ButtonGroup>
+    <>
+      <LayoutSection pt={3}>
+        <NavOverviewCard poolId={pool.id} changeInValuation={changeInValuation.toDecimal().toNumber()} />
+      </LayoutSection>
 
-            {liquidityAdminAccount && orders?.length ? (
-              <Text variant="body3">
-                There are open investment or redemption orders, updating the NAV will trigger the execution of orders.
-              </Text>
-            ) : null}
-          </Stack>
-        </Drawer>
-        <LayoutSection
-          title="Assets"
-          pt={5}
-          headerRight={
-            isEditing ? (
-              <ButtonGroup variant="small" key="editing">
-                <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+      <Stack pb={8}>
+        <FormikProvider value={form}>
+          <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
+            <Stack gap={2}>
+              <Stack gap={2}>
+                <Text variant="heading3">Confirm NAV</Text>
+                <VisualNavCard
+                  currency={pool.currency}
+                  aum={totalAum.toNumber()}
+                  change={changeInValuation.toDecimal().toNumber()}
+                  pendingFees={pendingFees.toFloat()}
+                  pendingNav={pendingNav.toNumber()}
+                />
+              </Stack>
+              {pool.tranches.length === 1 && (
+                <Stack gap={2}>
+                  <Text variant="heading3">Token price update</Text>
+                  <Shelf bg="backgroundSecondary" p={1} gap={1}>
+                    <Text variant="body2">
+                      {pool.tranches[0].currency.symbol} price:{' '}
+                      {formatBalance(pool.tranches[0].tokenPrice ?? 0, pool.currency.symbol, 5)}
+                    </Text>
+                    <IconArrowRight size={16} />{' '}
+                    <Text variant="body2" color="accentPrimary">
+                      {pool.tranches[0].currency.symbol} price: {formatBalance(newPrice ?? 0, pool.currency.symbol, 5)}
+                    </Text>
+                  </Shelf>
+                </Stack>
+              )}
+              <ButtonGroup>
+                <Button
+                  onClick={() => {
+                    form.submitForm()
+                    setIsConfirming(false)
+                  }}
+                >
+                  Update NAV
+                </Button>
+                <Button variant="secondary" onClick={() => setIsConfirming(false)}>
                   Cancel
                 </Button>
-                <Button
-                  small
-                  onClick={() => setIsConfirming(true)}
-                  loading={isLoading || form.isSubmitting}
-                  loadingMessage={isLoading ? 'Pending...' : undefined}
-                  disabled={!isFeeder}
-                >
-                  Done
-                </Button>
               </ButtonGroup>
-            ) : (
-              <ButtonGroup variant="small" key="edit">
-                <Button variant="tertiary" small icon={IconDownload}>
-                  Download
-                </Button>
-                <Button onClick={() => setIsEditing(true)} small>
-                  Edit
-                </Button>
-              </ButtonGroup>
-            )
-          }
-        >
-          <DataTable data={[...reserveRow, ...cashLoans, ...form.values.feed]} columns={columns} />
-        </LayoutSection>
-      </FormikProvider>
+
+              {liquidityAdminAccount && orders?.length ? (
+                <Text variant="body3">
+                  There are open investment or redemption orders, updating the NAV will trigger the execution of orders.
+                </Text>
+              ) : null}
+            </Stack>
+          </Drawer>
+          <LayoutSection
+            title="Assets"
+            pt={5}
+            headerRight={
+              isEditing ? (
+                <ButtonGroup variant="small" key="editing">
+                  <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+                    Cancel
+                  </Button>
+                  <Button
+                    small
+                    onClick={() => setIsConfirming(true)}
+                    loading={isLoading || form.isSubmitting}
+                    loadingMessage={isLoading ? 'Pending...' : undefined}
+                    disabled={!isFeeder}
+                  >
+                    Done
+                  </Button>
+                </ButtonGroup>
+              ) : (
+                <ButtonGroup variant="small" key="edit">
+                  <Button variant="tertiary" small icon={IconDownload}>
+                    Download
+                  </Button>
+                  <Button onClick={() => setIsEditing(true)} small>
+                    Edit
+                  </Button>
+                </ButtonGroup>
+              )
+            }
+          >
+            <DataTable data={[...reserveRow, ...cashLoans, ...form.values.feed]} columns={columns} />
+          </LayoutSection>
+        </FormikProvider>
+      </Stack>
+    </>
+  )
+}
+
+export function NavOverviewCard({ poolId, changeInValuation }: { poolId: string; changeInValuation: number }) {
+  const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const pendingFees = React.useMemo(() => {
+    return new CurrencyBalance(
+      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
+      pool.currency.decimals
+    )
+  }, [poolFees, pool.currency.decimals])
+
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
+
+  return (
+    <VisualNavCard
+      currency={pool.currency}
+      aum={totalAum.toNumber()}
+      change={changeInValuation ?? 0}
+      pendingFees={pendingFees.toFloat()}
+      pendingNav={totalAum.add(changeInValuation).sub(pendingFees.toDecimal()).toNumber()}
+    />
+  )
+}
+
+export function VisualNavCard({
+  currency,
+  aum,
+  change,
+  pendingFees,
+  pendingNav,
+}: {
+  currency: Pick<CurrencyMetadata, 'displayName' | 'decimals'>
+  aum: number
+  change: number
+  pendingFees: number
+  pendingNav: number
+}) {
+  return (
+    <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+      <Shelf justifyContent="space-between">
+        <Text variant="body2" color="textPrimary">
+          AUM
+        </Text>
+        <Text variant="body2">{formatBalance(aum, currency.displayName, 2)}</Text>
+      </Shelf>
+      <Divider borderColor="statusInfoBg" />
+      <Stack gap={1}>
+        <Shelf justifyContent="space-between">
+          <Text variant="body2" color="textPrimary">
+            Change in asset valuation
+          </Text>
+          <Text variant="body2" color={change >= 0 ? 'statusOk' : 'statusCritical'}>
+            {formatBalance(change, currency.displayName, 2)}
+          </Text>
+        </Shelf>
+        <Shelf justifyContent="space-between">
+          <Text variant="body2" color="textPrimary">
+            Pending fees
+          </Text>
+          <Text variant="body2" color="statusCritical">
+            -{formatBalance(pendingFees, currency.displayName, 2)}
+          </Text>
+        </Shelf>
+      </Stack>
+      <Divider borderColor="statusInfoBg" />
+      <Shelf justifyContent="space-between">
+        <Shelf gap={1}>
+          <IconClockForward color="textSelected" size="iconSmall" />
+          <Text variant="body2" color="textSelected">
+            Pending NAV
+          </Text>
+        </Shelf>
+        <Text variant="body2" color="textSelected">
+          {formatBalance(pendingNav, currency.displayName, 2)}
+        </Text>
+      </Shelf>
     </Stack>
   )
 }
