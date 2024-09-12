@@ -45,7 +45,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
-  const chainId = provider?.network.chainId || 1
+  const chainId = Number(provider?._network.chainId)
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 

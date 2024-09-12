@@ -1,7 +1,7 @@
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
 import type { TransactionRequest, TransactionResponse } from 'ethers'
-import { Contract, Interface, Provider } from 'ethers'
+import { Contract, Interface, Provider, ethers } from 'ethers'
 import set from 'lodash/set'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
@@ -70,7 +70,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function centrifugeRouter(chainId: number) {
     const centrifugeRouter = getCentrifugeRouterAddress(chainId)
-    const getEstimate = from(contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).estimate([0]))
+    const bytes = ethers.hexlify(new Uint8Array([0x12]))
+    const getEstimate = from(contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).estimate(bytes))
     return getEstimate.pipe(
       map((estimate) => {
         return { estimate, centrifugeRouter }

@@ -20,6 +20,9 @@ export type ProviderProps = {
   walletConnectId?: string
   subscanUrl?: string
   transactionToastPositionProps?: TransactionToastsProps['positionProps']
+  infuraApiKey?: string
+  alchemyApiKey?: string
+  tenderlyApiKey?: string
 }
 
 export function Provider({
@@ -30,6 +33,9 @@ export function Provider({
   walletConnectId,
   subscanUrl,
   transactionToastPositionProps,
+  infuraApiKey,
+  alchemyApiKey,
+  tenderlyApiKey,
 }: ProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
@@ -39,6 +45,9 @@ export function Provider({
           evmAdditionalConnectors={evmAdditionalConnectors}
           walletConnectId={walletConnectId}
           subscanUrl={subscanUrl}
+          infuraApiKey={infuraApiKey}
+          alchemyApiKey={alchemyApiKey}
+          tenderlyApiKey={tenderlyApiKey}
         >
           <TransactionProvider>
             <TransactionToasts positionProps={transactionToastPositionProps} />
