@@ -195,6 +195,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing, isLoading])
 
+
+  // NOTE: This assumes that pool.reserve.total comes from onchain state AND NOT from the runtime-apis
+  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.total.toDecimal())
+
+  // NOTE: current pending here in the app does include both pending + disbursed fees
   const pendingFees = React.useMemo(() => {
     return new CurrencyBalance(
       poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
@@ -214,7 +219,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     }, new CurrencyBalance(0, pool.currency.decimals))
   }, [externalLoans, pool?.nav, form.values.feed])
 
-  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
   const pendingNav = totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
 
   // Only for single tranche pools
@@ -319,7 +323,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   return (
     <>
       <LayoutSection pt={3}>
-        <NavOverviewCard poolId={pool.id} changeInValuation={changeInValuation.toDecimal().toNumber()} />
+        <NavOverviewCard
+            poolId={pool.id}
+            changeInValuation={changeInValuation.toDecimal().toNumber()}
+            totalAum={totalAum.toNumber()}
+            pendingFees={pendingFees.toDecimal().toNumber()}
+            pendingNav={pendingNav.toNumber()}
+        />
       </LayoutSection>
 
       <Stack pb={8}>
@@ -411,28 +421,18 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   )
 }
 
-export function NavOverviewCard({ poolId, changeInValuation }: { poolId: string; changeInValuation: number }) {
+export function NavOverviewCard({ poolId, changeInValuation, totalAum, pendingFees, pendingNav }: { poolId: string; changeInValuation: number; totalAum: number; pendingFees: number; pendingNav: number}) {
   const pool = usePool(poolId)
-  const poolFees = usePoolFees(poolId)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-
-  const pendingFees = React.useMemo(() => {
-    return new CurrencyBalance(
-      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
-      pool.currency.decimals
-    )
-  }, [poolFees, pool.currency.decimals])
-
-  const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.available.toDecimal())
 
   return (
     <VisualNavCard
       currency={pool.currency}
-      aum={totalAum.toNumber()}
+      aum={totalAum ?? 0}
       change={changeInValuation ?? 0}
-      pendingFees={pendingFees.toFloat()}
-      pendingNav={totalAum.add(changeInValuation).sub(pendingFees.toDecimal()).toNumber()}
+      pendingFees={pendingFees ?? 0}
+      pendingNav={pendingNav ?? 0}
     />
   )
 }
