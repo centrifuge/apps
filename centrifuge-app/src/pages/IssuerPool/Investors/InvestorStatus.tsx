@@ -1,6 +1,7 @@
 import { findBalance, Pool, Token } from '@centrifuge/centrifuge-js'
 import {
   getChainInfo,
+  Network,
   useBalances,
   useCentrifugeTransaction,
   useCentrifugeUtils,
@@ -23,7 +24,7 @@ import {
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
@@ -36,7 +37,6 @@ const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 export function InvestorStatus() {
   const {
     evm: { chains },
-    substrate: { evmChainId: substrateEvmChainId },
   } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
 
@@ -44,16 +44,6 @@ export function InvestorStatus() {
 
   const [address, setAddress] = React.useState('')
   const [chain, setChain] = React.useState<number | ''>('')
-  const validator = chain ? isEvmAddress : isAddress
-  const validAddress = validator(address) ? address : undefined
-  const utils = useCentrifugeUtils()
-  const centAddress =
-    chain && validAddress
-      ? utils.evmToSubstrateAddress(address, chain)
-      : chain === '' && substrateEvmChainId && isEvmAddress(address)
-      ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
-      : validAddress
-  const permissions = usePermissions(centAddress)
 
   const { data: domains } = useActiveDomains(poolId)
   const deployedLpChains = domains?.map((d) => d.chainId) ?? []
@@ -67,9 +57,11 @@ export function InvestorStatus() {
     (cent) => cent.pools.updatePoolRoles
   )
 
-  const allowedTranches = Object.entries(permissions?.pools[poolId]?.tranches ?? {})
-    .filter(([, till]) => new Date(till).getTime() - Date.now() > SevenDaysMs)
-    .map(([tid]) => tid)
+  const { allowedTranches, permissions, centAddress, validAddress } = useInvestorStatus(
+    poolId,
+    address,
+    chain || 'centrifuge'
+  )
 
   const pool = usePool(poolId) as Pool
 
@@ -201,4 +193,30 @@ function InvestedCell({ address, poolId, trancheId }: { address: string; poolId:
   const hasInvested = hasBalance || hasOrder
 
   return <TextWithPlaceholder variant="body2">{hasInvested && 'Invested'}</TextWithPlaceholder>
+}
+
+export function useInvestorStatus(poolId: string, address: string, network: Network = 'centrifuge') {
+  const {
+    substrate: { evmChainId: substrateEvmChainId },
+  } = useWallet()
+  const validator = typeof network === 'number' ? isEvmAddress : isAddress
+  const validAddress = validator(address) ? address : undefined
+  const utils = useCentrifugeUtils()
+  const centAddress =
+    validAddress && typeof network === 'number'
+      ? utils.evmToSubstrateAddress(address, network)
+      : substrateEvmChainId && isEvmAddress(address)
+      ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
+      : validAddress
+  const permissions = usePermissions(centAddress)
+
+  const allowedTranches = useMemo(
+    () =>
+      Object.entries(permissions?.pools[poolId]?.tranches ?? {})
+        .filter(([, till]) => new Date(till).getTime() - Date.now() > SevenDaysMs)
+        .map(([tid]) => tid),
+    [permissions, poolId]
+  )
+
+  return { allowedTranches, permissions, centAddress, validAddress }
 }

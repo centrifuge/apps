@@ -8,6 +8,7 @@ import set from 'lodash/set'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
+import { addressToHex } from '../utils'
 import { CurrencyBalance, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
@@ -108,17 +109,21 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         }
         const domain = destinationNetwork === 'centrifuge' ? 0 : 1
         const destinationId = destinationNetwork === 'centrifuge' ? 0 : destinationNetwork.evm
+        const address = isEvmAddress(receiverAddress) ? receiverAddress.padEnd(66, '0') : addressToHex(receiverAddress)
+        // hexlify(strings.toUtf8Bytes(receiverAddress))
+        console.log('address', address)
         return pending(
           contract(centrifugeRouter, ABI.CentrifugeRouter).transferTrancheTokens(
             vault,
             domain,
             destinationId,
-            receiverAddress,
+            address,
             amount.toString(),
             0,
             {
               ...options,
               value: estimate,
+              gasLimit: 200000,
             }
           )
         )

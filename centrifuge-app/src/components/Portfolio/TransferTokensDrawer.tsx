@@ -27,10 +27,11 @@ import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useLocation, useMatch, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
+import { useInvestorStatus } from '../../pages/IssuerPool/Investors/InvestorStatus'
 import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
@@ -217,15 +218,15 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
       const validAddress = validator(recipientAddress) ? recipientAddress : undefined
       if (!validAddress) {
         errors.recipientAddress = 'Invalid address'
+      } else if (!allowedTranches.includes(holding.trancheId)) {
+        errors.recipientAddress = 'Recipient is not allowed to receive this token'
       }
       if (!values.isDisclaimerAgreed && values.recipientAddress.startsWith('0x') && isNativeTransfer) {
         errors.isDisclaimerAgreed = 'Please read and accept the above'
       }
-
       return errors
     },
     onSubmit: (values, actions) => {
-      if (!liquidityPools?.[0]) return
       let { recipientAddress, chain } = values
       if (isEvmAddress(recipientAddress) && chain === '') {
         recipientAddress = utils.evmToSubstrateAddress(recipientAddress, centEvmChainId!)
@@ -238,6 +239,7 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
           chain === '' ? undefined : { evm: chain },
         ])
       } else {
+        if (!liquidityPools?.[0]) return
         evmTransfer([
           recipientAddress,
           CurrencyBalance.fromFloat(values.amount || 0, holding.currency.decimals),
@@ -251,16 +253,26 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
     },
   })
 
-  console.log('form.values.chain', form.values.chain, typeof form.values.chain === 'number')
   const { data: liquidityPools } = useLiquidityPools(
     holding.poolId,
     holding.trancheId,
-    typeof form.values.chain === 'number' ? form.values.chain : -1
+    connectedEvmChainId ?? -1 // typeof form.values.chain === 'number' ? form.values.chain :
   )
   console.log('liquidityPools', liquidityPools)
 
-  console.log('isNativeTransfer', isNativeTransfer)
-  console.log('activeDomains', activeDomains)
+  const { allowedTranches } = useInvestorStatus(
+    holding.poolId,
+    form.values.recipientAddress,
+    form.values.chain || 'centrifuge'
+  )
+
+  useEffect(() => {
+    form.validateForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedTranches])
+
+  // console.log('isNativeTransfer', isNativeTransfer)
+  // console.log('activeDomains', activeDomains)
   return (
     <Stack px={2} py={4} backgroundColor="backgroundSecondary">
       <FormikProvider value={form}>
@@ -280,9 +292,9 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
                     })) || []),
                   ]}
                   disabled={!activeDomains.length}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     form.setFieldValue('chain', event.target.value === '' ? '' : Number(event.target.value))
-                  }
+                  }}
                   onBlur={field.onBlur}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 />
