@@ -467,9 +467,7 @@ function CreatePoolForm() {
 
       const nonJuniorTranches = metadataValues.tranches.slice(1)
       const tranches = [
-        {
-          interestRatePerSec: Rate.fromAprPercent(values.tranches[0].interestRate),
-        },
+        {},
         ...nonJuniorTranches.map((tranche) => ({
           interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
