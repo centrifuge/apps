@@ -116,7 +116,6 @@ export type CreatePoolValues = Omit<
   ratingAgency: string
   ratingValue: string
   ratingReport: File | null
-  minPoolInvestment: number
 }
 
 const initialValues: CreatePoolValues = {
@@ -130,7 +129,6 @@ const initialValues: CreatePoolValues = {
   epochMinutes: 50, // in minutes
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
   investorType: '',
-  minPoolInvestment: 0,
 
   issuerName: '',
   issuerRepName: '',
@@ -722,20 +720,6 @@ function CreatePoolForm() {
                       />
                     )
                   }}
-                </Field>
-              </Box>
-              <Box gridColumn="span 2">
-                <Field name="minPoolInvestment" validate={validate.minPoolInvestment}>
-                  {({ field, form }: FieldProps) => (
-                    <CurrencyInput
-                      {...field}
-                      name="minPoolInvestment"
-                      label="Minimum investment amount*"
-                      placeholder="0"
-                      currency={form.values.currency}
-                      onChange={(value) => form.setFieldValue('minPoolInvestment', value)}
-                    />
-                  )}
                 </Field>
               </Box>
               <Box gridColumn="span 2">

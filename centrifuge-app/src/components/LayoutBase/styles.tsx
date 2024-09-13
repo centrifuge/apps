@@ -116,13 +116,15 @@ export const WalletPositioner = styled(Shelf)`
 `
 
 export const WalletInner = styled(Stack)`
-  height: ${HEADER_HEIGHT}px;
+  height: 80px;
   justify-content: center;
   pointer-events: auto;
   width: 250px;
+  margin-right: 40px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
+    height: 50px;
   }
 `
 

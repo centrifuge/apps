@@ -31,7 +31,6 @@ export const validate = {
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   poolType: required(),
   investorType: required(),
-  minPoolInvestment: required(),
 
   epochHours: combine(required(), nonNegativeNumber(), integer(), max(24 * 7 /* 1 week */)),
   epochMinutes: combine(required(), nonNegativeNumber(), integer(), max(59)),
