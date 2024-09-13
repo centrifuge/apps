@@ -31,6 +31,7 @@ export function PoolList() {
   const [listedPools, , metadataIsLoading] = useListedPools()
   const isLarge = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
+  const isExtraLarge = useIsAboveBreakpoint('XL')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -50,7 +51,6 @@ export function PoolList() {
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
     return [pools, search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listedPools, search])
 
   const archivedPools = pools.filter((pool) => pool?.status?.includes('Archived'))
@@ -69,22 +69,22 @@ export function PoolList() {
     <Stack>
       <Stack>
         <Box overflow="auto">
-          <Box
-            as="ul"
-            role="list"
-            display="grid"
-            gridTemplateColumns={isLarge ? 'repeat(3, 1fr)' : isMedium ? 'repeat(2, 1fr)' : 'repeat(1, 1fr)'}
-          >
+          <Box as="ul" role="list" display="flex" flexWrap="wrap">
             {metadataIsLoading
               ? Array(6)
                   .fill(true)
                   .map((_, index) => (
-                    <Box as="li" key={index}>
+                    <Box as="li" key={index} width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}>
                       <PoolCard />
                     </Box>
                   ))
               : filteredPools.map((pool) => (
-                  <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
+                  <PoolCardBox
+                    as="li"
+                    key={pool.poolId}
+                    status={pool.status}
+                    width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+                  >
                     <PoolCard {...pool} />
                   </PoolCardBox>
                 ))}
@@ -111,16 +111,17 @@ export function PoolList() {
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
   const isMedium = useIsAboveBreakpoint('M')
   const isLarge = useIsAboveBreakpoint('L')
+  const isExtraLarge = useIsAboveBreakpoint('XL')
   return (
     <Stack gap={1} overflow="auto">
-      <Box
-        as="ul"
-        role="list"
-        display="grid"
-        gridTemplateColumns={isLarge ? 'repeat(3, 1fr)' : isMedium ? 'repeat(2, 1fr)' : 'repeat(1, 1fr)'}
-      >
+      <Box as="ul" role="list" display="flex" flexWrap="wrap">
         {pools.map((pool) => (
-          <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
+          <PoolCardBox
+            as="li"
+            key={pool.poolId}
+            status={pool.status}
+            width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+          >
             <PoolCard {...pool} />
           </PoolCardBox>
         ))}
