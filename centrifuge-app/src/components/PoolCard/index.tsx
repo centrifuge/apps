@@ -47,6 +47,26 @@ const StyledRouterTextLink = styled(RouterTextLink)`
   margin-top: 8px;
   text-decoration: none;
 `
+const StyledCard = styled(Card)`
+  width: 100%;
+  max-width: 100%;
+  height: 320px;
+  margin-right: 12px;
+  margin-bottom: 12px;
+  padding: 12px;
+
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.colors.backgroundInverted};
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints['M']}) {
+    width: auto;
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints['XL']}) {
+    width: auto;
+  }
+`
 
 export type PoolCardProps = {
   poolId?: string
@@ -102,7 +122,7 @@ export function PoolCard({
   }) as TrancheData[]
 
   return (
-    <Card marginRight={20} marginBottom={20} padding={18} height={320}>
+    <StyledCard>
       <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>
         <CardHeader marginBottom={12}>
           <Box>
@@ -114,15 +134,15 @@ export function PoolCard({
           {iconUri ? (
             <Box as="img" src={iconUri} alt="" height={38} width={38} borderRadius="4px" />
           ) : (
-            <Thumbnail type="pool" label="LP" size="small" />
+            <Thumbnail type="pool" label="LP" size="large" />
           )}
         </CardHeader>
         <Divider />
         <Box display="flex" justifyContent="space-between" alignItems="center" marginY="8px">
           <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-            TVL ({currencySymbol})
+            {currencySymbol && `TVL (${currencySymbol})`}
           </Text>
-          <Text variant="heading1">{valueLocked ? formatBalance(valueLocked, '') : '-'}</Text>
+          <Text variant="heading1">{valueLocked ? formatBalance(valueLocked, '') : ''}</Text>
         </Box>
         <Box
           bg={isOneTranche ? 'white' : 'backgroundSecondary'}
@@ -165,14 +185,14 @@ export function PoolCard({
           </Box>
         )}
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">Asset Type</Text>
-          <Text variant="body2">{assetClass ?? '-'}</Text>
+          <Text variant="body2">{assetClass && 'Asset Type'}</Text>
+          <Text variant="body2">{assetClass ?? ''}</Text>
         </Box>
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">Investor Type</Text>
-          <Text variant="body2"> {metaData?.pool?.investorType || '-'}</Text>
+          <Text variant="body2">{metaData?.pool?.investorType && 'Investor Type'}</Text>
+          <Text variant="body2"> {metaData?.pool?.investorType ?? ''}</Text>
         </Box>
       </RouterTextLink>
-    </Card>
+    </StyledCard>
   )
 }

@@ -645,7 +645,6 @@ interface TrancheFormValues {
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
-  targetAPY: number | ''
 }
 
 export type IssuerDetail = {
