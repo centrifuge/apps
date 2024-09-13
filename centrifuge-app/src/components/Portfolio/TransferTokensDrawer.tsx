@@ -2,6 +2,7 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import {
   getChainInfo,
   useCentEvmChainId,
+  useCentrifuge,
   useCentrifugeConsts,
   useCentrifugeTransaction,
   useCentrifugeUtils,
@@ -25,9 +26,11 @@ import {
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
+import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useEffect } from 'react'
+import { useQuery } from 'react-query'
 import { useLocation, useMatch, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
@@ -90,9 +93,7 @@ function TransferTokensDrawerInner() {
 
   const holding = getHolding()
 
-  console.log('holding', holding)
-
-  return holding || true ? (
+  return holding ? (
     <Stack gap={3}>
       <Text textAlign="center" variant="heading2">
         {holding?.currency.symbol} Holdings
@@ -125,26 +126,7 @@ function TransferTokensDrawerInner() {
             <TabsItem>Receive</TabsItem>
           </Tabs>
           {isSend ? (
-            <SendToken
-              address={address!}
-              holding={{
-                currency: {
-                  symbol: 'TPPP',
-                  key: { Tranche: ['2779829532', '0xac6bffc5fd68f7772ceddec7b0a316ca'] },
-                  decimals: 6,
-                  name: 'THE PP',
-                  isPoolCurrency: false,
-                  isPermissioned: true,
-                  displayName: 'Tropical Pool Token',
-                },
-                poolId: '2779829532',
-                trancheId: '0xac6bffc5fd68f7772ceddec7b0a316ca',
-                marketValue: Dec(10000),
-                position: Dec(10000),
-                tokenPrice: Dec(1),
-              }}
-              isNativeTransfer={isNativeTransfer}
-            />
+            <SendToken holding={holding} isNativeTransfer={isNativeTransfer} />
           ) : (
             <ReceiveToken address={address!} />
           )}
@@ -167,18 +149,19 @@ function TransferTokensDrawerInner() {
 }
 
 type SendProps = {
-  address: string
   holding: Holding
   isNativeTransfer?: boolean
 }
 
-const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
+const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
+  const address = useAddress()
+  const cent = useCentrifuge()
   const { data: domains } = useActiveDomains(holding.poolId)
   const activeDomains = domains?.filter((domain) => domain.hasDeployedLp) ?? []
   const {
     connectedNetwork,
     isEvmOnSubstrate,
-    evm: { chains, chainId: connectedEvmChainId },
+    evm: { chains, chainId: connectedEvmChainId, getProvider },
   } = useWallet()
 
   const utils = useCentrifugeUtils()
@@ -195,7 +178,10 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
     `Send ${holding.currency.symbol}`,
     (cent) => cent.liquidityPools.transferTrancheTokens,
     {
-      onSuccess: () => form.resetForm(),
+      onSuccess: () => {
+        form.resetForm()
+        refetchAllowance()
+      },
     }
   )
 
@@ -240,14 +226,26 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
         ])
       } else {
         if (!liquidityPools?.[0]) return
-        evmTransfer([
-          recipientAddress,
-          CurrencyBalance.fromFloat(values.amount || 0, holding.currency.decimals),
-          liquidityPools[0].lpAddress,
-          liquidityPools[0].trancheTokenAddress,
-          connectedEvmChainId!,
-          chain === '' ? 'centrifuge' : { evm: chain },
-        ])
+        const amount = CurrencyBalance.fromFloat(values.amount || 0, holding.currency.decimals)
+        const send = () =>
+          evmTransfer([
+            recipientAddress,
+            amount,
+            liquidityPools[0].lpAddress,
+            liquidityPools[0].trancheTokenAddress,
+            connectedEvmChainId!,
+            chain === '' ? 'centrifuge' : { evm: chain },
+          ])
+        if (isEvmAndNeedsApprove) {
+          executeApprove([
+            send,
+            liquidityPools[0].trancheTokenAddress,
+            CurrencyBalance.fromFloat(values.amount || 0, holding.currency.decimals),
+            connectedEvmChainId!,
+          ])
+        } else {
+          send()
+        }
       }
       actions.setSubmitting(false)
     },
@@ -256,9 +254,8 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
   const { data: liquidityPools } = useLiquidityPools(
     holding.poolId,
     holding.trancheId,
-    connectedEvmChainId ?? -1 // typeof form.values.chain === 'number' ? form.values.chain :
+    !isEvmOnSubstrate ? connectedEvmChainId ?? -1 : -1 // typeof form.values.chain === 'number' ? form.values.chain :
   )
-  console.log('liquidityPools', liquidityPools)
 
   const { allowedTranches } = useInvestorStatus(
     holding.poolId,
@@ -266,13 +263,43 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
     form.values.chain || 'centrifuge'
   )
 
+  const { data: allowanceData, refetch: refetchAllowance } = useQuery(
+    ['allowance', liquidityPools?.[0]?.trancheTokenAddress, connectedEvmChainId, address],
+    () =>
+      cent.liquidityPools.getCentrifugeRouterAllowance(
+        [liquidityPools![0].trancheTokenAddress!, address!, connectedEvmChainId!],
+        {
+          rpcProvider: getProvider(connectedEvmChainId!),
+        }
+      ),
+    {
+      enabled:
+        !!liquidityPools?.[0]?.trancheTokenAddress && !!connectedEvmChainId && !!address && isEvmAddress(address),
+    }
+  )
+
+  const isEvmAndNeedsApprove =
+    !!liquidityPools?.[0]?.trancheTokenAddress &&
+    allowanceData &&
+    allowanceData?.allowance?.toDecimal().lt(Dec(form.values.amount || 0))
+
+  const { execute: executeApprove, isLoading: isApproving } = useEvmTransaction(
+    `Send ${holding.currency.symbol}`,
+    (cent) =>
+      ([, ...args]: [cb: () => void, currencyAddress: string, amount: BN, chainId: number], options) =>
+        cent.liquidityPools.approveForCurrency(args, options),
+    {
+      onSuccess: ([cb]) => {
+        cb()
+      },
+    }
+  )
+
   useEffect(() => {
     form.validateForm()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowedTranches])
 
-  // console.log('isNativeTransfer', isNativeTransfer)
-  // console.log('activeDomains', activeDomains)
   return (
     <Stack px={2} py={4} backgroundColor="backgroundSecondary">
       <FormikProvider value={form}>
@@ -374,8 +401,8 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
               </>
             )}
             <Shelf>
-              <Button variant="primary" type="submit" loading={isLoading || evmIsLoading}>
-                Send
+              <Button variant="primary" type="submit" loading={isLoading || evmIsLoading || isApproving}>
+                {isEvmAndNeedsApprove ? 'Approve and send' : 'Send'}
               </Button>
             </Shelf>
           </Stack>
@@ -386,8 +413,7 @@ const SendToken = ({ address, holding, isNativeTransfer }: SendProps) => {
 }
 
 const ReceiveToken = ({ address }: { address: string }) => {
-  const { evm, connectedNetworkName } = useWallet()
-  const chainId = evm.chainId ?? undefined
+  const { connectedNetworkName } = useWallet()
   const utils = useCentrifugeUtils()
   const [copied, setCopied] = React.useState(false)
   const formattedAddr = utils.formatAddress(address)
