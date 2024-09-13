@@ -45,6 +45,17 @@ export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
+          validate={!isTestEnv && validate.issuerShortDescription}
+          name="issuerShortDescription"
+          label="Short description (max 100 characters)"
+          as={TextAreaInput}
+          placeholder="Short description..."
+          maxLength={100}
+          disabled={waitingForStoredIssuer}
+        />
+      </Box>
+      <Box gridColumn={['span 1', 'span 2']}>
+        <FieldWithErrorMessage
           validate={!isTestEnv && validate.issuerDescription}
           name="issuerDescription"
           as={TextAreaInput}
