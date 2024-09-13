@@ -3758,7 +3758,6 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) =>
         combineLatest([api.query.investments.investOrders.keys(), api.query.investments.redeemOrders.keys()]).pipe(
           switchMap(([investKeys, redeemKeys]) => {
-            console.log('investKeys', investKeys)
             const keys = [...investKeys, ...redeemKeys]
               .map((k, i) => {
                 const key = k.toHuman() as [string, [poolId: string, trancheId: string]]

@@ -85,7 +85,6 @@ function TransferTokensDrawerInner() {
     if (transferKey?.includes('.')) {
       const [poolId, trancheId] = transferKey.split('.')
       return tokens?.find((token) => token.poolId === poolId && token.trancheId === trancheId)
-      // } else if (isNativeTransfer) {
     } else {
       return tokens?.find((token) => token.currency.symbol === transferKey)
     }

@@ -239,7 +239,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         returns: [['decimals']],
       },
     ]
-    console.log('getCentrifugeRouterAllowance', getCentrifugeRouterAllowance)
 
     const data = await multicall<{
       decimals: number

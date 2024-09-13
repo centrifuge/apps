@@ -34,7 +34,6 @@ function getDomainStatus(domain: Domain) {
   if (!domain.isActive) {
     return 'inactive'
   }
-  // if (Object.values(domain.liquidityPools).every((t) => Object.values(t).every((p) => !!p))) {
   if (domain.hasDeployedLp) {
     return 'deployed'
   }
@@ -98,8 +97,6 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
   const api = useCentrifugeApi()
 
   const status = getDomainStatus(domain)
-  console.log('status', status)
-  console.log('domain', domain)
 
   const { execute, isLoading } = useCentrifugeTransaction(
     `Update token prices`,
