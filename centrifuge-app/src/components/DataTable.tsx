@@ -49,6 +49,7 @@ export type DataTableProps<T = any> = {
   footer?: React.ReactNode
   pageSize?: number
   page?: number
+  headerStyles?: React.CSSProperties
 } & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
@@ -96,6 +97,7 @@ export const DataTable = <T extends Record<string, any>>({
   defaultSortOrder = 'desc',
   pageSize = Infinity,
   page = 1,
+  headerStyles,
 }: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
@@ -122,7 +124,7 @@ export const DataTable = <T extends Record<string, any>>({
   return (
     <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0}>
       {showHeader && (
-        <HeaderRow>
+        <HeaderRow styles={headerStyles}>
           {columns.map((col, i) => (
             <HeaderCol key={i} align={col?.align}>
               <Text variant="body3">
@@ -203,12 +205,13 @@ const Row = styled('div')`
   box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderPrimary}, 1px 0 0 0 ${theme.colors.borderPrimary}`};
 `
 
-const HeaderRow = styled(Row)<any>(
+const HeaderRow = styled(Row)<{ styles?: any }>(({ styles }) =>
   css({
     backgroundColor: 'backgroundSecondary',
     borderStyle: 'solid',
     borderWidth: '1px 0',
     borderColor: 'borderPrimary',
+    ...styles,
   })
 )
 

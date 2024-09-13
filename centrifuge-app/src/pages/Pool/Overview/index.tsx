@@ -137,7 +137,7 @@ export function PoolDetailOverview() {
               trancheTokens={tokens}
               poolId={poolId}
               createdAt={pool.createdAt}
-              poolCurrencySymbol={pool.currency.symbol}
+              poolCurrency={pool.currency}
             />
           </React.Suspense>
         )}
