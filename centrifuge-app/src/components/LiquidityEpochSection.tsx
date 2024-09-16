@@ -79,30 +79,29 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
 
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Start order execution',
-    (cent) => (args: [poolId: string, batchSolution: boolean, collect: boolean], options) =>
-      !args[2]
-        ? cent.pools.closeEpoch([args[0], args[1]], options)
-        : cent.pools.closeEpoch([args[0], args[1]], { batch: true }).pipe(
-            switchMap((closeTx) => {
-              const tx = api.tx.utility.batchAll(
-                [
-                  ...closeTx.method.args[0],
-                  orders?.length
-                    ? api.tx.utility.batch(
-                        orders
-                          .slice(0, MAX_COLLECT)
-                          .map((order) =>
-                            api.tx.investments[
-                              order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
-                            ](order.accountId, [pool.id, order.trancheId])
-                          )
+    (cent) => (args: [poolId: string, collect: boolean], options) =>
+      cent.pools.closeEpoch([args[0], false], { batch: true }).pipe(
+        switchMap((closeTx) => {
+          const tx = api.tx.utility.batchAll(
+            [
+              ...closeTx.method.args[0],
+              orders?.length
+                ? api.tx.utility.batch(
+                    orders
+                      .slice(0, MAX_COLLECT)
+                      .map((order) =>
+                        api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
+                          order.accountId,
+                          [pool.id, order.trancheId]
+                        )
                       )
-                    : null,
-                ].filter(Boolean)
-              )
-              return cent.wrapSignAndSend(api, tx, options)
-            })
-          ),
+                  )
+                : null,
+            ].filter(Boolean)
+          )
+          return cent.wrapSignAndSend(api, tx, options)
+        })
+      ),
     {
       onSuccess: () => {
         console.log('Started order execution successfully')
@@ -113,7 +112,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const closeEpoch = async () => {
     if (!pool) return // const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
     // also collect the first MAX_COLLECT open orders when orders are fully executable
-    closeEpochTx([pool.id, false, ordersFullyExecutable], {
+    closeEpochTx([pool.id, ordersFullyExecutable], {
       account,
       forceProxyType: ['Borrow', 'Invest'],
     })

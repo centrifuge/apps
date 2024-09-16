@@ -16,6 +16,7 @@ import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { getColumnHeader } from './utils'
 
 type Row = TableDataRow & {
   formatter?: (v: any) => any
@@ -75,29 +76,6 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       return []
     }
 
-    const getColumnHeader = (timestamp: string) => {
-      if (groupBy === 'day' || groupBy === 'daily') {
-        return new Date(timestamp).toLocaleDateString('en-US', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        })
-      } else if (groupBy === 'month') {
-        return new Date(timestamp).toLocaleDateString('en-US', {
-          month: 'long',
-          year: 'numeric',
-        })
-      } else if (groupBy === 'quarter') {
-        const date = new Date(timestamp)
-        return `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`
-      } else if (groupBy === 'year') {
-        return new Date(timestamp).toLocaleDateString('en-US', {
-          year: 'numeric',
-        })
-      }
-      return ''
-    }
-
     return [
       {
         align: 'left',
@@ -117,7 +95,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         poolStates.map((state, index) => ({
           align: 'right',
           timestamp: state.timestamp,
-          header: getColumnHeader(state.timestamp),
+          header: getColumnHeader(state.timestamp, groupBy),
           cell: (row: Row) => (
             <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>
               {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}

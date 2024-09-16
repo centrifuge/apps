@@ -27,13 +27,13 @@ export function TrancheSection() {
   const getNewTrancheName = (numTranches: number, poolName: string) => {
     switch (numTranches) {
       case 0:
-        return `${poolName} Junior` // First tranche to be added
+        return `${poolName} Junior`
       case 1:
-        return `${poolName} Senior` // Second tranche
+        return `${poolName} Senior`
       case 2:
-        return `${poolName} Mezzanine` // Third tranche
+        return `${poolName} Mezzanine`
       default:
-        return '' // No more tranches allowed or needed
+        return ''
     }
   }
 
@@ -158,21 +158,19 @@ export function TrancheInput({ canRemove, isUpdating }: { canRemove?: boolean; i
                 </Field>
                 {index === 0 ? (
                   <>
-                    <TextInput
-                      label={<Tooltips type="noTranchProtection" variant="secondary" />}
-                      value="-"
+                    {/* Only most junior tranche has target APY */}
+                    <FieldWithErrorMessage
+                      as={NumberInput}
+                      label={<Tooltips type="targetAPY" variant="secondary" />}
+                      placeholder="0.00"
                       symbol="%"
-                      disabled
-                    />
-                    <TextInput
-                      label={<Tooltips type="variableTranchInterest" variant="secondary" />}
-                      value="-"
-                      symbol="%"
-                      disabled
+                      name={`tranches.${index}.targetAPY`}
+                      validate={validate.interestRate}
                     />
                   </>
                 ) : (
                   <>
+                    {/* Show min subordination and interest rate for Senior or Mezzanine tranches */}
                     <FieldWithErrorMessage
                       as={NumberInput}
                       label={<Tooltips type="tranchProtection" variant="secondary" />}
@@ -191,6 +189,7 @@ export function TrancheInput({ canRemove, isUpdating }: { canRemove?: boolean; i
                     />
                   </>
                 )}
+
                 {canRemove && (
                   <Box pt={1}>
                     {index !== 0 && (
@@ -198,9 +197,7 @@ export function TrancheInput({ canRemove, isUpdating }: { canRemove?: boolean; i
                         variant="tertiary"
                         icon={IconMinusCircle}
                         onClick={() => {
-                          // removes always mezzanine first and then senior to maintain order Junior | Senior or Junior | Mezzanine | Senior
-                          // the only option that is not allow is Senior & Mezzanine
-                          fldArr.remove(1)
+                          fldArr.remove(index)
                         }}
                       />
                     )}

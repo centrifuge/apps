@@ -103,7 +103,7 @@ export const StyledInputAction = styled.button`
 export function InputAction({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <StyledInputAction type="button" {...props}>
-      <Text variant="interactive1" color="textSecondary" fontWeight={400}>
+      <Text variant="interactive1" color="textInverted" fontWeight={400}>
         {children}
       </Text>
     </StyledInputAction>

@@ -36,6 +36,7 @@ import {
   getDateYearsFromNow,
   getRandomUint,
   isSameAddress,
+  isValidDate,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -638,13 +639,13 @@ export type DailyPoolState = {
   sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
-
 interface TrancheFormValues {
   tokenName: string
   symbolName: string
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
+  targetAPY?: number | ''
 }
 
 export type IssuerDetail = {
@@ -674,18 +675,25 @@ export interface PoolMetadataInput {
   epochHours: number | ''
   epochMinutes: number | ''
   listed?: boolean
+  investorType: string
 
   // issuer
   issuerName: string
   issuerRepName: string
   issuerLogo?: FileType | null
   issuerDescription: string
+  issuerShortDescription: string
 
   poolReport?: {
     authorName: string
     authorTitle: string
     authorAvatar: FileType | null
     url: string
+  }
+  poolRating?: {
+    ratingAgency?: string
+    ratingValue?: string
+    ratingReportUrl?: string
   }
 
   executiveSummary: FileType | null
@@ -723,6 +731,7 @@ export type PoolMetadata = {
       class: 'Public credit' | 'Private credit'
       subClass: string
     }
+    investorType: string
     poolFees?: {
       id: number
       name: string
@@ -736,6 +745,7 @@ export type PoolMetadata = {
       description: string
       email: string
       logo?: FileType | null
+      shortDescription: string
     }
     links: {
       executiveSummary: FileType | null
@@ -746,6 +756,11 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
     reports?: PoolReport[]
+    rating?: {
+      ratingAgency?: string
+      ratingValue?: string
+      ratingReportUrl?: string
+    }
   }
   pod?: {
     indexer?: string | null
@@ -1089,8 +1104,10 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const tranchesById: PoolMetadata['tranches'] = {}
     metadata.tranches.forEach((tranche, index) => {
+      const targetAPY = tranche?.targetAPY ? { targetAPY: tranche.targetAPY } : {}
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
+        ...targetAPY,
       }
     })
 
@@ -1109,7 +1126,9 @@ export function getPoolsModule(inst: Centrifuge) {
           description: metadata.issuerDescription,
           email: metadata.email,
           logo: metadata.issuerLogo,
+          shortDescription: metadata.issuerShortDescription,
         },
+        investorType: metadata.investorType,
         links: {
           executiveSummary: metadata.executiveSummary,
           forum: metadata.forum,
@@ -1119,6 +1138,13 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
+        rating: metadata.poolRating
+          ? {
+              ratingAgency: metadata.poolRating.ratingAgency,
+              ratingValue: metadata.poolRating.ratingValue,
+              ratingReportUrl: metadata.poolRating.ratingReportUrl,
+            }
+          : undefined,
         reports: metadata.poolReport
           ? [
               {
@@ -2292,8 +2318,15 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     )
   }
-
   function getPoolSnapshotsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {
+    // Default values for invalid dates
+    const defaultFrom = getDateYearsFromNow(-10).toISOString()
+    const defaultTo = getDateYearsFromNow(10).toISOString()
+
+    // Use valid dates or default values
+    const validFrom = isValidDate(from) ? from?.toISOString() : defaultFrom
+    const validTo = isValidDate(to) ? to?.toISOString() : defaultTo
+
     return inst.getSubqueryObservable<{
       poolSnapshots: { nodes: SubqueryPoolSnapshot[]; pageInfo: { hasNextPage: boolean; endCursor: string } }
     }>(
@@ -2341,8 +2374,8 @@ export function getPoolsModule(inst: Centrifuge) {
     `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: validFrom,
+        to: validTo,
         poolCursor: endCursor,
       }
     )
@@ -2354,10 +2387,16 @@ export function getPoolsModule(inst: Centrifuge) {
     from?: Date,
     to?: Date
   ) {
+    const defaultFrom = getDateYearsFromNow(-10).toISOString()
+    const defaultTo = getDateYearsFromNow(10).toISOString()
+
+    const validFrom = isValidDate(from) ? from?.toISOString() : defaultFrom
+    const validTo = isValidDate(to) ? to?.toISOString() : defaultTo
+
     const filter: any = {
       timestamp: {
-        greaterThan: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        lessThan: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        greaterThan: validFrom,
+        lessThan: validTo,
       },
     }
     if ('poolId' in filterBy) {

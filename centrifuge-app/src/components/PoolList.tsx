@@ -1,6 +1,6 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Grid, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
@@ -9,11 +9,9 @@ import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
-import { COLUMNS, COLUMN_GAPS, PoolCard, PoolCardProps } from './PoolCard'
+import { MetaData, PoolCard, PoolCardProps, Tranche } from './PoolCard'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
-import { PoolFilter } from './PoolFilter'
 import { filterPools } from './PoolFilter/utils'
-import { ButtonTextLink } from './TextLink'
 
 export type MetaDataById = Record<string, PoolMetaDataPartial>
 export type PoolMetaDataPartial = Partial<PoolMetadata> | undefined
@@ -31,7 +29,9 @@ export function PoolList() {
   const { search } = useLocation()
   const [showArchived, setShowArchived] = React.useState(false)
   const [listedPools, , metadataIsLoading] = useListedPools()
+  const isLarge = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
+  const isExtraLarge = useIsAboveBreakpoint('XL')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -51,7 +51,6 @@ export function PoolList() {
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
     return [pools, search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listedPools, search])
 
   const archivedPools = pools.filter((pool) => pool?.status?.includes('Archived'))
@@ -67,44 +66,40 @@ export function PoolList() {
   }
 
   return (
-    <Stack gap={2}>
-      <Stack gap={1}>
+    <Stack>
+      <Stack>
         <Box overflow="auto">
-          <PoolFilter pools={filteredPools} />
-
-          {!filteredPools.length ? (
-            <Shelf px={2} mt={2} justifyContent="center">
-              <Box px={2} py={1} borderRadius="input" backgroundColor="secondarySelectedBackground">
-                <InlineFeedback status="info">
-                  No results found with these filters. Try different filters.
-                </InlineFeedback>
-              </Box>
-            </Shelf>
-          ) : (
-            <Stack as="ul" role="list" gap={1} minWidth={isMedium ? 970 : 0} py={1}>
-              {metadataIsLoading
-                ? Array(6)
-                    .fill(true)
-                    .map((_, index) => (
-                      <Box as="li" key={index}>
-                        <PoolCard isLoading={true} />
-                      </Box>
-                    ))
-                : filteredPools.map((pool) => (
-                    <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
-                      <PoolCard {...pool} />
-                    </PoolCardBox>
-                  ))}
-            </Stack>
-          )}
+          <Box as="ul" role="list" display="flex" flexWrap="wrap">
+            {metadataIsLoading
+              ? Array(6)
+                  .fill(true)
+                  .map((_, index) => (
+                    <Box as="li" key={index} width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}>
+                      <PoolCard />
+                    </Box>
+                  ))
+              : filteredPools.map((pool) => (
+                  <PoolCardBox
+                    as="li"
+                    key={pool.poolId}
+                    status={pool.status}
+                    width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+                  >
+                    <PoolCard {...pool} />
+                  </PoolCardBox>
+                ))}
+          </Box>
         </Box>
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <Text color="textSecondary">
-            <ButtonTextLink onClick={() => setShowArchived((show) => !show)}>
-              {showArchived ? 'Hide archived pools' : 'View archived pools'}
-            </ButtonTextLink>
+          <Text
+            style={{ cursor: 'pointer', marginBottom: 12 }}
+            color="textSecondary"
+            onClick={() => setShowArchived((show) => !show)}
+            variant="body2"
+          >
+            {showArchived ? 'Hide archived pools' : 'View archived pools >'}
           </Text>
           {showArchived && <ArchivedPools pools={archivedPools} />}
         </>
@@ -115,39 +110,22 @@ export function PoolList() {
 
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
   const isMedium = useIsAboveBreakpoint('M')
-
+  const isLarge = useIsAboveBreakpoint('L')
+  const isExtraLarge = useIsAboveBreakpoint('XL')
   return (
     <Stack gap={1} overflow="auto">
-      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={isMedium ? 970 : 0} px={2}>
-        <Text as="span" variant="body3">
-          Pool name
-        </Text>
-        {isMedium && (
-          <Text as="span" variant="body3">
-            Asset class
-          </Text>
-        )}
-        <Text as="span" variant="body3" textAlign="right">
-          Value locked
-        </Text>
-        {isMedium && (
-          <Text as="span" variant="body3">
-            APR
-          </Text>
-        )}
-        {isMedium && (
-          <Text as="span" variant="body3">
-            Pool status
-          </Text>
-        )}
-      </Grid>
-      <Stack as="ul" role="list" gap={1} minWidth={isMedium ? 970 : 0} py={1}>
+      <Box as="ul" role="list" display="flex" flexWrap="wrap">
         {pools.map((pool) => (
-          <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
+          <PoolCardBox
+            as="li"
+            key={pool.poolId}
+            status={pool.status}
+            width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+          >
             <PoolCard {...pool} />
           </PoolCardBox>
         ))}
-      </Stack>
+      </Box>
     </Stack>
   )
 }
@@ -159,7 +137,6 @@ export function poolsToPoolCardProps(
 ): PoolCardProps[] {
   return pools.map((pool) => {
     const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
-    const mostSeniorTranche = pool?.tranches?.slice(1).at(-1)
     const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
 
     return {
@@ -168,16 +145,17 @@ export function poolsToPoolCardProps(
       assetClass: metaData?.pool?.asset.subClass,
       valueLocked: getPoolValueLocked(pool),
       currencySymbol: pool.currency.symbol,
-      apr: mostSeniorTranche?.interestRatePerSec,
       status:
         tinlakePool && tinlakePool.tinlakeMetadata.isArchived
           ? 'Archived'
           : tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
           ? 'Closed'
-          : pool.tranches.at(0)?.capacity.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
+          : pool.tranches.at(0)?.capacity?.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
           ? 'Open for investments'
           : ('Closed' as PoolStatusKey),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
+      tranches: pool.tranches as Tranche[],
+      metaData: metaData as MetaData,
     }
   })
 }

@@ -33,8 +33,8 @@ export default function PoolsPage() {
   }, [])
 
   return (
-    <LayoutSection py={5}>
-      <Stack gap={4} mb={20}>
+    <LayoutSection>
+      <Stack>
         <Stack>
           <Text as="h3" variant="heading3">
             Pools of real-world assets
