@@ -82,8 +82,9 @@ const columns: Column[] = [
     align: 'left',
   },
   {
-    align: 'left',
+    align: 'right',
     header: '', // invest redeem buttons
+    width: 'max-content',
     cell: ({ showActions, poolId, trancheId, currency, connectedNetwork }: Holding) => {
       return (
         <Grid gap={1} justifySelf="end">
