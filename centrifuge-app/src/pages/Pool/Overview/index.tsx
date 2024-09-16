@@ -153,9 +153,7 @@ export function PoolDetailOverview() {
         </React.Suspense>
         {!isTinlakePool && (
           <React.Suspense fallback={<Spinner />}>
-            <Card p={3}>
-              <TransactionHistory poolId={poolId} />
-            </Card>
+            <TransactionHistory poolId={poolId} />
           </React.Suspense>
         )}
       </Box>
