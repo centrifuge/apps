@@ -3801,8 +3801,6 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(({ api, pool: rawPool }) => {
         const pool = rawPool.toHuman() as PoolDetailsData
         const trancheIds = pool.tranches.ids
-        console.log('🚀 ~ trancheIds:', trancheIds)
-        console.log('🚀 ~ poolId:', poolId)
         return combineLatest([
           api.queryMulti(
             trancheIds.flatMap((trancheId) => [

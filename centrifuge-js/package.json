@@ -34,7 +34,6 @@
     "@stablelib/blake2b": "^1.0.1",
     "clp-wasm": "^0.0.15",
     "decimal.js-light": "^2.5.1",
-    "eth-permit": "^0.2.3",
     "isomorphic-fetch": "^3.0.0",
     "jw3t": "^1.0.8",
     "lodash": "^4.17.21"

@@ -1,5 +1,4 @@
 import BN from 'bn.js'
-import { signERC2612Permit } from 'eth-permit'
 import type { TransactionRequest, TransactionResponse } from 'ethers'
 import { Contract, Interface, Provider, ethers } from 'ethers'
 import set from 'lodash/set'
@@ -8,6 +7,7 @@ import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { CurrencyBalance, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
+import { signERC2612Permit } from '../utils/signERC2612Permit'
 import * as ABI from './liquidityPools/abi'
 import { CurrencyKey, CurrencyMetadata, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
 

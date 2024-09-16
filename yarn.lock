@@ -1798,7 +1798,6 @@ __metadata:
     clp-wasm: ^0.0.15
     decimal.js-light: ^2.5.1
     eslint: ^7.32.0
-    eth-permit: ^0.2.3
     isomorphic-fetch: ^3.0.0
     jest: ^27.4.3
     jw3t: ^1.0.8
@@ -16092,15 +16091,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eth-permit@npm:^0.2.3":
-  version: 0.2.3
-  resolution: "eth-permit@npm:0.2.3"
-  dependencies:
-    utf8: ^3.0.0
-  checksum: 9bf3eed8ecb8c914aadfff97d6c3d19fc432928c72fbe205075153e84289ea95f3a101f77e2dae78ad629e09682700241f207b5436b575ca7d4fbae68eacd3f6
-  languageName: node
-  linkType: hard
-
 "eth-query@npm:^2.1.2":
   version: 2.1.2
   resolution: "eth-query@npm:2.1.2"
@@ -27340,7 +27330,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"utf8@npm:3.0.0, utf8@npm:^3.0.0":
+"utf8@npm:3.0.0":
   version: 3.0.0
   resolution: "utf8@npm:3.0.0"
   checksum: cb89a69ad9ab393e3eae9b25305b3ff08bebca9adc839191a34f90777eb2942f86a96369d2839925fea58f8f722f7e27031d697f10f5f39690f8c5047303e62d
