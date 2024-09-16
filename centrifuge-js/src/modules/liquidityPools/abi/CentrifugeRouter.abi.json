@@ -364,20 +364,6 @@
   {
     "inputs": [
       { "internalType": "address", "name": "vault", "type": "address" },
-      { "internalType": "enum Domain", "name": "domain", "type": "uint8" },
-      { "internalType": "uint64", "name": "chainId", "type": "uint64" },
-      { "internalType": "address", "name": "recipient", "type": "address" },
-      { "internalType": "uint128", "name": "amount", "type": "uint128" },
-      { "internalType": "uint256", "name": "topUpAmount", "type": "uint256" }
-    ],
-    "name": "transferTrancheTokens",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "vault", "type": "address" },
       { "internalType": "address", "name": "receiver", "type": "address" }
     ],
     "name": "unlockDepositRequest",

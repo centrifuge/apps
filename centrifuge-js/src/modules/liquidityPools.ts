@@ -1,10 +1,11 @@
 import BN from 'bn.js'
 import type { TransactionRequest, TransactionResponse } from 'ethers'
-import { Contract, Interface, Provider, ethers } from 'ethers'
+import { Contract, Interface, Provider, ethers, isAddress as isEvmAddress } from 'ethers'
 import set from 'lodash/set'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
+import { addressToHex } from '../utils'
 import { CurrencyBalance, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import { signERC2612Permit } from '../utils/signERC2612Permit'
@@ -33,6 +34,9 @@ type LPConfig = {
 const config: Record<number, LPConfig> = {
   // Testnet
   11155111: {
+    centrifugeRouter: '0x723635430aa191ef5f6f856415f41b1a4d81dd7a',
+  },
+  84532: {
     centrifugeRouter: '0x723635430aa191ef5f6f856415f41b1a4d81dd7a',
   },
   // Mainnet
@@ -85,6 +89,48 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function getProvider(options?: EvmQueryOptions) {
     return options?.rpcProvider ?? inst.config.evmSigner?.provider
+  }
+
+  function transferTrancheTokens(
+    args: [
+      receiverAddress: string,
+      amount: BN,
+      vault: string,
+      currencyAddress: string,
+      chainId: number,
+      destinationNetwork: 'centrifuge' | { evm: number }
+    ],
+    options: TransactionRequest = {}
+  ) {
+    const [receiverAddress, amount, vault, currencyAddress, chainId, destinationNetwork] = args
+    return centrifugeRouter(chainId).pipe(
+      switchMap(({ estimate, centrifugeRouter }) => {
+        const isToSameNetwork = typeof destinationNetwork !== 'string' && chainId === destinationNetwork.evm
+        if (isToSameNetwork) {
+          return pending(
+            contract(currencyAddress, new Interface(ABI.Currency)).transfer(receiverAddress, amount.toString(), options)
+          )
+        }
+        const domain = destinationNetwork === 'centrifuge' ? 0 : 1
+        const destinationId = destinationNetwork === 'centrifuge' ? 0 : destinationNetwork.evm
+        const address = isEvmAddress(receiverAddress) ? receiverAddress.padEnd(66, '0') : addressToHex(receiverAddress)
+        return pending(
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).transferTrancheTokens(
+            vault,
+            domain,
+            destinationId,
+            address,
+            amount.toString(),
+            estimate,
+            {
+              ...options,
+              value: estimate,
+              gasLimit: 500000,
+            }
+          )
+        )
+      })
+    )
   }
 
   function enablePoolOnDomain(
@@ -177,6 +223,38 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pending(
       contract(currencyAddress, new Interface(ABI.Currency)).approve(centrifugeRouterAddress, amount, options)
     )
+  }
+
+  async function getCentrifugeRouterAllowance(
+    args: [currencyAddress: string, user: string, chainId: number],
+    options?: EvmQueryOptions
+  ) {
+    const [currencyAddress, user, chainId] = args
+    const centrifugeRouterAddress = getCentrifugeRouterAddress(chainId)
+
+    const calls: Call[] = [
+      {
+        target: currencyAddress,
+        call: ['function allowance(address, address) view returns (uint)', user, centrifugeRouterAddress],
+        returns: [['allowance']],
+      },
+      {
+        target: currencyAddress,
+        call: ['function decimals() view returns (uint8)'],
+        returns: [['decimals']],
+      },
+    ]
+
+    const data = await multicall<{
+      decimals: number
+      allowance: bigint
+    }>(calls, {
+      rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
+    })
+
+    return {
+      allowance: new CurrencyBalance(data.allowance.toString(), data.decimals),
+    }
   }
 
   async function signPermit(args: [currencyAddress: string, amount: BN, chainId: number]) {
@@ -781,6 +859,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   return {
+    transferTrancheTokens,
     enablePoolOnDomain,
     deployTranche,
     deployLiquidityPool,
@@ -802,5 +881,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     getLiquidityPools,
     getLiquidityPoolInvestment,
     getRecentLPEvents,
+    getCentrifugeRouterAllowance,
   }
 }
