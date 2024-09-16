@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import { Contract, TransactionRequest, TransactionResponse } from 'ethers'
+import { Contract, Interface, TransactionRequest, TransactionResponse } from 'ethers'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
@@ -68,10 +68,10 @@ export function getTinlakeModule(inst: Centrifuge) {
     if (!inst.config.evmSigner) throw new Error('Needs signer')
     if (!abi) throw new Error('ABI not found')
     if (!contracts[contractAddress]) {
-      contracts[contractAddress] = new Contract(contractAddress, abi)
+      contracts[contractAddress] = new Contract(contractAddress, new Interface(abi))
     }
 
-    return contracts[contractAddress].connect(inst.config.evmSigner)
+    return contracts[contractAddress].connect(inst.config.evmSigner) as Contract
   }
 
   function pending(txPromise: Promise<TransactionResponse>) {
@@ -93,7 +93,6 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const [tranche] = args
     return pending(
-      // @ts-ignore
       contract(contractAddresses, contractVersions, 'TINLAKE_CURRENCY').approve(
         contractAddresses[tranche === 'junior' ? 'JUNIOR_TRANCHE' : 'SENIOR_TRANCHE'],
         maxUint256,
@@ -110,7 +109,6 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const [tranche] = args
     return pending(
-      // @ts-ignore
       contract(contractAddresses, contractVersions, tranche === 'junior' ? 'JUNIOR_TOKEN' : 'SENIOR_TOKEN').approve(
         contractAddresses[tranche === 'junior' ? 'JUNIOR_TRANCHE' : 'SENIOR_TRANCHE'],
         maxUint256,
@@ -127,12 +125,10 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const [tranche, order] = args
     return pending(
-      // @ts-ignore
       contract(
         contractAddresses,
         contractVersions,
         tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR'
-        // @ts-ignore
       ).supplyOrder(order.toString(), options)
     )
   }
@@ -145,12 +141,10 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const [tranche, order] = args
     return pending(
-      // @ts-ignore
       contract(
         contractAddresses,
         contractVersions,
         tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR'
-        // @ts-ignore
       ).redeemOrder(order.toString(), options)
     )
   }
@@ -163,7 +157,6 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const [tranche] = args
     return pending(
-      // @ts-ignore
       contract(contractAddresses, contractVersions, tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR')[
         'disburse()'
       ](options)
@@ -187,37 +180,27 @@ export function getTinlakeModule(inst: Centrifuge) {
     const reserve = toBN(
       await (beforeClosing
         ? isMakerIntegrated
-          ? // @ts-ignore
-            contract(contractAddresses, contractVersions, 'ASSESSOR').totalBalance()
-          : // @ts-ignore
-            contract(contractAddresses, contractVersions, 'RESERVE').totalBalance()
-        : // @ts-ignore
-          coordinator.epochReserve())
+          ? contract(contractAddresses, contractVersions, 'ASSESSOR').totalBalance()
+          : contract(contractAddresses, contractVersions, 'RESERVE').totalBalance()
+        : coordinator.epochReserve())
     )
     const netAssetValue = toBN(
       await (beforeClosing
         ? contractVersions?.FEED === 2
-          ? // @ts-ignore
-            feed.latestNAV()
-          : // @ts-ignore
-            feed.approximatedNAV()
-        : // @ts-ignore
-          coordinator.epochNAV())
+          ? feed.latestNAV()
+          : feed.approximatedNAV()
+        : coordinator.epochNAV())
     )
     const seniorAsset = beforeClosing
       ? isMakerIntegrated
-        ? // @ts-ignore
-          toBN(await assessor.seniorDebt()).add(toBN(await assessor.seniorBalance()))
-        : // @ts-ignore
-          toBN(await assessor.seniorDebt_()).add(toBN(await assessor.seniorBalance_()))
-      : // @ts-ignore
-        toBN(await coordinator.epochSeniorAsset())
+        ? toBN(await assessor.seniorDebt()).add(toBN(await assessor.seniorBalance()))
+        : toBN(await assessor.seniorDebt_()).add(toBN(await assessor.seniorBalance_()))
+      : toBN(await coordinator.epochSeniorAsset())
 
-    // @ts-ignore
     const minDropRatio = toBN(await assessor.minSeniorRatio())
-    // @ts-ignore
+
     const maxDropRatio = toBN(await assessor.maxSeniorRatio())
-    // @ts-ignore
+
     const maxReserve = toBN(await assessor.maxReserve())
 
     return { reserve, netAssetValue, seniorAsset, minDropRatio, maxDropRatio, maxReserve }
@@ -238,36 +221,32 @@ export function getTinlakeModule(inst: Centrifuge) {
       const assessor = contract(contractAddresses, contractVersions, 'ASSESSOR')
       const feed = contract(contractAddresses, contractVersions, 'FEED')
 
-      // @ts-ignore
       const epochNAV = toBN(await feed.currentNAV())
-      // @ts-ignore
+
       const epochReserve = toBN(await contract(contractAddresses, contractVersions, 'RESERVE').totalBalance())
       const epochSeniorTokenPrice = toBN(
-        // @ts-ignore
         await assessor['calcSeniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
       )
       const epochJuniorTokenPrice = toBN(
-        // @ts-ignore
         await assessor['calcJuniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
       )
 
       return {
-        // @ts-ignore
         dropInvest: toBN(await seniorTranche.totalSupply()),
-        // @ts-ignore
+
         dropRedeem: toBN(await seniorTranche.totalRedeem())
           .mul(epochSeniorTokenPrice)
           .div(e27),
-        // @ts-ignore
+
         tinInvest: toBN(await juniorTranche.totalSupply()),
-        // @ts-ignore
+
         tinRedeem: toBN(await juniorTranche.totalRedeem())
           .mul(epochJuniorTokenPrice)
           .div(e27),
       }
     }
     const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
-    // @ts-ignore
+
     const orderState = await coordinator.order()
 
     return {
@@ -285,15 +264,14 @@ export function getTinlakeModule(inst: Centrifuge) {
     const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
 
     return {
-      // @ts-ignore
       dropInvest: toBN(await coordinator.weightSeniorSupply()),
-      // @ts-ignore
+
       dropRedeem: toBN(await coordinator.weightSeniorRedeem()),
-      // @ts-ignore
+
       tinInvest: toBN(await coordinator.weightJuniorSupply()),
-      // @ts-ignore
+
       tinRedeem: toBN(await coordinator.weightJuniorRedeem()),
-      // @ts-ignore
+
       seniorAsset: toBN(await coordinator.weightSeniorAsset()),
     }
   }
@@ -305,7 +283,7 @@ export function getTinlakeModule(inst: Centrifuge) {
     options: TransactionRequest = {}
   ) {
     const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
-    // @ts-ignore
+
     return pending(coordinator.closeEpoch({ ...options, gasLimit: 5000000 }))
   }
 
@@ -317,7 +295,7 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const submissionTx = (async () => {
       const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
-      // @ts-ignore
+
       if ((await coordinator.submissionPeriod()) !== true) throw new Error('Not in submission period')
       const state = await getEpochState(contractAddresses, contractVersions, [])
       const orders = await getOrders(contractAddresses, contractVersions, [])
@@ -327,7 +305,6 @@ export function getTinlakeModule(inst: Centrifuge) {
         throw new Error('Failed to find a solution')
       }
 
-      // @ts-ignore
       return coordinator.submitSolution(
         solution.dropRedeem.toString(),
         solution.tinRedeem.toString(),
@@ -368,7 +345,6 @@ export function getTinlakeModule(inst: Centrifuge) {
         throw new Error('Current epoch is still in the challenge period')
       }
 
-      // @ts-ignore
       return coordinator.executeEpoch({ ...options, gasLimit: 2000000 })
     })()
     return pending(tx)
@@ -386,7 +362,7 @@ export function getTinlakeModule(inst: Centrifuge) {
     contractVersions: TinlakeContractVersions | undefined
   ) {
     const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
-    // @ts-ignore
+
     const minChallengePeriodEnd = toBN(await coordinator.minChallengePeriodEnd()).toNumber()
     const latestBlockTimestamp = await getLatestBlockTimestamp()
     if (minChallengePeriodEnd !== 0) {
@@ -394,15 +370,13 @@ export function getTinlakeModule(inst: Centrifuge) {
       return 'in-challenge-period'
     }
 
-    // @ts-ignore
     const submissionPeriod = await coordinator.submissionPeriod()
     if (submissionPeriod === true) {
       return 'in-submission-period'
     }
 
-    // @ts-ignore
     const lastEpochClosed = toBN(await coordinator.lastEpochClosed()).toNumber()
-    // @ts-ignore
+
     const minimumEpochTime = toBN(await coordinator.minimumEpochTime()).toNumber()
     if (submissionPeriod === false) {
       if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) return 'can-be-closed'
@@ -425,7 +399,6 @@ export function getTinlakeModule(inst: Centrifuge) {
     const [address] = args
     const coordinator = contract(contractAddresses, contractVersions, 'CLAIM_CFG')
 
-    // @ts-ignore
     const tx = coordinator.accounts(address, options)
     return pending(tx)
   }
@@ -439,7 +412,6 @@ export function getTinlakeModule(inst: Centrifuge) {
     const [centAddress] = args
     const coordinator = contract(contractAddresses, contractVersions, 'CLAIM_CFG')
 
-    // @ts-ignore
     const tx = coordinator.update(centAddress, options)
     return pending(tx)
   }
