@@ -1,9 +1,9 @@
-import Centrifuge, { addressToHex, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import Centrifuge, { Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect, useMemo } from 'react'
 import { useQueries, useQuery } from 'react-query'
-import { combineLatest, map, Observable, switchMap } from 'rxjs'
+import { Observable, combineLatest, map } from 'rxjs'
 import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
 import { useLoans } from './useLoans'
@@ -320,44 +320,8 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
 }
 
 export function usePoolAccountOrders(poolId: string) {
-  const api = useCentrifugeApi()
-  const [orders] = useCentrifugeQuery(['poolAccountOrders', poolId], () =>
-    combineLatest([api.query.investments.investOrders.keys(), api.query.investments.redeemOrders.keys()]).pipe(
-      switchMap(([investKeys, redeemKeys]) => {
-        const keys = [...investKeys, ...redeemKeys]
-          .map((k, i) => {
-            const key = k.toHuman() as [string, [poolId: string, trancheId: string]]
-            return {
-              accountId: addressToHex(key[0]),
-              poolId: key[1][0].replace(/\D/g, ''),
-              trancheId: key[1][1],
-              type: i >= investKeys.length ? 'redeem' : 'invest',
-            }
-          })
-          .filter((k) => k.poolId === poolId && k)
-        return api
-          .queryMulti(
-            keys.map((key) => [
-              key.type === 'invest' ? api.query.investments.investOrders : api.query.investments.redeemOrders,
-              [key.accountId, [key.poolId, key.trancheId]],
-            ])
-          )
-          .pipe(
-            map((orders) => {
-              return keys
-                .map((key, i) => {
-                  const order = orders[i].toPrimitive() as { amount: string; submittedAt: number }
-                  return {
-                    ...key,
-                    amount: new BN(order.amount),
-                    submittedAt: order.submittedAt,
-                  }
-                })
-                .filter((order) => order.amount.gt(new BN(0)))
-            })
-          )
-      })
-    )
+  const [orders] = useCentrifugeQuery(['poolAccountOrders', poolId], (cent) =>
+    cent.pools.getPoolAccountOrders([poolId])
   )
   return orders
 }

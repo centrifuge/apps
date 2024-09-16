@@ -35,7 +35,9 @@ export function formatBalanceAbbreviated(
       ? amount.toNumber()
       : amount
   let formattedAmount = ''
-  if (amountNumber >= 1e6) {
+  if (amountNumber >= 1e9) {
+    formattedAmount = `${(amountNumber / 1e9).toFixed(decimals)}B`
+  } else if (amountNumber >= 1e6) {
     formattedAmount = `${(amountNumber / 1e6).toFixed(decimals)}M`
   } else if (amountNumber > 999) {
     formattedAmount = `${(amountNumber / 1e3).toFixed(decimals)}K`
