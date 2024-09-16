@@ -1,23 +1,45 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Accordion, AnchorButton, Box, IconExternalLink, Shelf, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  IconBalanceSheet,
+  IconCashflow,
+  IconChevronRight,
+  IconProfitAndLoss,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
+import styled from 'styled-components'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
-import { LabelValueStack } from './LabelValueStack'
-import { PillButton } from './PillButton'
-import { AnchorTextLink, RouterTextLink } from './TextLink'
+import { AnchorPillButton, PillButton } from './PillButton'
+import { RouterTextLink } from './TextLink'
+
+const SUBTLE_GRAY = '#91969b21'
 
 type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
 }
 
 const reportLinks = [
-  { label: 'Balance sheet', href: '/balance-sheet' },
-  { label: 'Profit & loss', href: '/profit-and-loss' },
-  { label: 'Cashflow statement', href: '/cash-flow-statement' },
-  { label: 'View all', href: '/' },
+  { label: 'Balance sheet', href: '/balance-sheet', icon: <IconBalanceSheet /> },
+  { label: 'Profit & loss', href: '/profit-and-loss', icon: <IconProfitAndLoss /> },
+  { label: 'Cashflow statement', href: '/cash-flow-statement', icon: <IconCashflow /> },
 ]
+
+const StyledRouterTextLink = styled(RouterTextLink)`
+  color: white;
+  text-decoration: unset;
+  font-size: 14px;
+  :active {
+    color: white;
+  }
+  :visited {
+    color: white;
+  }
+`
 
 export function ReportDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
@@ -25,61 +47,87 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
   const report = metadata?.pool?.reports?.[0]
 
   return (
-    <Shelf flexDirection="column" alignItems="flex-start">
-      <Shelf marginBottom={30}>
-        <LabelValueStack
-          label=""
-          value={
-            <Text variant="body1">
-              <Shelf flexWrap="wrap" gap={2} alignItems="flex-start">
-                {reportLinks.map((link, i) => (
-                  <RouterTextLink to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
-                    {link.label}
-                  </RouterTextLink>
-                ))}
-              </Shelf>
-            </Text>
-          }
-        />
-      </Shelf>
-      {report && (
+    <>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Text color="white" variant="heading4">
+          Reports
+        </Text>
+        <Box backgroundColor={SUBTLE_GRAY} padding="8px 22px" borderRadius="4px">
+          <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
+        </Box>
+      </Box>
+
+      <Box marginY={2} backgroundColor={SUBTLE_GRAY} padding={2} borderRadius={10}>
+        {reportLinks.map((link, i) => (
+          <Box
+            borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            paddingY={3}
+          >
+            <Box display="flex" alignItems="center">
+              {link.icon}
+              <StyledRouterTextLink
+                style={{ marginLeft: 8 }}
+                to={`${pathname}/reporting${link.href}`}
+                key={`${link.label}-${i}`}
+              >
+                {link.label}
+              </StyledRouterTextLink>
+            </Box>
+            <IconChevronRight color="white" />
+          </Box>
+        ))}
+      </Box>
+
+      {report?.author.name && report.author.title && (
         <>
-          <Text style={{ marginBottom: 8 }} variant="heading2">
+          <Text color="white" variant="heading4">
             Pool analysis
           </Text>
           <Shelf gap={1}>
-            {report.author.avatar?.uri && (
-              <Box
-                as="img"
-                height={40}
-                borderRadius={30}
-                src={cent.metadata.parseMetadataUrl(report.author.avatar.uri)}
-                alt=""
-              />
-            )}
-            <Text variant="body2">
+            <Text variant="body4" color="textSecondary">
               Reviewer: {report.author.name}
               <br />
               {report.author.title}
             </Text>
           </Shelf>
-          <Shelf marginTop={20}>
-            <AnchorButton href={report.uri} target="_blank" variant="secondary" icon={IconExternalLink}>
-              View full report
-            </AnchorButton>
-          </Shelf>
         </>
       )}
-    </Shelf>
+    </>
   )
 }
 
 export function IssuerDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+
+  const links = [
+    {
+      label: 'Website',
+      href: metadata?.pool?.links.website,
+      show: !!metadata?.pool?.links.website,
+    },
+    {
+      label: 'Forum',
+      href: metadata?.pool?.links.forum,
+      show: !!metadata?.pool?.links.forum,
+    },
+    {
+      label: 'Email',
+      href: `mailto:${metadata?.pool?.issuer.email}`,
+      show: !!metadata?.pool?.issuer.email,
+    },
+    {
+      label: 'Executive Summary',
+      show: !!metadata?.pool?.links.executiveSummary,
+      onClick: () => setIsDialogOpen(true),
+    },
+  ]
   return (
-    <>
-      <Shelf gap={1}>
+    <Stack>
+      <Shelf display="flex" justifyContent="space-between" marginBottom={12}>
         {metadata?.pool?.issuer.logo && (
           <Box
             as="img"
@@ -89,52 +137,44 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
             src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)}
           />
         )}
-        <Text variant="body2">{metadata?.pool?.issuer.name}</Text>
+        <Links links={links} />
       </Shelf>
-      <Text variant="body2">{metadata?.pool?.issuer.description}</Text>
+      <Box pt={4}>
+        <Text variant="heading2">{metadata?.pool?.name}</Text>
+        <Text variant="body2" style={{ marginTop: '12px' }}>
+          {metadata?.pool?.issuer.description}
+        </Text>
+      </Box>
+      <ExecutiveSummaryDialog
+        issuerName={metadata?.pool?.issuer.name ?? ''}
+        href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri ?? '')}
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
+    </Stack>
+  )
+}
 
-      {metadata?.pool?.links.executiveSummary && (
-        <LabelValueStack
-          label="Download"
-          value={
-            <>
-              <PillButton variant="small" onClick={() => setIsDialogOpen(true)}>
-                Executive summary
-              </PillButton>
-              <ExecutiveSummaryDialog
-                issuerName={metadata?.pool?.issuer.name}
-                href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
-                open={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
-              />
-            </>
-          }
-        />
-      )}
+const Links = ({ links }: { links: { label: string; href?: string; show: boolean; onClick?: () => void }[] }) => {
+  return (
+    <Box display="flex">
+      {links.map((link, index) => {
+        if (!link.show) return null
 
-      {(metadata?.pool?.links.website || metadata?.pool?.links.forum || metadata?.pool?.issuer.email) && (
-        <LabelValueStack
-          label="Links"
-          value={
-            <Text variant="body3">
-              <Shelf flexWrap="wrap" gap={2} alignItems="flex-start">
-                {metadata?.pool?.links.website && (
-                  <AnchorTextLink href={metadata?.pool?.links.website}>Website</AnchorTextLink>
-                )}
-                {metadata?.pool?.links.forum && (
-                  <AnchorTextLink href={metadata?.pool?.links.forum}>Forum</AnchorTextLink>
-                )}
-                {metadata?.pool?.issuer.email && (
-                  <AnchorTextLink href={`mailto:${metadata?.pool?.issuer.email}`}>Email</AnchorTextLink>
-                )}
-              </Shelf>
-            </Text>
-          }
-        />
-      )}
-      {!!metadata?.pool?.details?.length && (
-        <LabelValueStack label="Details" value={<Accordion items={metadata?.pool?.details} />} />
-      )}
-    </>
+        if (link.onClick) {
+          return (
+            <PillButton key={`${link.label} ${index}`} variant="small" onClick={link.onClick}>
+              {link.label}
+            </PillButton>
+          )
+        }
+
+        return (
+          <AnchorPillButton style={{ marginRight: 8 }} variant="small" key={`${link.label} ${index}`} href={link.href}>
+            {link.label}
+          </AnchorPillButton>
+        )
+      })}
+    </Box>
   )
 }

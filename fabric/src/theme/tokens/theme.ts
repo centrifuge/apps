@@ -1,4 +1,4 @@
-import { black, blackScale, blueScale, centrifugeBlue, gold, grayScale, yellowScale } from './colors'
+import { black, blackScale, blueScale, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
 const statusInfo = blueScale[500]
@@ -86,11 +86,11 @@ const colors = {
   backgroundButtonTertiaryHover: 'tranparent',
   backgroundButtonTertiaryPressed: 'transparent',
   backgroundButtonTertiaryDisabled: 'transparent',
-  textButtonTertiary: centrifugeBlue,
-  textButtonTertiaryFocus: centrifugeBlue,
-  textButtonTertiaryHover: grayScale[800],
-  textButtonTertiaryPressed: centrifugeBlue,
-  textButtonTertiaryDisabled: grayScale[500],
+  textButtonTertiary: grayScale[800],
+  textButtonTertiaryFocus: gold,
+  textButtonTertiaryHover: gold,
+  textButtonTertiaryPressed: gold,
+  textButtonTertiaryDisabled: gold,
   borderButtonTertiary: 'transparent',
   borderButtonTertiaryFocus: 'transparent',
   borderButtonTertiaryHover: 'transparent',
