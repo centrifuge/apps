@@ -296,7 +296,7 @@ type Events = ISubmittableResult['events']
 
 const txCompletedEvents: Record<string, Subject<Events>> = {}
 const blockEvents: Record<string, Observable<Events>> = {}
-let parachainUrlCache: string | null = null
+const parachainUrlCache = new Set<string | null>()
 
 export class CentrifugeBase {
   config: Config
@@ -347,15 +347,15 @@ export class CentrifugeBase {
   }
 
   private async getCachedParachainUrl(): Promise<string> {
-    const cachedUrl = parachainUrlCache
-    if (cachedUrl) {
-      return cachedUrl
+    if (parachainUrlCache.values().next().value) {
+      return parachainUrlCache.values().next().value
     }
-    parachainUrlCache = await this.findHealthyWs()
-    if (!parachainUrlCache) {
+    const healthyUrl = await this.findHealthyWs()
+    if (!healthyUrl) {
       throw new Error('No healthy parachain URL available')
     }
-    return parachainUrlCache
+    parachainUrlCache.add(healthyUrl)
+    return healthyUrl
   }
 
   async getChainId() {
