@@ -645,6 +645,7 @@ interface TrancheFormValues {
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
+  targetAPY?: number | ''
 }
 
 export type IssuerDetail = {
@@ -688,6 +689,11 @@ export interface PoolMetadataInput {
     authorTitle: string
     authorAvatar: FileType | null
     url: string
+  }
+  poolRating?: {
+    ratingAgency?: string
+    ratingValue?: string
+    ratingReportUrl?: string
   }
 
   executiveSummary: FileType | null
@@ -750,6 +756,11 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
     reports?: PoolReport[]
+    rating?: {
+      ratingAgency?: string
+      ratingValue?: string
+      ratingReportUrl?: string
+    }
   }
   pod?: {
     indexer?: string | null
@@ -1093,8 +1104,10 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const tranchesById: PoolMetadata['tranches'] = {}
     metadata.tranches.forEach((tranche, index) => {
+      const targetAPY = tranche?.targetAPY ? { targetAPY: tranche.targetAPY } : {}
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
+        ...targetAPY,
       }
     })
 
@@ -1125,6 +1138,13 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
+        rating: metadata.poolRating
+          ? {
+              ratingAgency: metadata.poolRating.ratingAgency,
+              ratingValue: metadata.poolRating.ratingValue,
+              ratingReportUrl: metadata.poolRating.ratingReportUrl,
+            }
+          : undefined,
         reports: metadata.poolReport
           ? [
               {

@@ -158,13 +158,13 @@ export function TrancheInput({ canRemove, isUpdating }: { canRemove?: boolean; i
                 </Field>
                 {index === 0 ? (
                   <>
-                    {/* For Junior tranche, use interestRatePerSec with "Target APY" label */}
+                    {/* Only most junior tranche has target APY */}
                     <FieldWithErrorMessage
                       as={NumberInput}
                       label={<Tooltips type="targetAPY" variant="secondary" />}
                       placeholder="0.00"
                       symbol="%"
-                      name={`tranches.${index}.interestRate`}
+                      name={`tranches.${index}.targetAPY`}
                       validate={validate.interestRate}
                     />
                   </>

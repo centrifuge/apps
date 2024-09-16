@@ -23,6 +23,7 @@ type Values = Pick<
   | 'issuerRepName'
   | 'issuerLogo'
   | 'issuerDescription'
+  | 'issuerShortDescription'
   | 'executiveSummary'
   | 'website'
   | 'forum'
@@ -31,6 +32,9 @@ type Values = Pick<
   | 'reportUrl'
   | 'reportAuthorName'
   | 'reportAuthorTitle'
+  | 'ratingAgency'
+  | 'ratingValue'
+  | 'ratingReportUrl'
 > & {
   reportAuthorAvatar: string | null | File
 }
@@ -54,6 +58,7 @@ export function Issuer() {
       issuerRepName: metadata?.pool?.issuer?.repName ?? '',
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
+      issuerShortDescription: metadata?.pool?.issuer?.shortDescription ?? '',
       executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
@@ -65,6 +70,9 @@ export function Issuer() {
       reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar
         ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}`
         : null,
+      ratingAgency: metadata?.pool?.rating?.ratingAgency ?? '',
+      ratingValue: metadata?.pool?.rating?.ratingValue ?? '',
+      ratingReportUrl: metadata?.pool?.rating?.ratingReportUrl ?? '',
     }),
     [metadata, logoFile]
   )
@@ -110,6 +118,7 @@ export function Issuer() {
             email: values.email,
             logo:
               logoChanged && logoUri ? { uri: logoUri, mime: values.issuerLogo!.type } : oldMetadata.pool.issuer.logo,
+            shortDescription: values.issuerShortDescription,
           },
           links: {
             executiveSummary: execSummaryUri
@@ -119,6 +128,11 @@ export function Issuer() {
             website: values.website,
           },
           details: values.details,
+          rating: {
+            ratingAgency: values.ratingAgency,
+            ratingValue: values.ratingValue,
+            ratingReportUrl: values.ratingReportUrl,
+          },
         },
       }
 

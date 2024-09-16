@@ -115,7 +115,7 @@ export type CreatePoolValues = Omit<
   issuerShortDescription: string
   ratingAgency: string
   ratingValue: string
-  ratingReport: File | null
+  ratingReportUrl: string
 }
 
 const initialValues: CreatePoolValues = {
@@ -148,7 +148,7 @@ const initialValues: CreatePoolValues = {
 
   ratingAgency: '',
   ratingValue: '',
-  ratingReport: null,
+  ratingReportUrl: '',
 
   tranches: [createEmptyTranche('')],
   adminMultisig: {
@@ -460,6 +460,13 @@ function CreatePoolForm() {
           authorName: values.reportAuthorName,
           authorTitle: values.reportAuthorTitle,
           url: values.reportUrl,
+        }
+      }
+      if (values.ratingReportUrl) {
+        metadataValues.poolRating = {
+          ratingAgency: values.ratingAgency,
+          ratingValue: values.ratingValue,
+          ratingReportUrl: values.ratingReportUrl,
         }
       }
 

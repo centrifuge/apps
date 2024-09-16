@@ -20,7 +20,7 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
 
-type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass'> & {
+type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass' | 'investorType'> & {
   listed: boolean
 }
 
@@ -55,6 +55,7 @@ export function Details() {
           : 'Private credit',
       subAssetClass: metadata?.pool?.asset?.subClass ?? '',
       listed: metadata?.pool?.listed ?? false,
+      investorType: metadata?.pool?.investorType ?? '',
     }),
     [metadata, iconFile]
   )
@@ -91,6 +92,7 @@ export function Details() {
             class: values.assetClass,
             subClass: values.subAssetClass,
           },
+          investorType: values.investorType,
           listed: values.listed,
         },
         pod: {
@@ -221,7 +223,14 @@ export function Details() {
                 placeholder=""
                 disabled
               />
-
+              <FieldWithErrorMessage
+                validate={validate.poolName}
+                name="investorType"
+                as={TextInput}
+                label="Investor type"
+                placeholder="Institutional"
+                maxLength={100}
+              />
               {((isDemo && editPoolVisibility) || !isDemo) && (
                 <Field name="listed" validate={validate.assetClass}>
                   {({ field }: FieldProps) => (
@@ -245,6 +254,7 @@ export function Details() {
 
               <LabelValueStack label="Currency" value={currency} />
               <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
+              <LabelValueStack label="Investor type" value={metadata?.pool?.investorType} />
             </Shelf>
           )}
         </PageSection>
