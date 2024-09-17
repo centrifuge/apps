@@ -31,8 +31,12 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
                   alt=""
                 />
               )}
-              <LabelValueStack label="Reviewer" value={<Text variant="body2">{report.author.name}</Text>} />
-              <LabelValueStack label="Reviewer title" value={<Text variant="body2">{report.author.title}</Text>} />
+              {report.author.name && (
+                <LabelValueStack label="Reviewer" value={<Text variant="body2">{report.author.name}</Text>} />
+              )}
+              {report.author.title && (
+                <LabelValueStack label="Reviewer title" value={<Text variant="body2">{report.author.title}</Text>} />
+              )}
             </Shelf>
             <Shelf marginTop={20}>
               <AnchorButton href={report.uri} target="_blank" variant="secondary" icon={IconExternalLink}>
@@ -130,8 +134,12 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
       <Shelf flexDirection="column" alignItems="flex-start">
         {rating && (
           <Shelf gap={1}>
-            <LabelValueStack label="Rating agency" value={<Text variant="body2">{rating.ratingAgency}</Text>} />
-            <LabelValueStack label="Rating" value={<Text variant="body2">{rating.ratingValue}</Text>} />
+            {rating.ratingAgency && (
+              <LabelValueStack label="Rating agency" value={<Text variant="body2">{rating.ratingAgency}</Text>} />
+            )}
+            {rating.ratingValue && (
+              <LabelValueStack label="Rating" value={<Text variant="body2">{rating.ratingValue}</Text>} />
+            )}
           </Shelf>
         )}
       </Shelf>

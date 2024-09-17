@@ -645,7 +645,7 @@ interface TrancheFormValues {
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
-  targetAPY?: number | ''
+  targetAPY?: string | ''
 }
 
 export type IssuerDetail = {
@@ -676,6 +676,7 @@ export interface PoolMetadataInput {
   epochMinutes: number | ''
   listed?: boolean
   investorType: string
+  poolStructure: string
 
   // issuer
   issuerName: string
@@ -732,6 +733,7 @@ export type PoolMetadata = {
       subClass: string
     }
     investorType: string
+    poolStructure: string
     poolFees?: {
       id: number
       name: string
@@ -770,6 +772,7 @@ export type PoolMetadata = {
     {
       icon?: FileType | null
       minInitialInvestment?: string
+      targetAPY?: string // only junior tranche (index: 0) has targetAPY
     }
   >
   loanTemplates?: {
@@ -1104,10 +1107,9 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const tranchesById: PoolMetadata['tranches'] = {}
     metadata.tranches.forEach((tranche, index) => {
-      const targetAPY = tranche?.targetAPY ? { targetAPY: tranche.targetAPY } : {}
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
-        ...targetAPY,
+        targetAPY: tranche.targetAPY,
       }
     })
 
@@ -1128,6 +1130,7 @@ export function getPoolsModule(inst: Centrifuge) {
           logo: metadata.issuerLogo,
           shortDescription: metadata.issuerShortDescription,
         },
+        poolStructure: metadata.poolStructure,
         investorType: metadata.investorType,
         links: {
           executiveSummary: metadata.executiveSummary,
