@@ -113,6 +113,7 @@ export type CreatePoolValues = Omit<
   poolType: 'open' | 'closed'
   investorType: string
   issuerShortDescription: string
+  issuerCategories: { type: string; value: string }[]
   ratingAgency: string
   ratingValue: string
   ratingReportUrl: string
@@ -135,6 +136,7 @@ const initialValues: CreatePoolValues = {
   issuerLogo: null,
   issuerDescription: '',
   issuerShortDescription: '',
+  issuerCategories: [],
 
   executiveSummary: null,
   website: '',

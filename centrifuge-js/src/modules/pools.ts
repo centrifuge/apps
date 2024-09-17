@@ -684,6 +684,7 @@ export interface PoolMetadataInput {
   issuerLogo?: FileType | null
   issuerDescription: string
   issuerShortDescription: string
+  issuerCategories: { type: string; value: string; customType?: string }[]
 
   poolReport?: {
     authorName: string

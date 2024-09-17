@@ -24,6 +24,7 @@ type Values = Pick<
   | 'issuerLogo'
   | 'issuerDescription'
   | 'issuerShortDescription'
+  | 'issuerCategories'
   | 'executiveSummary'
   | 'website'
   | 'forum'
@@ -73,6 +74,7 @@ export function Issuer() {
       ratingAgency: metadata?.pool?.rating?.ratingAgency ?? '',
       ratingValue: metadata?.pool?.rating?.ratingValue ?? '',
       ratingReportUrl: metadata?.pool?.rating?.ratingReportUrl ?? '',
+      issuerCategories: metadata?.pool?.issuerCategories ?? [{ type: '', value: '' }],
     }),
     [metadata, logoFile]
   )
