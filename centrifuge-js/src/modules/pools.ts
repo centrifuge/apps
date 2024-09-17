@@ -2161,7 +2161,9 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
-                    yield30DaysAnnualized: yield30DaysTrancheId?.[`${poolId}-${trancheId}`] ? new Perquintill( yield30DaysTrancheId[`${poolId}-${trancheId}`]!) : null,
+                    yield30DaysAnnualized: yield30DaysTrancheId?.[`${poolId}-${trancheId}`]
+                      ? new Perquintill(yield30DaysTrancheId[`${poolId}-${trancheId}`]!)
+                      : null,
                     minRiskBuffer,
                     currentRiskBuffer,
                     capacity: CurrencyBalance.fromFloat(capacity, currency.decimals),

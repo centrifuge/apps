@@ -9,7 +9,7 @@ import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
-import { MetaData, PoolCard, PoolCardProps, Tranche } from './PoolCard'
+import { MetaData, PoolCard, PoolCardProps } from './PoolCard'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
 import { filterPools } from './PoolFilter/utils'
 
@@ -154,7 +154,7 @@ export function poolsToPoolCardProps(
           ? 'Open for investments'
           : ('Closed' as PoolStatusKey),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
-      tranches: pool.tranches as Tranche[],
+      tranches: pool.tranches,
       metaData: metaData as MetaData,
     }
   })
