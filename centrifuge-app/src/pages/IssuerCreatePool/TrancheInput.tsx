@@ -67,28 +67,36 @@ export function TrancheSection() {
             </Button>
           }
         >
-          <TrancheInput canRemove />
+          <TrancheInput canRemove poolName={values.poolName} />
         </PageSection>
       )}
     </FieldArray>
   )
 }
 
-export function TrancheInput({ canRemove, isUpdating }: { canRemove?: boolean; isUpdating?: boolean }) {
+export function TrancheInput({
+  canRemove,
+  isUpdating,
+  poolName,
+}: {
+  canRemove?: boolean
+  isUpdating?: boolean
+  poolName?: string
+}) {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
 
   const getTrancheName = (index: number) => {
     if (values.tranches.length === 1) {
-      return values.poolName
+      return poolName
     }
     switch (index) {
       case 0:
-        return `${values.poolName} Junior`
+        return `${poolName} Junior`
       case 1:
-        return values.tranches.length === 2 ? `${values.poolName} Senior` : `${values.poolName} Mezzanine`
+        return values.tranches.length === 2 ? `${poolName} Senior` : `${poolName} Mezzanine`
       case 2:
-        return `${values.poolName} Senior`
+        return `${poolName} Senior`
       default:
         return ''
     }

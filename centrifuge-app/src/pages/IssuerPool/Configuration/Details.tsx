@@ -20,7 +20,10 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
 
-type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass' | 'investorType'> & {
+type Values = Pick<
+  CreatePoolValues,
+  'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass' | 'investorType' | 'poolStructure'
+> & {
   listed: boolean
 }
 
@@ -56,6 +59,7 @@ export function Details() {
       subAssetClass: metadata?.pool?.asset?.subClass ?? '',
       listed: metadata?.pool?.listed ?? false,
       investorType: metadata?.pool?.investorType ?? '',
+      poolStructure: metadata?.pool?.poolStructure ?? '',
     }),
     [metadata, iconFile]
   )
@@ -94,6 +98,7 @@ export function Details() {
           },
           investorType: values.investorType,
           listed: values.listed,
+          poolStructure: values.poolStructure,
         },
         pod: {
           ...oldMetadata.pod,
@@ -231,6 +236,13 @@ export function Details() {
                 placeholder="Institutional"
                 maxLength={100}
               />
+              <FieldWithErrorMessage
+                name="poolStructure"
+                as={TextInput}
+                label="Pool structure"
+                placeholder="Revolving"
+                maxLength={100}
+              />
               {((isDemo && editPoolVisibility) || !isDemo) && (
                 <Field name="listed" validate={validate.assetClass}>
                   {({ field }: FieldProps) => (
@@ -254,7 +266,12 @@ export function Details() {
 
               <LabelValueStack label="Currency" value={currency} />
               <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
-              <LabelValueStack label="Investor type" value={metadata?.pool?.investorType} />
+              {metadata?.pool?.investorType && (
+                <LabelValueStack label="Investor type" value={metadata?.pool?.investorType} />
+              )}
+              {metadata?.pool?.poolStructure && (
+                <LabelValueStack label="Pool structure" value={metadata?.pool?.poolStructure} />
+              )}
             </Shelf>
           )}
         </PageSection>

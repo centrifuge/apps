@@ -1,17 +1,12 @@
-import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate, Token } from '@centrifuge/centrifuge-js'
 import { Box, Card, Divider, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import styled from 'styled-components'
+import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
 import { RouterTextLink } from '../TextLink'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
-
-type TrancheData = {
-  name: string
-  apr: string
-  minInvestment: string
-}
 
 export type InnerMetadata = {
   minInitialInvestment?: CurrencyBalance
@@ -27,19 +22,6 @@ export type MetaData = {
     }
     investorType?: string
   }
-}
-
-export type Tranche = {
-  id: string
-  currency: {
-    name: string
-    decimals: number
-  }
-  interestRatePerSec: {
-    toAprPercent: () => Decimal
-  } | null
-  capacity?: CurrencyBalance | number
-  metadata?: MetaData
 }
 
 const StyledRouterTextLink = styled(RouterTextLink)`
@@ -77,8 +59,9 @@ export type PoolCardProps = {
   apr?: Rate | null | undefined
   status?: PoolStatusKey
   iconUri?: string
-  tranches?: Tranche[]
+  tranches?: Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id'>[]
   metaData?: MetaData
+  createdAt?: string
 }
 
 export function PoolCard({
@@ -91,6 +74,7 @@ export function PoolCard({
   iconUri,
   tranches,
   metaData,
+  createdAt,
 }: PoolCardProps) {
   const isOneTranche = tranches && tranches?.length === 1
   const renderText = (text: string) => (
@@ -99,7 +83,7 @@ export function PoolCard({
     </Text>
   )
 
-  const tranchesData: TrancheData[] = tranches?.map((tranche: Tranche) => {
+  const tranchesData = tranches?.map((tranche) => {
     const words = tranche.currency.name.trim().split(' ')
     const metadata = metaData?.tranches[tranche.id] ?? null
     const trancheName = words[words.length - 1]
@@ -108,18 +92,24 @@ export function PoolCard({
       tranche.currency.decimals
     ).toDecimal()
 
+    const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
+
+    function calculateApy() {
+      if (poolId === '4139607887') return formatPercentage(5, true, {}, 1)
+      if (poolId === '1655476167') return formatPercentage(15, true, {}, 1)
+      if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
+        return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
+      if (tranche.interestRatePerSec) return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
+      return '-'
+    }
+
     return {
       name: trancheName,
-      apr: tranche.interestRatePerSec
-        ? formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          })
-        : '-',
+      apr: calculateApy(),
       minInvestment:
         metadata && metadata.minInitialInvestment ? formatBalanceAbbreviated(investmentBalance, '', 0) : '-',
     }
-  }) as TrancheData[]
+  })
 
   return (
     <StyledCard>

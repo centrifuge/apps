@@ -53,6 +53,7 @@ import { truncate } from '../../utils/web3'
 import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerInput } from './IssuerInput'
 import { PoolFeeSection } from './PoolFeeInput'
+import { PoolRatingInput } from './PoolRatingInput'
 import { PoolReportsInput } from './PoolReportsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
@@ -117,6 +118,7 @@ export type CreatePoolValues = Omit<
   ratingAgency: string
   ratingValue: string
   ratingReportUrl: string
+  poolStructure: string
 }
 
 const initialValues: CreatePoolValues = {
@@ -130,7 +132,7 @@ const initialValues: CreatePoolValues = {
   epochMinutes: 50, // in minutes
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
   investorType: '',
-
+  poolStructure: '',
   issuerName: '',
   issuerRepName: '',
   issuerLogo: null,
@@ -743,13 +745,32 @@ function CreatePoolForm() {
                   )}
                 </Field>
               </Box>
+              <Box gridColumn="span 2">
+                <Field name="poolStructure">
+                  {({ field, meta, form }: FieldProps) => (
+                    <FieldWithErrorMessage
+                      name="poolStructure"
+                      label="Pool structure"
+                      onChange={(event: any) => form.setFieldValue('poolStructure', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      as={TextInput}
+                      placeholder="Revolving"
+                    />
+                  )}
+                </Field>
+              </Box>
             </Grid>
           </PageSection>
           <PageSection title="Issuer">
             <IssuerInput waitingForStoredIssuer={waitingForStoredIssuer} />
           </PageSection>
-          <PageSection title="Pool analysis">
+          <PageSection>
             <PoolReportsInput />
+          </PageSection>
+          <PageSection>
+            <PoolRatingInput />
           </PageSection>
 
           <TrancheSection />
