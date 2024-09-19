@@ -159,10 +159,14 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-    {
-      metric: 'Pool structure',
-      value: 'Revolving pool',
-    },
+    ...(metadata?.pool?.poolStructure
+      ? [
+          {
+            metric: 'Pool structure',
+            value: metadata?.pool?.poolStructure,
+          },
+        ]
+      : []),
     ...(metadata?.pool?.rating?.ratingValue
       ? [
           {
