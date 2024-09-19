@@ -15,14 +15,13 @@ const OPTIONS = [
 ]
 
 const createCategory = () => ({
-  type: '',
+  type: 'fundAdmin',
   value: '',
-  customType: '',
 })
 
 export type IssuerDetail = {
-  type?: string
-  value?: string
+  type: string
+  value: string
   customType?: string
 }
 

@@ -341,7 +341,6 @@ export type Pool = {
   metadata?: string
   value: CurrencyBalance
   createdAt: string | null
-  investorType: string
   tranches: Token[]
   reserve: {
     max: CurrencyBalance
@@ -750,6 +749,7 @@ export type PoolMetadata = {
       email: string
       logo?: FileType | null
       shortDescription: string
+      categories: { type: string; value: string; customType?: string }[]
     }
     links: {
       executiveSummary: FileType | null
@@ -1131,6 +1131,7 @@ export function getPoolsModule(inst: Centrifuge) {
           email: metadata.email,
           logo: metadata.issuerLogo,
           shortDescription: metadata.issuerShortDescription,
+          categories: metadata.issuerCategories,
         },
         poolStructure: metadata.poolStructure,
         investorType: metadata.investorType,
