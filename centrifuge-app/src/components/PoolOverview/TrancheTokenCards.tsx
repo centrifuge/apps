@@ -1,8 +1,8 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
-import { Box, Button, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { Token } from '../../pages/Pool/Overview'
+import { InvestButton, Token } from '../../pages/Pool/Overview'
 import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { DataTable } from '../DataTable'
@@ -65,7 +65,9 @@ export const TrancheTokenCards = ({
     {
       header: '',
       align: 'left',
-      formatter: (_: any, row: any) => <Button>Invest</Button>,
+      formatter: (_: any, row: any) => {
+        return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
+      },
     },
   ]
 
