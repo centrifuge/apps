@@ -6,7 +6,7 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { IssuerDetails, RatingDetails, ReportDetails } from '../../../components/IssuerSection'
+import { IssuerDetails, PoolAnalysis, RatingDetails } from '../../../components/IssuerSection'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
@@ -61,6 +61,7 @@ export function Issuer() {
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
       issuerShortDescription: metadata?.pool?.issuer?.shortDescription ?? '',
+      issuerCategories: metadata?.pool?.issuer?.categories ?? [],
       executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
@@ -75,7 +76,6 @@ export function Issuer() {
       ratingAgency: metadata?.pool?.rating?.ratingAgency ?? '',
       ratingValue: metadata?.pool?.rating?.ratingValue ?? '',
       ratingReportUrl: metadata?.pool?.rating?.ratingReportUrl ?? '',
-      issuerCategories: metadata?.pool?.issuerCategories ?? [{ type: '', value: '' }],
     }),
     [metadata, logoFile]
   )
@@ -122,6 +122,7 @@ export function Issuer() {
             logo:
               logoChanged && logoUri ? { uri: logoUri, mime: values.issuerLogo!.type } : oldMetadata.pool.issuer.logo,
             shortDescription: values.issuerShortDescription,
+            categories: values.issuerCategories,
           },
           links: {
             executiveSummary: execSummaryUri
@@ -218,7 +219,7 @@ export function Issuer() {
           ) : (
             <Stack gap={2}>
               <IssuerDetails metadata={metadata} />
-              {metadata?.pool?.reports?.[0] && <ReportDetails metadata={metadata} />}
+              {metadata?.pool?.reports?.[0] && <PoolAnalysis inverted metadata={metadata} />}
               {metadata?.pool?.rating && <RatingDetails metadata={metadata} />}
             </Stack>
           )}

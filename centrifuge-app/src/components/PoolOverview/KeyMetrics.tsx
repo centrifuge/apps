@@ -1,4 +1,4 @@
-import { CurrencyBalance, Perquintill, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Perquintill } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
@@ -8,9 +8,9 @@ import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { evmChains } from '../../config'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
-import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
+import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
-import { useDailyTranchesStates, usePool } from '../../utils/usePools'
+import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { PillButton } from '../PillButton'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
@@ -27,15 +27,7 @@ const StyledPillButton = styled(PillButton)`
 
 type Props = {
   assetType?: { class: string; subClass: string }
-  averageMaturity: string
   poolId: string
-  pool: Pool | TinlakePool
-  poolMetadata: PoolMetadata
-  poolFees: {
-    amounts: {
-      pending: CurrencyBalance
-    }
-  }[]
 }
 
 interface DailyTrancheState {
@@ -78,12 +70,16 @@ const getTodayValue = (data: DailyTrancheStateArr | null | undefined): DailyTran
   return filteredData
 }
 
-export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool, poolMetadata }: Props) => {
+export const KeyMetrics = ({ poolId }: Props) => {
   const isTinlakePool = poolId.startsWith('0x')
+  const pool = usePool(poolId)
+  const { data: metadata } = usePoolMetadata(pool)
+  const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
   const totalNav = pool.nav.total.toFloat()
   const theme = useTheme()
+  const averageMaturity = useAverageMaturity(poolId)
 
   const pendingFees = useMemo(() => {
     return new CurrencyBalance(
@@ -106,13 +102,13 @@ export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool,
   }, [dailyTranches])
 
   const minInvestmentPerTranche = useMemo(() => {
-    if (!poolMetadata.tranches) return null
+    if (!metadata?.tranches) return null
 
-    return Object.values(poolMetadata.tranches).map((item) => {
+    return Object.values(metadata.tranches).map((item) => {
       const minInv = new CurrencyBalance(item.minInitialInvestment ?? 0, pool.currency.decimals).toDecimal()
       return item.minInitialInvestment ? formatBalanceAbbreviated(minInv, '', 0) : null
     })
-  }, [poolMetadata.tranches])
+  }, [metadata?.tranches])
 
   const isBT3BT4 =
     poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
@@ -121,7 +117,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool,
   const metrics = [
     {
       metric: 'Asset type',
-      value: `${capitalize(startCase(assetType?.class))} - ${assetType?.subClass}`,
+      value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
       metric: '30-day APY',
@@ -147,11 +143,11 @@ export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool,
           })
         : '-',
     },
-    ...(poolMetadata.pool.investorType
+    ...(metadata?.pool?.investorType
       ? [
           {
             metric: 'Investor type',
-            value: poolMetadata.pool.investorType,
+            value: metadata?.pool.investorType,
           },
         ]
       : []),
@@ -167,7 +163,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool,
       metric: 'Pool structure',
       value: 'Revolving pool',
     },
-    ...(poolMetadata.pool.rating?.ratingValue
+    ...(metadata?.pool?.rating?.ratingValue
       ? [
           {
             metric: 'Rating',
@@ -177,9 +173,9 @@ export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool,
                 bodyWidth="maxContent"
                 body={
                   <TooltipBody
-                    title={poolMetadata.pool.rating.ratingAgency ?? ''}
+                    title={metadata?.pool?.rating?.ratingAgency ?? ''}
                     subtitle="View Report"
-                    url={poolMetadata.pool.rating.ratingReportUrl ?? ''}
+                    url={metadata?.pool?.rating?.ratingReportUrl ?? ''}
                   />
                 }
               >
@@ -189,12 +185,12 @@ export const KeyMetrics = ({ assetType, averageMaturity, poolFees, poolId, pool,
                   padding="2px 10px"
                   display="flex"
                 >
-                  {poolMetadata.pool.rating.ratingAgency?.includes('moody') ? (
+                  {metadata?.pool?.rating?.ratingAgency?.includes('moody') ? (
                     <IconMoody size={16} />
                   ) : (
                     <IconSp size={16} />
                   )}
-                  <Text>{poolMetadata.pool.rating?.ratingValue}</Text>
+                  <Text>{metadata?.pool?.rating?.ratingValue}</Text>
                 </Box>
               </Tooltip>
             ),

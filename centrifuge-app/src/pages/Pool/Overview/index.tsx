@@ -21,8 +21,7 @@ import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
-import { useLoans } from '../../../utils/useLoans'
-import { usePool, usePoolFees, usePoolMetadata } from '../../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type Token = {
@@ -69,11 +68,7 @@ export function PoolDetailOverview() {
 
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
-  const poolFees = usePoolFees(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const averageMaturity = useAverageMaturity(poolId)
-  const loans = useLoans(poolId)
-  const isMedium = useIsAboveBreakpoint('M')
 
   const pageSummaryData = [
     {
@@ -107,7 +102,7 @@ export function PoolDetailOverview() {
         id: tranche.id,
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
-        yield30DaysAnnualized: tranche?.yield30DaysAnnualized,
+        yield30DaysAnnualized: tranche?.yield30DaysAnnualized?.toString() || '',
       }
     })
     .reverse()
@@ -118,15 +113,7 @@ export function PoolDetailOverview() {
         <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
           <PoolPerformance />
           <React.Suspense fallback={<Spinner />}>
-            <KeyMetrics
-              assetType={metadata?.pool?.asset}
-              averageMaturity={averageMaturity}
-              loans={loans}
-              poolId={poolId}
-              pool={pool}
-              poolMetadata={metadata}
-              poolFees={poolFees}
-            />
+            <KeyMetrics poolId={poolId} />
           </React.Suspense>
         </Grid>
         {tokens.length > 0 && (
