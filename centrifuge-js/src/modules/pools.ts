@@ -2483,7 +2483,7 @@ export function getPoolsModule(inst: Centrifuge) {
             tokenPrice: new Price(state.tokenPrice),
             pool: state.tranche.poolId,
             yield30DaysAnnualized: state.yield30DaysAnnualized
-              ? new Perquintill(hexToBN(state.yield30DaysAnnualized))
+              ? new Perquintill(state.yield30DaysAnnualized)
               : new Perquintill(0),
           }
           if (trancheStates[tid]) {
