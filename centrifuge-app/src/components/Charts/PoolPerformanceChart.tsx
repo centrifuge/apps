@@ -16,7 +16,7 @@ import { getRangeNumber } from './utils'
 type ChartData = {
   day: Date
   nav: number
-  juniorTokenPrice: number | null
+  juniorTokenPrice: number
   seniorTokenPrice?: number | null
   currency?: string
   seniorAPY: Decimal | null
@@ -37,12 +37,12 @@ const rangeFilters = [
 ]
 
 function calculateTranchePrices(pool: any) {
-  if (!pool?.tranches) return { juniorPrice: null, seniorPrice: null }
+  if (!pool?.tranches) return { juniorTokenPrice: 0, seniorTokenPrice: null }
 
   const juniorTranche = pool.tranches.find((t: Tranche) => t.seniority === 0)
   const seniorTranche = pool.tranches.length > 1 ? pool.tranches.find((t: Tranche) => t.seniority === 1) : null
 
-  const juniorTokenPrice = juniorTranche ? Number(formatBalance(juniorTranche.tokenPrice, undefined, 5, 5)) : null
+  const juniorTokenPrice = juniorTranche ? Number(formatBalance(juniorTranche.tokenPrice, undefined, 5, 5)) : 0
   const seniorTokenPrice = seniorTranche ? Number(formatBalance(seniorTranche.tokenPrice, undefined, 5, 5)) : null
 
   return { juniorTokenPrice, seniorTokenPrice }
@@ -113,7 +113,7 @@ function PoolPerformanceChart() {
         const juniorTrancheKey = trancheKeys[0]
         const seniorTrancheKey = trancheKeys[1] || null
 
-        const juniorTokenPrice = day.tranches[juniorTrancheKey]?.price?.toFloat() ?? null
+        const juniorTokenPrice = day.tranches[juniorTrancheKey]?.price?.toFloat() ?? 0
         const seniorTokenPrice = seniorTrancheKey ? day.tranches[seniorTrancheKey]?.price?.toFloat() ?? null : null
 
         const juniorAPY = getYieldFieldForFilter(day.tranches[juniorTrancheKey], range.value).toPercent().toNumber()
@@ -127,7 +127,7 @@ function PoolPerformanceChart() {
           return {
             day: new Date(day.timestamp),
             nav: todayAssetValue,
-            juniorTokenPrice: tranchePrices.juniorTokenPrice ?? null,
+            juniorTokenPrice: tranchePrices.juniorTokenPrice ?? 0,
             seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
             juniorAPY,
             seniorAPY,
@@ -170,7 +170,7 @@ function PoolPerformanceChart() {
       const base = {
         day: data.day,
         nav: data.nav,
-        juniorTokenPrice: data.juniorTokenPrice,
+        juniorTokenPrice: data.juniorTokenPrice ?? 0,
         juniorAPY: data.juniorAPY,
       }
       if (data.seniorTokenPrice && data.seniorAPY) {
@@ -184,26 +184,6 @@ function PoolPerformanceChart() {
 
     return getCSVDownloadUrl(filteredData as any)
   }, [chartData, selectedTabIndex])
-
-  const priceRange = React.useMemo(() => {
-    if (!chartData) return [0, 100]
-
-    const min =
-      chartData.reduce((prev, curr) => {
-        const currMin = Math.min(curr.juniorTokenPrice ?? Infinity, curr.seniorTokenPrice ?? Infinity)
-        const prevMin = Math.min(prev.juniorTokenPrice ?? Infinity, prev.seniorTokenPrice ?? Infinity)
-        return currMin < prevMin ? curr : prev
-      }, chartData[0])?.juniorTokenPrice ?? 0
-
-    const max =
-      chartData.reduce((prev, curr) => {
-        const currMax = Math.max(curr.juniorTokenPrice ?? -Infinity, curr.seniorTokenPrice ?? -Infinity)
-        const prevMax = Math.max(prev.juniorTokenPrice ?? -Infinity, prev.seniorTokenPrice ?? -Infinity)
-        return currMax > prevMax ? curr : prev
-      }, chartData[0])?.juniorTokenPrice ?? 1
-
-    return [min, max]
-  }, [chartData])
 
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
@@ -282,11 +262,10 @@ function PoolPerformanceChart() {
                 stroke="none"
                 tickLine={false}
                 style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
-                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 6)}
+                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                 yAxisId="right"
                 orientation="right"
-                domain={priceRange}
-                hide={true}
+                domain={selectedTabIndex === 0 ? ['dataMin - 0.25', 'dataMax + 0.25'] : [0, 'dataMax + 0.25']}
               />
               <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
@@ -379,6 +358,7 @@ function PoolPerformanceChart() {
                 yAxisId="right"
                 name="juniorAPY"
                 hide={selectedTabIndex === 0}
+                isAnimationActive={false}
               />
               <Line
                 type="monotone"
