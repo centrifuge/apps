@@ -5,22 +5,14 @@ import { useTheme } from 'styled-components'
 import { InvestButton, Token } from '../../pages/Pool/Overview'
 import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 
-export const TrancheTokenCards = ({
-  trancheTokens,
-  poolId,
-  createdAt,
-  poolCurrency,
-}: {
-  trancheTokens: Token[]
-  poolId: string
-  createdAt: string | null
-  poolCurrency: { symbol: string; decimals: number }
-}) => {
+export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: Token[]; poolId: string }) => {
+  const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
-  const daysSinceCreation = createdAt ? daysBetween(new Date(createdAt), new Date()) : 0
+  const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
 
   const getTrancheText = (trancheToken: Token) => {
     if (trancheToken.seniority === 0) return 'junior'
@@ -48,20 +40,27 @@ export const TrancheTokenCards = ({
       formatter: (v: any) => (v ? calculateApy(v) : '-'),
     },
     {
-      header: `TVL (${poolCurrency.symbol})`,
+      header: `TVL (${pool?.currency.symbol})`,
       align: 'left',
       formatter: (v: any) => (v ? formatBalance(v) : '-'),
     },
     {
       header: 'Token price',
       align: 'left',
-      formatter: (v: any) => (v ? formatBalance(v, poolCurrency.symbol, poolCurrency.decimals) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, pool?.currency.decimals) : '-'),
     },
-    {
-      header: 'Subordination',
-      align: 'left',
-      formatter: (_: any, row: any) => '-',
-    },
+    ...(pool.tranches.length > 1
+      ? [
+          {
+            header: 'Subordination',
+            align: 'left',
+            formatter: (_: any, row: any) => {
+              if (row.value[1].seniority === 0) return '-'
+              return formatPercentage(row.value[1].protection)
+            },
+          },
+        ]
+      : []),
     {
       header: '',
       align: 'left',
@@ -84,8 +83,6 @@ export const TrancheTokenCards = ({
       }
     })
   }, [columnConfig])
-
-  console.log(columns)
 
   const dataTable = useMemo(() => {
     return trancheTokens.map((tranche) => ({

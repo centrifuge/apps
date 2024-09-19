@@ -2674,26 +2674,26 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolCurrency.decimals
                   ),
                   yield7DaysAnnualized: tranche.yield7DaysAnnualized
-                    ? new Perquintill(hexToBN(tranche.yield7DaysAnnualized))
+                    ? new Perquintill(tranche.yield7DaysAnnualized)
                     : new Perquintill(0),
                   yield30DaysAnnualized: tranche.yield30DaysAnnualized
-                    ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized))
+                    ? new Perquintill(tranche.yield30DaysAnnualized)
                     : new Perquintill(0),
                   yield90DaysAnnualized: tranche.yield90DaysAnnualized
-                    ? new Perquintill(hexToBN(tranche.yield90DaysAnnualized))
+                    ? new Perquintill(tranche.yield90DaysAnnualized)
                     : new Perquintill(0),
                   yieldSinceInception: tranche.yieldSinceInception
-                    ? new Perquintill(hexToBN(tranche.yieldSinceInception))
+                    ? new Perquintill(tranche.yieldSinceInception)
                     : new Perquintill(0),
-                  yieldMTD: tranche.yieldMTD ? new Perquintill(hexToBN(tranche.yieldMTD)) : new Perquintill(0),
-                  yieldQTD: tranche.yieldQTD ? new Perquintill(hexToBN(tranche.yieldQTD)) : new Perquintill(0),
-                  yieldYTD: tranche.yieldYTD ? new Perquintill(hexToBN(tranche.yieldYTD)) : new Perquintill(0),
+                  yieldMTD: tranche.yieldMTD ? new Perquintill(tranche.yieldMTD) : new Perquintill(0),
+                  yieldQTD: tranche.yieldQTD ? new Perquintill(tranche.yieldQTD) : new Perquintill(0),
+                  yieldYTD: tranche.yieldYTD ? new Perquintill(tranche.yieldYTD) : new Perquintill(0),
                   yieldSinceLastPeriod: tranche.yieldSinceLastPeriod
-                    ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod))
+                    ? new Perquintill(tranche.yieldSinceLastPeriod)
                     : new Perquintill(0),
                 }
               })
-
+              console.log('🚀 ~ tranches:', tranches)
               return { ...state, poolState, poolValue, tranches }
             }) || [],
           trancheStates,
