@@ -1,7 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
-  Accordion,
   AnchorButton,
   Box,
   IconBalanceSheet,
@@ -19,13 +18,12 @@ import styled from 'styled-components'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
 import { AnchorPillButton, PillButton } from './PillButton'
-import { AnchorTextLink, RouterTextLink } from './TextLink'
+import { RouterTextLink } from './TextLink'
 
 const SUBTLE_GRAY = '#91969b21'
 
 type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
-  editView?: boolean
 }
 
 const reportLinks = [
@@ -46,11 +44,10 @@ const StyledRouterTextLink = styled(RouterTextLink)`
   }
 `
 
-export function ReportDetails({ metadata, editView }: IssuerSectionProps) {
-  const cent = useCentrifuge()
-  const report = metadata?.pool?.reports?.[0]
+export function ReportDetails({ metadata }: IssuerSectionProps) {
   const pathname = useLocation().pathname
-  return !editView ? (
+  const report = metadata?.pool?.reports?.[0]
+  return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Text color="white" variant="heading4">
@@ -85,57 +82,12 @@ export function ReportDetails({ metadata, editView }: IssuerSectionProps) {
         ))}
       </Box>
 
-      {report?.author.name && report.author.title && (
-        <>
-          <Text color="white" variant="heading4">
-            Pool analysis
-          </Text>
-          <Shelf gap={1}>
-            <Text variant="body4" color="textSecondary">
-              Reviewer: {report.author.name}
-              <br />
-              {report.author.title}
-            </Text>
-          </Shelf>
-        </>
-      )}
+      {report && <PoolAnalysis metadata={metadata} />}
     </>
-  ) : (
-    <Stack gap={2}>
-      <Text variant="heading2">Pool analysis</Text>
-      <Shelf flexDirection="column" alignItems="flex-start">
-        {report && (
-          <>
-            <Shelf gap={1}>
-              {report.author.avatar?.uri && (
-                <Box
-                  as="img"
-                  height={40}
-                  borderRadius={30}
-                  src={cent.metadata.parseMetadataUrl(report.author.avatar.uri)}
-                  alt=""
-                />
-              )}
-              {report.author.name && (
-                <LabelValueStack label="Reviewer" value={<Text variant="body2">{report.author.name}</Text>} />
-              )}
-              {report.author.title && (
-                <LabelValueStack label="Reviewer title" value={<Text variant="body2">{report.author.title}</Text>} />
-              )}
-            </Shelf>
-            <Shelf marginTop={20}>
-              <AnchorButton href={report.uri} target="_blank" variant="secondary" icon={IconExternalLink}>
-                View full analysis
-              </AnchorButton>
-            </Shelf>
-          </>
-        )}
-      </Shelf>
-    </Stack>
   )
 }
 
-export function IssuerDetails({ metadata, editView }: IssuerSectionProps) {
+export function IssuerDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
 
@@ -161,7 +113,7 @@ export function IssuerDetails({ metadata, editView }: IssuerSectionProps) {
       onClick: () => setIsDialogOpen(true),
     },
   ]
-  return !editView ? (
+  return (
     <Stack>
       <Shelf display="flex" justifyContent="space-between" marginBottom={12}>
         {metadata?.pool?.issuer.logo && (
@@ -187,61 +139,6 @@ export function IssuerDetails({ metadata, editView }: IssuerSectionProps) {
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
       />
-
-      {!editView && (metadata?.pool?.links.website || metadata?.pool?.links.forum || metadata?.pool?.issuer.email) && (
-        <LabelValueStack
-          label="Links"
-          value={
-            <Text variant="body3">
-              <Shelf flexWrap="wrap" gap={2} alignItems="flex-start">
-                {metadata?.pool?.links.website && (
-                  <AnchorTextLink href={metadata?.pool?.links.website}>Website</AnchorTextLink>
-                )}
-                {metadata?.pool?.links.forum && (
-                  <AnchorTextLink href={metadata?.pool?.links.forum}>Forum</AnchorTextLink>
-                )}
-                {metadata?.pool?.issuer.email && (
-                  <AnchorTextLink href={`mailto:${metadata?.pool?.issuer.email}`}>Email</AnchorTextLink>
-                )}
-              </Shelf>
-            </Text>
-          }
-        />
-      )}
-      {!!metadata?.pool?.details?.length && (
-        <LabelValueStack label="Details" value={<Accordion items={metadata?.pool?.details} />} />
-      )}
-    </Stack>
-  ) : (
-    <Stack gap={2}>
-      <LabelValueStack label="Issuer" value={<Text variant="body2">{metadata?.pool?.issuer.name}</Text>} />
-      <LabelValueStack
-        label="Legal representative"
-        value={<Text variant="body2">{metadata?.pool?.issuer.repName}</Text>}
-      />
-      <LabelValueStack
-        label="Short description"
-        value={<Text variant="body2">{metadata?.pool?.issuer.shortDescription}</Text>}
-      />
-      <LabelValueStack label="Description" value={<Text variant="body2">{metadata?.pool?.issuer.description}</Text>} />
-      {metadata?.pool?.links.executiveSummary && (
-        <LabelValueStack
-          label="Download"
-          value={
-            <>
-              <PillButton variant="small" onClick={() => setIsDialogOpen(true)}>
-                Executive summary
-              </PillButton>
-              <ExecutiveSummaryDialog
-                issuerName={metadata?.pool?.issuer.name}
-                href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
-                open={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
-              />
-            </>
-          }
-        />
-      )}
     </Stack>
   )
 }
@@ -273,20 +170,18 @@ const Links = ({ links }: { links: { label: string; href?: string; show: boolean
 export function RatingDetails({ metadata }: IssuerSectionProps) {
   const rating = metadata?.pool?.rating
 
-  return (
+  return rating?.ratingAgency || rating?.ratingValue || rating?.ratingReportUrl ? (
     <Stack gap={1}>
       <Text variant="heading2">Pool rating</Text>
       <Shelf flexDirection="column" alignItems="flex-start">
-        {rating && (
-          <Shelf gap={1}>
-            {rating.ratingAgency && (
-              <LabelValueStack label="Rating agency" value={<Text variant="body2">{rating.ratingAgency}</Text>} />
-            )}
-            {rating.ratingValue && (
-              <LabelValueStack label="Rating" value={<Text variant="body2">{rating.ratingValue}</Text>} />
-            )}
-          </Shelf>
-        )}
+        <Shelf gap={1}>
+          {rating.ratingAgency && (
+            <LabelValueStack label="Rating agency" value={<Text variant="body2">{rating.ratingAgency}</Text>} />
+          )}
+          {rating.ratingValue && (
+            <LabelValueStack label="Rating" value={<Text variant="body2">{rating.ratingValue}</Text>} />
+          )}
+        </Shelf>
       </Shelf>
       <Shelf>
         {rating?.ratingReportUrl && (
@@ -296,5 +191,24 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
         )}
       </Shelf>
     </Stack>
-  )
+  ) : null
+}
+
+export const PoolAnalysis = ({ metadata, inverted }: IssuerSectionProps & { inverted?: boolean }) => {
+  const report = metadata?.pool?.reports?.[0]
+  return report?.author?.name || report?.author?.title ? (
+    <Stack gap={1}>
+      <Text color={inverted ? 'textPrimary' : 'white'} variant={inverted ? 'heading2' : 'heading4'}>
+        Pool analysis
+      </Text>
+      <Stack gap={0}>
+        <Text variant="body3" color="textSecondary">
+          Reviewer: {report?.author?.name || 'N/A'}
+        </Text>
+        <Text variant="body3" color="textSecondary">
+          Title: {report?.author?.title || 'N/A'}
+        </Text>
+      </Stack>
+    </Stack>
+  ) : null
 }
