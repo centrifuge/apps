@@ -79,7 +79,7 @@ export const StyledInputAction = styled.button`
   cursor: pointer;
   appearance: none;
   border: none;
-  background: ${(props) => props.theme.colors.backgroundButtonSecondary};
+  background: ${(props) => props.theme.colors.backgroundButtonInverted};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -102,7 +102,7 @@ export const StyledInputAction = styled.button`
 export function InputAction({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <StyledInputAction type="button" {...props}>
-      <Text variant="interactive1" color="textInverted" fontWeight={400}>
+      <Text variant="interactive1" color="textButtonInverted" fontWeight={400}>
         {children}
       </Text>
     </StyledInputAction>

@@ -36,7 +36,7 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
           {inputElement}
         </Text>
         {secondaryLabel && (
-          <Text variant="body3" color={disabled ? 'textDisabled' : 'textSecondary'}>
+          <Text variant="body3" color={disabled ? 'textDisabled' : 'textPrimary'}>
             {secondaryLabel}
           </Text>
         )}
@@ -48,7 +48,7 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
 
 export function InputLabel({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) {
   return (
-    <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'} as="label" htmlFor={useContextId()}>
+    <Text variant="label2" color={disabled ? 'textDisabled' : 'textPrimary'} as="label" htmlFor={useContextId()}>
       {children}
     </Text>
   )

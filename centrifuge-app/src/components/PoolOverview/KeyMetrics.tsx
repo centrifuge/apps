@@ -204,7 +204,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
     ...(!!expenseRatio
       ? [
           {
-            metric: <Tooltips type="expenseRatio" variant="secondary" size="med" />,
+            metric: <Tooltips type="expenseRatio" size="med" />,
             value: `${formatBalance(expenseRatio * 100, '', 2)}%`,
           },
         ]
