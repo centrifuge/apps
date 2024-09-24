@@ -432,14 +432,12 @@ function CustomLegend({
       color: 'textGold',
       label: 'Junior APY',
       value: formatPercentage(data.juniorAPY ?? 0),
-      type: 'singleTrancheTokenPrice',
       show: true,
     },
     {
       color: 'textPrimary',
       label: 'Senior APY',
       value: formatPercentage(data.seniorAPY ?? 0),
-      type: 'singleTrancheTokenPrice',
       show: !!data.seniorAPY,
     },
   ]
@@ -461,7 +459,13 @@ function CustomLegend({
             <Stack key={index} pl={1} display="flex" marginRight="20px">
               <Box display="flex" alignItems="center">
                 <Dot color={item.color} />
-                <Tooltips type={item.type} label={item.label} />
+                {item.type ? (
+                  <Tooltips type={item.type} label={item.label} />
+                ) : (
+                  <Text variant="body3" style={{ lineHeight: 1.8 }}>
+                    {item.label}
+                  </Text>
+                )}
               </Box>
               <Text variant="heading1">{item.value}</Text>
             </Stack>

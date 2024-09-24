@@ -54,7 +54,7 @@ export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean }>`
   position: relative;
   background: ${({ theme }) => theme.colors.backgroundPage};
   border: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `1px solid ${theme.colors.borderPrimary}`)};
-  border-radius: ${({ theme }) => theme.radii.input}px;
+  border-radius: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `${theme.radii.input}px`)};
 
   &::before {
     content: '';

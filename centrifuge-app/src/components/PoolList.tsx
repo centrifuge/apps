@@ -1,6 +1,6 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
@@ -93,14 +93,17 @@ export function PoolList() {
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <Text
-            style={{ cursor: 'pointer', marginBottom: 12 }}
-            color="textSecondary"
-            onClick={() => setShowArchived((show) => !show)}
-            variant="body2"
-          >
-            {showArchived ? 'Hide archived pools' : 'View archived pools >'}
-          </Text>
+          <Box display="flex" alignItems="center" marginBottom={1}>
+            <Text
+              style={{ cursor: 'pointer' }}
+              color="textSecondary"
+              onClick={() => setShowArchived((show) => !show)}
+              variant="body2"
+            >
+              {showArchived ? 'Hide archived pools' : 'View archived pools'}
+            </Text>
+            {!showArchived && <IconChevronRight color="textSecondary" size={18} />}
+          </Box>
           {showArchived && <ArchivedPools pools={archivedPools} />}
         </>
       )}

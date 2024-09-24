@@ -1,4 +1,4 @@
-import { Box, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Select, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
@@ -34,10 +34,12 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
             </Text>
           )}
           {priceDifference && (
-            <Text variant="body3" color={priceDifference.gte(0) ? 'statusOk' : 'statusCritical'}>
-              {' '}
-              {priceDifference.gte(0) ? '+' : ''} {priceDifference.mul(100).toFixed(2)}%
-            </Text>
+            <StatusChip status={priceDifference.gte(0) ? 'ok' : 'critical'}>
+              <Text variant="body3" color={priceDifference.gte(0) ? 'statusOk' : 'statusCritical'}>
+                {' '}
+                {priceDifference.gte(0) ? '+' : ''} {priceDifference.mul(100).toFixed(2)}%
+              </Text>
+            </StatusChip>
           )}
         </Shelf>
         {filter && setFilter && (
@@ -50,6 +52,7 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
               ]}
               onChange={(option) => setFilter(option.target.value as FilterOptions)}
               defaultValue={filter}
+              hideBorder
             />
           </Box>
         )}
@@ -57,9 +60,9 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
       <ResponsiveContainer width="100%" height="100%" minHeight="200px">
         <AreaChart data={data || []} margin={{ top: 18, left: -10 }}>
           <defs>
-            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={'#626262'} stopOpacity={0.4} />
-              <stop offset="95%" stopColor={'#908f8f'} stopOpacity={0} />
+            <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={theme.colors.textGold} stopOpacity={0.4} />
+              <stop offset="95%" stopColor={theme.colors.textGold} stopOpacity={0.2} />
             </linearGradient>
           </defs>
           <XAxis
@@ -90,7 +93,7 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
               return tick.toFixed(6)
             }}
             domain={['dataMin - 0.001', 'dataMax + 0.001']}
-            interval={'preserveStartEnd'}
+            interval="preserveStartEnd"
           />
           <CartesianGrid stroke={theme.colors.borderPrimary} />
           <Tooltip content={<CustomizedTooltip currency={currency} precision={6} />} />
@@ -102,7 +105,7 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
             fill="url(#colorPrice)"
             name="Price"
             activeDot={{ fill: '#908f8f' }}
-            stroke="#908f8f"
+            stroke={theme.colors.textGold}
           />
         </AreaChart>
       </ResponsiveContainer>

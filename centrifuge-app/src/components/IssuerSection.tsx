@@ -15,6 +15,7 @@ import {
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
+import { formatPercentage } from '../utils/formatting'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
 import { AnchorPillButton, PillButton } from './PillButton'
@@ -113,6 +114,12 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
       onClick: () => setIsDialogOpen(true),
     },
   ]
+
+  const formatCamelCase = (text: string | undefined) => {
+    if (!text) return
+    return text.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())
+  }
+
   return (
     <Stack>
       <Shelf display="flex" justifyContent="space-between" marginBottom={12}>
@@ -127,11 +134,27 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         )}
         <Links links={links} />
       </Shelf>
-      <Box pt={4}>
-        <Text variant="heading2">{metadata?.pool?.name}</Text>
-        <Text variant="body2" style={{ marginTop: '12px' }}>
-          {metadata?.pool?.issuer.description}
-        </Text>
+      <Box pt={4} display="flex" justifyContent="space-between">
+        <Box>
+          <Text variant="heading2">{metadata?.pool?.issuer.name}</Text>
+          <Text variant="body2" style={{ marginTop: '12px' }}>
+            {metadata?.pool?.issuer.description}
+          </Text>
+        </Box>
+        {metadata?.pool?.issuer?.categories?.length ? (
+          <Box width="50%" bg="white" padding="8px" borderRadius={10} ml={1}>
+            {metadata?.pool?.issuer?.categories.map((category) => (
+              <Box display="flex" justifyContent="space-between" padding={1}>
+                <Text color="textSecondary" variant="body2" style={{ minWidth: 120, textTransform: 'capitalize' }}>
+                  {formatCamelCase(category.customType) || formatCamelCase(category.type)}
+                </Text>
+                <Text variant="body2" style={{ fontWeight: 500 }}>
+                  {category.type.includes('Rate') ? formatPercentage(category.value) : category.value}
+                </Text>
+              </Box>
+            ))}
+          </Box>
+        ) : null}
       </Box>
       <ExecutiveSummaryDialog
         issuerName={metadata?.pool?.issuer.name ?? ''}

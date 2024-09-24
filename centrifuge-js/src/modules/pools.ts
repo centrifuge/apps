@@ -2693,7 +2693,6 @@ export function getPoolsModule(inst: Centrifuge) {
                     : new Perquintill(0),
                 }
               })
-              console.log('🚀 ~ tranches:', tranches)
               return { ...state, poolState, poolValue, tranches }
             }) || [],
           trancheStates,
