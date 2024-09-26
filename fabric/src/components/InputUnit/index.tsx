@@ -15,15 +15,21 @@ export type InputUnitProps = {
   errorMessage?: string
   inputElement?: React.ReactNode
   disabled?: boolean
+  row?: boolean
 }
 
-export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElement, disabled }: InputUnitProps) {
+export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElement, disabled, row }: InputUnitProps) {
   const defaultId = React.useId()
   id ??= defaultId
+
   return (
     <IdContext.Provider value={id}>
-      <Stack gap={1}>
-        {label && <InputLabel disabled={disabled}>{label}</InputLabel>}
+      <Stack gap={1} flexDirection={row ? 'row' : 'column'} alignItems="center">
+        {label && (
+          <InputLabel row={row} disabled={disabled}>
+            {row ? `${label}:` : ''}
+          </InputLabel>
+        )}
         <Text
           variant="body2"
           color={disabled ? 'textDisabled' : 'textPrimary'}
@@ -46,9 +52,22 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
   )
 }
 
-export function InputLabel({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) {
+export function InputLabel({
+  children,
+  disabled,
+  row,
+}: {
+  children: React.ReactNode
+  disabled?: boolean
+  row?: boolean
+}) {
   return (
-    <Text variant="label2" color={disabled ? 'textDisabled' : 'textPrimary'} as="label" htmlFor={useContextId()}>
+    <Text
+      variant={row ? 'heading3' : 'label2'}
+      color={disabled ? 'textDisabled' : 'textPrimary'}
+      as="label"
+      htmlFor={useContextId()}
+    >
       {children}
     </Text>
   )

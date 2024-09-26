@@ -28,9 +28,9 @@ type IssuerSectionProps = {
 }
 
 const reportLinks = [
-  { label: 'Balance sheet', href: '/balance-sheet', icon: <IconBalanceSheet /> },
-  { label: 'Profit & loss', href: '/profit-and-loss', icon: <IconProfitAndLoss /> },
-  { label: 'Cashflow statement', href: '/cash-flow-statement', icon: <IconCashflow /> },
+  { label: 'Balance sheet', href: '/balance-sheet', icon: <IconBalanceSheet color="backgroundPrimary" /> },
+  { label: 'Profit & loss', href: '/profit-and-loss', icon: <IconProfitAndLoss color="backgroundPrimary" /> },
+  { label: 'Cashflow statement', href: '/cash-flow-statement', icon: <IconCashflow color="backgroundPrimary" /> },
 ]
 
 const StyledRouterTextLink = styled(RouterTextLink)`
@@ -78,7 +78,7 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
                 {link.label}
               </StyledRouterTextLink>
             </Box>
-            <IconChevronRight color="white" />
+            <IconChevronRight color="backgroundPrimary" />
           </Box>
         ))}
       </Box>

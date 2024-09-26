@@ -1,4 +1,4 @@
-import { black, blackScale, blueScale, gold, grayScale, yellowScale } from './colors'
+import { black, blueScale, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
 const statusInfo = blueScale[500]
@@ -65,19 +65,19 @@ const colors = {
   shadowButtonPrimary: 'transparent',
 
   backgroundButtonSecondary: black,
-  backgroundButtonSecondaryFocus: blackScale[500],
-  backgroundButtonSecondaryHover: blackScale[500],
-  backgroundButtonSecondaryPressed: blackScale[500],
+  backgroundButtonSecondaryFocus: black,
+  backgroundButtonSecondaryHover: black,
+  backgroundButtonSecondaryPressed: black,
   backgroundButtonSecondaryDisabled: grayScale[300],
   textButtonSecondary: 'white',
-  textButtonSecondaryFocus: gold,
-  textButtonSecondaryHover: gold,
-  textButtonSecondaryPressed: gold,
+  textButtonSecondaryFocus: 'white',
+  textButtonSecondaryHover: 'white',
+  textButtonSecondaryPressed: 'white',
   textButtonSecondaryDisabled: grayScale[500],
-  borderButtonSecondary: grayScale[300],
-  borderButtonSecondaryFocus: gold,
-  borderButtonSecondaryHover: gold,
-  borderButtonSecondaryPressed: gold,
+  borderButtonSecondary: black,
+  borderButtonSecondaryFocus: black,
+  borderButtonSecondaryHover: black,
+  borderButtonSecondaryPressed: black,
   borderButtonSecondaryDisabled: 'transparent',
   shadowButtonSecondary: 'transparent',
 
@@ -90,7 +90,7 @@ const colors = {
   textButtonTertiaryFocus: gold,
   textButtonTertiaryHover: gold,
   textButtonTertiaryPressed: gold,
-  textButtonTertiaryDisabled: gold,
+  textButtonTertiaryDisabled: grayScale[300],
   borderButtonTertiary: 'transparent',
   borderButtonTertiaryFocus: 'transparent',
   borderButtonTertiaryHover: 'transparent',
@@ -103,9 +103,9 @@ const colors = {
   backgroundButtonInvertedPressed: grayScale[100],
   backgroundButtonInvertedDisabled: grayScale[100],
   textButtonInverted: black,
-  textButtonInvertedFocus: grayScale[600],
-  textButtonInvertedHover: grayScale[600],
-  textButtonInvertedPressed: grayScale[600],
+  textButtonInvertedFocus: black,
+  textButtonInvertedHover: black,
+  textButtonInvertedPressed: black,
   textButtonInvertedDisabled: grayScale[500],
   borderButtonInverted: grayScale[100],
   borderButtonInvertedFocus: black,

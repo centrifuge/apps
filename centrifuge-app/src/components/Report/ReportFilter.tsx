@@ -1,197 +1,92 @@
-import { Loan, Pool } from '@centrifuge/centrifuge-js'
-import { useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centrifuge/fabric'
+import { Pool } from '@centrifuge/centrifuge-js'
+import {
+  AnchorButton,
+  Box,
+  Button,
+  DateInput,
+  IconBalanceSheet,
+  IconCashflow,
+  IconDownload,
+  IconProfitAndLoss,
+  Select,
+  Shelf,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router'
-import { nftMetadataSchema } from '../../schemas'
+import styled from 'styled-components'
 import { useBasePath } from '../../utils/useBasePath'
-import { useActiveDomains } from '../../utils/useLiquidityPools'
-import { useLoans } from '../../utils/useLoans'
-import { useMetadata } from '../../utils/useMetadata'
-import { useCentNFT } from '../../utils/useNFTs'
-import { useDebugFlags } from '../DebugFlags'
-import { GroupBy, Report, ReportContext } from './ReportContext'
-import { formatPoolFeeTransactionType } from './utils'
+import { GroupBy, ReportContext } from './ReportContext'
+
+interface StyledButtonProps {
+  selected?: boolean
+}
+
+const StyledButton = styled(Button)<StyledButtonProps>`
+  margin-right: 12px;
+  & > span {
+    border-color: ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.backgroundInverted)};
+  }
+  &:hover > span {
+    border-color: ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.backgroundInverted)};
+    color: ${({ selected, theme }) => (!selected ? theme.colors.textPrimary : theme.colors.textInverted)};
+  }
+`
 
 type ReportFilterProps = {
   pool: Pool
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
-  const {
-    csvData,
-    setStartDate,
-    startDate,
-    endDate,
-    setEndDate,
-    report,
-    loanStatus,
-    setLoanStatus,
-    txType,
-    setTxType,
-    groupBy,
-    setGroupBy,
-    activeTranche,
-    setActiveTranche,
-    address,
-    setAddress,
-    network,
-    setNetwork,
-    loan,
-    setLoan,
-  } = React.useContext(ReportContext)
+  const { csvData, setStartDate, startDate, endDate, setEndDate, groupBy, setGroupBy, report } =
+    React.useContext(ReportContext)
   const navigate = useNavigate()
   const basePath = useBasePath()
-
-  const { data: domains } = useActiveDomains(pool.id)
-  const getNetworkName = useGetNetworkName()
-  const loans = useLoans(pool.id) as Loan[] | undefined
-
-  const { showOracleTx } = useDebugFlags()
-
-  const reportOptions: { label: string; value: Report }[] = [
-    { label: 'Balance sheet', value: 'balance-sheet' },
-    { label: 'Profit & loss', value: 'profit-and-loss' },
-    { label: 'Cash flow statement', value: 'cash-flow-statement' },
-    { label: 'Investor transactions', value: 'investor-tx' },
-    { label: 'Asset transactions', value: 'asset-tx' },
-    { label: 'Fee transactions', value: 'fee-tx' },
-    ...(showOracleTx === true ? [{ label: 'Oracle transactions', value: 'oracle-tx' as Report }] : []),
-    // { label: 'Pool balance', value: 'pool-balance' },
-    { label: 'Token price', value: 'token-price' },
-    { label: 'Asset list', value: 'asset-list' },
-    { label: 'Investor list', value: 'investor-list' },
-  ]
 
   return (
     <Shelf
       alignItems="center"
       flexWrap="wrap"
       gap={2}
-      p={2}
-      borderWidth={0}
-      borderBottomWidth={1}
+      padding={2}
+      marginX={[1, 6]}
+      marginY={2}
+      borderWidth={[0, 1]}
+      borderRadius={6}
       borderStyle="solid"
       borderColor="borderPrimary"
+      justifyContent="space-between"
     >
-      <Select
-        name="report"
-        label="Report"
-        options={reportOptions}
-        value={report}
-        onChange={(event: { target: { value: any } }) => {
-          if (event.target.value) {
-            navigate(`${basePath}/${pool.id}/reporting/${event.target.value}`)
-          }
-        }}
-      />
+      <Box display="flex">
+        <StyledButton
+          selected={report === 'balance-sheet'}
+          variant={report === 'balance-sheet' ? 'secondary' : 'tertiary'}
+          icon={<IconBalanceSheet />}
+          onClick={() => navigate(`${basePath}/${pool.id}/reporting/balance-sheet`)}
+        >
+          Balance sheet
+        </StyledButton>
+        <StyledButton
+          selected={report === 'profit-and-loss'}
+          variant={report === 'profit-and-loss' ? 'secondary' : 'tertiary'}
+          icon={<IconProfitAndLoss />}
+          onClick={() => navigate(`${basePath}/${pool.id}/reporting/profit-and-loss`)}
+        >
+          Profit & loss
+        </StyledButton>
+        <StyledButton
+          selected={report === 'cash-flow-statement'}
+          variant={report === 'cash-flow-statement' ? 'secondary' : 'tertiary'}
+          icon={<IconCashflow />}
+          onClick={() => navigate(`${basePath}/${pool.id}/reporting/cash-flow-statement`)}
+        >
+          Cash flow
+        </StyledButton>
+      </Box>
 
-      {!['investor-list', 'asset-list', 'balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
-        <>
-          <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
-          <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
-        </>
-      )}
-
-      {['pool-balance', 'token-price'].includes(report) && (
-        <Select
-          name="groupBy"
-          label="Group by"
-          options={[
-            {
-              label: 'Day',
-              value: 'day',
-            },
-            {
-              label: 'Month',
-              value: 'month',
-            },
-          ]}
-          value={groupBy}
-          onChange={(event) => {
-            if (event.target.value) {
-              setGroupBy(event.target.value as GroupBy)
-            }
-          }}
-        />
-      )}
-
-      {report === 'asset-list' && (
-        <>
-          <Select
-            name="loanStatus"
-            label="Status"
-            options={[
-              {
-                label: 'All',
-                value: 'all',
-              },
-              {
-                label: 'Ongoing',
-                value: 'ongoing',
-              },
-              {
-                label: 'Repaid',
-                value: 'repaid',
-              },
-              {
-                label: 'Overdue',
-                value: 'overdue',
-              },
-            ]}
-            value={loanStatus}
-            onChange={(event) => {
-              setLoanStatus(event.target.value)
-            }}
-          />
-          <DateInput label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-        </>
-      )}
-
-      {(report === 'investor-list' || report === 'investor-tx') && (
-        <Select
-          name="activeTranche"
-          label="Token"
-          options={[
-            {
-              label: 'All tokens',
-              value: 'all',
-            },
-            ...pool.tranches.map((token) => {
-              return {
-                label: token.currency.name,
-                value: token.id,
-              }
-            }),
-          ]}
-          value={activeTranche}
-          onChange={(event) => {
-            if (event.target.value) {
-              setActiveTranche(event.target.value)
-            }
-          }}
-        />
-      )}
-      {report === 'asset-tx' && (
-        <Select
-          name="loan"
-          label="Asset"
-          onChange={(event) => {
-            setLoan(event.target.value)
-          }}
-          value={loan}
-          options={[
-            { label: 'All', value: 'all' },
-            ...(loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []),
-          ]}
-        />
-      )}
-
-      {['balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
-        <>
+      <Box display="flex">
+        <Box marginRight={2}>
           <Select
             name="balanceSheetGroupBy"
-            label="Group by"
             onChange={(event) => {
               setGroupBy(event.target.value as GroupBy)
             }}
@@ -203,154 +98,42 @@ export function ReportFilter({ pool }: ReportFilterProps) {
               { label: 'Quarterly', value: 'quarter' },
               { label: 'Yearly', value: 'year' },
             ]}
+            hideBorder
           />
+        </Box>
+        <Box marginRight={2}>
           {groupBy === 'day' && (
-            <DateInput label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <DateInput row label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           )}
-          {groupBy === 'month' || groupBy === 'daily' ? (
-            <>
-              <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
-              <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
-            </>
-          ) : null}
-        </>
-      )}
+        </Box>
+        {groupBy === 'month' || groupBy === 'daily' ? (
+          <>
+            <Box marginRight={2}>
+              <DateInput
+                row
+                label="From"
+                value={startDate}
+                max={endDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </Box>
+            <DateInput row label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
+          </>
+        ) : null}
+      </Box>
 
-      {['investor-tx', 'asset-tx', 'fee-tx'].includes(report) && (
-        <Select
-          name="txType"
-          label="Transaction type"
-          options={
-            report === 'investor-tx'
-              ? [
-                  {
-                    label: 'All',
-                    value: 'all',
-                  },
-                  {
-                    label: 'Submitted orders',
-                    value: 'orders',
-                  },
-                  {
-                    label: 'Executed orders',
-                    value: 'executions',
-                  },
-                  {
-                    label: 'Transfers',
-                    value: 'transfers',
-                  },
-                ]
-              : report === 'asset-tx'
-              ? [
-                  {
-                    label: 'All',
-                    value: 'all',
-                  },
-                  {
-                    label: 'Created',
-                    value: 'Created',
-                  },
-                  {
-                    label: 'Financed',
-                    value: 'Financed',
-                  },
-                  {
-                    label: 'Repaid',
-                    value: 'Repaid',
-                  },
-                  {
-                    label: 'Priced',
-                    value: 'Priced',
-                  },
-                  {
-                    label: 'Closed',
-                    value: 'Closed',
-                  },
-                ]
-              : [
-                  {
-                    label: 'All',
-                    value: 'all',
-                  },
-                  {
-                    label: formatPoolFeeTransactionType('CHARGED'),
-                    value: 'CHARGED',
-                  },
-                  {
-                    label: formatPoolFeeTransactionType('UNCHARGED'),
-                    value: 'UNCHARGED',
-                  },
-                  {
-                    label: formatPoolFeeTransactionType('ACCRUED'),
-                    value: 'ACCRUED',
-                  },
-                  {
-                    label: formatPoolFeeTransactionType('PAID'),
-                    value: 'PAID',
-                  },
-                ]
-          }
-          value={txType}
-          onChange={(event) => {
-            if (event.target.value) {
-              setTxType(event.target.value)
-            }
-          }}
-        />
-      )}
-      {['investor-tx', 'investor-list'].includes(report) && (
-        <>
-          <Select
-            name="network"
-            label="Network"
-            options={[
-              {
-                label: 'All',
-                value: 'all',
-              },
-              {
-                label: 'Centrifuge',
-                value: 'centrifuge',
-              },
-              ...(domains ?? []).map((domain) => {
-                return {
-                  label: getNetworkName(domain.chainId),
-                  value: String(domain.chainId),
-                }
-              }),
-            ]}
-            value={network}
-            onChange={(e) => {
-              const { value } = e.target
-              if (value) {
-                setNetwork(isNaN(Number(value)) ? value : Number(value))
-              }
-            }}
-          />
-          <SearchInput
-            name="address"
-            label="Address"
-            placeholder="Filter by address..."
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </>
-      )}
-      <Box ml="auto">
-        <AnchorButton href={csvData?.dataUrl} download={csvData?.fileName} variant="primary" small disabled={!csvData}>
-          Export CSV
+      <Box>
+        <AnchorButton
+          disabled={!csvData}
+          download={csvData?.fileName}
+          href={csvData?.dataUrl}
+          icon={<IconDownload />}
+          small
+          variant="inverted"
+        >
+          CSV
         </AnchorButton>
       </Box>
     </Shelf>
-  )
-}
-
-function LoanOption({ loan }: { loan: Loan }) {
-  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, false)
-  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  return (
-    <option value={loan.id}>
-      {loan.id} - {metadata?.name}
-    </option>
   )
 }
