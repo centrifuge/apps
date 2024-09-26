@@ -8,13 +8,14 @@ import { CustomizedTooltip } from './Tooltip'
 export type FilterOptions = 'YTD' | '30days' | '90days'
 
 type PriceChartProps = {
-  data: { day: Date; price: number }[]
+  data: { day: Date; price: number; apy: number }[]
   currency: string
   filter?: FilterOptions
   setFilter?: React.Dispatch<React.SetStateAction<FilterOptions>>
+  isPrice: boolean
 }
 
-export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProps) => {
+export const PriceChart = ({ data, currency, filter, setFilter, isPrice }: PriceChartProps) => {
   const theme = useTheme()
   const currentPrice = data.at(-1)?.price
 
@@ -84,26 +85,40 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
             tickLine={false}
             allowDuplicatedCategory={false}
           />
-          <YAxis
-            tickCount={6}
-            dataKey="price"
-            tickLine={false}
-            style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-            tickFormatter={(tick: number) => {
-              return tick.toFixed(6)
-            }}
-            domain={['dataMin - 0.001', 'dataMax + 0.001']}
-            interval="preserveStartEnd"
-          />
+          {isPrice ? (
+            <YAxis
+              tickCount={6}
+              dataKey="price"
+              tickLine={false}
+              style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+              tickFormatter={(tick: number) => {
+                return tick.toFixed(6)
+              }}
+              domain={['dataMin - 0.001', 'dataMax + 0.001']}
+              interval="preserveStartEnd"
+            />
+          ) : (
+            <YAxis
+              tickCount={6}
+              dataKey="apy"
+              tickLine={false}
+              style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+              tickFormatter={(tick: number) => {
+                return tick.toFixed(6)
+              }}
+              domain={['dataMin - 0.001', 'dataMax + 0.001']}
+              interval="preserveStartEnd"
+            />
+          )}
           <CartesianGrid stroke={theme.colors.borderPrimary} />
           <Tooltip content={<CustomizedTooltip currency={currency} precision={6} />} />
           <Area
             type="monotone"
-            dataKey="price"
+            dataKey={isPrice ? 'price' : 'apy'}
             strokeWidth={1}
             fillOpacity={1}
             fill="url(#colorPrice)"
-            name="Price"
+            name={isPrice ? 'Price' : 'APY'}
             activeDot={{ fill: '#908f8f' }}
             stroke={theme.colors.textGold}
           />
