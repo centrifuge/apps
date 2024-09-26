@@ -195,7 +195,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing, isLoading])
 
-
   // NOTE: This assumes that pool.reserve.total comes from onchain state AND NOT from the runtime-apis
   const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.total.toDecimal())
 
@@ -209,7 +208,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
 
   const changeInValuation = React.useMemo(() => {
     return (externalLoans as ActiveLoan[]).reduce((prev, curr) => {
-      const price = curr.currentPrice.toDecimal()
+      const price = curr.currentPrice ? curr.currentPrice.toDecimal() : 0
       const quantity = (curr as ExternalLoan).pricing.outstandingQuantity.toDecimal()
       const updatedPrice = Dec(form.values.feed.find((p) => p.id === curr.id)?.value || 0)
       return CurrencyBalance.fromFloat(
@@ -324,11 +323,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     <>
       <LayoutSection pt={3}>
         <NavOverviewCard
-            poolId={pool.id}
-            changeInValuation={changeInValuation.toDecimal().toNumber()}
-            totalAum={totalAum.toNumber()}
-            pendingFees={pendingFees.toDecimal().toNumber()}
-            pendingNav={pendingNav.toNumber()}
+          poolId={pool.id}
+          changeInValuation={changeInValuation.toDecimal().toNumber()}
+          totalAum={totalAum.toNumber()}
+          pendingFees={pendingFees.toDecimal().toNumber()}
+          pendingNav={pendingNav.toNumber()}
         />
       </LayoutSection>
 
@@ -421,7 +420,19 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   )
 }
 
-export function NavOverviewCard({ poolId, changeInValuation, totalAum, pendingFees, pendingNav }: { poolId: string; changeInValuation: number; totalAum: number; pendingFees: number; pendingNav: number}) {
+export function NavOverviewCard({
+  poolId,
+  changeInValuation,
+  totalAum,
+  pendingFees,
+  pendingNav,
+}: {
+  poolId: string
+  changeInValuation: number
+  totalAum: number
+  pendingFees: number
+  pendingNav: number
+}) {
   const pool = usePool(poolId)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
