@@ -221,7 +221,6 @@ function PoolPerformanceChart() {
 
     return result
   }
-
   return (
     <Stack gap={2} padding={20}>
       <Stack flexDirection="row" justifyContent="space-between" alignItems="center" mb={12}>
@@ -501,8 +500,9 @@ function CustomLegend({
   )
 }
 
-const CustomTick = ({ x, y, payload }: any) => {
+export const CustomTick = ({ x, y, payload }: any) => {
   const theme = useTheme()
+
   return (
     <g transform={`translate(${x},${y})`}>
       <text

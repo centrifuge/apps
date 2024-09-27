@@ -20,7 +20,7 @@ type Row = TableDataRow & {
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setReportData, reportData } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
     const today = new Date()
@@ -237,6 +237,10 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       URL.revokeObjectURL(dataUrl)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetValuationRecords, trancheRecords])
+
+  React.useEffect(() => {
+    setReportData(poolStates)
   }, [assetValuationRecords, trancheRecords])
 
   if (!poolStates) {

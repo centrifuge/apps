@@ -49,6 +49,9 @@ export type ReportContextType = {
 
   loan: string
   setLoan: (type: string) => void
+
+  reportData: any
+  setReportData: (type: any) => void
 }
 
 export type CsvDataProps = {
@@ -78,6 +81,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [address, setAddress] = React.useState(searchParams.get('address') || '')
   const [network, setNetwork] = React.useState<string | number>(searchParams.get('network') || 'all')
   const [loan, setLoan] = React.useState(searchParams.get('loan') || '')
+  const [reportData, setReportData] = React.useState([])
 
   React.useEffect(() => {
     const startDate = searchParams.get('from')
@@ -170,6 +174,8 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         setNetwork: (value: any) => updateParamValues('network', value),
         loan,
         setLoan: (value: string) => updateParamValues('asset', value),
+        reportData,
+        setReportData,
       }}
     >
       {children}
