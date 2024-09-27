@@ -25,7 +25,7 @@ type Row = TableDataRow & {
 }
 
 export function ProfitAndLoss({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
@@ -333,6 +333,10 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profitAndLossRecords, feesRecords, totalProfitRecords])
+
+  React.useEffect(() => {
+    setReportData(poolStates)
+  }, [poolStates])
 
   if (!poolStates) {
     return <Spinner mt={2} />

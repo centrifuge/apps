@@ -1,6 +1,6 @@
 import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatDate } from '../../../src/utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../../src/utils/formatting'
@@ -35,27 +35,33 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
     return result
   }
 
-  if (!data.length) return
+  if (!data || !data.length) return
   return (
     <LoadBoundary>
       <ResponsiveContainer width="100%" height={200}>
-        <BarChart width={500} height={300} data={data} barSize={16} barGap={16} barCategoryGap="20%">
+        <BarChart width={500} height={300} data={data} barSize={10} barGap={10}>
           <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
           <XAxis
             dy={4}
             interval={0}
-            minTickGap={100000}
             tickLine={false}
+            axisLine={false}
+            tickMargin={10}
             type="category"
             dataKey="name"
             ticks={getOneDayPerMonth()}
             tick={<CustomTick />}
+            angle={45}
           />
           <YAxis
             tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
             tick={{ fontSize: 10, color: theme.colors.textPrimary }}
             tickLine={false}
+            axisLine={false}
+            dataKey="yAxis"
           />
+          <ReferenceLine y={0} stroke={theme.colors.textSecondary} />
+
           <Tooltip
             cursor={false}
             content={({ payload }) => {
@@ -71,7 +77,14 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
               }
             }}
           />
-          <Bar dataKey="yAxis" fill={theme.colors.backgroundTertiary} strokeWidth={0} fillOpacity={1} />
+          <Bar
+            dataKey="yAxis"
+            name="yAxis"
+            fill={theme.colors.backgroundTertiary}
+            strokeWidth={0}
+            fillOpacity={1}
+            maxBarSize={20}
+          />
         </BarChart>
       </ResponsiveContainer>
     </LoadBoundary>

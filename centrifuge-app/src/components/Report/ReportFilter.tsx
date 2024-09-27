@@ -14,6 +14,7 @@ import {
 import * as React from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
+import { usePoolMetadata } from '../../../src/utils/usePools'
 import { useBasePath } from '../../utils/useBasePath'
 import { SimpleBarChart } from '../Charts/SimpleBarChart'
 import { GroupBy, ReportContext } from './ReportContext'
@@ -42,13 +43,34 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     React.useContext(ReportContext)
   const navigate = useNavigate()
   const basePath = useBasePath()
+  const metadata = usePoolMetadata(pool as Pool)
 
   const transformDataChart = React.useMemo(() => {
+    if (!reportData.length) return
     if (report === 'balance-sheet') {
-      return reportData.map((data: { timestamp: string; netAssetValue: CurrencyBalance }) => ({
+      return reportData.map((data: any) => ({
         name: data.timestamp,
         yAxis: new CurrencyBalance(data.netAssetValue, pool.currency.decimals).toDecimal().toNumber(),
       }))
+    } else if (report === 'profit-and-loss') {
+      return reportData.map((data: any) => {
+        return {
+          name: data.timestamp,
+          yAxis: (metadata?.data?.pool?.asset.class === 'Private credit'
+            ? data.poolState.sumInterestRepaidAmountByPeriod
+                .toDecimal()
+                .add(data.poolState.sumInterestAccruedByPeriod.toDecimal())
+                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
+                .sub(data.poolState.sumDebtWrittenOffByPeriod.toDecimal())
+            : data.poolState.sumUnrealizedProfitByPeriod
+                .toDecimal()
+                .add(data.poolState.sumInterestRepaidAmountByPeriod.toDecimal())
+                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
+          )
+            .sub(data.poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
+            .sub(data.poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal()),
+        }
+      })
     }
   }, [report, reportData])
 

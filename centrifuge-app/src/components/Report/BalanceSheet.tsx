@@ -20,7 +20,7 @@ type Row = TableDataRow & {
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData, setReportData, reportData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
     const today = new Date()
@@ -241,7 +241,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
 
   React.useEffect(() => {
     setReportData(poolStates)
-  }, [assetValuationRecords, trancheRecords])
+  }, [poolStates])
 
   if (!poolStates) {
     return <Spinner mt={2} />
