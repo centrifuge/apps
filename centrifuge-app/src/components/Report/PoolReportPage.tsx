@@ -1,15 +1,19 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { ReportComponent } from '.'
 import { usePool } from '../../utils/usePools'
 import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
+import { DataFilter } from './DataFilter'
 import { ReportContextProvider } from './ReportContext'
 import { ReportFilter } from './ReportFilter'
 
 export function PoolReportPage({ header }: { header: React.ReactNode }) {
-  const { pid: poolId } = useParams<{ pid: string }>()
+  const params = useParams<{ pid: string; '*': string }>()
+  const location = useLocation()
+  const { pid: poolId } = params
+
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId) as Pool
@@ -18,7 +22,7 @@ export function PoolReportPage({ header }: { header: React.ReactNode }) {
     <ReportContextProvider>
       {header}
 
-      {pool && <ReportFilter pool={pool} />}
+      {pool && location.pathname.includes('reporting') ? <ReportFilter pool={pool} /> : <DataFilter pool={pool} />}
 
       <LoadBoundary>
         <PoolDetailReporting pool={pool} />

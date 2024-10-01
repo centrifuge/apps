@@ -1,18 +1,6 @@
 import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useGetNetworkName } from '@centrifuge/centrifuge-react'
-import {
-  AnchorButton,
-  Box,
-  Button,
-  DateInput,
-  IconBalanceSheet,
-  IconCashflow,
-  IconDownload,
-  IconProfitAndLoss,
-  SearchInput,
-  Select,
-  Shelf,
-} from '@centrifuge/fabric'
+import { AnchorButton, Box, DateInput, IconDownload, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router'
 import { nftMetadataSchema } from '../../schemas'
@@ -29,7 +17,7 @@ type ReportFilterProps = {
   pool: Pool
 }
 
-export function ReportFilter({ pool }: ReportFilterProps) {
+export function DataFilter({ pool }: ReportFilterProps) {
   const {
     csvData,
     setStartDate,
@@ -62,9 +50,6 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const { showOracleTx } = useDebugFlags()
 
   const reportOptions: { label: string; value: Report }[] = [
-    { label: 'Balance sheet', value: 'balance-sheet' },
-    { label: 'Profit & loss', value: 'profit-and-loss' },
-    { label: 'Cash flow statement', value: 'cash-flow-statement' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
@@ -86,27 +71,17 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       borderStyle="solid"
       borderColor="borderPrimary"
     >
-      <Button
-        variant="secondary"
-        icon={<IconBalanceSheet />}
-        onClick={() => navigate(`${basePath}/${pool.id}/reporting/balance-sheet`)}
-      >
-        Balance sheet
-      </Button>
-      <Button
-        variant="secondary"
-        icon={<IconProfitAndLoss />}
-        onClick={() => navigate(`${basePath}/${pool.id}/reporting/profit-and-loss`)}
-      >
-        Profit & loss
-      </Button>
-      <Button
-        variant="secondary"
-        icon={<IconCashflow />}
-        onClick={() => navigate(`${basePath}/${pool.id}/reporting/cash-flow-statement`)}
-      >
-        Cash flow
-      </Button>
+      <Select
+        name="report"
+        label="Report"
+        options={reportOptions}
+        value={report}
+        onChange={(event: { target: { value: any } }) => {
+          if (event.target.value) {
+            navigate(`${basePath}/${pool.id}/data/${event.target.value}`)
+          }
+        }}
+      />
 
       {!['investor-list', 'asset-list', 'balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
         <>

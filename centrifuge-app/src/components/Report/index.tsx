@@ -22,7 +22,7 @@ export type TableDataRow = {
 }
 
 export function ReportComponent({ pool }: { pool: Pool }) {
-  const { report, startDate, endDate } = React.useContext(ReportContext)
+  const { report } = React.useContext(ReportContext)
 
   return (
     <Box pb={6}>

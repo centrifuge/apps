@@ -106,8 +106,6 @@ export const DataTable = <T extends Record<string, any>>({
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
 
-  console.log(columns)
-
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
     const updatedOrderBy = orderBy[sortKey] === 'desc' ? 'asc' : 'desc'
