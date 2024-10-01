@@ -2,7 +2,6 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { AssetTransactions } from './AssetTransactions'
 import { BalanceSheet } from './BalanceSheet'
@@ -27,16 +26,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
 
   return (
     <Box pb={6}>
-      <Shelf p={2} justifyContent="space-between">
-        <Text as="span" variant="body3" color="textSecondary">
-          {!['investor-list', 'asset-list'].includes(report) && (
-            <>
-              {startDate ? formatDate(startDate) : 'The beginning of time'}
-              {' - '}
-              {endDate ? formatDate(endDate) : 'now'}
-            </>
-          )}
-        </Text>
+      <Shelf justifyContent="space-between">
         {['pool-balance', 'asset-list'].includes(report) && pool && (
           <Text as="span" variant="body3" color="textSecondary">
             All amounts are in {pool.currency.symbol}

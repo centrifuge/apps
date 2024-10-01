@@ -60,6 +60,7 @@ export type Column = {
   align?: string
   sortKey?: string
   width?: string
+  isLabel?: boolean
 }
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
@@ -105,6 +106,8 @@ export const DataTable = <T extends Record<string, any>>({
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
 
+  console.log(columns)
+
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
     const updatedOrderBy = orderBy[sortKey] === 'desc' ? 'asc' : 'desc'
@@ -149,33 +152,36 @@ export const DataTable = <T extends Record<string, any>>({
           tabIndex={onRowClicked ? 0 : undefined}
         >
           {columns.map((col, index) => (
-            <DataCol variant="body2" align={col?.align} key={index}>
+            <DataCol variant="body2" align={col?.align} key={index} isLabel={col.isLabel}>
               {col.cell(row, i)}
             </DataCol>
           ))}
         </DataRow>
       ))}
-      {sortedAndPaginatedData?.map((row, i) => (
-        <DataRow
-          data-testId={`data-table-row-${i}-${groupIndex ?? 0}`}
-          hoverable={hoverable}
-          as={onRowClicked ? Link : 'div'}
-          to={onRowClicked ? onRowClicked(row) : undefined}
-          key={keyField ? row[keyField] : i}
-          tabIndex={onRowClicked ? 0 : undefined}
-        >
-          {columns.map((col, index) => (
-            <DataCol
-              data-testId={`data-table-col-${i}-${groupIndex ?? 0}-${col.header}`}
-              variant="body2"
-              align={col?.align}
-              key={index}
-            >
-              {col.cell(row, i)}
-            </DataCol>
-          ))}
-        </DataRow>
-      ))}
+      {sortedAndPaginatedData?.map((row, i) => {
+        return (
+          <DataRow
+            data-testId={`data-table-row-${i}-${groupIndex ?? 0}`}
+            hoverable={hoverable}
+            as={onRowClicked ? Link : 'div'}
+            to={onRowClicked ? onRowClicked(row) : undefined}
+            key={keyField ? row[keyField] : i}
+            tabIndex={onRowClicked ? 0 : undefined}
+          >
+            {columns.map((col, index) => (
+              <DataCol
+                data-testId={`data-table-col-${i}-${groupIndex ?? 0}-${col.header}`}
+                variant="body2"
+                align={col?.align}
+                key={index}
+                isLabel={col.isLabel}
+              >
+                {col.cell(row, i)}
+              </DataCol>
+            ))}
+          </DataRow>
+        )
+      })}
       {/* summary row is not included in sorting */}
       {summary && (
         <DataRow data-testId={`row-summary-${groupIndex ?? 0}`}>
@@ -241,8 +247,8 @@ export const DataRow = styled(Row)<any>`
     })}
 `
 
-export const DataCol = styled(Text)<{ align: Column['align'] }>`
-  background: initial;
+export const DataCol = styled(Text)<{ align: Column['align']; isLabel?: boolean }>`
+  background: ${({ isLabel, theme }) => (isLabel ? theme.colors.backgroundSecondary : 'initial')};
   border: none;
   padding: 8px 16px;
   display: flex;

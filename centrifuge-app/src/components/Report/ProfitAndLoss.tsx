@@ -89,6 +89,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
           ),
         width: '240px',
+        isLabel: true,
       },
     ]
       .concat(
@@ -102,6 +103,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             </Text>
           ),
           width: '170px',
+          isLabel: false,
         }))
       )
       .concat({
@@ -109,6 +111,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         header: '',
         cell: () => <span />,
         width: '1fr',
+        isLabel: false,
       })
   }, [poolStates, groupBy])
 
