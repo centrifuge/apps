@@ -24,7 +24,11 @@ interface StyledButtonProps {
 }
 
 const StyledButton = styled(Button)<StyledButtonProps>`
+  margin-bottom: 12px;
   margin-right: 12px;
+  @media (min-width: ${({ theme }) => theme.breakpoints['M']}) {
+    margin-bottom: 0;
+  }
   & > span {
     border-color: ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.backgroundInverted)};
   }
@@ -90,8 +94,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   return (
     <Shelf
       padding={2}
-      marginX={[1, 6]}
-      marginY={2}
+      margin={2}
       borderRadius={6}
       borderStyle="solid"
       borderColor="borderPrimary"
@@ -99,11 +102,11 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       flexDirection="column"
     >
       <Shelf alignItems="center" flexWrap="wrap" justifyContent="space-between" width="100%">
-        <Box display="flex">
+        <Shelf flexDirection={['column', 'row']}>
           <StyledButton
             selected={report === 'balance-sheet'}
             variant={report === 'balance-sheet' ? 'secondary' : 'tertiary'}
-            icon={<IconBalanceSheet />}
+            icon={<IconBalanceSheet size={18} />}
             onClick={() => navigate(`${basePath}/${pool.id}/reporting/balance-sheet`)}
           >
             Balance sheet
@@ -111,7 +114,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           <StyledButton
             selected={report === 'profit-and-loss'}
             variant={report === 'profit-and-loss' ? 'secondary' : 'tertiary'}
-            icon={<IconProfitAndLoss />}
+            icon={<IconProfitAndLoss size={18} />}
             onClick={() => navigate(`${basePath}/${pool.id}/reporting/profit-and-loss`)}
           >
             Profit & loss
@@ -119,14 +122,14 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           <StyledButton
             selected={report === 'cash-flow-statement'}
             variant={report === 'cash-flow-statement' ? 'secondary' : 'tertiary'}
-            icon={<IconCashflow />}
+            icon={<IconCashflow size={18} />}
             onClick={() => navigate(`${basePath}/${pool.id}/reporting/cash-flow-statement`)}
           >
             Cash flow
           </StyledButton>
-        </Box>
+        </Shelf>
 
-        <Box display="flex">
+        <Shelf flexDirection={['column', 'row']}>
           <Box marginRight={2}>
             <Select
               name="balanceSheetGroupBy"
@@ -175,13 +178,13 @@ export function ReportFilter({ pool }: ReportFilterProps) {
             disabled={!csvData}
             download={csvData?.fileName}
             href={csvData?.dataUrl}
-            icon={<IconDownload />}
+            icon={<IconDownload size={18} />}
             small
             variant="inverted"
           >
             CSV
           </AnchorButton>
-        </Box>
+        </Shelf>
       </Shelf>
       <Box mt={4} width="100%" height={200} marginLeft="-50px">
         <SimpleBarChart data={transformDataChart} currency={pool.currency} />
