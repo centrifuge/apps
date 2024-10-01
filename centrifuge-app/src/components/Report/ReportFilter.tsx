@@ -50,7 +50,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     if (report === 'balance-sheet') {
       return reportData.map((data: any) => ({
         name: data.timestamp,
-        yAxis: new CurrencyBalance(data.netAssetValue, pool.currency.decimals).toDecimal().toNumber(),
+        yAxis: new CurrencyBalance(data.netAssetValue, pool.currency.decimals).toNumber(),
       }))
     } else if (report === 'profit-and-loss') {
       return reportData.map((data: any) => {
@@ -58,17 +58,30 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           name: data.timestamp,
           yAxis: (metadata?.data?.pool?.asset.class === 'Private credit'
             ? data.poolState.sumInterestRepaidAmountByPeriod
-                .toDecimal()
-                .add(data.poolState.sumInterestAccruedByPeriod.toDecimal())
-                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-                .sub(data.poolState.sumDebtWrittenOffByPeriod.toDecimal())
+                .add(data.poolState.sumInterestAccruedByPeriod)
+                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod)
+                .sub(data.poolState.sumDebtWrittenOffByPeriod)
             : data.poolState.sumUnrealizedProfitByPeriod
-                .toDecimal()
-                .add(data.poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
+                .add(data.poolState.sumInterestRepaidAmountByPeriod)
+                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod)
           )
-            .sub(data.poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
-            .sub(data.poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal()),
+            .sub(data.poolState.sumPoolFeesChargedAmountByPeriod)
+            .sub(data.poolState.sumPoolFeesAccruedAmountByPeriod)
+            .toNumber(),
+        }
+      })
+    } else {
+      return reportData.map((data: any) => {
+        return {
+          name: data.timestamp,
+          yAxis: data.poolState.sumPrincipalRepaidAmountByPeriod
+            .sub(data.poolState.sumBorrowedAmountByPeriod)
+            .add(data.poolState.sumInterestRepaidAmountByPeriod)
+            .add(data.poolState.sumUnscheduledRepaidAmountByPeriod)
+            .sub(data.poolState.sumPoolFeesPaidAmountByPeriod)
+            .add(data.poolState.sumInvestedAmountByPeriod)
+            .sub(data.poolState.sumRedeemedAmountByPeriod)
+            .toNumber(),
         }
       })
     }

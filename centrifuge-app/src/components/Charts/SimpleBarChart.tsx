@@ -1,4 +1,4 @@
-import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, CurrencyMetadata } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
@@ -36,6 +36,7 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
   }
 
   if (!data || !data.length) return
+
   return (
     <LoadBoundary>
       <ResponsiveContainer width="100%" height={200}>
@@ -54,7 +55,10 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
             angle={45}
           />
           <YAxis
-            tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
+            tickFormatter={(tick: number) => {
+              const balance = new CurrencyBalance(tick, currency?.decimals || 0)
+              return formatBalanceAbbreviated(balance, '', 0)
+            }}
             tick={{ fontSize: 10, color: theme.colors.textPrimary }}
             tickLine={false}
             axisLine={false}
