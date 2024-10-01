@@ -53,8 +53,8 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
       if (source === 'reserve') {
         financeTx = cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true })
       } else {
-        const principal = new CurrencyBalance(
-          price.mul(new BN(quantity.toDecimal().toString())),
+        const principal = CurrencyBalance.fromFloat(
+          price.toDecimal().mul(quantity.toDecimal()).toString(),
           pool.currency.decimals
         )
         const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
