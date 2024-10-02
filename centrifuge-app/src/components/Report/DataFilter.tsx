@@ -80,9 +80,10 @@ export function DataFilter({ poolId }: ReportFilterProps) {
             label="Report"
             options={reportOptions}
             value={report}
-            onChange={(event: { target: { value: any } }) => {
-              if (event.target.value) {
-                navigate(`${basePath}/${pool.id}/data/${event.target.value}`)
+            onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+              const { value } = event.target
+              if (value) {
+                navigate(`${basePath}/${pool.id}/data/${value}`)
               }
             }}
           />
