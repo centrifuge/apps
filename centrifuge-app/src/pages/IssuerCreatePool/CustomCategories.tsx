@@ -29,8 +29,6 @@ export function CustomCategories() {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
 
-  console.log('FORM', values)
-
   return (
     <FieldArray name="issuerCategories">
       {(fldArr) => (

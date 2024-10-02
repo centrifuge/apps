@@ -1,19 +1,12 @@
-import { Perquintill } from '@centrifuge/centrifuge-js'
+import { DailyPoolState, Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Drawer, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
-import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LoadBoundary } from '../LoadBoundary'
 import { InvestRedeem } from './InvestRedeem'
 
-type TrancheState = {
-  price: Decimal | any
-}
-
-type DailyPoolStateProps = {
-  timestamp: string
-  tranches: { [trancheId: string]: TrancheState }
+type DailyPoolStateProps = Pick<DailyPoolState, 'timestamp' | 'tranches'> & {
   apy?: Perquintill | undefined
 }
 

@@ -1,47 +1,36 @@
-import { CurrencyBalance, Perquintill } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { evmChains } from '../../config'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
-import { PillButton } from '../PillButton'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
 import { Tooltips } from '../Tooltips'
 
-const StyledPillButton = styled(PillButton)`
-  background-color: white;
-  cursor: default;
-  :hover {
-    color: black;
-  }
-`
-
 type Props = {
-  assetType?: { class: string; subClass: string }
   poolId: string
 }
 
-interface DailyTrancheState {
-  yield30DaysAnnualized: Perquintill
+type PartialDailyTrancheState = Pick<DailyTrancheState, 'yield30DaysAnnualized'> & {
+  tokenPrice: Price
   timestamp: string
 }
 
-type DailyTrancheStateArr = Record<string, DailyTrancheState[]>
+type DailyTrancheStateArr = Record<string, PartialDailyTrancheState[]>
 
-type Tranche = {
+type Tranche = Pick<DailyTrancheState, 'id'> & {
   currency: {
     name: string
   }
-  id: string
 }
 
 const getTodayValue = (data: DailyTrancheStateArr | null | undefined): DailyTrancheStateArr | undefined => {

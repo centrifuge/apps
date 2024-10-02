@@ -1,5 +1,5 @@
+import { DailyPoolState } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, IconDownload, Select, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
-import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -9,18 +9,18 @@ import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
-import { Tooltips } from '../Tooltips'
+import { Tooltips, tooltipText } from '../Tooltips'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getRangeNumber } from './utils'
 
 type ChartData = {
   day: Date
   nav: number
-  juniorTokenPrice: number
+  juniorTokenPrice: number | null
   seniorTokenPrice?: number | null
   currency?: string
-  seniorAPY: Decimal | null
-  juniorAPY: Decimal
+  seniorAPY: number | null
+  juniorAPY: number
   isToday: boolean
 }
 
@@ -28,6 +28,23 @@ type Tranche = {
   seniority: number
   tokenPrice: number
 }
+
+type GraphDataItemWithType = {
+  show: boolean
+  color: string
+  type: keyof typeof tooltipText
+  label: string
+  value: string | number
+}
+
+type GraphDataItemWithoutType = {
+  show: boolean
+  color: string
+  label: string
+  value: string | number
+}
+
+type GraphDataItem = GraphDataItemWithType | GraphDataItemWithoutType
 
 const rangeFilters = [
   { value: 'all', label: 'All' },
@@ -106,7 +123,7 @@ function PoolPerformanceChart() {
 
   const data: ChartData[] = React.useMemo(
     () =>
-      truncatedPoolStates?.map((day: any) => {
+      truncatedPoolStates?.map((day: DailyPoolState) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
 
         const trancheKeys = Object.keys(day.tranches)
@@ -400,7 +417,7 @@ function CustomLegend({
     <Box width="8px" height="8px" borderRadius="50%" backgroundColor={color} marginRight="4px" />
   )
 
-  const navObj = {
+  const navData = {
     color: 'backgroundTertiary',
     label: `NAV ${data.currency}`,
     value: formatBalance(data.nav),
@@ -409,7 +426,7 @@ function CustomLegend({
   }
 
   const tokenData = [
-    navObj,
+    navData,
     {
       color: 'textGold',
       label: 'Junior token price',
@@ -427,7 +444,7 @@ function CustomLegend({
   ]
 
   const apyData = [
-    navObj,
+    navData,
     {
       color: 'textGold',
       label: 'Junior APY',
@@ -444,7 +461,7 @@ function CustomLegend({
 
   const graphData = selectedTabIndex === 0 ? tokenData : apyData
 
-  const toggleRange = (e: any) => {
+  const toggleRange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value
     const range = rangeFilters.find((range) => range.value === value)
     setRange(range ?? rangeFilters[0])
@@ -453,13 +470,18 @@ function CustomLegend({
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">
       <Box display="flex" justifyContent="space-evenly">
-        {graphData.map((item: any, index: any) => {
+        {graphData.map((item: GraphDataItem, index: number) => {
           if (!item.show) return
+
+          const hasType = (item: GraphDataItem): item is GraphDataItemWithType => {
+            return (item as GraphDataItemWithType).type !== undefined
+          }
+
           return (
             <Stack key={index} pl={1} display="flex" marginRight="20px">
               <Box display="flex" alignItems="center">
                 <Dot color={item.color} />
-                {item.type ? (
+                {hasType(item) ? (
                   <Tooltips type={item.type} label={item.label} />
                 ) : (
                   <Text variant="body3" style={{ lineHeight: 1.8 }}>
