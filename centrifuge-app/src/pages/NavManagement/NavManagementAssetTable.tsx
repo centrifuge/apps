@@ -208,7 +208,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
 
   const changeInValuation = React.useMemo(() => {
     return (externalLoans as ActiveLoan[]).reduce((prev, curr) => {
-      const price = curr.currentPrice ? curr.currentPrice.toDecimal() : 0
+      const price = curr.currentPrice ? curr.currentPrice.toDecimal() : Dec(0)
       const quantity = (curr as ExternalLoan).pricing.outstandingQuantity.toDecimal()
       const updatedPrice = Dec(form.values.feed.find((p) => p.id === curr.id)?.value || 0)
       return CurrencyBalance.fromFloat(
