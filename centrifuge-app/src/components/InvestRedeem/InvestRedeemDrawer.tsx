@@ -51,37 +51,38 @@ export function InvestRedeemDrawer({
 
   const { poolStates: dailyPoolStates } = useDailyPoolStates(poolId, new Date(dateFrom)) || {}
 
-  if (!dailyPoolStates?.length) return
-
   return (
     <Drawer isOpen={open} onClose={onClose}>
       <LoadBoundary>
         <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
       </LoadBoundary>
       <LoadBoundary>
-        <Stack gap={12} borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="8px" p={2}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Text variant="heading6" color="textPrimary" fontWeight={600}>
-              Performance
-            </Text>
-            <Tabs selectedIndex={index} onChange={(index) => setIndex(index)}>
-              <TabsItem styleOverrides={{ padding: '4px' }} showBorder>
-                Price
-              </TabsItem>
-              <TabsItem styleOverrides={{ padding: '4px' }} showBorder>
-                APY
-              </TabsItem>
-            </Tabs>
-          </Box>
-          <TokenPriceChart
-            poolId={poolId}
-            trancheId={trancheId}
-            dailyPoolStates={dailyPoolStates}
-            filter={filter}
-            setFilter={setFilter}
-            index={index}
-          />
-        </Stack>
+        {dailyPoolStates?.length ? (
+          <Stack gap={12} borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="8px" p={2}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Text variant="heading6" color="textPrimary" fontWeight={600}>
+                Performance
+              </Text>
+              <Tabs selectedIndex={index} onChange={(index) => setIndex(index)}>
+                <TabsItem styleOverrides={{ padding: '4px' }} showBorder>
+                  Price
+                </TabsItem>
+                <TabsItem styleOverrides={{ padding: '4px' }} showBorder>
+                  APY
+                </TabsItem>
+              </Tabs>
+            </Box>
+
+            <TokenPriceChart
+              poolId={poolId}
+              trancheId={trancheId}
+              dailyPoolStates={dailyPoolStates}
+              filter={filter}
+              setFilter={setFilter}
+              index={index}
+            />
+          </Stack>
+        ) : null}
       </LoadBoundary>
     </Drawer>
   )
