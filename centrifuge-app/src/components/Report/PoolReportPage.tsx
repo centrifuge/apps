@@ -2,7 +2,7 @@ import { Pool } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { ReportComponent } from '.'
-import { usePool } from '../../utils/usePools'
+import { usePool } from '../../../src/utils/usePools'
 import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { DataFilter } from './DataFilter'
@@ -16,23 +16,22 @@ export function PoolReportPage({ header }: { header: React.ReactNode }) {
 
   if (!poolId) throw new Error('Pool not found')
 
-  const pool = usePool(poolId) as Pool
-
   return (
     <ReportContextProvider>
       {header}
 
-      {pool && location.pathname.includes('reporting') ? <ReportFilter pool={pool} /> : <DataFilter pool={pool} />}
+      {location.pathname.includes('reporting') ? <ReportFilter poolId={poolId} /> : <DataFilter poolId={poolId} />}
 
       <LoadBoundary>
-        <PoolDetailReporting pool={pool} />
+        <PoolDetailReporting poolId={poolId} />
       </LoadBoundary>
     </ReportContextProvider>
   )
 }
 
-function PoolDetailReporting({ pool }: { pool: Pool }) {
-  if (!pool) {
+function PoolDetailReporting({ poolId }: { poolId: string }) {
+  const pool = usePool(poolId) as Pool
+  if (!poolId || !pool) {
     return <Spinner mt={2} />
   }
 

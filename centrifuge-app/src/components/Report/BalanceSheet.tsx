@@ -3,7 +3,6 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -21,7 +20,6 @@ type Row = TableDataRow & {
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
-  const theme = useTheme()
   const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
@@ -245,7 +243,9 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
   }, [assetValuationRecords, trancheRecords])
 
   React.useEffect(() => {
-    setReportData(poolStates)
+    if (poolStates?.length) {
+      setReportData(poolStates)
+    }
   }, [poolStates])
 
   if (!poolStates) {

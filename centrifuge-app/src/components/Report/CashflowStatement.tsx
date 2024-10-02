@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -324,7 +324,15 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   }, [grossCashflowRecords, netCashflowRecords])
 
   React.useEffect(() => {
-    setReportData(poolStates)
+    if (poolStates && Object.keys(poolStates).length > 0) {
+      const fullPoolStates: DailyPoolState[] = Object.values(poolStates).map((partialState) => {
+        return {
+          ...partialState,
+        } as DailyPoolState
+      })
+
+      setReportData(fullPoolStates)
+    }
   }, [poolStates])
 
   if (!poolStates) {

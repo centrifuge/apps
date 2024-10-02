@@ -1,5 +1,5 @@
 import { CurrencyBalance, CurrencyMetadata } from '@centrifuge/centrifuge-js'
-import { Text } from '@centrifuge/fabric'
+import { Shelf, Text } from '@centrifuge/fabric'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatDate } from '../../../src/utils/date'
@@ -35,7 +35,12 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
     return result
   }
 
-  if (!data || !data.length) return
+  if (!data.length)
+    return (
+      <Shelf justifyContent="center">
+        <Text>No data available</Text>
+      </Shelf>
+    )
 
   return (
     <LoadBoundary>

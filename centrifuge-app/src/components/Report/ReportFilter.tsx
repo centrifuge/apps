@@ -1,4 +1,4 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, DailyPoolState, Pool } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -14,7 +14,7 @@ import {
 import * as React from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
-import { usePoolMetadata } from '../../../src/utils/usePools'
+import { usePool, usePoolMetadata } from '../../../src/utils/usePools'
 import { useBasePath } from '../../utils/useBasePath'
 import { SimpleBarChart } from '../Charts/SimpleBarChart'
 import { GroupBy, ReportContext } from './ReportContext'
@@ -39,25 +39,26 @@ const StyledButton = styled(Button)<StyledButtonProps>`
 `
 
 type ReportFilterProps = {
-  pool: Pool
+  poolId: string
 }
 
-export function ReportFilter({ pool }: ReportFilterProps) {
+export function ReportFilter({ poolId }: ReportFilterProps) {
   const { csvData, setStartDate, startDate, endDate, setEndDate, groupBy, setGroupBy, report, reportData } =
     React.useContext(ReportContext)
   const navigate = useNavigate()
   const basePath = useBasePath()
+  const pool = usePool(poolId) as Pool
   const metadata = usePoolMetadata(pool as Pool)
 
   const transformDataChart = React.useMemo(() => {
     if (!reportData.length) return
     if (report === 'balance-sheet') {
-      return reportData.map((data: any) => ({
+      return reportData.map((data: DailyPoolState) => ({
         name: data.timestamp,
-        yAxis: new CurrencyBalance(data.netAssetValue, pool.currency.decimals).toNumber(),
+        yAxis: new CurrencyBalance(data.poolState.netAssetValue, pool.currency.decimals).toNumber(),
       }))
     } else if (report === 'profit-and-loss') {
-      return reportData.map((data: any) => {
+      return reportData.map((data: DailyPoolState) => {
         return {
           name: data.timestamp,
           yAxis: (metadata?.data?.pool?.asset.class === 'Private credit'
@@ -75,7 +76,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }
       })
     } else {
-      return reportData.map((data: any) => {
+      return reportData.map((data: DailyPoolState) => {
         return {
           name: data.timestamp,
           yAxis: data.poolState.sumPrincipalRepaidAmountByPeriod
@@ -186,9 +187,11 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           </AnchorButton>
         </Shelf>
       </Shelf>
-      <Box mt={4} width="100%" height={200} marginLeft="-50px">
-        <SimpleBarChart data={transformDataChart} currency={pool.currency} />
-      </Box>
+      {transformDataChart?.length && (
+        <Box mt={4} width="100%" height={200} marginLeft="-50px">
+          <SimpleBarChart data={transformDataChart} currency={pool.currency} />
+        </Box>
+      )}
     </Shelf>
   )
 }

@@ -3,6 +3,7 @@ import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, DateInput, IconDownload, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router'
+import { usePool } from '../../../src/utils/usePools'
 import { nftMetadataSchema } from '../../schemas'
 import { useBasePath } from '../../utils/useBasePath'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
@@ -14,10 +15,10 @@ import { GroupBy, Report, ReportContext } from './ReportContext'
 import { formatPoolFeeTransactionType } from './utils'
 
 type ReportFilterProps = {
-  pool: Pool
+  poolId: string
 }
 
-export function DataFilter({ pool }: ReportFilterProps) {
+export function DataFilter({ poolId }: ReportFilterProps) {
   const {
     csvData,
     setStartDate,
@@ -42,6 +43,7 @@ export function DataFilter({ pool }: ReportFilterProps) {
   } = React.useContext(ReportContext)
   const navigate = useNavigate()
   const basePath = useBasePath()
+  const pool = usePool(poolId) as Pool
 
   const { data: domains } = useActiveDomains(pool.id)
   const getNetworkName = useGetNetworkName()
@@ -54,7 +56,6 @@ export function DataFilter({ pool }: ReportFilterProps) {
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
     ...(showOracleTx === true ? [{ label: 'Oracle transactions', value: 'oracle-tx' as Report }] : []),
-    // { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
     { label: 'Investor list', value: 'investor-list' },
