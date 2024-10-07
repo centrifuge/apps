@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { bool, InferType, object, string } from 'yup'
+import { InferType, bool, object, string } from 'yup'
 import { EntityUser, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
@@ -160,8 +160,8 @@ const startManualKyb = async (req: Request, res: Response, user: EntityUser) => 
     reference: MANUAL_KYB_REFERENCE,
     email: body.email,
     country: body.jurisdictionCode,
-    redirect_url: `${origin}/manual-kyb-redirect.html`,
-    callback_url: `${callbackBaseUrl}/manualKybCallback?${searchParams}`,
+    redirect_url: `${origin}#/manual-kyb-redirect.html`,
+    callback_url: `${callbackBaseUrl}#/manualKybCallback?${searchParams}`,
   }
 
   const manualKyb = await shuftiProRequest(payloadmanualKYB)
