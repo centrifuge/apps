@@ -132,14 +132,12 @@ export const KeyMetrics = ({ poolId }: Props) => {
           })
         : '-',
     },
-    ...(metadata?.pool?.investorType
-      ? [
-          {
-            metric: 'Investor type',
-            value: metadata?.pool.investorType,
-          },
-        ]
-      : []),
+
+    {
+      metric: 'Investor type',
+      value: metadata?.pool?.investorType ? metadata?.pool?.investorType : '-',
+    },
+    ,
     ...(!isTinlakePool
       ? [
           {
@@ -148,14 +146,12 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-    ...(metadata?.pool?.poolStructure
-      ? [
-          {
-            metric: 'Pool structure',
-            value: metadata?.pool?.poolStructure,
-          },
-        ]
-      : []),
+
+    {
+      metric: 'Pool structure',
+      value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
+    },
+    ,
     ...(metadata?.pool?.rating?.ratingValue
       ? [
           {
@@ -190,36 +186,36 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-    ...(!!expenseRatio
-      ? [
-          {
-            metric: <Tooltips type="expenseRatio" size="med" />,
-            value: `${formatBalance(expenseRatio * 100, '', 2)}%`,
-          },
-        ]
-      : []),
+
+    {
+      metric: <Tooltips type="expenseRatio" size="med" />,
+      value: expenseRatio ? `${formatBalance(expenseRatio * 100, '', 2)}%` : '-',
+    },
   ]
 
   return (
-    <Card p={3}>
+    <Card p={2}>
       <Stack gap={1}>
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" marginTop={2}>
           <Text variant="body2" fontWeight="500">
             Overview
           </Text>
           <PoolStatus status={getPoolStatus(pool)} />
         </Box>
         <Box marginTop={2}>
-          {metrics.map(({ metric, value }, index) => (
-            <Box key={index} display="flex" justifyContent="space-between" mt="6px">
-              <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
-                {metric}
-              </Text>
-              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                {value}
-              </Text>
-            </Box>
-          ))}
+          {metrics.map(({ metric, value }, index) => {
+            console.log(metric, value)
+            return (
+              <Box key={index} display="flex" justifyContent="space-between" paddingY={1}>
+                <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {metric}
+                </Text>
+                <Text variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {value}
+                </Text>
+              </Box>
+            )
+          })}
         </Box>
       </Stack>
     </Card>

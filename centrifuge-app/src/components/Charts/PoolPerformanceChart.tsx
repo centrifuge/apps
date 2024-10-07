@@ -270,7 +270,11 @@ function PoolPerformanceChart() {
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                 yAxisId="right"
                 orientation="right"
-                domain={selectedTabIndex === 0 ? ['dataMin - 0.25', 'dataMax + 0.25'] : [0, 'dataMax + 0.25']}
+                domain={
+                  selectedTabIndex === 0
+                    ? ['auto', 'auto']
+                    : [(dataMin: number) => [Math.round(dataMin)], (dataMax: number) => [Math.round(dataMax)]]
+                }
               />
               <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
@@ -401,8 +405,6 @@ function CustomLegend({
   setRange: (value: { value: string; label: string }) => void
   selectedTabIndex: number
 }) {
-  const juniorAPY = data.juniorAPY ?? 0
-
   const Dot = ({ color }: { color: string }) => (
     <Box width="8px" height="8px" borderRadius="50%" backgroundColor={color} marginRight="4px" />
   )
@@ -438,7 +440,7 @@ function CustomLegend({
     {
       color: 'textGold',
       label: 'Junior APY',
-      value: formatPercentage(juniorAPY),
+      value: formatPercentage(data.juniorAPY ?? 0),
       show: !!data.juniorAPY,
     },
     {
