@@ -10,10 +10,10 @@ import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Tooltips } from '../Tooltips'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
-import { getRangeNumber } from './utils'
+import { getOneDayPerMonth, getRangeNumber } from './utils'
 
 type ChartData = {
-  day: Date
+  day: Date | string
   nav: number
   price: number | null
 }
@@ -120,23 +120,6 @@ function PoolPerformanceChart() {
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
 
-  const getOneDayPerMonth = (): any[] => {
-    const seenMonths = new Set<string>()
-    const result: any[] = []
-
-    chartData.forEach((item) => {
-      const date = new Date(item.day)
-      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' })
-
-      if (!seenMonths.has(monthYear)) {
-        seenMonths.add(monthYear)
-        result.push(item.day)
-      }
-    })
-
-    return result
-  }
-
   return (
     <Stack gap={2}>
       <Stack flexDirection="row" justifyContent="space-between">
@@ -194,8 +177,8 @@ function PoolPerformanceChart() {
                 minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tick={<CustomTick tickCount={getOneDayPerMonth().length} />}
-                ticks={getOneDayPerMonth()}
+                tick={<CustomTick />}
+                ticks={getOneDayPerMonth(chartData, 'day')}
               />
               <YAxis
                 stroke="none"
@@ -287,7 +270,7 @@ function CustomLegend({
   )
 }
 
-const CustomTick = ({ x, y, payload }: any) => {
+export const CustomTick = ({ x, y, payload }: any) => {
   const theme = useTheme()
   return (
     <g transform={`translate(${x},${y})`}>
