@@ -130,7 +130,7 @@ export function Menu() {
 
 function CreatePool() {
   return (
-    <RouterLinkButton to="/issuer/create-pool" variant="secondary" small>
+    <RouterLinkButton to="/issuer/create-pool" small>
       Create pool
     </RouterLinkButton>
   )
