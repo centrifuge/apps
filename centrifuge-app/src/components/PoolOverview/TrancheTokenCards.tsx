@@ -88,7 +88,7 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
 
   const dataTable = useMemo(() => {
     return trancheTokens.map((tranche) => ({
-      value: [`${tranche.name} ${getTrancheText(tranche)}`, tranche, tranche.valueLocked, tranche.tokenPrice],
+      value: [tranche.name, tranche, tranche.valueLocked, tranche.tokenPrice],
     }))
   }, [trancheTokens])
 
