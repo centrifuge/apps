@@ -155,7 +155,7 @@ export function TrancheInput({
                   {({ field, form, meta }: FieldProps) => (
                     <CurrencyInput
                       {...field}
-                      label={<Tooltips type="minimumInvestment" variant="secondary" label="Min. investment*" />}
+                      label={<Tooltips type="minimumInvestment" label="Min. investment*" />}
                       placeholder="0.00"
                       currency={values.currency}
                       errorMessage={meta.touched ? meta.error : undefined}
@@ -169,7 +169,7 @@ export function TrancheInput({
                     {/* Only most junior tranche has target APY */}
                     <FieldWithErrorMessage
                       as={NumberInput}
-                      label={<Tooltips type="targetAPY" variant="secondary" />}
+                      label={<Tooltips type="targetAPY" />}
                       placeholder="0.00"
                       symbol="%"
                       name={`tranches.${index}.targetAPY`}
@@ -181,7 +181,7 @@ export function TrancheInput({
                     {/* Show min subordination and interest rate for Senior or Mezzanine tranches */}
                     <FieldWithErrorMessage
                       as={NumberInput}
-                      label={<Tooltips type="tranchProtection" variant="secondary" />}
+                      label={<Tooltips type="tranchProtection" />}
                       placeholder="0.00"
                       symbol="%"
                       name={`tranches.${index}.minRiskBuffer`}
@@ -189,7 +189,7 @@ export function TrancheInput({
                     />
                     <FieldWithErrorMessage
                       as={NumberInput}
-                      label={<Tooltips type="fixedTranchInterest" variant="secondary" />}
+                      label={<Tooltips type="fixedTranchInterest" />}
                       placeholder="0.00"
                       symbol="%"
                       name={`tranches.${index}.interestRate`}

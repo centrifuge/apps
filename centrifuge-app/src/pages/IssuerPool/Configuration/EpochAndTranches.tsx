@@ -71,7 +71,8 @@ export function EpochAndTranches() {
     {
       align: 'right',
       header: 'Fixed interest (APR)',
-      cell: (token: Row) => (token.interestRate ? formatPercentage(token.interestRate) : '-'),
+      cell: (token: Row) =>
+        token.interestRate || token.targetAPY ? formatPercentage((token.interestRate || token.targetAPY) ?? 0) : '-',
       width: 'min-content',
     },
   ]
@@ -156,10 +157,7 @@ export function EpochAndTranches() {
                 values.tranches[i].minInvestment,
                 pool.currency.decimals
               ).toString(),
-              targetAPY:
-                i === 0 && values.tranches[i].targetAPY
-                  ? Rate.fromPercent(values.tranches[i].targetAPY).toString()
-                  : undefined,
+              targetAPY: i === 0 && values.tranches[0].targetAPY ? values.tranches[0].targetAPY.toString() : undefined,
             },
           ])
         ),
@@ -184,7 +182,7 @@ export function EpochAndTranches() {
         {
           tokenName: values.tranches[0].tokenName,
           tokenSymbol: values.tranches[0].symbolName,
-          targetAPY: values.tranches[0].targetAPY ? Rate.fromPercent(values.tranches[0]?.targetAPY) : undefined,
+          targetAPY: values.tranches[0].targetAPY ? values.tranches[0]?.targetAPY.toString() : undefined,
         }, // most junior tranche
         ...nonJuniorTranches.map((tranche) => ({
           interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
@@ -193,6 +191,7 @@ export function EpochAndTranches() {
           tokenSymbol: tranche.symbolName,
         })),
       ]
+
       execute(
         [
           poolId,
@@ -225,7 +224,7 @@ export function EpochAndTranches() {
 
   const hasMetaChanges = initialValues.tranches.some((t1, i) => {
     const t2 = form.values.tranches[i]
-    return t1.minInvestment !== t2.minInvestment
+    return t1.minInvestment !== t2.minInvestment || t1.targetAPY !== t2.targetAPY
   })
   const hasTrancheChanges = initialValues.tranches.some((t1, i) => {
     const t2 = form.values.tranches[i]

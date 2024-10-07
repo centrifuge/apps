@@ -21,7 +21,7 @@ export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
           validate={validate.issuerName}
           name="issuerName"
           as={TextInput}
-          label={<Tooltips type="issuerName" label="Legal name of issuer*" variant="secondary" />}
+          label={<Tooltips type="issuerName" label="Legal name of issuer*" />}
           placeholder="Name..."
           maxLength={100}
           disabled={waitingForStoredIssuer}
@@ -32,13 +32,7 @@ export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
           validate={!isTestEnv && validate.issuerRepName}
           name="issuerRepName"
           as={TextInput}
-          label={
-            <Tooltips
-              type="issuerRepName"
-              label={createLabel('Legal name of issuer representative')}
-              variant="secondary"
-            />
-          }
+          label={<Tooltips type="issuerRepName" label={createLabel('Legal name of issuer representative')} />}
           placeholder="Full name..."
           maxLength={100}
           disabled={waitingForStoredIssuer}
@@ -60,13 +54,7 @@ export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
           validate={!isTestEnv && validate.issuerDescription}
           name="issuerDescription"
           as={TextAreaInput}
-          label={
-            <Tooltips
-              type="poolDescription"
-              variant="secondary"
-              label={createLabel('Description (minimum 100 characters)')}
-            />
-          }
+          label={<Tooltips type="poolDescription" label={createLabel('Description (minimum 100 characters)')} />}
           placeholder="Description..."
           maxLength={1000}
           disabled={waitingForStoredIssuer}
