@@ -274,7 +274,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
         )}
         {['investor-tx', 'investor-list'].includes(report) && (
           <>
-            <Box mr={1} mt={report === 'investor-tx' ? 1 : 0}>
+            <Box mr={1}>
               <Select
                 name="network"
                 label="Network"
@@ -305,7 +305,6 @@ export function DataFilter({ poolId }: ReportFilterProps) {
             </Box>
             <Box mt={1} width="50%">
               <SearchInput
-                label="Address"
                 name="address"
                 placeholder="Filter by address..."
                 value={address}
