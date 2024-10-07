@@ -317,7 +317,7 @@ export type Tranche = {
   minRiskBuffer: Perquintill | null
   currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
-  yield30DaysAnnualized?: string | null
+  yield30DaysAnnualized: Perquintill | null
   lastUpdatedInterest: string
   ratio: Perquintill
 }
@@ -645,7 +645,7 @@ interface TrancheFormValues {
   interestRate: number | ''
   minRiskBuffer: number | ''
   minInvestment: number | ''
-  targetAPY?: number | ''
+  targetAPY?: string | ''
 }
 
 export type IssuerDetail = {
@@ -676,6 +676,7 @@ export interface PoolMetadataInput {
   epochMinutes: number | ''
   listed?: boolean
   investorType: string
+  poolStructure: string
 
   // issuer
   issuerName: string
@@ -732,6 +733,7 @@ export type PoolMetadata = {
       subClass: string
     }
     investorType: string
+    poolStructure: string
     poolFees?: {
       id: number
       name: string
@@ -770,6 +772,7 @@ export type PoolMetadata = {
     {
       icon?: FileType | null
       minInitialInvestment?: string
+      targetAPY?: string // only junior tranche (index: 0) has targetAPY
     }
   >
   loanTemplates?: {
@@ -1104,10 +1107,9 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const tranchesById: PoolMetadata['tranches'] = {}
     metadata.tranches.forEach((tranche, index) => {
-      const targetAPY = tranche?.targetAPY ? { targetAPY: tranche.targetAPY } : {}
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
-        ...targetAPY,
+        targetAPY: tranche.targetAPY,
       }
     })
 
@@ -1128,6 +1130,7 @@ export function getPoolsModule(inst: Centrifuge) {
           logo: metadata.issuerLogo,
           shortDescription: metadata.issuerShortDescription,
         },
+        poolStructure: metadata.poolStructure,
         investorType: metadata.investorType,
         links: {
           executiveSummary: metadata.executiveSummary,
@@ -2054,13 +2057,6 @@ export function getPoolsModule(inst: Centrifuge) {
           })
           .flat()
 
-        const $yield30DaysAnnualized = combineLatest(
-          keys.map((key) => {
-            const poolIdTrancheId = `${key[0]}-${key[1].toLowerCase()}`
-            return getLatestTrancheSnapshot(poolIdTrancheId).pipe(map((snapshot) => snapshot?.trancheSnapshots.nodes))
-          })
-        ) as Observable<{ yield30DaysAnnualized: string | null; trancheId: string }[][]>
-
         const trancheIdToIndex: Record<string, number> = {}
         keys.forEach(([, tid], i) => {
           trancheIdToIndex[tid] = i
@@ -2080,11 +2076,11 @@ export function getPoolsModule(inst: Centrifuge) {
 
         const $block = inst.getBlocks().pipe(take(1))
 
-        return combineLatest([$issuance, $block, $prices, $navs, $yield30DaysAnnualized]).pipe(
-          map(([rawIssuances, { block }, rawPrices, rawNavs, [rawYield30DaysAnnualized]]) => {
+        return combineLatest([$issuance, $block, $prices, $navs, getLatestTrancheSnapshots()]).pipe(
+          map(([rawIssuances, { block }, rawPrices, rawNavs, rawYield30DaysAnnualized]) => {
             const blockNumber = block.header.number.toNumber()
 
-            const yield30DaysAnnualizedByPoolIdTrancheId = rawYield30DaysAnnualized?.reduce(
+            const yield30DaysTrancheId = rawYield30DaysAnnualized?.trancheSnapshots.nodes.reduce(
               (acc, { yield30DaysAnnualized, trancheId }) => {
                 acc[trancheId] = yield30DaysAnnualized
                 return acc
@@ -2168,7 +2164,9 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
-                    yield30DaysAnnualized: yield30DaysAnnualizedByPoolIdTrancheId?.[`${poolId}-${trancheId}`],
+                    yield30DaysAnnualized: yield30DaysTrancheId?.[`${poolId}-${trancheId}`]
+                      ? new Perquintill(yield30DaysTrancheId[`${poolId}-${trancheId}`]!)
+                      : null,
                     minRiskBuffer,
                     currentRiskBuffer,
                     capacity: CurrencyBalance.fromFloat(capacity, currency.decimals),
@@ -2301,21 +2299,18 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getLatestTrancheSnapshot(poolIdTrancheId: string) {
+  function getLatestTrancheSnapshots() {
     return inst.getSubqueryObservable<{
       trancheSnapshots: { nodes: { yield30DaysAnnualized: string | null; trancheId: string }[] }
     }>(
-      `query ($poolIdTrancheId: String!) {
-        trancheSnapshots(filter: { trancheId: { equalTo: $poolIdTrancheId } }, last: 1) {
+      `{
+        trancheSnapshots(distinct: TRANCHE_ID, orderBy: TIMESTAMP_DESC) {
           nodes {
             trancheId
             yield30DaysAnnualized
           }
         }
-      }`,
-      {
-        poolIdTrancheId,
-      }
+      }`
     )
   }
   function getPoolSnapshotsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {

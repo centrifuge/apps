@@ -54,13 +54,13 @@ export const sendDocumentsMessage = async (
           },
         ],
         dynamic_template_data: {
-          rejectLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
+          rejectLink: `${process.env.REDIRECT_URL}#/onboarding/updateInvestorStatus?token=${encodeURIComponent(
             token
           )}&status=rejected&metadata=${pool?.metadata}`,
-          approveLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
+          approveLink: `${process.env.REDIRECT_URL}#/onboarding/updateInvestorStatus?token=${encodeURIComponent(
             token
           )}&status=approved&metadata=${pool?.metadata}&network=${wallet.network}`,
-          disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
+          disclaimerLink: `${process.env.REDIRECT_URL}#/disclaimer`,
           trancheName: tranche?.currency.name,
           investorEmail,
         },

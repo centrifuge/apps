@@ -1,12 +1,12 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Stack, Text } from '@centrifuge/fabric'
+import { Button, Stack } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
+import { IssuerDetails, RatingDetails, ReportDetails } from '../../../components/IssuerSection'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
@@ -15,6 +15,7 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
+import { PoolRatingInput } from '../../IssuerCreatePool/PoolRatingInput'
 import { PoolReportsInput } from '../../IssuerCreatePool/PoolReportsInput'
 
 type Values = Pick<
@@ -181,7 +182,7 @@ export function Issuer() {
     <FormikProvider value={form}>
       <Form>
         <PageSection
-          title={`Issuer - ${metadata?.pool?.issuer.name}`}
+          title={`Issuer details`}
           headerRight={
             isEditing ? (
               <ButtonGroup variant="small">
@@ -209,18 +210,14 @@ export function Issuer() {
           {isEditing ? (
             <Stack gap={3}>
               <IssuerInput />
-              <Text>Pool analysis</Text>
               <PoolReportsInput />
+              <PoolRatingInput />
             </Stack>
           ) : (
             <Stack gap={2}>
               <IssuerDetails metadata={metadata} />
-              {metadata?.pool?.reports?.[0] && (
-                <Stack gap={2} mt={3}>
-                  <Text>Pool analysis</Text>
-                  <ReportDetails metadata={metadata} />
-                </Stack>
-              )}
+              {metadata?.pool?.reports?.[0] && <ReportDetails metadata={metadata} />}
+              {metadata?.pool?.rating && <RatingDetails metadata={metadata} />}
             </Stack>
           )}
         </PageSection>

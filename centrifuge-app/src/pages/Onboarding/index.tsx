@@ -81,7 +81,7 @@ export default function OnboardingPage() {
     }
 
     setPool(null)
-    return navigate('/onboarding')
+    return navigate('#/onboarding')
   }, [
     poolId,
     setPool,
@@ -118,9 +118,7 @@ export default function OnboardingPage() {
 
   return (
     <Layout>
-      <Header walletMenu={!isOnboardingExternally}>
-        {!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}
-      </Header>
+      <Header>{!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}</Header>
 
       <Container
         closeable={!isOnboardingExternally}

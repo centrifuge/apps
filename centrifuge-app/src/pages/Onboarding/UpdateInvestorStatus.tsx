@@ -25,7 +25,7 @@ export default function UpdateInvestorStatus() {
       : null
   return (
     <Layout>
-      <Header walletMenu={false} />
+      <Header />
       <Container closeable={false}>
         <Content>
           {data && poolMetadata && data && token ? (

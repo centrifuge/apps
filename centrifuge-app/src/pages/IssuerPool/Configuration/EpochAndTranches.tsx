@@ -88,6 +88,7 @@ export function EpochAndTranches() {
             metadata?.tranches?.[tranche.id]?.minInitialInvestment ?? 0,
             pool?.currency.decimals
           ).toFloat(),
+          targetAPY: metadata?.tranches?.[tranche.id]?.targetAPY,
         }
         return row
       }) ?? [],
@@ -155,6 +156,10 @@ export function EpochAndTranches() {
                 values.tranches[i].minInvestment,
                 pool.currency.decimals
               ).toString(),
+              targetAPY:
+                i === 0 && values.tranches[i].targetAPY
+                  ? Rate.fromPercent(values.tranches[i].targetAPY).toString()
+                  : undefined,
             },
           ])
         ),
@@ -168,7 +173,8 @@ export function EpochAndTranches() {
           t1.tokenName !== t2.tokenName ||
           t1.symbolName !== t2.symbolName ||
           t1.interestRate !== t2.interestRate ||
-          t1.minRiskBuffer !== t2.minRiskBuffer
+          t1.minRiskBuffer !== t2.minRiskBuffer ||
+          t1.targetAPY !== t2.targetAPY
         )
       })
 
@@ -178,6 +184,7 @@ export function EpochAndTranches() {
         {
           tokenName: values.tranches[0].tokenName,
           tokenSymbol: values.tranches[0].symbolName,
+          targetAPY: values.tranches[0].targetAPY ? Rate.fromPercent(values.tranches[0]?.targetAPY) : undefined,
         }, // most junior tranche
         ...nonJuniorTranches.map((tranche) => ({
           interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
@@ -226,7 +233,8 @@ export function EpochAndTranches() {
       t1.tokenName !== t2.tokenName ||
       t1.symbolName !== t2.symbolName ||
       t1.interestRate !== t2.interestRate ||
-      t1.minRiskBuffer !== t2.minRiskBuffer
+      t1.minRiskBuffer !== t2.minRiskBuffer ||
+      t1.targetAPY !== t2.targetAPY
     )
   })
   const epochSeconds = ((form.values.epochHours as number) * 60 + (form.values.epochMinutes as number)) * 60
@@ -321,7 +329,11 @@ export function EpochAndTranches() {
             <Stack gap={2}>
               <Text variant="heading3">Tranches</Text>
 
-              {isEditing ? <TrancheInput isUpdating /> : <DataTable data={trancheData} columns={columns} />}
+              {isEditing ? (
+                <TrancheInput isUpdating poolName={metadata?.pool?.name} />
+              ) : (
+                <DataTable data={trancheData} columns={columns} />
+              )}
             </Stack>
           </Stack>
         </PageSection>
