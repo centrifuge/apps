@@ -11,7 +11,7 @@ export default function EmailVerified() {
 
   return (
     <Layout>
-      <Header walletMenu={false} />
+      <Header />
 
       <Container closeable={false}>
         <Content>

@@ -27,9 +27,7 @@ export const CompleteExternalOnboarding = ({ openNewTab, poolId, poolSymbol }: P
 
   return (
     <Layout>
-      <Header walletMenu={!isOnboardingExternally}>
-        {!!poolId && <PoolBranding poolId={poolId} symbol={poolSymbol} />}
-      </Header>
+      <Header>{!!poolId && <PoolBranding poolId={poolId} symbol={poolSymbol} />}</Header>
 
       <Container>
         <>
