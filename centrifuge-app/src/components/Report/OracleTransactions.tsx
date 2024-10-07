@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Text } from '@centrifuge/fabric'
+import { Box, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -95,7 +95,9 @@ export function OracleTransactions({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable />
+    <Box paddingX={2}>
+      <DataTable data={data} columns={columns} hoverable />
+    </Box>
   ) : (
     <UserFeedback reportType="Oracle transactions" />
   )
