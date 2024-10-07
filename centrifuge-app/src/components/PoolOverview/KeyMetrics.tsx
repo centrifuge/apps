@@ -246,14 +246,14 @@ const TooltipBody = ({
         {links ? (
           links.map((link, index) => (
             <a key={index} target="_blank" rel="noopener noreferrer" href={link.url}>
-              <Text variant="body4" color="white">
+              <Text variant="body3" color="white">
                 {subtitle}
               </Text>
             </a>
           ))
         ) : (
           <a target="_blank" rel="noopener noreferrer" href={url}>
-            <Text variant="body4" color="white">
+            <Text variant="body3" color="white">
               {subtitle}
             </Text>
           </a>
