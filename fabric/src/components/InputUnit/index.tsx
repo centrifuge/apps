@@ -24,10 +24,10 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
 
   return (
     <IdContext.Provider value={id}>
-      <Stack gap={1} flexDirection={row ? 'row' : 'column'} alignItems="center">
+      <Stack gap={1} flexDirection={row ? 'row' : 'column'} alignItems={row ? 'center' : null}>
         {label && (
           <InputLabel row={row} disabled={disabled}>
-            {row ? `${label}:` : ''}
+            {label}
           </InputLabel>
         )}
         <Text

@@ -161,7 +161,7 @@ export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id,
           type="search"
           disabled={disabled}
           error={!!errorMessage}
-          symbol={<IconSearch size="iconMedium" color="textPrimary" />}
+          symbol={<IconSearch size="iconSmall" color="textSecondary" />}
           {...inputProps}
         />
       }

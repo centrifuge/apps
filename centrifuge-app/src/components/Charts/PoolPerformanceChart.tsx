@@ -3,6 +3,7 @@ import { AnchorButton, Box, IconDownload, Select, Shelf, Stack, Tabs, TabsItem, 
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { useTheme } from 'styled-components'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { daysBetween, formatDate } from '../../utils/date'
@@ -45,6 +46,14 @@ type GraphDataItemWithoutType = {
 }
 
 type GraphDataItem = GraphDataItemWithType | GraphDataItemWithoutType
+
+type CustomTickProps = {
+  x: number
+  y: number
+  payload: {
+    value: ValueType
+  }
+}
 
 const rangeFilters = [
   { value: 'all', label: 'All' },
@@ -500,8 +509,16 @@ function CustomLegend({
   )
 }
 
-export const CustomTick = ({ x, y, payload }: any) => {
+export const CustomTick = ({ x, y, payload }: CustomTickProps) => {
   const theme = useTheme()
+
+  let dateValue: Date | null = null
+
+  if (payload.value instanceof Date) {
+    dateValue = payload.value
+  } else if (typeof payload.value === 'string' || typeof payload.value === 'number') {
+    dateValue = new Date(payload.value)
+  }
 
   return (
     <g transform={`translate(${x},${y})`}>
@@ -512,7 +529,7 @@ export const CustomTick = ({ x, y, payload }: any) => {
         dy={16}
         textAnchor="middle"
       >
-        {new Date(payload.value).toLocaleString('en-US', { month: 'short' })}
+        {dateValue ? dateValue.toLocaleString('en-US', { month: 'short' }) : ''}
       </text>
     </g>
   )

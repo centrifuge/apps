@@ -1,6 +1,6 @@
 import { DailyPoolState } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 
 export type GroupBy = 'day' | 'month' | 'quarter' | 'year' | 'daily'
@@ -67,9 +67,10 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
 
   // Global filters
   const { report: reportParam } = useParams<{ report: Report }>()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const report = reportParam || 'balance-sheet'
+  const report = reportParam ? reportParam : location.pathname.includes('reporting') ? 'balance-sheet' : 'investor-tx'
 
   const [startDate, setStartDate] = React.useState<string>('')
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
