@@ -1,6 +1,6 @@
 import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, PricingInfo } from '@centrifuge/centrifuge-js'
 import { AssetTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
-import { StatusChip, Tooltip } from '@centrifuge/fabric'
+import { Text, Tooltip } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
@@ -143,7 +143,7 @@ export const TransactionTable = ({
     {
       align: 'left',
       header: 'Type',
-      cell: (row: Row) => <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>,
+      cell: (row: Row) => <Text variant="heading4">{getStatusText(row.type)}</Text>,
     },
     {
       align: 'left',
