@@ -347,8 +347,9 @@ export class CentrifugeBase {
   }
 
   private async getCachedParachainUrl(): Promise<string> {
-    if (parachainUrlCache.values().next().value) {
-      return parachainUrlCache.values().next().value
+    const match = this.rpcEndpoints.find((url) => parachainUrlCache.has(url))
+    if (match) {
+      return match
     }
     const healthyUrl = await this.findHealthyWs()
     if (!healthyUrl) {
