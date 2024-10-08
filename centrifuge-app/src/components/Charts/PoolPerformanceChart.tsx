@@ -1,4 +1,4 @@
-import { DailyPoolState } from '@centrifuge/centrifuge-js'
+import { DailyPoolState, DailyTrancheState, Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, IconDownload, Select, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -20,14 +20,9 @@ type ChartData = {
   juniorTokenPrice: number | null
   seniorTokenPrice?: number | null
   currency?: string
-  seniorAPY: number | null
-  juniorAPY: number
+  seniorAPY: number | null | undefined
+  juniorAPY: number | null
   isToday: boolean
-}
-
-type Tranche = {
-  seniority: number
-  tokenPrice: number
 }
 
 type GraphDataItemWithType = {
@@ -62,19 +57,22 @@ const rangeFilters = [
   { value: 'ytd', label: 'Year to date' },
 ]
 
-function calculateTranchePrices(pool: any) {
+function calculateTranchePrices(pool: Pool) {
   if (!pool?.tranches) return { juniorTokenPrice: 0, seniorTokenPrice: null }
 
-  const juniorTranche = pool.tranches.find((t: Tranche) => t.seniority === 0)
-  const seniorTranche = pool.tranches.length > 1 ? pool.tranches.find((t: Tranche) => t.seniority === 1) : null
+  const juniorTranche = pool.tranches.find((t) => t.seniority === 0)
+  const seniorTranche = pool.tranches.length > 1 ? pool.tranches.find((t) => t.seniority === 1) : null
 
-  const juniorTokenPrice = juniorTranche ? Number(formatBalance(juniorTranche.tokenPrice, undefined, 5, 5)) : 0
-  const seniorTokenPrice = seniorTranche ? Number(formatBalance(seniorTranche.tokenPrice, undefined, 5, 5)) : null
+  const juniorTokenPrice =
+    juniorTranche && juniorTranche.tokenPrice ? Number(formatBalance(juniorTranche.tokenPrice, undefined, 5, 5)) : 0
+
+  const seniorTokenPrice =
+    seniorTranche && seniorTranche.tokenPrice ? Number(formatBalance(seniorTranche.tokenPrice, undefined, 5, 5)) : null
 
   return { juniorTokenPrice, seniorTokenPrice }
 }
 
-function getYieldFieldForFilter(tranche: any, filter: string) {
+function getYieldFieldForFilter(tranche: DailyTrancheState, filter: string) {
   switch (filter) {
     case '30d':
       return tranche.yield30DaysAnnualized || 0
@@ -110,7 +108,7 @@ function PoolPerformanceChart() {
     return acc
   }, '')
 
-  const truncatedPoolStates = poolStates?.filter((poolState) => {
+  const truncatedPoolStates = poolStates?.filter((poolState: DailyPoolState) => {
     if (firstOriginationDate) {
       return new Date(poolState.timestamp) >= new Date(firstOriginationDate)
     }
@@ -128,11 +126,11 @@ function PoolPerformanceChart() {
     ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
     : null
 
-  const trancheTodayPrice = calculateTranchePrices(pool)
+  const trancheTodayPrice = calculateTranchePrices(pool as Pool)
 
   const data: ChartData[] = React.useMemo(
     () =>
-      truncatedPoolStates?.map((day: DailyPoolState) => {
+      truncatedPoolStates?.map((day) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
 
         const trancheKeys = Object.keys(day.tranches)
@@ -142,21 +140,21 @@ function PoolPerformanceChart() {
         const juniorTokenPrice = day.tranches[juniorTrancheKey]?.price?.toFloat() ?? 0
         const seniorTokenPrice = seniorTrancheKey ? day.tranches[seniorTrancheKey]?.price?.toFloat() ?? null : null
 
-        const juniorAPY = getYieldFieldForFilter(day.tranches[juniorTrancheKey], range.value).toPercent().toNumber()
-        const seniorAPY = seniorTrancheKey
-          ? getYieldFieldForFilter(day.tranches[seniorTrancheKey], range.value).toPercent().toNumber()
-          : null
+        const juniorAPY = getYieldFieldForFilter(day.tranches[juniorTrancheKey], range.value)
+        const formattedJuniorAPY = juniorAPY !== 0 ? juniorAPY.toPercent().toNumber() : 0
+        const seniorAPY = seniorTrancheKey ? getYieldFieldForFilter(day.tranches[seniorTrancheKey], range.value) : null
+        const formattedSeniorAPY = seniorAPY !== 0 ? seniorAPY?.toPercent().toNumber() : null
 
         if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
-          const tranchePrices = calculateTranchePrices(pool)
+          const tranchePrices = calculateTranchePrices(pool as Pool)
 
           return {
             day: new Date(day.timestamp),
             nav: todayAssetValue,
             juniorTokenPrice: tranchePrices.juniorTokenPrice ?? 0,
             seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
-            juniorAPY,
-            seniorAPY,
+            juniorAPY: formattedJuniorAPY,
+            seniorAPY: formattedSeniorAPY,
             isToday: true,
           }
         }
@@ -166,8 +164,8 @@ function PoolPerformanceChart() {
           nav: Number(nav),
           juniorTokenPrice: juniorTokenPrice !== 0 ? juniorTokenPrice : null,
           seniorTokenPrice: seniorTokenPrice !== 0 ? seniorTokenPrice : null,
-          juniorAPY,
-          seniorAPY,
+          juniorAPY: formattedJuniorAPY,
+          seniorAPY: formattedSeniorAPY,
           isToday: false,
         }
       }) || [],
@@ -256,7 +254,7 @@ function PoolPerformanceChart() {
                 minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tick={<CustomTick />}
+                tick={(props) => <CustomTick {...props} />}
                 ticks={getOneDayPerMonth(chartData, 'day')}
               />
               <YAxis
@@ -399,12 +397,14 @@ function CustomLegend({
     nav: number
     juniorTokenPrice: number
     seniorTokenPrice?: number | null
-    juniorAPY: number
-    seniorAPY: number
+    juniorAPY: number | undefined | null
+    seniorAPY: number | undefined | null
   }
   setRange: (value: { value: string; label: string }) => void
   selectedTabIndex: number
 }) {
+  const juniorAPY = data.juniorAPY ?? 0
+
   const Dot = ({ color }: { color: string }) => (
     <Box width="8px" height="8px" borderRadius="50%" backgroundColor={color} marginRight="4px" />
   )
@@ -440,7 +440,7 @@ function CustomLegend({
     {
       color: 'textGold',
       label: 'Junior APY',
-      value: formatPercentage(data.juniorAPY ?? 0),
+      value: formatPercentage(juniorAPY),
       show: true,
     },
     {

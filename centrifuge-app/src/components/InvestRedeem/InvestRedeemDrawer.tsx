@@ -113,7 +113,7 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
 
   const data = React.useMemo(() => {
     const tokenData =
-      dailyPoolStates?.map((state: DailyPoolStateProps) => {
+      dailyPoolStates?.map((state) => {
         return {
           price: state.tranches[trancheId].price?.toFloat() || 0,
           day: new Date(state.timestamp),
