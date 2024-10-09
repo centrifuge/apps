@@ -132,12 +132,10 @@ export const KeyMetrics = ({ poolId }: Props) => {
           })
         : '-',
     },
-
     {
       metric: 'Investor type',
       value: metadata?.pool?.investorType ? metadata?.pool?.investorType : '-',
     },
-    ,
     ...(!isTinlakePool
       ? [
           {
@@ -151,7 +149,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: 'Pool structure',
       value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
     },
-    ,
     ...(metadata?.pool?.rating?.ratingValue
       ? [
           {

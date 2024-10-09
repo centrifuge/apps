@@ -124,12 +124,6 @@ export const TransactionTable = ({
       })
   }, [transactions, maturityDate, pricing, decimals])
 
-  const getStatusChipType = (type: AssetTransactionType) => {
-    if (type === 'BORROWED' || type === 'CREATED' || type === 'PRICED') return 'info'
-    if (type === 'REPAID') return 'ok'
-    return 'default'
-  }
-
   const getStatusText = (type: AssetTransactionType) => {
     if (type === 'BORROWED') return 'Financed'
     if (type === 'REPAID') return 'Repaid'

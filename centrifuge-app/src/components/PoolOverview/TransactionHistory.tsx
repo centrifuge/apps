@@ -195,7 +195,7 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { amount, netFlow } = getLabelAndAmount(transaction)
+      const { amount, netFlow, label } = getLabelAndAmount(transaction)
       return {
         activeAssetId,
         netFlow,
