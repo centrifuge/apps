@@ -83,37 +83,39 @@ export function PoolCard({
     </Text>
   )
 
-  const tranchesData = tranches?.map((tranche) => {
-    const words = tranche.currency.name.trim().split(' ')
-    const metadata = metaData?.tranches[tranche.id] ?? null
-    const trancheName = words[words.length - 1]
-    const investmentBalance = new CurrencyBalance(
-      metadata?.minInitialInvestment ?? 0,
-      tranche.currency.decimals
-    ).toDecimal()
+  const tranchesData = tranches
+    ?.map((tranche) => {
+      const words = tranche.currency.name.trim().split(' ')
+      const metadata = metaData?.tranches[tranche.id] ?? null
+      const trancheName = words[words.length - 1]
+      const investmentBalance = new CurrencyBalance(
+        metadata?.minInitialInvestment ?? 0,
+        tranche.currency.decimals
+      ).toDecimal()
 
-    const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
+      const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
 
-    function calculateApy() {
-      if (poolId === '4139607887') return formatPercentage(5, true, {}, 1)
-      if (poolId === '1655476167') return formatPercentage(15, true, {}, 1)
-      if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
-        return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
-      if (tranche.interestRatePerSec) return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
-      return '-'
-    }
+      function calculateApy() {
+        if (poolId === '4139607887') return formatPercentage(5, true, {}, 1)
+        if (poolId === '1655476167') return formatPercentage(15, true, {}, 1)
+        if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
+          return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
+        if (tranche.interestRatePerSec) return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
+        return '-'
+      }
 
-    return {
-      name: trancheName,
-      apr: calculateApy(),
-      minInvestment:
-        metadata && metadata.minInitialInvestment ? formatBalanceAbbreviated(investmentBalance, '', 0) : '-',
-    }
-  })
+      return {
+        name: trancheName,
+        apr: calculateApy(),
+        minInvestment:
+          metadata && metadata.minInitialInvestment ? `$${formatBalanceAbbreviated(investmentBalance, '', 0)}` : '-',
+      }
+    })
+    .reverse()
 
   return (
-    <StyledCard>
-      <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>
+    <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>
+      <StyledCard>
         <CardHeader marginBottom={12}>
           <Box>
             <PoolStatus status={status} />
@@ -146,7 +148,7 @@ export function PoolCard({
           {!isOneTranche && (
             <Stack>
               <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-                Tranches
+                Tranche
               </Text>
               {tranchesData?.map((tranche) => renderText(tranche.name))}
               {tranches && tranches.length > 2 ? (
@@ -162,7 +164,7 @@ export function PoolCard({
           </Stack>
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-              Min Investment
+              Min. investment
             </Text>
             {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
           </Stack>
@@ -175,14 +177,14 @@ export function PoolCard({
           </Box>
         )}
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">{assetClass && 'Asset Type'}</Text>
+          <Text variant="body2">{assetClass && 'Asset type'}</Text>
           <Text variant="body2">{assetClass ?? ''}</Text>
         </Box>
         <Box display="flex" justifyContent="space-between">
           <Text variant="body2">{metaData?.pool?.investorType && 'Investor Type'}</Text>
           <Text variant="body2"> {metaData?.pool?.investorType ?? ''}</Text>
         </Box>
-      </RouterTextLink>
-    </StyledCard>
+      </StyledCard>
+    </RouterTextLink>
   )
 }
