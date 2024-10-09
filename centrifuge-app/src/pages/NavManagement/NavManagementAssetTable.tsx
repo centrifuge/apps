@@ -6,7 +6,12 @@ import {
   CurrencyMetadata,
   ExternalLoan,
 } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  useCentrifugeApi,
+  useCentrifugeQuery,
+  useCentrifugeTransaction,
+  useEvmProvider,
+} from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -24,7 +29,7 @@ import {
 import { BN } from 'bn.js'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { combineLatest, switchMap } from 'rxjs'
+import { combineLatest, first, from, map, switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
@@ -70,6 +75,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
   })
+  const provider = useEvmProvider()
   const poolFees = usePoolFees(poolId)
 
   const externalLoans = React.useMemo(
@@ -102,6 +108,31 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
+      const signer = provider?.getSigner()
+      const attestation = {
+        portfolio: {
+          decimals: pool.currency.decimals,
+          assets: externalLoans.map((l) => ({
+            asset: l.id,
+            quantity: l.pricing.outstandingQuantity.toString(),
+            price: (l as ActiveLoan).currentPrice?.toString() ?? '0',
+          })),
+          netAssetValue: pool.nav.total.toString(),
+          netFeeValue: pool.nav.fees.toString(),
+          tokenSupply: pool.tranches.map((t) => t.totalIssuance.toString()),
+          tokenPrice: pool.tranches.map((t) => t.tokenPrice?.toString() ?? '0'),
+          signature: '',
+        },
+      }
+      const attestationHashTx = from(signer!.signMessage(JSON.stringify(attestation))).pipe(
+        first(),
+        switchMap((signature) => {
+          attestation.portfolio.signature = signature
+          return cent.metadata.pinJson(attestation)
+        }),
+        map(({ ipfsHash }) => ipfsHash)
+      )
+
       const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
       const updateTokenPrices = deployedDomains
         ? deployedDomains.flatMap((domain) =>
@@ -116,8 +147,12 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           )
         : []
 
-      return combineLatest([cent.pools.closeEpoch([poolId, false], { batch: true }), ...updateTokenPrices]).pipe(
-        switchMap(([closeTx, ...updateTokenPricesTxs]) => {
+      return combineLatest([
+        attestationHashTx,
+        cent.pools.closeEpoch([poolId, false], { batch: true }),
+        ...updateTokenPrices,
+      ]).pipe(
+        switchMap(([attestationHash, closeTx, ...updateTokenPricesTxs]) => {
           const [values] = args
           const batch = [
             ...values.feed
@@ -127,7 +162,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
               }),
             api.tx.oraclePriceCollection.updateCollection(poolId),
-            api.tx.loans.updatePortfolioValuation(poolId),
+            api.tx.remarks.remark([{ Named: attestationHash }], api.tx.loans.updatePortfolioValuation(poolId)),
             ...updateTokenPricesTxs,
           ]
 
