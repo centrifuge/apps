@@ -90,7 +90,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
         }
       })
     }
-  }, [report, reportData])
+  }, [report, reportData, metadata?.data?.pool?.asset.class, pool.currency.decimals])
 
   return (
     <Shelf

@@ -20,55 +20,57 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
     return 'mezzanine'
   }
 
-  const calculateApy = (trancheToken: Token) => {
-    if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
-    if (daysSinceCreation < 30) return 'N/A'
-    return trancheToken.yield30DaysAnnualized
-      ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
-      : '-'
-  }
+  const columnConfig = useMemo(() => {
+    const calculateApy = (trancheToken: Token) => {
+      if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
+      if (daysSinceCreation < 30) return 'N/A'
+      return trancheToken.yield30DaysAnnualized
+        ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
+        : '-'
+    }
 
-  const columnConfig = [
-    {
-      header: 'Token',
-      align: 'left',
-      formatter: (v: any) => v,
-    },
-    {
-      header: 'APY',
-      align: 'left',
-      formatter: (v: any) => (v ? calculateApy(v) : '-'),
-    },
-    {
-      header: `TVL (${pool?.currency.symbol})`,
-      align: 'left',
-      formatter: (v: any) => (v ? formatBalance(v) : '-'),
-    },
-    {
-      header: 'Token price',
-      align: 'left',
-      formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, pool?.currency.decimals) : '-'),
-    },
-    ...(pool.tranches.length > 1
-      ? [
-          {
-            header: 'Subordination',
-            align: 'left',
-            formatter: (_: any, row: any) => {
-              if (row.value[1].seniority === 0) return '-'
-              return formatPercentage(row.value[1].protection)
-            },
-          },
-        ]
-      : []),
-    {
-      header: '',
-      align: 'left',
-      formatter: (_: any, row: any) => {
-        return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
+    return [
+      {
+        header: 'Token',
+        align: 'left',
+        formatter: (v: any) => v,
       },
-    },
-  ]
+      {
+        header: 'APY',
+        align: 'left',
+        formatter: (v: any) => (v ? calculateApy(v) : '-'),
+      },
+      {
+        header: `TVL (${pool?.currency.symbol})`,
+        align: 'left',
+        formatter: (v: any) => (v ? formatBalance(v) : '-'),
+      },
+      {
+        header: 'Token price',
+        align: 'left',
+        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, pool?.currency.decimals) : '-'),
+      },
+      ...(pool.tranches.length > 1
+        ? [
+            {
+              header: 'Subordination',
+              align: 'left',
+              formatter: (_: any, row: any) => {
+                if (row.value[1].seniority === 0) return '-'
+                return formatPercentage(row.value[1].protection)
+              },
+            },
+          ]
+        : []),
+      {
+        header: '',
+        align: 'left',
+        formatter: (_: any, row: any) => {
+          return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
+        },
+      },
+    ]
+  }, [pool, poolId, isTinlakePool, daysSinceCreation])
 
   const columns = useMemo(() => {
     return columnConfig.map((col, index) => {

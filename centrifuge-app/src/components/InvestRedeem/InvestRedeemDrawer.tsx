@@ -105,13 +105,12 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
 }) {
   const pool = usePool(poolId)
 
-  const apy = {
-    '30days': 'yield30DaysAnnualized',
-    '90days': 'yield90DaysAnnualized',
-    YTD: 'yieldYTD',
-  }
-
   const data = React.useMemo(() => {
+    const apy = {
+      '30days': 'yield30DaysAnnualized',
+      '90days': 'yield90DaysAnnualized',
+      YTD: 'yieldYTD',
+    }
     const tokenData =
       dailyPoolStates?.map((state) => {
         return {

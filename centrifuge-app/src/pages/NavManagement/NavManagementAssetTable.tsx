@@ -216,7 +216,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
         pool.currency.decimals
       )
     }, new CurrencyBalance(0, pool.currency.decimals))
-  }, [externalLoans, pool?.nav, form.values.feed])
+  }, [externalLoans, form.values.feed, pool.currency.decimals])
 
   const pendingNav = totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
 

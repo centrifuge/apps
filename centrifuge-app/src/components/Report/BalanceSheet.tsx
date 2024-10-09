@@ -246,7 +246,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     if (poolStates?.length) {
       setReportData(poolStates)
     }
-  }, [poolStates])
+  }, [poolStates, setReportData])
 
   if (!poolStates) {
     return <Spinner mt={2} />

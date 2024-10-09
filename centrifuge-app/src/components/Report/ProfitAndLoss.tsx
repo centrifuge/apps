@@ -347,7 +347,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
 
       setReportData(fullPoolStates)
     }
-  }, [poolStates])
+  }, [poolStates, setReportData])
 
   if (!poolStates) {
     return <Spinner mt={2} />

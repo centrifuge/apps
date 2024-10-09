@@ -118,8 +118,6 @@ function PoolPerformanceChart() {
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
-  const isSingleTranche = pool?.tranches.length === 1
-
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
   const todayPrice = pool?.tranches
@@ -169,7 +167,7 @@ function PoolPerformanceChart() {
           isToday: false,
         }
       }) || [],
-    [isSingleTranche, truncatedPoolStates, todayAssetValue, todayPrice, pool, range]
+    [truncatedPoolStates, todayAssetValue, pool, range]
   )
 
   const todayData = data.find((day) => day.isToday)
@@ -207,7 +205,7 @@ function PoolPerformanceChart() {
     })
 
     return getCSVDownloadUrl(filteredData as any)
-  }, [chartData, selectedTabIndex])
+  }, [chartData])
 
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
@@ -422,14 +420,14 @@ function CustomLegend({
     {
       color: 'textGold',
       label: 'Junior token price',
-      value: data.juniorTokenPrice ?? 0,
+      value: formatBalance(data.juniorTokenPrice ?? 0, '', 3),
       type: 'singleTrancheTokenPrice',
       show: true,
     },
     {
       color: 'textPrimary',
       label: 'Senior token price',
-      value: data.seniorTokenPrice ?? 0,
+      value: formatBalance(data.seniorTokenPrice ?? 0, '', 3),
       type: 'singleTrancheTokenPrice',
       show: !!data.seniorTokenPrice,
     },
@@ -441,7 +439,7 @@ function CustomLegend({
       color: 'textGold',
       label: 'Junior APY',
       value: formatPercentage(juniorAPY),
-      show: true,
+      show: !!data.juniorAPY,
     },
     {
       color: 'textPrimary',
@@ -463,7 +461,7 @@ function CustomLegend({
     <Box display="flex" justifyContent="space-between" alignItems="center">
       <Box display="flex" justifyContent="space-evenly">
         {graphData.map((item: GraphDataItem, index: number) => {
-          if (!item.show) return
+          if (!item.show) return null
 
           const hasType = (item: GraphDataItem): item is GraphDataItemWithType => {
             return (item as GraphDataItemWithType).type !== undefined

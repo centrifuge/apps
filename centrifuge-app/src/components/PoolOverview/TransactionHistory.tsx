@@ -24,10 +24,6 @@ type Row = {
   netFlow?: 'positive' | 'negative' | 'neutral'
 }
 
-const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
-  return 'default'
-}
-
 export const TransactionHistory = ({
   poolId,
   activeAssetId,
@@ -198,7 +194,7 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { label, amount, netFlow } = getLabelAndAmount(transaction)
+      const { amount, netFlow } = getLabelAndAmount(transaction)
       return {
         activeAssetId,
         netFlow,

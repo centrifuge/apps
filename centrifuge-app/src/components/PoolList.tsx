@@ -51,7 +51,7 @@ export function PoolList() {
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
     return [pools, search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools]
-  }, [listedPools, search])
+  }, [listedPools, search, cent, centPoolsMetaDataById])
 
   const archivedPools = pools.filter((pool) => pool?.status?.includes('Archived'))
 

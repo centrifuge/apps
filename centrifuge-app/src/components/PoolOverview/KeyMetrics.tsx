@@ -97,7 +97,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       const minInv = new CurrencyBalance(item.minInitialInvestment ?? 0, pool.currency.decimals).toDecimal()
       return item.minInitialInvestment ? formatBalanceAbbreviated(minInv, '', 0) : null
     })
-  }, [metadata?.tranches])
+  }, [metadata?.tranches, pool.currency.decimals])
 
   const isBT3BT4 =
     poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
