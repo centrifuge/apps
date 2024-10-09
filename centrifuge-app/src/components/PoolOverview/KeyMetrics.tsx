@@ -1,7 +1,6 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
@@ -66,18 +65,14 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
-  const totalNav = pool.nav.total.toFloat()
   const theme = useTheme()
   const averageMaturity = useAverageMaturity(poolId)
 
-  const pendingFees = useMemo(() => {
-    return new CurrencyBalance(
-      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
-      pool.currency.decimals
+  const expenseRatio = useMemo(() => {
+    return (
+      poolFees?.map((f) => f.amounts?.percentOfNav.toPercent().toNumber()).reduce((acc, f) => acc + (f ?? 0), 0) ?? 0
     )
-  }, [poolFees, pool.currency.decimals])
-
-  const expenseRatio = (pendingFees.toFloat() / totalNav) * 100
+  }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
     const thirtyDayAPY = getTodayValue(dailyTranches)
@@ -186,7 +181,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     {
       metric: <Tooltips type="expenseRatio" size="med" />,
-      value: expenseRatio ? `${formatBalance(expenseRatio * 100, '', 2)}%` : '-',
+      value: expenseRatio ? `${formatBalance(expenseRatio, '', 2)}%` : '-',
     },
   ]
 
@@ -201,7 +196,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
         </Box>
         <Box marginTop={2}>
           {metrics.map(({ metric, value }, index) => {
-            console.log(metric, value)
             return (
               <Box key={index} display="flex" justifyContent="space-between" paddingY={1}>
                 <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
