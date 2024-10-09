@@ -1,5 +1,5 @@
 import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
+import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -22,10 +22,6 @@ type Row = {
   amount: CurrencyBalance | undefined
   hash: string
   netFlow?: 'positive' | 'negative' | 'neutral'
-}
-
-const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
-  return 'default'
 }
 
 export const TransactionHistory = ({
@@ -198,11 +194,10 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { label, amount, netFlow } = getLabelAndAmount(transaction)
+      const { amount, netFlow } = getLabelAndAmount(transaction)
       return {
         activeAssetId,
         netFlow,
-        type: label,
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
         assetName: transaction.asset.name,
@@ -218,11 +213,6 @@ export const TransactionHistoryTable = ({
   const columns = [
     {
       align: 'left',
-      header: 'Type',
-      cell: ({ type }: Row) => <StatusChip status={getTransactionTypeStatus(type)}>{type}</StatusChip>,
-    },
-    {
-      align: 'left',
       header: <SortableTableHeader label="Transaction date" />,
       cell: ({ transactionDate }: Row) => (
         <Text as="span" variant="body3">
@@ -233,7 +223,7 @@ export const TransactionHistoryTable = ({
     },
     {
       align: 'left',
-      header: 'Asset',
+      header: <SortableTableHeader label="Transaction" />,
       cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
         const base = `${basePath}/${poolId}/assets/`
         return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
@@ -263,6 +253,7 @@ export const TransactionHistoryTable = ({
           </Text>
         )
       },
+      sortKey: 'transaction',
     },
     {
       align: 'right',
@@ -299,25 +290,28 @@ export const TransactionHistoryTable = ({
         <Text fontSize="18px" fontWeight="500">
           Transaction history
         </Text>
-        {transactions?.length && (
-          <AnchorButton
-            href={csvUrl}
-            download={`pool-transaction-history-${poolId}.csv`}
-            variant="secondary"
-            icon={IconDownload}
-            small
-            target="_blank"
-          >
-            Download
-          </AnchorButton>
-        )}
+        <Shelf>
+          {transactions?.length! > 8 && preview && (
+            <AnchorButton href={`#/pools/${poolId}/transactions`} small variant="inverted">
+              View all
+            </AnchorButton>
+          )}
+          {transactions?.length && (
+            <AnchorButton
+              href={csvUrl}
+              download={`pool-transaction-history-${poolId}.csv`}
+              variant="inverted"
+              icon={IconDownload}
+              small
+              target="_blank"
+              style={{ marginLeft: 8 }}
+            >
+              Download
+            </AnchorButton>
+          )}
+        </Shelf>
       </Shelf>
       <DataTable data={tableData} columns={columns} />
-      {transactions?.length! > 8 && preview && (
-        <Text variant="body2" color="textSecondary">
-          <RouterTextLink to={`/pools/${poolId}/transactions`}>View all</RouterTextLink>
-        </Text>
-      )}
     </Stack>
   )
 }

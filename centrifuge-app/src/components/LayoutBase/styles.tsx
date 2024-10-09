@@ -26,32 +26,49 @@ export const Root = styled(Box)`
     }
   }
 `
-
 export const Inner = styled(Grid)`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   background-color: transparent;
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  overflow-y: auto;
   z-index: 2;
   padding-bottom: 1rem;
+  width: 100vw;
+  bottom: 0;
+  overflow-y: auto;
+
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
     width: 6vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     overflow: visible;
+    height: 100vh;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     padding-left: 16px;
+    height: 100vh;
   }
+`
+
+export const MobileBar = styled(Box)`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 3;
+  background-color: ${({ theme }) => theme.colors.backgroundInverted};
+  padding: 1rem;
+  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `
 
 export const HeaderBackground = styled(Box)`
@@ -75,8 +92,10 @@ export const HeaderBackground = styled(Box)`
 export const LogoContainer = styled(Stack)`
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
   z-index: ${({ theme }) => theme.zIndices.header};
-  position: sticky;
+  position: absolute;
   top: 0;
+  width: 100%;
+  z-index: 0;
 
   height: ${HEADER_HEIGHT}px;
   justify-content: center;
@@ -96,7 +115,7 @@ export const LogoContainer = styled(Stack)`
 `
 
 export const WalletContainer = styled(Stack)`
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   z-index: ${({ theme }) => theme.zIndices.header};
@@ -106,6 +125,9 @@ export const WalletContainer = styled(Stack)`
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     margin-right: 20px;
+    position: fixed;
+    top: 0;
+    right: 0;
   }
 `
 
@@ -120,11 +142,11 @@ export const WalletInner = styled(Stack)`
   justify-content: center;
   pointer-events: auto;
   width: 250px;
-  margin-right: 40px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
     height: 50px;
+    margin-right: 40px;
   }
 `
 

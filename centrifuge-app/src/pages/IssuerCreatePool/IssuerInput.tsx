@@ -3,6 +3,7 @@ import { Field, FieldProps } from 'formik'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../components/Tooltips'
 import { isTestEnv } from '../../config'
+import { CustomCategories } from './CustomCategories'
 import { CustomDetails } from './CustomDetails'
 import { validate } from './validate'
 
@@ -131,6 +132,9 @@ export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
 
       <Box gridColumn={['span 1', 'span 2']}>
         <CustomDetails />
+      </Box>
+      <Box gridColumn={['span 1', 'span 2']}>
+        <CustomCategories />
       </Box>
     </Grid>
   )

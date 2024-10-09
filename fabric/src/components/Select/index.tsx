@@ -17,6 +17,7 @@ export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   placeholder?: string
   errorMessage?: string
   small?: boolean
+  hideBorder?: boolean
 }
 
 const StyledSelect = styled.select`
@@ -31,13 +32,10 @@ const StyledSelect = styled.select`
   cursor: pointer;
   line-height: inherit;
   text-overflow: ellipsis;
+  font-weight: 500;
 
   &:disabled {
     cursor: default;
-  }
-
-  &:focus {
-    color: ${({ theme }) => theme.colors.textSelected};
   }
 `
 
@@ -79,7 +77,7 @@ export function SelectInner({
   )
 }
 
-export function Select({ label, errorMessage, id, ...rest }: SelectProps) {
+export function Select({ label, errorMessage, id, hideBorder, ...rest }: SelectProps) {
   const defaultId = React.useId()
   id ??= defaultId
   return (
@@ -89,7 +87,7 @@ export function Select({ label, errorMessage, id, ...rest }: SelectProps) {
       disabled={rest.disabled}
       errorMessage={errorMessage}
       inputElement={
-        <StyledInputBox alignItems="stretch" height="input" px={1}>
+        <StyledInputBox alignItems="stretch" height="input" px={1} hideBorder={hideBorder}>
           <SelectInner id={id} {...rest} />
         </StyledInputBox>
       }

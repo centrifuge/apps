@@ -1,5 +1,5 @@
-import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import { Box, Button, Card, Grid, IconFileText, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
+import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -9,10 +9,8 @@ import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedee
 import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
 import { LayoutSection } from '../../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { Cashflows } from '../../../components/PoolOverview/Cashflows'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
 import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
-import { PoolStructure } from '../../../components/PoolOverview/PoolStructure'
 import { TrancheTokenCards } from '../../../components/PoolOverview/TrancheTokenCards'
 import { TransactionHistory } from '../../../components/PoolOverview/TransactionHistory'
 import { Spinner } from '../../../components/Spinner'
@@ -23,8 +21,7 @@ import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
-import { useLoans } from '../../../utils/useLoans'
-import { usePool, usePoolFees, usePoolMetadata } from '../../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type Token = {
@@ -71,11 +68,7 @@ export function PoolDetailOverview() {
 
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
-  const poolFees = usePoolFees(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const averageMaturity = useAverageMaturity(poolId)
-  const loans = useLoans(poolId)
-  const isMedium = useIsAboveBreakpoint('M')
 
   const pageSummaryData = [
     {
@@ -109,100 +102,43 @@ export function PoolDetailOverview() {
         id: tranche.id,
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
-        yield30DaysAnnualized: tranche?.yield30DaysAnnualized,
+        yield30DaysAnnualized: tranche?.yield30DaysAnnualized?.toString() || '',
       }
     })
     .reverse()
 
   return (
-    <FullHeightLayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
-      <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
-        <PoolPerformance />
-        <React.Suspense fallback={<Spinner />}>
-          <KeyMetrics
-            assetType={metadata?.pool?.asset}
-            averageMaturity={averageMaturity}
-            loans={loans}
-            poolId={poolId}
-          />
-        </React.Suspense>
-      </Grid>
-      {tokens.length > 0 && (
-        <React.Suspense fallback={<Spinner />}>
-          <TrancheTokenCards
-            trancheTokens={tokens}
-            poolId={poolId}
-            createdAt={pool.createdAt}
-            poolCurrencySymbol={pool.currency.symbol}
-          />
-        </React.Suspense>
-      )}
-      <React.Suspense fallback={<Spinner />}>
-        {metadata?.pool?.reports?.length || !isTinlakePool ? (
-          <Card p={3}>
-            <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
-              <Stack gap={2}>
-                <Box display="flex" flexDirection="row" alignItems="center">
-                  <IconFileText />
-                  <Text style={{ marginLeft: 8 }} variant="heading2">
-                    Reports
-                  </Text>
-                </Box>
-                <ReportDetails metadata={metadata} />
-              </Stack>
-              <Stack gap={2}>
-                <Text variant="heading2">Issuer details</Text>
-                <IssuerDetails metadata={metadata} />
-              </Stack>
-            </Grid>
-          </Card>
-        ) : null}
-        {isTinlakePool && (
-          <Card p={3}>
-            <Stack gap={2}>
-              <Text variant="heading2">Issuer details</Text>
-              <IssuerDetails metadata={metadata} />
-            </Stack>
-          </Card>
-        )}
-      </React.Suspense>
-      {!isTinlakePool && (
-        <>
-          <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
-            <React.Suspense fallback={<Spinner />}>
-              <PoolStructure
-                numOfTranches={pool.tranches.length}
-                poolId={poolId}
-                poolStatus={metadata?.pool?.status}
-                poolFees={
-                  metadata?.pool?.poolFees?.map((fee) => {
-                    return {
-                      fee: poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
-                      name: fee.name,
-                      id: fee.id,
-                    }
-                  }) || []
-                }
-              />
-            </React.Suspense>
-            {/* <React.Suspense fallback={<Spinner />}>
-                <AssetsByMaturity />
-              </React.Suspense> */}
-          </Grid>
-          {isMedium && (
-            <React.Suspense fallback={<Spinner />}>
-              <Card p={3}>
-                <Cashflows />
-              </Card>
-            </React.Suspense>
-          )}
+    <FullHeightLayoutSection bg={theme.colors.backgroundPage}>
+      <Box>
+        <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
+          <PoolPerformance />
           <React.Suspense fallback={<Spinner />}>
-            <Card p={3}>
-              <TransactionHistory poolId={poolId} />
-            </Card>
+            <KeyMetrics poolId={poolId} />
           </React.Suspense>
-        </>
-      )}
+        </Grid>
+        {tokens.length > 0 && (
+          <React.Suspense fallback={<Spinner />}>
+            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} />
+          </React.Suspense>
+        )}
+        <React.Suspense fallback={<Spinner />}>
+          <Grid gridTemplateColumns={'1fr 0.5fr'} gap={2} marginY={3}>
+            <Card p={3} backgroundColor="backgroundSecondary">
+              <IssuerDetails metadata={metadata} />
+            </Card>
+            {metadata?.pool?.reports?.length || !isTinlakePool ? (
+              <Card p={3} backgroundColor="backgroundButtonSecondary">
+                <ReportDetails metadata={metadata} />
+              </Card>
+            ) : null}
+          </Grid>
+        </React.Suspense>
+        {!isTinlakePool && (
+          <React.Suspense fallback={<Spinner />}>
+            <TransactionHistory poolId={poolId} />
+          </React.Suspense>
+        )}
+      </Box>
     </FullHeightLayoutSection>
   )
 }
