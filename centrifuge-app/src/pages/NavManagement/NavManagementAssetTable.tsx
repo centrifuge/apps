@@ -11,6 +11,7 @@ import {
   useCentrifugeQuery,
   useCentrifugeTransaction,
   useEvmProvider,
+  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -26,10 +27,11 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
+import { Signer } from '@polkadot/types/types'
 import { BN } from 'bn.js'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { combineLatest, first, from, map, switchMap } from 'rxjs'
+import { combineLatest, first, from, map, of, switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
@@ -76,6 +78,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     enabled: !!poolId && !!pool,
   })
   const provider = useEvmProvider()
+  const { substrate } = useWallet()
   const poolFees = usePoolFees(poolId)
 
   const externalLoans = React.useMemo(
@@ -108,7 +111,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
-      const signer = provider?.getSigner()
       const attestation = {
         portfolio: {
           decimals: pool.currency.decimals,
@@ -124,14 +126,28 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           signature: '',
         },
       }
-      const attestationHashTx = from(signer!.signMessage(JSON.stringify(attestation))).pipe(
-        first(),
-        switchMap((signature) => {
-          attestation.portfolio.signature = signature
-          return cent.metadata.pinJson(attestation)
-        }),
-        map(({ ipfsHash }) => ipfsHash)
-      )
+      const evmSigner = provider?.getSigner()
+      const attestationHashTx = evmSigner
+        ? from(evmSigner.signMessage(JSON.stringify(attestation))).pipe(
+            first(),
+            switchMap((signature) => {
+              attestation.portfolio.signature = signature
+              return cent.metadata.pinJson(attestation)
+            }),
+            map(({ ipfsHash }) => ipfsHash)
+          )
+        : substrate.selectedWallet
+        ? from(
+            cent.auth.generateJw3t(substrate.selectedAccount!.address, substrate.selectedWallet.signer as Signer)
+          ).pipe(
+            first(),
+            switchMap(({ token }) => {
+              attestation.portfolio.signature = token
+              return cent.metadata.pinJson(attestation)
+            }),
+            map(({ ipfsHash }) => ipfsHash)
+          )
+        : of(null)
 
       const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
       const updateTokenPrices = deployedDomains
