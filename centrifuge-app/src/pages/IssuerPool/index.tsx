@@ -32,6 +32,8 @@ export default function IssuerPoolPage() {
         <Route path="liquidity" element={<IssuerPoolLiquidityPage />} />
         <Route path="reporting" element={<IssuerPoolReportingPage />} />
         <Route path="reporting/:report" element={<IssuerPoolReportingPage />} />
+        <Route path="data" element={<IssuerPoolReportingPage />} />
+        <Route path="data/:report" element={<IssuerPoolReportingPage />} />
         <Route path="pricing" element={<IssuerPoolPricingPage />} />
         <Route path="fees" element={<IssuerPoolFeesPage />} />
       </Routes>

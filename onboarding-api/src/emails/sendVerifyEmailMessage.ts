@@ -26,8 +26,8 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser, wallet: Reque
           },
         ],
         dynamic_template_data: {
-          verifyLink: `${process.env.REDIRECT_URL}/onboarding/verifyEmail?token=${encodeURIComponent(token)}`,
-          disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
+          verifyLink: `${process.env.REDIRECT_URL}#/onboarding/verifyEmail?token=${encodeURIComponent(token)}`,
+          disclaimerLink: `${process.env.REDIRECT_URL}#/disclaimer`,
         },
       },
     ],

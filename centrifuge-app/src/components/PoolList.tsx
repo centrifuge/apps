@@ -1,6 +1,6 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
@@ -51,7 +51,7 @@ export function PoolList() {
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
     return [pools, search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools]
-  }, [listedPools, search])
+  }, [listedPools, search, cent, centPoolsMetaDataById])
 
   const archivedPools = pools.filter((pool) => pool?.status?.includes('Archived'))
 
@@ -93,14 +93,17 @@ export function PoolList() {
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <Text
-            style={{ cursor: 'pointer', marginBottom: 12 }}
-            color="textSecondary"
-            onClick={() => setShowArchived((show) => !show)}
-            variant="body2"
-          >
-            {showArchived ? 'Hide archived pools' : 'View archived pools >'}
-          </Text>
+          <Box display="flex" alignItems="center" marginBottom={1}>
+            <Text
+              style={{ cursor: 'pointer' }}
+              color="textSecondary"
+              onClick={() => setShowArchived((show) => !show)}
+              variant="body2"
+            >
+              {showArchived ? 'Hide archived pools' : 'View archived pools'}
+            </Text>
+            {!showArchived && <IconChevronRight color="textSecondary" size={18} />}
+          </Box>
           {showArchived && <ArchivedPools pools={archivedPools} />}
         </>
       )}
@@ -136,7 +139,6 @@ export function poolsToPoolCardProps(
   cent: Centrifuge
 ): PoolCardProps[] {
   return pools.map((pool) => {
-    const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
     const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
 
     return {
@@ -145,19 +147,30 @@ export function poolsToPoolCardProps(
       assetClass: metaData?.pool?.asset.subClass,
       valueLocked: getPoolValueLocked(pool),
       currencySymbol: pool.currency.symbol,
-      status:
-        tinlakePool && tinlakePool.tinlakeMetadata.isArchived
-          ? 'Archived'
-          : tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
-          ? 'Closed'
-          : pool.tranches.at(0)?.capacity?.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
-          ? 'Open for investments'
-          : ('Closed' as PoolStatusKey),
+      status: getPoolStatus(pool),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
       tranches: pool.tranches,
       metaData: metaData as MetaData,
     }
   })
+}
+
+export function getPoolStatus(pool: Pool | TinlakePool): PoolStatusKey {
+  const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
+
+  if (tinlakePool && tinlakePool.tinlakeMetadata.isArchived) {
+    return 'Archived'
+  }
+
+  if (tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk) {
+    return 'Closed'
+  }
+
+  if (pool.tranches.at(0)?.capacity?.toFloat()) {
+    return 'Open for investments'
+  }
+
+  return 'Closed'
 }
 
 function getMetasById(pools: Pool[], poolMetas: PoolMetaDataPartial[]) {

@@ -20,7 +20,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
   radii: {
     tooltip: 4,
     card: 8,
-    input: 2,
+    input: 8,
     button: 4,
     chip: 4,
   },
