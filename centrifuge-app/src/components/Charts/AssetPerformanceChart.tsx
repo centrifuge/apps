@@ -172,7 +172,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
             <AnchorButton
               href={dataUrl}
               download={`asset-${loanId}-timeseries.csv`}
-              variant="secondary"
+              variant="inverted"
               icon={IconDownload}
               small
             >
@@ -252,9 +252,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                 <Text variant="label2">{'Value'}</Text>
                                 <Text variant="label2">
                                   {payload[0].payload.historicPV
-                                    ? formatBalance(payload[0].payload.historicPV, 'USD' || '', 2)
+                                    ? formatBalance(payload[0].payload.historicPV, 'USD', 2)
                                     : payload[0].payload.futurePV
-                                    ? `~${formatBalance(payload[0].payload.futurePV, 'USD' || '', 2)}`
+                                    ? `~${formatBalance(payload[0].payload.futurePV, 'USD', 2)}`
                                     : '-'}
                                 </Text>
                               </Shelf>
@@ -262,9 +262,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                 <Text variant="label2">{'Price'}</Text>
                                 <Text variant="label2">
                                   {payload[0].payload.historicPrice
-                                    ? formatBalance(payload[0].payload.historicPrice, 'USD' || '', 6)
+                                    ? formatBalance(payload[0].payload.historicPrice, 'USD', 6)
                                     : payload[0].payload.futurePrice
-                                    ? `~${formatBalance(payload[0].payload.futurePrice, 'USD' || '', 6)}`
+                                    ? `~${formatBalance(payload[0].payload.futurePrice, 'USD', 6)}`
                                     : '-'}
                                 </Text>
                               </Shelf>
@@ -278,13 +278,19 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                 />
 
                 {activeFilter.value === 'price' && (
-                  <Line type="monotone" dataKey="historicPrice" stroke="#1253FF" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="historicPrice"
+                    stroke={theme.colors.textGold}
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 )}
                 {activeFilter.value === 'price' && (
                   <Line
                     type="monotone"
                     dataKey="futurePrice"
-                    stroke="#c2d3ff"
+                    stroke={theme.colors.textGold}
                     strokeWidth={2}
                     dot={false}
                     strokeDasharray="6 6"
@@ -292,13 +298,19 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                 )}
 
                 {activeFilter.value === 'value' && (
-                  <Line type="monotone" dataKey="historicPV" stroke="#1253FF" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="historicPV"
+                    stroke={theme.colors.textGold}
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 )}
                 {activeFilter.value === 'value' && (
                   <Line
                     type="monotone"
                     dataKey="futurePV"
-                    stroke="#c2d3ff"
+                    stroke={theme.colors.textGold}
                     strokeWidth={2}
                     dot={false}
                     strokeDasharray="6 6"

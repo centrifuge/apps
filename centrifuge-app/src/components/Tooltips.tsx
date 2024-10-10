@@ -339,7 +339,7 @@ export const tooltipText = {
     body: 'The target APY for the tranche.',
   },
   expenseRatio: {
-    label: 'Expense Ratio',
+    label: 'Expense ratio',
     body: 'The operating expenses of the fund as a percentage of the total NAV',
   },
 }

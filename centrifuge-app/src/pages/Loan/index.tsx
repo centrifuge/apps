@@ -11,13 +11,11 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
-import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -145,16 +143,9 @@ function Loan() {
         </RouterLinkButton>
       </Box>
       <PageHeader
-        icon={
-          loanId === '0' ? (
-            <Box as="img" src={usdcLogo} alt="" height="iconMedium" width="iconMedium" />
-          ) : (
-            <Thumbnail type="asset" label={loan?.id ?? ''} size="large" />
-          )
-        }
         title={
           <Shelf>
-            <Box mr="16px">
+            <Box mr="16px" ml={2}>
               <TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>
             </Box>
             {loan && <LoanLabel loan={loan} />}
@@ -295,7 +286,7 @@ function Loan() {
       {isTinlakePool && loan && 'owner' in loan ? (
         <PageSection title={<Box>NFT</Box>}>
           <Shelf gap={6}>
-            <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={loanId} />
+            <LabelValueStack label={<Tooltips type="id" />} value={loanId} />
             <LabelValueStack
               label="Owner"
               value={

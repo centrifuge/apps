@@ -27,10 +27,29 @@ type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
 }
 
+const StyledBox = styled(Box)`
+  padding: 30px 20px;
+  &:hover {
+    background: ${SUBTLE_GRAY};
+    border-radius: 0px;
+  }
+`
+
+const HoverBox = styled(StyledBox)`
+  padding: 8px 22px;
+  border-radius: 4px;
+  background-color: ${SUBTLE_GRAY};
+  &:hover {
+    a {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+  }
+`
+
 const reportLinks = [
   { label: 'Balance sheet', href: '/balance-sheet', icon: <IconBalanceSheet color="white" /> },
   { label: 'Profit & loss', href: '/profit-and-loss', icon: <IconProfitAndLoss color="white" /> },
-  { label: 'Cashflow statement', href: '/cash-flow-statement', icon: <IconCashflow color="white" /> },
+  { label: 'Cash flow statement', href: '/cash-flow-statement', icon: <IconCashflow color="white" /> },
 ]
 
 const StyledRouterTextLink = styled(RouterTextLink)`
@@ -54,32 +73,29 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
         <Text color="white" variant="heading4">
           Reports
         </Text>
-        <Box backgroundColor={SUBTLE_GRAY} padding="8px 22px" borderRadius="4px">
+        <HoverBox backgroundColor={SUBTLE_GRAY}>
           <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
-        </Box>
+        </HoverBox>
       </Box>
 
-      <Box marginY={2} backgroundColor={SUBTLE_GRAY} padding={2} borderRadius={10}>
+      <Box marginY={2} backgroundColor={SUBTLE_GRAY} borderRadius={10}>
         {reportLinks.map((link, i) => (
-          <Box
-            borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            paddingY={3}
-          >
-            <Box display="flex" alignItems="center">
-              {link.icon}
-              <StyledRouterTextLink
-                style={{ marginLeft: 8 }}
-                to={`${pathname}/reporting${link.href}`}
-                key={`${link.label}-${i}`}
-              >
-                {link.label}
-              </StyledRouterTextLink>
-            </Box>
-            <IconChevronRight color="white" />
-          </Box>
+          <StyledRouterTextLink to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
+            <StyledBox
+              borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Box display="flex" alignItems="center">
+                {link.icon}
+                <Text color="white" style={{ marginLeft: 4 }}>
+                  {link.label}
+                </Text>
+              </Box>
+              <IconChevronRight color="white" />
+            </StyledBox>
+          </StyledRouterTextLink>
         ))}
       </Box>
 
@@ -109,7 +125,7 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
       show: !!metadata?.pool?.issuer.email,
     },
     {
-      label: 'Executive Summary',
+      label: 'Executive summary',
       show: !!metadata?.pool?.links.executiveSummary,
       onClick: () => setIsDialogOpen(true),
     },

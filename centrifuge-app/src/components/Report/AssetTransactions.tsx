@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { formatBalance, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
-import { IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
+import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -156,7 +156,9 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable />
+    <Box paddingX={2}>
+      <DataTable data={data} columns={columns} hoverable />
+    </Box>
   ) : (
     <UserFeedback reportType="Asset transactions" />
   )

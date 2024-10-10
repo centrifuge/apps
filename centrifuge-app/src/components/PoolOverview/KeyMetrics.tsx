@@ -1,7 +1,6 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
@@ -66,18 +65,14 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
-  const totalNav = pool.nav.total.toFloat()
   const theme = useTheme()
   const averageMaturity = useAverageMaturity(poolId)
 
-  const pendingFees = useMemo(() => {
-    return new CurrencyBalance(
-      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
-      pool.currency.decimals
+  const expenseRatio = useMemo(() => {
+    return (
+      poolFees?.map((f) => f.amounts?.percentOfNav.toPercent().toNumber()).reduce((acc, f) => acc + (f ?? 0), 0) ?? 0
     )
-  }, [poolFees, pool.currency.decimals])
-
-  const expenseRatio = (pendingFees.toFloat() / totalNav) * 100
+  }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
     const thirtyDayAPY = getTodayValue(dailyTranches)
@@ -132,14 +127,10 @@ export const KeyMetrics = ({ poolId }: Props) => {
           })
         : '-',
     },
-    ...(metadata?.pool?.investorType
-      ? [
-          {
-            metric: 'Investor type',
-            value: metadata?.pool.investorType,
-          },
-        ]
-      : []),
+    {
+      metric: 'Investor type',
+      value: metadata?.pool?.investorType ? metadata?.pool?.investorType : '-',
+    },
     ...(!isTinlakePool
       ? [
           {
@@ -148,14 +139,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-    ...(metadata?.pool?.poolStructure
-      ? [
-          {
-            metric: 'Pool structure',
-            value: metadata?.pool?.poolStructure,
-          },
-        ]
-      : []),
+
+    {
+      metric: 'Pool structure',
+      value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
+    },
     ...(metadata?.pool?.rating?.ratingValue
       ? [
           {
@@ -190,36 +178,35 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-    ...(!!expenseRatio
-      ? [
-          {
-            metric: <Tooltips type="expenseRatio" size="med" />,
-            value: `${formatBalance(expenseRatio * 100, '', 2)}%`,
-          },
-        ]
-      : []),
+
+    {
+      metric: <Tooltips type="expenseRatio" size="med" />,
+      value: expenseRatio ? `${formatBalance(expenseRatio, '', 2)}%` : '-',
+    },
   ]
 
   return (
-    <Card p={3}>
+    <Card p={2}>
       <Stack gap={1}>
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" marginTop={2}>
           <Text variant="body2" fontWeight="500">
             Overview
           </Text>
           <PoolStatus status={getPoolStatus(pool)} />
         </Box>
         <Box marginTop={2}>
-          {metrics.map(({ metric, value }, index) => (
-            <Box key={index} display="flex" justifyContent="space-between" mt="6px">
-              <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
-                {metric}
-              </Text>
-              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                {value}
-              </Text>
-            </Box>
-          ))}
+          {metrics.map(({ metric, value }, index) => {
+            return (
+              <Box key={index} display="flex" justifyContent="space-between" paddingY={1}>
+                <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {metric}
+                </Text>
+                <Text variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {value}
+                </Text>
+              </Box>
+            )
+          })}
         </Box>
       </Stack>
     </Card>
@@ -246,14 +233,14 @@ const TooltipBody = ({
         {links ? (
           links.map((link, index) => (
             <a key={index} target="_blank" rel="noopener noreferrer" href={link.url}>
-              <Text variant="body4" color="white">
+              <Text variant="body3" color="white">
                 {subtitle}
               </Text>
             </a>
           ))
         ) : (
           <a target="_blank" rel="noopener noreferrer" href={url}>
-            <Text variant="body4" color="white">
+            <Text variant="body3" color="white">
               {subtitle}
             </Text>
           </a>
