@@ -938,6 +938,9 @@ type Holder = {
 export type ExternalLoan = Loan & {
   pricing: ExternalPricingInfo
 }
+export type InternalLoan = Loan & {
+  pricing: InternalPricingInfo
+}
 
 export type Permissions = {
   pools: {

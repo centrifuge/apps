@@ -4,7 +4,6 @@ import Centrifuge, {
   CreatedLoan,
   CurrencyBalance,
   CurrencyMetadata,
-  ExternalLoan,
   Loan as LoanType,
   Pool,
   WithdrawAddress,
@@ -77,7 +76,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
       <Stack gap={2} p={1}>
         <Text variant="heading2">Purchase</Text>
         <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
-        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
+        <ExternalFinanceForm loan={loan} source={source} />
       </Stack>
     )
   }
