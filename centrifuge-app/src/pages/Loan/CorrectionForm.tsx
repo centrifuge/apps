@@ -31,7 +31,6 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const { initial: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  const displayCurrency = pool.currency.symbol
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Adjust asset',
     (cent) => (args: [poolId: string, loanId: string, values: CorrectionValues], options) => {
@@ -149,7 +148,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
                       <CurrencyInput
                         {...field}
                         label="Price"
-                        currency={displayCurrency}
+                        currency={pool.currency.symbol}
                         onChange={(value) => form.setFieldValue('price', value)}
                         decimals={8}
                         errorMessage={meta.touched ? meta.error : undefined}
@@ -163,7 +162,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
                   ={' '}
                   {formatBalance(
                     Dec(correctionForm.values.price || 0).mul(correctionForm.values.quantity || 0),
-                    displayCurrency,
+                    pool.currency.symbol,
                     2
                   )}{' '}
                   principal
@@ -184,7 +183,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label={isCashLoan(loan) ? 'Amount' : 'Principal'}
-                    currency={displayCurrency}
+                    currency={pool.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
                     errorMessage={meta.touched ? meta.error : undefined}
                   />
@@ -211,17 +210,17 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
               <Text variant="label2" color="textPrimary">
                 Old holdings
               </Text>
-              <Text variant="label2">{formatBalance(oldPrincipal, displayCurrency, 2)}</Text>
+              <Text variant="label2">{formatBalance(oldPrincipal, pool.currency.symbol, 2)}</Text>
             </Shelf>
             <Shelf justifyContent="space-between">
               <Text variant="label2" color="textPrimary">
                 New holdings
               </Text>
               <Text variant="label2">
-                {formatBalance(newPrincipal, displayCurrency, 2)} (
+                {formatBalance(newPrincipal, pool.currency.symbol, 2)} (
                 <Text color={isIncrease ? 'statusOk' : 'statusCritical'}>
                   {isIncrease ? '+' : ''}
-                  {formatBalance(newPrincipal.minus(oldPrincipal), displayCurrency, 2)}
+                  {formatBalance(newPrincipal.minus(oldPrincipal), pool.currency.symbol, 2)}
                 </Text>
                 )
               </Text>
