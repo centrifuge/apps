@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -26,7 +26,7 @@ type Row = TableDataRow & {
 }
 
 export function CashflowStatement({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
@@ -322,6 +322,18 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grossCashflowRecords, netCashflowRecords])
+
+  React.useEffect(() => {
+    if (poolStates && Object.keys(poolStates).length > 0) {
+      const fullPoolStates: DailyPoolState[] = Object.values(poolStates).map((partialState) => {
+        return {
+          ...partialState,
+        } as DailyPoolState
+      })
+
+      setReportData(fullPoolStates)
+    }
+  }, [poolStates, setReportData])
 
   if (!poolStates) {
     return <Spinner mt={2} />

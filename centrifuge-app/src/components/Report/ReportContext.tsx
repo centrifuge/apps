@@ -1,5 +1,6 @@
+import { DailyPoolState } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 
 export type GroupBy = 'day' | 'month' | 'quarter' | 'year' | 'daily'
@@ -49,6 +50,9 @@ export type ReportContextType = {
 
   loan: string
   setLoan: (type: string) => void
+
+  reportData: DailyPoolState[]
+  setReportData: (type: DailyPoolState[]) => void
 }
 
 export type CsvDataProps = {
@@ -63,9 +67,10 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
 
   // Global filters
   const { report: reportParam } = useParams<{ report: Report }>()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const report = reportParam || 'balance-sheet'
+  const report = reportParam ? reportParam : location.pathname.includes('reporting') ? 'balance-sheet' : 'investor-tx'
 
   const [startDate, setStartDate] = React.useState<string>('')
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
@@ -78,6 +83,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [address, setAddress] = React.useState(searchParams.get('address') || '')
   const [network, setNetwork] = React.useState<string | number>(searchParams.get('network') || 'all')
   const [loan, setLoan] = React.useState(searchParams.get('loan') || '')
+  const [reportData, setReportData] = React.useState<DailyPoolState[]>([])
 
   React.useEffect(() => {
     const startDate = searchParams.get('from')
@@ -170,6 +176,8 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         setNetwork: (value: any) => updateParamValues('network', value),
         loan,
         setLoan: (value: string) => updateParamValues('asset', value),
+        reportData,
+        setReportData,
       }}
     >
       {children}

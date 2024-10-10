@@ -32,9 +32,9 @@ export function TooltipContainer({ children }: { children: React.ReactNode }) {
       bg="backgroundPage"
       p={1}
       style={{
-        boxShadow: '1px 3px 6px rgba(0, 0, 0, .15)',
+        boxShadow: '1px 3px 6px 0px rgba(0, 0, 0, 0.15)',
       }}
-      minWidth="180px"
+      minWidth="250px"
       gap="4px"
     >
       {children}
@@ -44,7 +44,7 @@ export function TooltipContainer({ children }: { children: React.ReactNode }) {
 
 export function TooltipTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Text variant="label2" fontWeight="500">
+    <Text color="textPrimary" variant="label2" fontWeight="500">
       {children}
     </Text>
   )

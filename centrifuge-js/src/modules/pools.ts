@@ -684,6 +684,7 @@ export interface PoolMetadataInput {
   issuerLogo?: FileType | null
   issuerDescription: string
   issuerShortDescription: string
+  issuerCategories: { type: string; value: string; customType?: string }[]
 
   poolReport?: {
     authorName: string
@@ -748,6 +749,7 @@ export type PoolMetadata = {
       email: string
       logo?: FileType | null
       shortDescription: string
+      categories: { type: string; value: string; customType?: string }[]
     }
     links: {
       executiveSummary: FileType | null
@@ -1129,6 +1131,7 @@ export function getPoolsModule(inst: Centrifuge) {
           email: metadata.email,
           logo: metadata.issuerLogo,
           shortDescription: metadata.issuerShortDescription,
+          categories: metadata.issuerCategories,
         },
         poolStructure: metadata.poolStructure,
         investorType: metadata.investorType,
@@ -2469,13 +2472,19 @@ export function getPoolsModule(inst: Centrifuge) {
       }),
       takeLast(1),
       map(({ trancheSnapshots }) => {
-        const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
+        const trancheStates: Record<
+          string,
+          { timestamp: string; tokenPrice: Price; yield30DaysAnnualized: Perquintill }[]
+        > = {}
         trancheSnapshots?.forEach((state) => {
           const tid = state.tranche.trancheId
           const entry = {
             timestamp: state.timestamp,
             tokenPrice: new Price(state.tokenPrice),
             pool: state.tranche.poolId,
+            yield30DaysAnnualized: state.yield30DaysAnnualized
+              ? new Perquintill(state.yield30DaysAnnualized)
+              : new Perquintill(0),
           }
           if (trancheStates[tid]) {
             trancheStates[tid].push(entry)
@@ -2665,26 +2674,25 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolCurrency.decimals
                   ),
                   yield7DaysAnnualized: tranche.yield7DaysAnnualized
-                    ? new Perquintill(hexToBN(tranche.yield7DaysAnnualized))
+                    ? new Perquintill(tranche.yield7DaysAnnualized)
                     : new Perquintill(0),
                   yield30DaysAnnualized: tranche.yield30DaysAnnualized
-                    ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized))
+                    ? new Perquintill(tranche.yield30DaysAnnualized)
                     : new Perquintill(0),
                   yield90DaysAnnualized: tranche.yield90DaysAnnualized
-                    ? new Perquintill(hexToBN(tranche.yield90DaysAnnualized))
+                    ? new Perquintill(tranche.yield90DaysAnnualized)
                     : new Perquintill(0),
                   yieldSinceInception: tranche.yieldSinceInception
-                    ? new Perquintill(hexToBN(tranche.yieldSinceInception))
+                    ? new Perquintill(tranche.yieldSinceInception)
                     : new Perquintill(0),
-                  yieldMTD: tranche.yieldMTD ? new Perquintill(hexToBN(tranche.yieldMTD)) : new Perquintill(0),
-                  yieldQTD: tranche.yieldQTD ? new Perquintill(hexToBN(tranche.yieldQTD)) : new Perquintill(0),
-                  yieldYTD: tranche.yieldYTD ? new Perquintill(hexToBN(tranche.yieldYTD)) : new Perquintill(0),
+                  yieldMTD: tranche.yieldMTD ? new Perquintill(tranche.yieldMTD) : new Perquintill(0),
+                  yieldQTD: tranche.yieldQTD ? new Perquintill(tranche.yieldQTD) : new Perquintill(0),
+                  yieldYTD: tranche.yieldYTD ? new Perquintill(tranche.yieldYTD) : new Perquintill(0),
                   yieldSinceLastPeriod: tranche.yieldSinceLastPeriod
-                    ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod))
+                    ? new Perquintill(tranche.yieldSinceLastPeriod)
                     : new Perquintill(0),
                 }
               })
-
               return { ...state, poolState, poolValue, tranches }
             }) || [],
           trancheStates,
@@ -4629,7 +4637,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 }
 
-function hexToBN(value?: string | number | null) {
+export function hexToBN(value?: string | number | null) {
   if (typeof value === 'number' || value == null) return new BN(value ?? 0)
   return new BN(value.toString().substring(2), 'hex')
 }
