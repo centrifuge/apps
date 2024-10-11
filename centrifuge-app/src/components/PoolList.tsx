@@ -140,7 +140,6 @@ export function poolsToPoolCardProps(
 ): PoolCardProps[] {
   return pools.map((pool) => {
     const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
-
     return {
       poolId: pool.id,
       name: metaData?.pool?.name,
@@ -151,6 +150,7 @@ export function poolsToPoolCardProps(
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
       tranches: pool.tranches,
       metaData: metaData as MetaData,
+      createdAt: pool.createdAt ?? '',
     }
   })
 }

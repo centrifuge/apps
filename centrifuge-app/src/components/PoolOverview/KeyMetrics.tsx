@@ -32,6 +32,17 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
   }
 }
 
+type TinlakeDataKey =
+  | '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
+  | '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
+  | '0x90040F96aB8f291b6d43A8972806e977631aFFdE'
+
+const tinlakeData = {
+  '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15% target',
+  '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7': '4% - 15% target',
+  '0x90040F96aB8f291b6d43A8972806e977631aFFdE': '4% - 15% target',
+}
+
 const getTodayValue = (data: DailyTrancheStateArr | null | undefined): DailyTrancheStateArr | undefined => {
   if (!data) return
   if (!Object.keys(data).length) return
@@ -95,8 +106,9 @@ export const KeyMetrics = ({ poolId }: Props) => {
   }, [metadata?.tranches, pool.currency.decimals])
 
   const isBT3BT4 =
-    poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
-    poolId.toLowerCase() === '0x55d86d51ac3bcab7ab7d2124931fba106c8b60c7'
+    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
+    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
+    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
 
   const metrics = [
     {
@@ -109,6 +121,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
         ? tranchesAPY.map((tranche, index) => {
             return tranche && `${tranche} ${index !== tranchesAPY?.length - 1 ? '-' : ''} `
           })
+        : tinlakeData[poolId as TinlakeDataKey]
+        ? tinlakeData[poolId as TinlakeDataKey]
         : '-',
     },
     ...(isBT3BT4
@@ -129,7 +143,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
     },
     {
       metric: 'Investor type',
-      value: metadata?.pool?.investorType ? metadata?.pool?.investorType : '-',
+      value: isBT3BT4 ? 'Private' : metadata?.pool?.investorType ?? '-',
     },
     ...(!isTinlakePool
       ? [
@@ -142,7 +156,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     {
       metric: 'Pool structure',
-      value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
+      value: isBT3BT4 ? 'Revolving' : metadata?.pool?.poolStructure ?? '-',
     },
     ...(metadata?.pool?.rating?.ratingValue
       ? [
