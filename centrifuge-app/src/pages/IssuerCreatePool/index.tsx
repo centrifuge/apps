@@ -3,6 +3,7 @@ import {
   AddFee,
   CurrencyKey,
   FeeTypes,
+  FileType,
   PoolMetadataInput,
   TrancheInput,
 } from '@centrifuge/centrifuge-js/dist/modules/pools'
@@ -91,7 +92,7 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport'
+  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport' | 'poolRatings'
 > & {
   poolIcon: File | null
   issuerLogo: File | null
@@ -119,6 +120,7 @@ export type CreatePoolValues = Omit<
     agency?: string
     value?: string
     reportUrl?: string
+    reportFile?: File | null
   }[]
   poolStructure: string
 }
@@ -426,15 +428,20 @@ function CreatePoolForm() {
         return
       }
 
+      const pinFile = async (file: File): Promise<FileType> => {
+        const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(file)))
+        return { uri: pinned.uri, mime: file.type }
+      }
+
       // Handle pinning files (pool icon, issuer logo, and executive summary)
-      const promises = [lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon)))]
+      const promises = [pinFile(values.poolIcon)]
 
       if (values.issuerLogo) {
-        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))))
+        promises.push(pinFile(values.issuerLogo))
       }
 
       if (!isTestEnv && values.executiveSummary) {
-        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))))
+        promises.push(pinFile(values.executiveSummary))
       }
 
       const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
@@ -454,9 +461,7 @@ function CreatePoolForm() {
       if (values.reportUrl) {
         let avatar = null
         if (values.reportAuthorAvatar) {
-          const pinned = await lastValueFrom(
-            centrifuge.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar))
-          )
+          const pinned = await pinFile(values.reportAuthorAvatar)
           avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
         }
         metadataValues.poolReport = {
@@ -466,12 +471,25 @@ function CreatePoolForm() {
           url: values.reportUrl,
         }
       }
-      if (values.poolRatings.length > 0) {
-        metadataValues.poolRatings = values.poolRatings.map((rating) => ({
-          agency: rating.agency,
-          value: rating.value,
-          reportUrl: rating.reportUrl,
-        }))
+      if (values.poolRatings) {
+        const newRatingReportPromise = await Promise.all(
+          values.poolRatings.map((rating) => (rating.reportFile ? pinFile(rating.reportFile) : null))
+        )
+        const ratings = values.poolRatings.map((rating, index) => {
+          let reportFile: FileType | null = rating.reportFile
+            ? { uri: rating.reportFile.name, mime: rating.reportFile.type }
+            : null
+          if (rating.reportFile && newRatingReportPromise[index]?.uri) {
+            reportFile = newRatingReportPromise[index] ?? null
+          }
+          return {
+            agency: rating.agency ?? '',
+            value: rating.value ?? '',
+            reportUrl: rating.reportUrl ?? '',
+            reportFile: reportFile ?? null,
+          }
+        })
+        metadataValues.poolRatings = ratings
       }
 
       const nonJuniorTranches = metadataValues.tranches.slice(1)

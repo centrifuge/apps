@@ -1,18 +1,21 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, Button, Grid, IconMinusCircle, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
-import { FieldArray, useFormikContext } from 'formik'
+import { Box, Button, FileUpload, Grid, IconMinusCircle, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 
 export function PoolRatingInput() {
   const form = useFormikContext<PoolMetadataInput>()
-  console.log('🚀 ~ form:', form.values.poolRatings)
   return (
     <FieldArray name="poolRatings">
       {({ push, remove }) => (
         <Stack gap={2}>
           <Shelf justifyContent="space-between" gap={2}>
             <Text variant="heading2">Pool rating</Text>
-            <Button variant="secondary" small onClick={() => push({ agency: '', value: '', reportUrl: '' })}>
+            <Button
+              variant="secondary"
+              small
+              onClick={() => push({ agency: '', value: '', reportUrl: '', reportFile: null })}
+            >
               {form.values.poolRatings.length ? 'Add another' : 'Add'}
             </Button>
           </Shelf>
@@ -40,6 +43,21 @@ export function PoolRatingInput() {
                           label="Rating report URL"
                           placeholder="https://..."
                         />
+                        <Field name={`poolRatings.${index}.reportFile`}>
+                          {({ field, meta, form }: FieldProps) => (
+                            <FileUpload
+                              file={field.value}
+                              onFileChange={(file) => {
+                                form.setFieldTouched(`poolRatings.${index}.reportFile`, true, false)
+                                form.setFieldValue(`poolRatings.${index}.reportFile`, file)
+                              }}
+                              accept="application/pdf"
+                              label="Report PDF"
+                              placeholder="Choose file"
+                              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                            />
+                          )}
+                        </Field>
                       </Grid>
                     </>
                     <Box pt={1}>

@@ -653,7 +653,7 @@ export type IssuerDetail = {
   body: string
 }
 
-type FileType = { uri: string; mime: string }
+export type FileType = { uri: string; mime: string }
 
 export type PoolReport = {
   author: {
@@ -696,6 +696,7 @@ export interface PoolMetadataInput {
     agency?: string
     value?: string
     reportUrl?: string
+    reportFile?: FileType | null
   }[]
 
   executiveSummary: FileType | null
@@ -764,6 +765,7 @@ export type PoolMetadata = {
       agency?: string
       value?: string
       reportUrl?: string
+      reportFile?: FileType | null
     }[]
   }
   pod?: {

@@ -1,5 +1,5 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
-import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
+import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
@@ -66,6 +66,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
   const theme = useTheme()
+  const cent = useCentrifuge()
   const averageMaturity = useAverageMaturity(poolId)
 
   const expenseRatio = useMemo(() => {
@@ -148,21 +149,38 @@ export const KeyMetrics = ({ poolId }: Props) => {
       ? metadata?.pool?.poolRatings.map((rating) => ({
           metric: 'Rating',
           value: (
-            <Tooltip
-              delay={300}
-              bodyWidth="maxContent"
-              body={<TooltipBody title={rating.agency ?? ''} subtitle="View Report" url={rating.reportUrl ?? ''} />}
-            >
-              <Box
-                border={`1px solid ${theme.colors.backgroundInverted}`}
-                borderRadius={20}
-                padding="2px 10px"
-                display="flex"
+            <Shelf gap={2}>
+              <Tooltip
+                delay={300}
+                bodyWidth="maxContent"
+                body={
+                  <TooltipBody
+                    title={rating.agency ?? ''}
+                    links={[
+                      { text: 'View report', url: rating.reportUrl ?? '' },
+                      ...(rating.reportFile
+                        ? [
+                            {
+                              text: 'Download report',
+                              url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                }
               >
-                {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
-                <Text>{rating.value}</Text>
-              </Box>
-            </Tooltip>
+                <Box
+                  border={`1px solid ${theme.colors.backgroundInverted}`}
+                  borderRadius={20}
+                  padding="2px 10px"
+                  display="flex"
+                >
+                  {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
+                  <Text>{rating.value}</Text>
+                </Box>
+              </Tooltip>
+            </Shelf>
           ),
         }))
       : []),
@@ -220,21 +238,26 @@ const TooltipBody = ({
         </Text>
         {links ? (
           links.map((link, index) => (
-            <a key={index} target="_blank" rel="noopener noreferrer" href={link.url}>
+            <Shelf>
+              <a key={`${link.text}-${index}`} target="_blank" rel="noopener noreferrer" href={link.url}>
+                <Text variant="body3" color="white">
+                  {link.text}
+                </Text>
+              </a>
+              <IconArrowRightWhite size="iconSmall" />
+            </Shelf>
+          ))
+        ) : (
+          <Shelf>
+            <a target="_blank" rel="noopener noreferrer" href={url}>
               <Text variant="body3" color="white">
                 {subtitle}
               </Text>
             </a>
-          ))
-        ) : (
-          <a target="_blank" rel="noopener noreferrer" href={url}>
-            <Text variant="body3" color="white">
-              {subtitle}
-            </Text>
-          </a>
+            <IconArrowRightWhite size="iconSmall" />
+          </Shelf>
         )}
       </Box>
-      <IconArrowRightWhite size="iconSmall" />
     </Box>
   )
 }

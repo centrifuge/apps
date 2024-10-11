@@ -208,6 +208,7 @@ const Links = ({ links }: { links: { label: string; href?: string; show: boolean
 
 export function RatingDetails({ metadata }: IssuerSectionProps) {
   const ratings = metadata?.pool?.poolRatings
+  const cent = useCentrifuge()
 
   return ratings?.length ? (
     <Stack gap={1}>
@@ -226,10 +227,20 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
                   )}
                 </Shelf>
               </Shelf>
-              <Shelf>
+              <Shelf gap={2}>
                 {rating?.reportUrl && (
                   <AnchorButton href={rating.reportUrl} target="_blank" variant="secondary" icon={IconExternalLink}>
                     View full report
+                  </AnchorButton>
+                )}
+                {rating?.reportFile && (
+                  <AnchorButton
+                    href={cent.metadata.parseMetadataUrl(rating.reportFile.uri)}
+                    target="_blank"
+                    variant="secondary"
+                    icon={IconExternalLink}
+                  >
+                    Download report
                   </AnchorButton>
                 )}
               </Shelf>

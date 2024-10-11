@@ -1,4 +1,4 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { FileType, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Stack } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
@@ -71,7 +71,11 @@ export function Issuer() {
       reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar
         ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}`
         : null,
-      poolRatings: metadata?.pool?.poolRatings ?? [],
+      poolRatings:
+        metadata?.pool?.poolRatings?.map((rating) => ({
+          ...rating,
+          reportFile: rating.reportFile ? `report.${rating.reportFile.mime?.split('/')[1]}` : ('' as any),
+        })) ?? [],
     }),
     [metadata, logoFile]
   )
@@ -89,21 +93,24 @@ export function Issuer() {
       const execSummaryChanged = values.executiveSummary !== initialValues.executiveSummary
       const logoChanged = values.issuerLogo !== initialValues.issuerLogo
 
+      const pinFile = async (file: File) => {
+        const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(file as File)))
+        return { uri: pinned.uri, mime: (file as File).type }
+      }
+
       if (!hasChanges) {
         setIsEditing(false)
         actions.setSubmitting(false)
         return
       }
       let execSummaryUri
-      if (execSummaryChanged) {
-        execSummaryUri = (
-          await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(values.executiveSummary as File)))
-        ).uri
+      if (execSummaryChanged && values.executiveSummary) {
+        execSummaryUri = (await pinFile(values.executiveSummary)).uri
         prefetchMetadata(execSummaryUri)
       }
       let logoUri
       if (logoChanged && values.issuerLogo) {
-        logoUri = (await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(values.issuerLogo as File)))).uri
+        logoUri = (await pinFile(values.issuerLogo)).uri
         prefetchMetadata(logoUri)
       }
       const newPoolMetadata: PoolMetadata = {
@@ -128,11 +135,6 @@ export function Issuer() {
             website: values.website,
           },
           details: values.details,
-          poolRatings: values.poolRatings.map((rating) => ({
-            agency: rating.agency ?? '',
-            value: rating.value ?? '',
-            reportUrl: rating.reportUrl ?? '',
-          })),
         },
       }
 
@@ -140,9 +142,7 @@ export function Issuer() {
         let avatar = null
         const avatarChanged = values.reportAuthorAvatar !== initialValues.reportAuthorAvatar
         if (avatarChanged && values.reportAuthorAvatar) {
-          const pinned = await lastValueFrom(
-            cent.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar as File))
-          )
+          const pinned = await pinFile(values.reportAuthorAvatar as File)
           avatar = { uri: pinned.uri, mime: (values.reportAuthorAvatar as File).type }
         }
         newPoolMetadata.pool.reports = [
@@ -155,6 +155,28 @@ export function Issuer() {
             uri: values.reportUrl,
           },
         ]
+      }
+
+      if (values.poolRatings) {
+        const newRatingReportPromise = await Promise.all(
+          values.poolRatings.map((rating) => (rating.reportFile ? pinFile(rating.reportFile) : null))
+        )
+
+        const ratings = values.poolRatings.map((rating, index) => {
+          let reportFile: FileType | null = rating.reportFile
+            ? { uri: rating.reportFile.name, mime: rating.reportFile.type }
+            : null
+          if (rating.reportFile && newRatingReportPromise[index]?.uri) {
+            reportFile = newRatingReportPromise[index] ?? null
+          }
+          return {
+            agency: rating.agency ?? '',
+            value: rating.value ?? '',
+            reportUrl: rating.reportUrl ?? '',
+            reportFile: reportFile ?? null,
+          }
+        })
+        newPoolMetadata.pool.poolRatings = ratings
       }
 
       execute([poolId, newPoolMetadata], { account })
