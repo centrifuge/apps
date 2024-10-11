@@ -3196,7 +3196,6 @@ export function getPoolsModule(inst: Centrifuge) {
             realizedProfitFifo
             asset {
               id
-              currentPrice
               metadata
               name
               type
