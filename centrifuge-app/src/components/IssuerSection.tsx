@@ -207,27 +207,35 @@ const Links = ({ links }: { links: { label: string; href?: string; show: boolean
 }
 
 export function RatingDetails({ metadata }: IssuerSectionProps) {
-  const rating = metadata?.pool?.rating
+  const ratings = metadata?.pool?.poolRatings
 
-  return rating?.ratingAgency || rating?.ratingValue || rating?.ratingReportUrl ? (
+  return ratings?.length ? (
     <Stack gap={1}>
       <Text variant="heading2">Pool rating</Text>
       <Shelf flexDirection="column" alignItems="flex-start">
-        <Shelf gap={1}>
-          {rating.ratingAgency && (
-            <LabelValueStack label="Rating agency" value={<Text variant="body2">{rating.ratingAgency}</Text>} />
-          )}
-          {rating.ratingValue && (
-            <LabelValueStack label="Rating" value={<Text variant="body2">{rating.ratingValue}</Text>} />
-          )}
-        </Shelf>
-      </Shelf>
-      <Shelf>
-        {rating?.ratingReportUrl && (
-          <AnchorButton href={rating.ratingReportUrl} target="_blank" variant="secondary" icon={IconExternalLink}>
-            View full report
-          </AnchorButton>
-        )}
+        {ratings?.map((rating) => {
+          return (
+            <Stack gap={1} key={rating.agency}>
+              <Shelf flexDirection="column" alignItems="flex-start">
+                <Shelf gap={1}>
+                  {rating.agency && (
+                    <LabelValueStack label="Rating agency" value={<Text variant="body2">{rating.agency}</Text>} />
+                  )}
+                  {rating.value && (
+                    <LabelValueStack label="Rating" value={<Text variant="body2">{rating.value}</Text>} />
+                  )}
+                </Shelf>
+              </Shelf>
+              <Shelf>
+                {rating?.reportUrl && (
+                  <AnchorButton href={rating.reportUrl} target="_blank" variant="secondary" icon={IconExternalLink}>
+                    View full report
+                  </AnchorButton>
+                )}
+              </Shelf>
+            </Stack>
+          )
+        })}
       </Shelf>
     </Stack>
   ) : null

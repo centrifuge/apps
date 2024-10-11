@@ -34,9 +34,7 @@ type Values = Pick<
   | 'reportUrl'
   | 'reportAuthorName'
   | 'reportAuthorTitle'
-  | 'ratingAgency'
-  | 'ratingValue'
-  | 'ratingReportUrl'
+  | 'poolRatings'
 > & {
   reportAuthorAvatar: string | null | File
 }
@@ -73,9 +71,7 @@ export function Issuer() {
       reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar
         ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}`
         : null,
-      ratingAgency: metadata?.pool?.rating?.ratingAgency ?? '',
-      ratingValue: metadata?.pool?.rating?.ratingValue ?? '',
-      ratingReportUrl: metadata?.pool?.rating?.ratingReportUrl ?? '',
+      poolRatings: metadata?.pool?.poolRatings ?? [],
     }),
     [metadata, logoFile]
   )
@@ -132,11 +128,11 @@ export function Issuer() {
             website: values.website,
           },
           details: values.details,
-          rating: {
-            ratingAgency: values.ratingAgency,
-            ratingValue: values.ratingValue,
-            ratingReportUrl: values.ratingReportUrl,
-          },
+          poolRatings: values.poolRatings.map((rating) => ({
+            agency: rating.agency ?? '',
+            value: rating.value ?? '',
+            reportUrl: rating.reportUrl ?? '',
+          })),
         },
       }
 
@@ -220,7 +216,7 @@ export function Issuer() {
             <Stack gap={2}>
               <IssuerDetails metadata={metadata} />
               {metadata?.pool?.reports?.[0] && <PoolAnalysis inverted metadata={metadata} />}
-              {metadata?.pool?.rating && <RatingDetails metadata={metadata} />}
+              {metadata?.pool?.poolRatings?.length && <RatingDetails metadata={metadata} />}
             </Stack>
           )}
         </PageSection>

@@ -115,9 +115,11 @@ export type CreatePoolValues = Omit<
   investorType: string
   issuerShortDescription: string
   issuerCategories: { type: string; value: string }[]
-  ratingAgency: string
-  ratingValue: string
-  ratingReportUrl: string
+  poolRatings: {
+    agency?: string
+    value?: string
+    reportUrl?: string
+  }[]
   poolStructure: string
 }
 
@@ -150,9 +152,7 @@ const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
-  ratingAgency: '',
-  ratingValue: '',
-  ratingReportUrl: '',
+  poolRatings: [],
 
   tranches: [createEmptyTranche('')],
   adminMultisig: {
@@ -466,12 +466,12 @@ function CreatePoolForm() {
           url: values.reportUrl,
         }
       }
-      if (values.ratingReportUrl) {
-        metadataValues.poolRating = {
-          ratingAgency: values.ratingAgency,
-          ratingValue: values.ratingValue,
-          ratingReportUrl: values.ratingReportUrl,
-        }
+      if (values.poolRatings.length > 0) {
+        metadataValues.poolRatings = values.poolRatings.map((rating) => ({
+          agency: rating.agency,
+          value: rating.value,
+          reportUrl: rating.reportUrl,
+        }))
       }
 
       const nonJuniorTranches = metadataValues.tranches.slice(1)
@@ -631,7 +631,7 @@ function CreatePoolForm() {
                   {({ field, form, meta }: FieldProps) => (
                     <Select
                       name="poolType"
-                      label={<Tooltips type="poolType" variant="secondary" />}
+                      label={<Tooltips type="poolType" size="sm" />}
                       onChange={(event) => form.setFieldValue('poolType', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -668,7 +668,7 @@ function CreatePoolForm() {
                   {({ field, meta, form }: FieldProps) => (
                     <Select
                       name="assetClass"
-                      label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
+                      label={<Tooltips type="assetClass" label="Asset class*" size="sm" />}
                       onChange={(event) => {
                         form.setFieldValue('assetClass', event.target.value)
                         form.setFieldValue('subAssetClass', '', false)
@@ -687,7 +687,7 @@ function CreatePoolForm() {
                   {({ field, meta, form }: FieldProps) => (
                     <FieldWithErrorMessage
                       name="investorType"
-                      label={<Tooltips type="investorType" label="Investor Type*" variant="secondary" />}
+                      label={<Tooltips type="investorType" label="Investor Type*" size="sm" />}
                       onChange={(event: any) => form.setFieldValue('investorType', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -719,7 +719,7 @@ function CreatePoolForm() {
                     return (
                       <Select
                         name="currency"
-                        label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
+                        label={<Tooltips type="currency" label="Currency*" size="sm" />}
                         onChange={(event) => form.setFieldValue('currency', event.target.value)}
                         onBlur={field.onBlur}
                         errorMessage={meta.touched && meta.error ? meta.error : undefined}

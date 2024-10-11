@@ -144,39 +144,27 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: 'Pool structure',
       value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
     },
-    ...(metadata?.pool?.rating?.ratingValue
-      ? [
-          {
-            metric: 'Rating',
-            value: (
-              <Tooltip
-                delay={300}
-                bodyWidth="maxContent"
-                body={
-                  <TooltipBody
-                    title={metadata?.pool?.rating?.ratingAgency ?? ''}
-                    subtitle="View Report"
-                    url={metadata?.pool?.rating?.ratingReportUrl ?? ''}
-                  />
-                }
+    ...(metadata?.pool?.poolRatings?.length
+      ? metadata?.pool?.poolRatings.map((rating) => ({
+          metric: 'Rating',
+          value: (
+            <Tooltip
+              delay={300}
+              bodyWidth="maxContent"
+              body={<TooltipBody title={rating.agency ?? ''} subtitle="View Report" url={rating.reportUrl ?? ''} />}
+            >
+              <Box
+                border={`1px solid ${theme.colors.backgroundInverted}`}
+                borderRadius={20}
+                padding="2px 10px"
+                display="flex"
               >
-                <Box
-                  border={`1px solid ${theme.colors.backgroundInverted}`}
-                  borderRadius={20}
-                  padding="2px 10px"
-                  display="flex"
-                >
-                  {metadata?.pool?.rating?.ratingAgency?.includes('moody') ? (
-                    <IconMoody size={16} />
-                  ) : (
-                    <IconSp size={16} />
-                  )}
-                  <Text>{metadata?.pool?.rating?.ratingValue}</Text>
-                </Box>
-              </Tooltip>
-            ),
-          },
-        ]
+                {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
+                <Text>{rating.value}</Text>
+              </Box>
+            </Tooltip>
+          ),
+        }))
       : []),
 
     {
