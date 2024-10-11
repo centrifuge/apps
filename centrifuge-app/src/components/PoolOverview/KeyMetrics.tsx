@@ -123,7 +123,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: 'Min. investment',
       value: minInvestmentPerTranche?.length
         ? minInvestmentPerTranche.map((tranche, index) => {
-            return tranche && `${tranche} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
+            return tranche && `$${tranche} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
           })
         : '-',
     },

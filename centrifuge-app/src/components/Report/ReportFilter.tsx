@@ -189,7 +189,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
       </Shelf>
       {transformDataChart?.length && (
         <Box mt={4} width="100%" height={200} marginLeft="-50px">
-          <SimpleBarChart data={transformDataChart} currency={pool.currency} />
+          <SimpleBarChart data={transformDataChart} currency={pool.currency} groupBy={groupBy} />
         </Box>
       )}
     </Shelf>
