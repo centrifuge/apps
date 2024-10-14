@@ -89,11 +89,13 @@ export const KeyMetrics = ({ poolId }: Props) => {
     const thirtyDayAPY = getTodayValue(dailyTranches)
     if (!thirtyDayAPY) return null
 
-    return Object.keys(thirtyDayAPY).map((key) => {
-      return thirtyDayAPY[key][0].yield30DaysAnnualized
-        ? formatPercentage(thirtyDayAPY[key][0].yield30DaysAnnualized)
-        : null
-    })
+    return Object.keys(thirtyDayAPY)
+      .map((key) => {
+        return thirtyDayAPY[key][0].yield30DaysAnnualized
+          ? thirtyDayAPY[key][0].yield30DaysAnnualized.toPercent().toNumber()
+          : 0
+      })
+      .sort((a, b) => a - b)
   }, [dailyTranches])
 
   const minInvestmentPerTranche = useMemo(() => {
@@ -101,7 +103,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     return Object.values(metadata.tranches).map((item) => {
       const minInv = new CurrencyBalance(item.minInitialInvestment ?? 0, pool.currency.decimals).toDecimal()
-      return item.minInitialInvestment ? formatBalanceAbbreviated(minInv, '', 0) : null
+      return item.minInitialInvestment ? minInv : null
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
@@ -117,12 +119,13 @@ export const KeyMetrics = ({ poolId }: Props) => {
     },
     {
       metric: '30-day APY',
-      value: tranchesAPY?.length
-        ? tranchesAPY.map((tranche, index) => {
-            return tranche && `${tranche} ${index !== tranchesAPY?.length - 1 ? '-' : ''} `
-          })
-        : tinlakeData[poolId as TinlakeDataKey]
+      value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
+        : tranchesAPY?.length
+        ? tranchesAPY.map((tranche, index) => {
+            const formatted = formatPercentage(tranche)
+            return formatted && `${formatted} ${index !== tranchesAPY?.length - 1 ? '-' : ''}`
+          })
         : '-',
     },
     ...(isBT3BT4
@@ -136,9 +139,12 @@ export const KeyMetrics = ({ poolId }: Props) => {
     {
       metric: 'Min. investment',
       value: minInvestmentPerTranche?.length
-        ? minInvestmentPerTranche.map((tranche, index) => {
-            return tranche && `$${tranche} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
-          })
+        ? minInvestmentPerTranche
+            .sort((a, b) => Number(a) - Number(b))
+            .map((tranche, index) => {
+              const formatted = formatBalanceAbbreviated(tranche?.toNumber() ?? 0, '', 0)
+              return tranche && `$${formatted} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
+            })
         : '-',
     },
     {

@@ -32,7 +32,7 @@ const StyledSelect = styled.select`
   cursor: pointer;
   line-height: inherit;
   text-overflow: ellipsis;
-  font-weight: 500;
+  font-weight: 400;
 
   &:disabled {
     cursor: default;

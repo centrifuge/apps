@@ -10,6 +10,12 @@ type DailyPoolStateProps = Pick<DailyPoolState, 'timestamp' | 'tranches'> & {
   apy?: Perquintill | undefined
 }
 
+const apy = {
+  '30days': 'yield30DaysAnnualized',
+  '90days': 'yield90DaysAnnualized',
+  YTD: 'yieldYTD',
+}
+
 export function InvestRedeemDrawer({
   poolId,
   trancheId,
@@ -106,11 +112,6 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
   const pool = usePool(poolId)
 
   const data = React.useMemo(() => {
-    const apy = {
-      '30days': 'yield30DaysAnnualized',
-      '90days': 'yield90DaysAnnualized',
-      YTD: 'yieldYTD',
-    }
     const tokenData =
       dailyPoolStates?.map((state) => {
         return {

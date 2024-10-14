@@ -144,7 +144,7 @@ export default function LiquidityTransactionsSection({
             <AnchorButton
               href={dataUrl}
               download={`Pool-${pool.id}-${dataNames.join('-')}.csv`}
-              variant="secondary"
+              variant="inverted"
               icon={IconDownload}
               small
             >

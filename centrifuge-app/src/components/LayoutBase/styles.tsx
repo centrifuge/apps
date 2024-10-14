@@ -39,6 +39,7 @@ export const Inner = styled(Grid)`
   width: 100vw;
   bottom: 0;
   overflow-y: auto;
+  padding-right: 12px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {

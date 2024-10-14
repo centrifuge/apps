@@ -37,7 +37,7 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  height: 340px;
+  height: 320px;
 
   margin-right: 12px;
   margin-bottom: 12px;
@@ -60,22 +60,19 @@ const tinlakeTranches = {
   silver: {
     Junior: '15%',
     Senior: '7%',
-    shortDescription:
-      'The New Silver 2 pool funds real estate bridge loans for fix and flip projects, maturing in 12-24 months.',
+    shortDescription: ' Real estate bridge loans for fix and flip projects, maturing in 12-24 months.',
     InvestorType: 'Qualified Investors',
   },
   blocktowerThree: {
     Junior: '15%',
     Senior: '4% - 15%',
-    shortDescription:
-      'BlockTower Credit’s BT3 pool invests in investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
+    shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     InvestorType: 'Private',
   },
   blocktowerFour: {
     Junior: '15%',
     Senior: '4%',
-    shortDescription:
-      'BlockTower Credit’s BT4 pool invests in investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
+    shortDescription: 'Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     InvestorType: 'Private',
   },
   none: {
@@ -131,7 +128,7 @@ export function PoolCard({
   }
 
   const renderText = (text: string) => (
-    <Text fontWeight={500} as="h2" variant="body1">
+    <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'}>
       {text}
     </Text>
   )
@@ -199,7 +196,7 @@ export function PoolCard({
           padding={isOneTranche ? 0 : '8px'}
           display="flex"
           justifyContent="space-between"
-          width={isOneTranche ? '50%' : '100%'}
+          width={isOneTranche ? '60%' : '100%'}
         >
           {!isOneTranche && (
             <Stack>
@@ -236,11 +233,11 @@ export function PoolCard({
             </Box>
           ))}
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">{assetClass && 'Asset type'}</Text>
-          <Text variant="body2">{assetClass ?? ''}</Text>
+          <Text variant="body2">Asset type</Text>
+          <Text variant="body2">{assetClass ?? '-'}</Text>
         </Box>
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">Investor Type</Text>
+          <Text variant="body2">Investor type</Text>
           <Text variant="body2">
             {' '}
             {isTinlakePool ? tinlakeTranches[tinlakeObjKey()].InvestorType : metaData?.pool?.investorType ?? '-'}

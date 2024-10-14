@@ -34,6 +34,7 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
         header: 'Token',
         align: 'left',
         formatter: (v: any) => v,
+        width: '40%',
       },
       {
         header: 'APY',
@@ -64,7 +65,7 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
         : []),
       {
         header: '',
-        align: 'left',
+        align: 'right',
         formatter: (_: any, row: any) => {
           return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
         },
@@ -75,13 +76,12 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
   const columns = useMemo(() => {
     return columnConfig.map((col, index) => {
       return {
-        align: col.align,
-        header: col.header,
         cell: (row: any) => (
           <Text paddingY={2} fontWeight={col.header === 'APY' ? '600' : '400'} variant="heading2">
             {col.formatter(row.value[index], row)}
           </Text>
         ),
+        ...col,
       }
     })
   }, [columnConfig])

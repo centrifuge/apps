@@ -229,13 +229,13 @@ export const TransactionHistoryTable = ({
     {
       align: 'left',
       header: <SortableTableHeader label="Transaction" />,
-      cell: ({ assetId, assetName, toAssetId, toAssetName, label, sublabel, fromAssetName }: Row) => {
+      cell: ({ assetId, assetName, toAssetId, toAssetName, label, sublabel, fromAssetName, fromAssetId }: Row) => {
         const base = `${basePath}/${poolId}/assets/`
         const isCashTransfer = label === 'Cash transfer from'
         return (
           <Text as="span" variant="body3">
             {label}{' '}
-            <RouterTextLink to={`${base}${assetId.split('-')[1]}`}>
+            <RouterTextLink to={`${base}${isCashTransfer ? fromAssetId?.split('-')[1] : assetId.split('-')[1]}`}>
               {isCashTransfer ? fromAssetName : assetName}
             </RouterTextLink>{' '}
             {toAssetName ? (

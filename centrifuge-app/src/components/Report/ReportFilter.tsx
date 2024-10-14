@@ -30,12 +30,16 @@ const StyledButton = styled(Button)<StyledButtonProps>`
     margin-bottom: 0;
   }
   & > span {
-    border-color: ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.backgroundInverted)};
+    border-color: ${({ selected, theme }) => (selected ? 'transparent' : '#B7B7B7')};
   }
   &:hover > span {
     border-color: ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.backgroundInverted)};
     color: ${({ selected, theme }) => (!selected ? theme.colors.textPrimary : theme.colors.textInverted)};
   }
+`
+
+const StyledAnchorButton = styled(AnchorButton)`
+  width: 80px;
 `
 
 type ReportFilterProps = {
@@ -175,7 +179,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
               </Box>
             </>
           ) : null}
-          <AnchorButton
+          <StyledAnchorButton
             disabled={!csvData}
             download={csvData?.fileName}
             href={csvData?.dataUrl}
@@ -184,12 +188,12 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
             variant="inverted"
           >
             CSV
-          </AnchorButton>
+          </StyledAnchorButton>
         </Shelf>
       </Shelf>
       {transformDataChart?.length && (
         <Box mt={4} width="100%" height={200} marginLeft="-50px">
-          <SimpleBarChart data={transformDataChart} currency={pool.currency} groupBy={groupBy} />
+          <SimpleBarChart data={transformDataChart} currency={pool.currency} />
         </Box>
       )}
     </Shelf>

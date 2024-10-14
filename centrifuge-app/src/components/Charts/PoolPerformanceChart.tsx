@@ -22,7 +22,6 @@ type ChartData = {
   currency?: string
   seniorAPY: number | null | undefined
   juniorAPY: number | null
-  isToday: boolean
 }
 
 type GraphDataItemWithType = {
@@ -115,7 +114,7 @@ function PoolPerformanceChart() {
     return true
   })
 
-  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
+  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>(rangeFilters[0])
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
@@ -123,6 +122,16 @@ function PoolPerformanceChart() {
   const todayPrice = pool?.tranches
     ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
     : null
+
+  const todayJuniorApy = pool?.tranches
+    ?.find((pool) => pool.seniority === 0)
+    ?.yield30DaysAnnualized?.toPercent()
+    .toNumber()
+
+  const todaySeniorApy = pool?.tranches
+    ?.find((pool) => pool.seniority === 1)
+    ?.yield30DaysAnnualized?.toPercent()
+    .toNumber()
 
   const trancheTodayPrice = calculateTranchePrices(pool as Pool)
 
@@ -151,9 +160,8 @@ function PoolPerformanceChart() {
             nav: todayAssetValue,
             juniorTokenPrice: tranchePrices.juniorTokenPrice ?? 0,
             seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
-            juniorAPY: formattedJuniorAPY,
-            seniorAPY: formattedSeniorAPY,
-            isToday: true,
+            juniorAPY: todayJuniorApy ?? 0,
+            seniorAPY: todaySeniorApy,
           }
         }
 
@@ -164,20 +172,17 @@ function PoolPerformanceChart() {
           seniorTokenPrice: seniorTokenPrice !== 0 ? seniorTokenPrice : null,
           juniorAPY: formattedJuniorAPY,
           seniorAPY: formattedSeniorAPY,
-          isToday: false,
         }
       }) || [],
     [truncatedPoolStates, todayAssetValue, pool, range]
   )
 
-  const todayData = data.find((day) => day.isToday)
-
   const today = {
     nav: todayAssetValue,
     price: todayPrice,
     currency: pool.currency.symbol,
-    juniorAPY: todayData?.juniorAPY,
-    seniorAPY: todayData?.seniorAPY,
+    juniorAPY: todayJuniorApy,
+    seniorAPY: todaySeniorApy,
     ...trancheTodayPrice,
   }
 
@@ -421,7 +426,7 @@ function CustomLegend({
     navData,
     {
       color: 'textGold',
-      label: 'Junior token price',
+      label: data.seniorTokenPrice ? 'Junior token price' : 'Token price',
       value: formatBalance(data.juniorTokenPrice ?? 0, '', 3),
       type: 'singleTrancheTokenPrice',
       show: true,
@@ -439,7 +444,7 @@ function CustomLegend({
     navData,
     {
       color: 'textGold',
-      label: 'Junior APY',
+      label: data.seniorAPY ? 'Junior APY' : 'APY',
       value: formatPercentage(data.juniorAPY ?? 0),
       show: !!data.juniorAPY,
     },
