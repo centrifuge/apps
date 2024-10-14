@@ -30,7 +30,7 @@ const StyledButton = styled(Button)<StyledButtonProps>`
     margin-bottom: 0;
   }
   & > span {
-    border-color: ${({ selected, theme }) => (selected ? 'transparent' : '#B7B7B7')};
+    border-color: ${({ selected }) => (selected ? 'transparent' : '#B7B7B7')};
   }
   &:hover > span {
     border-color: ${({ selected, theme }) => (selected ? 'transparent' : theme.colors.backgroundInverted)};

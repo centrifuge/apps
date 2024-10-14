@@ -42,6 +42,7 @@ export type DataTableProps<T = any> = {
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
   hoverable?: boolean
+  scrollable?: boolean
   /**
    * summary row is not included in sorting
    */
@@ -99,6 +100,7 @@ export const DataTable = <T extends Record<string, any>>({
   pageSize = Infinity,
   page = 1,
   headerStyles,
+  scrollable = false,
 }: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
@@ -123,9 +125,9 @@ export const DataTable = <T extends Record<string, any>>({
   const templateColumns = `[start] ${columns.map((col) => col.width ?? 'minmax(min-content, 1fr)').join(' ')} [end]`
 
   return (
-    <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0}>
+    <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0} scrollable={scrollable}>
       {showHeader && (
-        <HeaderRow styles={headerStyles}>
+        <HeaderRow styles={headerStyles} scrollable={scrollable}>
           {columns.map((col, i) => (
             <HeaderCol key={i} align={col?.align}>
               <Text variant="body3">
@@ -200,7 +202,15 @@ export const DataTable = <T extends Record<string, any>>({
   )
 }
 
-const TableGrid = styled(Grid)``
+const TableGrid = styled(Grid)<{ scrollable?: boolean }>`
+  ${({ scrollable }) =>
+    scrollable &&
+    css({
+      height: 'calc(100vh - 180px)',
+      overflowY: 'auto',
+      overflowX: 'auto',
+    })}
+`
 
 const Row = styled('div')`
   display: grid;
@@ -209,12 +219,15 @@ const Row = styled('div')`
   box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderPrimary}, 1px 0 0 0 ${theme.colors.borderPrimary}`};
 `
 
-const HeaderRow = styled(Row)<{ styles?: any }>(({ styles }) =>
+const HeaderRow = styled(Row)<{ styles?: any; scrollable?: boolean }>(({ styles, scrollable }) =>
   css({
     backgroundColor: 'backgroundSecondary',
     borderStyle: 'solid',
     borderWidth: '1px 0',
     borderColor: 'borderPrimary',
+    position: scrollable ? 'sticky' : 'static',
+    top: scrollable ? 0 : 'auto',
+    zIndex: scrollable ? 10 : 'auto',
     ...styles,
   })
 )

@@ -294,7 +294,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
 
   return poolStates?.length > 0 ? (
     <Box paddingX={2}>
-      <DataTable data={priceRecords} columns={columns} hoverable />
+      <DataTable data={priceRecords} columns={columns} hoverable scrollable />
     </Box>
   ) : (
     <UserFeedback reportType="Token price" />
