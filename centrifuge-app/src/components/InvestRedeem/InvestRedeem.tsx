@@ -25,6 +25,7 @@ import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
 import { LiquidityRewardsProvider } from '../LiquidityRewards/LiquidityRewardsProvider'
 import { LoadBoundary } from '../LoadBoundary'
+import { PoolMetaDataPartial } from '../PoolList'
 import { Transactions } from '../Portfolio/Transactions'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
@@ -35,6 +36,7 @@ import { RedeemForm } from './RedeemForm'
 export type InvestRedeemProps = {
   poolId: string
   trancheId: string
+  metadata: PoolMetaDataPartial
 } & InputProps
 
 // @ts-ignore

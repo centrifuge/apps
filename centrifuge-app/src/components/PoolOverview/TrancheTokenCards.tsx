@@ -7,8 +7,17 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { PoolMetaDataPartial } from '../PoolList'
 
-export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: Token[]; poolId: string }) => {
+export const TrancheTokenCards = ({
+  trancheTokens,
+  poolId,
+  metadata,
+}: {
+  trancheTokens: Token[]
+  poolId: string
+  metadata: PoolMetaDataPartial
+}) => {
   const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
@@ -66,9 +75,9 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
       {
         header: '',
         align: 'right',
-        formatter: (_: any, row: any) => {
-          return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
-        },
+        formatter: (_: any, row: any) => (
+          <InvestButton poolId={poolId} trancheId={row.value[1].id} metadata={metadata} />
+        ),
       },
     ]
   }, [pool, poolId, isTinlakePool, daysSinceCreation])

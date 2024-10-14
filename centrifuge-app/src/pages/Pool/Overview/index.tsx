@@ -1,9 +1,11 @@
 import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { InvestRedeemContext, InvestRedeemProvider } from '../../../../src/components/InvestRedeem/InvestRedeemProvider'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
@@ -20,7 +22,6 @@ import { formatBalance } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
-import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -118,7 +119,7 @@ export function PoolDetailOverview() {
         </Grid>
         {tokens.length > 0 && (
           <React.Suspense fallback={<Spinner />}>
-            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} />
+            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} metadata={metadata} />
           </React.Suspense>
         )}
         <React.Suspense fallback={<Spinner />}>
@@ -144,16 +145,43 @@ export function PoolDetailOverview() {
 }
 
 export function InvestButton(props: InvestRedeemProps) {
+  const { poolId, trancheId, metadata } = props
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
-  const isMedium = useIsAboveBreakpoint('M')
+  const { connectedType, showNetworks } = useWallet()
 
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
-      <Button aria-label={`Invest in ${props.trancheId}`} onClick={() => connectAndOpen()} style={{ width: '120px' }}>
-        Invest
-      </Button>
+      <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
+        <InvestRedeemContext.Consumer>
+          {({ state }) => {
+            if (!state.isAllowedToInvest && connectedType !== null) {
+              return (
+                <Button onClick={() => window.open(metadata?.onboarding?.externalOnboardingUrl)} variant="primary">
+                  Onboard
+                </Button>
+              )
+            } else if (connectedType === null) {
+              return (
+                <Button onClick={() => showNetworks()} variant="primary">
+                  Connect
+                </Button>
+              )
+            } else {
+              return (
+                <Button
+                  aria-label={`Invest in ${props.trancheId}`}
+                  onClick={() => connectAndOpen()}
+                  style={{ marginLeft: 'auto', width: '120px' }}
+                >
+                  {state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'}
+                </Button>
+              )
+            }
+          }}
+        </InvestRedeemContext.Consumer>
+      </InvestRedeemProvider>
     </>
   )
 }

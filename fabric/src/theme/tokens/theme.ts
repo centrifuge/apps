@@ -7,7 +7,7 @@ const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
-const statusDefaultBg = grayScale[300]
+const statusDefaultBg = '#CFCFCF'
 const statusInfoBg = blueScale[50]
 const statusOkBg = '#f1f7ec'
 const statusWarningBg = yellowScale[50]
