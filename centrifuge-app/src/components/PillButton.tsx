@@ -14,11 +14,13 @@ const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
     backgroundColor: 'backgroundSecondary',
     textDecoration: 'none',
     borderRadius: 20,
+    lineHeight: 20,
     '&:visited, &:active': {
       color: 'textPrimary',
     },
     '&:hover': {
-      color: 'textGold',
+      color: 'textInverted',
+      backgroundColor: 'textPrimary',
     },
   }),
   ({ theme }) => ({
@@ -32,11 +34,11 @@ const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
       ? css({
           borderRadius: '20px',
           fontSize: '14px',
-          padding: '2px 8px',
+          padding: '8px 16px',
         })
       : css({
           borderRadius: '12px',
-          padding: '2px 10px',
+          padding: '4px 12px',
           fontSize: '12px',
         })
 )

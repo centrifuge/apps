@@ -123,12 +123,18 @@ export function PoolDetailOverview() {
           </React.Suspense>
         )}
         <React.Suspense fallback={<Spinner />}>
-          <Grid gridTemplateColumns={'1fr 0.5fr'} gap={2} marginY={3}>
-            <Card p={3} backgroundColor="backgroundSecondary">
+          <Grid
+            gridTemplateColumns="1fr 0.5fr"
+            gap={2}
+            marginY={3}
+            borderBottom={`1px solid ${theme.colors.borderPrimary}`}
+            paddingBottom={3}
+          >
+            <Card p={2} backgroundColor="backgroundSecondary">
               <IssuerDetails metadata={metadata} />
             </Card>
             {metadata?.pool?.reports?.length || !isTinlakePool ? (
-              <Card p={3} backgroundColor="backgroundButtonSecondary">
+              <Card p={2} backgroundColor="backgroundButtonSecondary">
                 <ReportDetails metadata={metadata} />
               </Card>
             ) : null}

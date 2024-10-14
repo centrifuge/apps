@@ -30,6 +30,7 @@ const StyledButton = styled(Button)<StyledButtonProps>`
     margin-bottom: 0;
   }
   & > span {
+    border-width: 1px;
     border-color: ${({ selected }) => (selected ? 'transparent' : '#B7B7B7')};
   }
   &:hover > span {
@@ -187,7 +188,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
             small
             variant="inverted"
           >
-            CSV
+            Download
           </StyledAnchorButton>
         </Shelf>
       </Shelf>

@@ -22,6 +22,19 @@ const PoolCardBox = styled<typeof Box & { status?: PoolStatusKey }>(Box)`
   }
 `
 
+const StyledBox = styled(Box)`
+  background-color: transparent;
+  border: none;
+  &:hover {
+    svg {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+    div {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+  }
+`
+
 const upcomingPools: PoolCardProps[] = []
 
 export function PoolList() {
@@ -93,7 +106,7 @@ export function PoolList() {
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <Box display="flex" alignItems="center" marginBottom={1}>
+          <StyledBox display="flex" alignItems="center" marginBottom={1} as="button">
             <Text
               style={{ cursor: 'pointer' }}
               color="textSecondary"
@@ -103,7 +116,7 @@ export function PoolList() {
               {showArchived ? 'Hide archived pools' : 'View archived pools'}
             </Text>
             {!showArchived && <IconChevronRight color="textSecondary" size={18} />}
-          </Box>
+          </StyledBox>
           {showArchived && <ArchivedPools pools={archivedPools} />}
         </>
       )}

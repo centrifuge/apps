@@ -245,12 +245,12 @@ export function DataFilter({ poolId }: ReportFilterProps) {
             disabled={!csvData}
             download={csvData?.fileName}
             href={csvData?.dataUrl}
-            icon={<IconDownload />}
+            icon={<IconDownload size={20} />}
             small
             variant="inverted"
             style={{ marginLeft: '12px', marginTop: '22px' }}
           >
-            CSV
+            Download
           </AnchorButton>
         </Box>
       </Box>

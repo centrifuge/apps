@@ -93,7 +93,7 @@ export const StyledButton = styled.span<StyledProps>(
       color: $disabled ? fgDisabled : $active ? fgHover : fg,
       backgroundColor: $disabled ? bgDisabled : $active ? bgHover : bg,
       borderColor: $disabled ? borderDisabled : $active ? borderHover : border,
-      borderWidth: 1,
+      borderWidth: 3,
       borderRadius: 'button',
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
@@ -171,7 +171,7 @@ export function VisualButton({
         ) : (
           <>
             {children && (
-              <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={400}>
+              <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
                 {children}
               </Text>
             )}

@@ -58,7 +58,7 @@ export const TrancheTokenCards = ({
       {
         header: 'Token price',
         align: 'left',
-        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, pool?.currency.decimals) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, 6) : '-'),
       },
       ...(pool.tranches.length > 1
         ? [

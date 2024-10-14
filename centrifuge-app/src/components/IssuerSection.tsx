@@ -28,7 +28,7 @@ type IssuerSectionProps = {
 }
 
 const StyledBox = styled(Box)`
-  padding: 30px 20px;
+  padding: 24px;
   &:hover {
     background: ${SUBTLE_GRAY};
     border-radius: 0px;
@@ -37,12 +37,12 @@ const StyledBox = styled(Box)`
 
 const HoverBox = styled(StyledBox)`
   padding: 8px 22px;
-  border-radius: 4px;
   background-color: ${SUBTLE_GRAY};
+  border: 3px solid transparent;
+  border-radius: 4px;
   &:hover {
-    a {
-      color: ${({ theme }) => theme.colors.textGold};
-    }
+    border-radius: 4px;
+    border-color: #91969b1a;
   }
 `
 
@@ -151,8 +151,8 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         {metadata?.pool?.issuer.logo && (
           <Box
             as="img"
-            maxWidth={80}
-            maxHeight={30}
+            maxWidth={100}
+            maxHeight={28}
             alt={metadata?.pool?.issuer.name}
             src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)}
           />
@@ -199,14 +199,19 @@ const Links = ({ links }: { links: { label: string; href?: string; show: boolean
 
         if (link.onClick) {
           return (
-            <PillButton key={`${link.label} ${index}`} variant="small" onClick={link.onClick}>
+            <PillButton key={`${link.label} ${index}`} variant="regular" onClick={link.onClick}>
               {link.label}
             </PillButton>
           )
         }
 
         return (
-          <AnchorPillButton style={{ marginRight: 8 }} variant="small" key={`${link.label} ${index}`} href={link.href}>
+          <AnchorPillButton
+            style={{ marginRight: 8 }}
+            variant="regular"
+            key={`${link.label} ${index}`}
+            href={link.href}
+          >
             {link.label}
           </AnchorPillButton>
         )

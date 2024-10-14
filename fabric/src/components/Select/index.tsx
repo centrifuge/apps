@@ -44,6 +44,7 @@ export function SelectInner({
   placeholder,
   disabled,
   small,
+  hideBorder,
   ...rest
 }: Omit<SelectProps, 'label' | 'errorMessage'>) {
   return (
@@ -68,7 +69,12 @@ export function SelectInner({
           </option>
         )}
         {options.map((option, index) => (
-          <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
+          <option
+            key={`${index}${option.value}`}
+            value={option.value}
+            disabled={option.disabled}
+            style={{ textAlign: hideBorder ? 'right' : 'left' }}
+          >
             {option.label}
           </option>
         ))}
@@ -88,7 +94,7 @@ export function Select({ label, errorMessage, id, hideBorder, ...rest }: SelectP
       errorMessage={errorMessage}
       inputElement={
         <StyledInputBox alignItems="stretch" height="input" px={1} hideBorder={hideBorder}>
-          <SelectInner id={id} {...rest} />
+          <SelectInner id={id} {...rest} hideBorder={hideBorder} />
         </StyledInputBox>
       }
     />

@@ -7,7 +7,7 @@ const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
-const statusDefaultBg = '#CFCFCF'
+const statusDefaultBg = grayScale[100]
 const statusInfoBg = blueScale[50]
 const statusOkBg = '#f1f7ec'
 const statusWarningBg = yellowScale[50]
@@ -58,9 +58,9 @@ const colors = {
   textButtonPrimaryPressed: black,
   textButtonPrimaryDisabled: grayScale[500],
   borderButtonPrimary: gold,
-  borderButtonPrimaryFocus: yellowScale[800],
-  borderButtonPrimaryHover: yellowScale[800],
-  borderButtonPrimaryPressed: yellowScale[800],
+  borderButtonPrimaryFocus: yellowScale[100],
+  borderButtonPrimaryHover: yellowScale[100],
+  borderButtonPrimaryPressed: yellowScale[100],
   borderButtonPrimaryDisabled: 'transparent',
   shadowButtonPrimary: 'transparent',
 
@@ -108,9 +108,9 @@ const colors = {
   textButtonInvertedPressed: black,
   textButtonInvertedDisabled: grayScale[500],
   borderButtonInverted: grayScale[100],
-  borderButtonInvertedFocus: black,
-  borderButtonInvertedHover: black,
-  borderButtonInvertedPressed: black,
+  borderButtonInvertedFocus: grayScale[50],
+  borderButtonInvertedHover: grayScale[50],
+  borderButtonInvertedPressed: grayScale[50],
   borderButtonInvertedDisabled: 'transparent',
   shadowButtonInverted: 'transparent',
 }

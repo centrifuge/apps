@@ -2,7 +2,7 @@ import { CurrencyBalance, Rate, Token } from '@centrifuge/centrifuge-js'
 import { Box, Card, Divider, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
@@ -44,7 +44,8 @@ const StyledCard = styled(Card)`
   padding: 12px;
 
   &:hover {
-    border: 1px solid ${({ theme }) => theme.colors.backgroundInverted};
+    border: 1px solid ${({ theme }) => theme.colors.backgroundTertiary};
+    box-shadow: 0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) {
@@ -65,7 +66,7 @@ const tinlakeTranches = {
   },
   blocktowerThree: {
     Junior: '15%',
-    Senior: '4% - 15%',
+    Senior: '4%',
     shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     InvestorType: 'Private',
   },
@@ -109,6 +110,7 @@ export function PoolCard({
   metaData,
   createdAt,
 }: PoolCardProps) {
+  const theme = useTheme()
   const isOneTranche = tranches && tranches?.length === 1
   const isTinlakePool =
     poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
@@ -137,7 +139,9 @@ export function PoolCard({
     const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
     if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
       return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
-    if (tranche.interestRatePerSec) return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
+    if (tranche.interestRatePerSec) {
+      return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
+    }
     return '-'
   }
 
@@ -153,9 +157,14 @@ export function PoolCard({
           tranche.currency.decimals
         ).toDecimal()
 
+        const apy = () => {
+          if (calculateApy(tranche) === '0.0%') return '-'
+          else return calculateApy(tranche)
+        }
+
         return {
           name: trancheName,
-          apr: isTinlakePool ? tinlakeTranches[key][trancheName as 'Junior' | 'Senior'] : calculateApy(tranche),
+          apr: isTinlakePool ? tinlakeTranches[key][trancheName as 'Junior' | 'Senior'] : apy(),
           minInvestment: isTinlakePool
             ? getTinlakeMinInvestment(trancheName as 'Junior' | 'Senior')
             : metadata && metadata.minInitialInvestment
@@ -177,7 +186,15 @@ export function PoolCard({
             </Text>
           </Box>
           {iconUri ? (
-            <Box as="img" src={iconUri} alt="" height={38} width={38} borderRadius="4px" />
+            <Box
+              as="img"
+              src={iconUri}
+              alt=""
+              height={38}
+              width={38}
+              border={`1px solid ${theme.colors.backgroundTertiary}`}
+              borderRadius={4}
+            />
           ) : (
             <Thumbnail type="pool" label="LP" size="large" />
           )}

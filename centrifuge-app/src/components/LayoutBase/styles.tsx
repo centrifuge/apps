@@ -147,7 +147,7 @@ export const WalletInner = styled(Stack)`
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
     height: 50px;
-    margin-right: 40px;
+    margin-right: 30px;
   }
 `
 

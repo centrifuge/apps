@@ -222,10 +222,10 @@ function PoolPerformanceChart() {
           Pool performance
         </Text>
         <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
             Price
           </TabsItem>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
             APY
           </TabsItem>
         </Tabs>
@@ -263,7 +263,7 @@ function PoolPerformanceChart() {
               <YAxis
                 stroke="none"
                 tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
                 yAxisId="left"
                 width={80}
@@ -271,7 +271,7 @@ function PoolPerformanceChart() {
               <YAxis
                 stroke="none"
                 tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                 yAxisId="right"
                 orientation="right"
@@ -475,13 +475,15 @@ function CustomLegend({
           }
 
           return (
-            <Stack key={index} pl={1} display="flex" marginRight="20px">
+            <Stack key={index} display="flex" marginRight="20px">
               <Box display="flex" alignItems="center">
                 <Dot color={item.color} />
                 {hasType(item) ? (
-                  <Tooltips type={item.type} label={item.label} />
-                ) : (
                   <Text variant="body3" style={{ lineHeight: 1.8 }}>
+                    <Tooltips type={item.type} label={item.label} color="textSecondary" />
+                  </Text>
+                ) : (
+                  <Text color="textSecondary" variant="body3" style={{ lineHeight: 1.8 }}>
                     {item.label}
                   </Text>
                 )}
@@ -512,7 +514,7 @@ export const CustomTick = ({ x, y, payload }: CustomTickProps) => {
   return (
     <g transform={`translate(${x},${y})`}>
       <text
-        style={{ fontSize: '10px', fill: theme.colors.textPrimary, letterSpacing: '-0.5px' }}
+        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
         x={0}
         y={0}
         dy={16}

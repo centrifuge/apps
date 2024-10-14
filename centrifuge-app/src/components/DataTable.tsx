@@ -206,7 +206,7 @@ const TableGrid = styled(Grid)<{ scrollable?: boolean }>`
   ${({ scrollable }) =>
     scrollable &&
     css({
-      height: 'calc(100vh - 180px)',
+      maxHeight: 'calc(100vh - 180px)',
       overflowY: 'auto',
       overflowX: 'auto',
     })}
@@ -228,6 +228,8 @@ const HeaderRow = styled(Row)<{ styles?: any; scrollable?: boolean }>(({ styles,
     position: scrollable ? 'sticky' : 'static',
     top: scrollable ? 0 : 'auto',
     zIndex: scrollable ? 10 : 'auto',
+    borderTopLeftRadius: '8px',
+    borderTopRightRadius: '8px',
     ...styles,
   })
 )
@@ -254,6 +256,10 @@ export const DataRow = styled(Row)<any>`
           : undefined,
       '&:focus-visible': {
         boxShadow: 'inset 0 0 0 3px var(--fabric-focus)',
+      },
+      '&:last-child': {
+        borderBottomLeftRadius: '8px',
+        borderBottomRightRadius: '8px',
       },
     })}
 `
