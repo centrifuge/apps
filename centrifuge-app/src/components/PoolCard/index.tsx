@@ -35,14 +35,15 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  height: 320px;
+  height: 300px;
 
   margin-right: 12px;
   margin-bottom: 12px;
   padding: 12px;
+  border: 1px solid rgba(207, 207, 207, 0.5);
 
   &:hover {
-    border: 1px solid ${({ theme }) => theme.colors.backgroundTertiary};
+    border: 1px solid ${({ theme }) => theme.colors.textPrimary};
     box-shadow: 0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   }
 
@@ -262,24 +263,21 @@ export function PoolCard({
             {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
           </Stack>
         </Box>
-        {metaData?.pool?.issuer?.shortDescription ||
-          (isTinlakePool && (
-            <Box marginY={12}>
-              <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
-                {isTinlakePool
-                  ? tinlakeTranches[tinlakeKey].shortDescription
-                  : metaData?.pool?.issuer?.shortDescription}
-              </Text>
-            </Box>
-          ))}
+        {(metaData?.pool?.issuer?.shortDescription || isTinlakePool) && (
+          <Box marginY={12}>
+            <Text as="p" variant="body3" color="textButtonPrimaryDisabled">
+              {isTinlakePool ? tinlakeTranches[tinlakeKey].shortDescription : metaData?.pool?.issuer?.shortDescription}
+            </Text>
+          </Box>
+        )}
+
         <Box display="flex" justifyContent="space-between" mt={1}>
-          <Text variant="body2">Asset type</Text>
-          <Text variant="body2">{assetClass ?? '-'}</Text>
+          <Text variant="body3">Asset type</Text>
+          <Text variant="body3">{assetClass ?? '-'}</Text>
         </Box>
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">Investor type</Text>
-          <Text variant="body2">
-            {' '}
+          <Text variant="body3">Investor type</Text>
+          <Text variant="body3">
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
           </Text>
         </Box>

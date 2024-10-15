@@ -24,20 +24,13 @@ const StyledButton = styled.button`
   display: inline-block;
   width: 100%;
   padding: 0;
-  border-width: 3;
-  border-color: transparent;
+  border: none;
   appearance: none;
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
   outline: 0;
-  border-radius: 40px;
+  border-radius: 4px;
   white-space: nowrap;
-  & > span {
-    border-width: 3;
-    border-color: ${({ theme }) => theme.colors.backgroundPrimary};
-    :hover {
-      border: ${({ theme }) => `3px solid ${theme.colors.borderSecondary}`};
-    }
-  }
+  border: 3px solid transparent;
 `
 
 const IdenticonWrapper = styled(Flex)({
