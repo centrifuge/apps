@@ -124,7 +124,7 @@ export function PoolDetailOverview() {
         )}
         <React.Suspense fallback={<Spinner />}>
           <Grid
-            gridTemplateColumns="1fr 0.5fr"
+            gridTemplateColumns={metadata?.pool?.reports?.length || !isTinlakePool ? '1fr 0.5fr' : '1fr'}
             gap={2}
             marginY={3}
             borderBottom={`1px solid ${theme.colors.borderPrimary}`}

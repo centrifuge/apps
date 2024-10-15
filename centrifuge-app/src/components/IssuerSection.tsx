@@ -19,7 +19,7 @@ import { formatPercentage } from '../utils/formatting'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
 import { AnchorPillButton, PillButton } from './PillButton'
-import { RouterTextLink } from './TextLink'
+import { AnchorTextLink, RouterTextLink } from './TextLink'
 
 const SUBTLE_GRAY = '#91969b21'
 
@@ -55,6 +55,21 @@ const StyledRouterTextLink = styled(RouterTextLink)`
   }
   :visited {
     color: white;
+  }
+`
+
+const StyledAnchorTextLink = styled(AnchorTextLink)`
+  color: white;
+  font-size: 14px;
+  text-decoration: unset;
+  :active {
+    color: white;
+  }
+  :visited {
+    color: white;
+  }
+  :hover {
+    text-decoration: underline;
   }
 `
 
@@ -160,14 +175,14 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         <Links links={links} />
       </Shelf>
       <Box pt={4} display="flex" justifyContent="space-between">
-        <Box>
+        <Box width={metadata?.pool?.issuer?.categories?.length ? '50%' : '100%'} marginRight={3}>
           <Text variant="heading2">{metadata?.pool?.issuer.name}</Text>
-          <Text variant="body2" style={{ marginTop: '12px' }}>
+          <Text variant="body2" style={{ marginTop: '12px', lineHeight: '22px', letterSpacing: '-0.14px' }}>
             {metadata?.pool?.issuer.description}
           </Text>
         </Box>
         {metadata?.pool?.issuer?.categories?.length ? (
-          <Box width="50%" bg="white" padding="8px" borderRadius={10} ml={1}>
+          <Box width="50%" bg="white" padding={2} borderRadius={10} ml={1} height="min-content">
             {metadata?.pool?.issuer?.categories.map((category) => (
               <Box display="flex" justifyContent="space-between" padding={1}>
                 <Text color="textSecondary" variant="body2" style={{ minWidth: 120, textTransform: 'capitalize' }}>
@@ -270,12 +285,14 @@ export const PoolAnalysis = ({ metadata, inverted }: IssuerSectionProps & { inve
   const report = metadata?.pool?.reports?.[0]
   // Not sure why some pools have N/A, it should be empty but this is a fix for those pools in the meantime
   const isEmpty = report?.author.name === 'N/A'
+
+  console.log(report)
   return report?.author?.name || report?.author?.title ? (
     isEmpty ? null : (
       <Stack gap={1}>
-        <Text color={inverted ? 'textPrimary' : 'white'} variant={inverted ? 'heading2' : 'heading4'}>
+        <StyledAnchorTextLink color={inverted ? 'textPrimary' : 'white'} href={report.uri}>
           Pool analysis
-        </Text>
+        </StyledAnchorTextLink>
         <Stack gap={0}>
           <Text variant="body3" color="textSecondary">
             Reviewer: {report?.author?.name || 'N/A'}
