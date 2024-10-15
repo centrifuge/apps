@@ -32,6 +32,17 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
   }
 }
 
+type TinlakeDataKey =
+  | '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
+  | '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
+  | '0x90040F96aB8f291b6d43A8972806e977631aFFdE'
+
+const tinlakeData = {
+  '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15% target',
+  '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7': '4% - 15% target',
+  '0x90040F96aB8f291b6d43A8972806e977631aFFdE': '4% - 15% target',
+}
+
 const getTodayValue = (data: DailyTrancheStateArr | null | undefined): DailyTrancheStateArr | undefined => {
   if (!data) return
   if (!Object.keys(data).length) return
@@ -78,11 +89,13 @@ export const KeyMetrics = ({ poolId }: Props) => {
     const thirtyDayAPY = getTodayValue(dailyTranches)
     if (!thirtyDayAPY) return null
 
-    return Object.keys(thirtyDayAPY).map((key) => {
-      return thirtyDayAPY[key][0].yield30DaysAnnualized
-        ? formatPercentage(thirtyDayAPY[key][0].yield30DaysAnnualized)
-        : null
-    })
+    return Object.keys(thirtyDayAPY)
+      .map((key) => {
+        return thirtyDayAPY[key][0].yield30DaysAnnualized
+          ? thirtyDayAPY[key][0].yield30DaysAnnualized.toPercent().toNumber()
+          : 0
+      })
+      .sort((a, b) => a - b)
   }, [dailyTranches])
 
   const minInvestmentPerTranche = useMemo(() => {
@@ -90,13 +103,19 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     return Object.values(metadata.tranches).map((item) => {
       const minInv = new CurrencyBalance(item.minInitialInvestment ?? 0, pool.currency.decimals).toDecimal()
-      return item.minInitialInvestment ? formatBalanceAbbreviated(minInv, '', 0) : null
+      return item.minInitialInvestment ? minInv : null
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
+  const getHardCodedApy = () => {
+    if (poolId === '1655476167') return '15%'
+    if (poolId === '1615768079') return '8% - 16%'
+  }
+
   const isBT3BT4 =
-    poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
-    poolId.toLowerCase() === '0x55d86d51ac3bcab7ab7d2124931fba106c8b60c7'
+    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
+    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
+    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
 
   const metrics = [
     {
@@ -104,10 +123,15 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: '30-day APY',
-      value: tranchesAPY?.length
+      metric: poolId === '1655476167' || poolId === '1615768079' ? 'Target APY' : '30-day APY',
+      value: tinlakeData[poolId as TinlakeDataKey]
+        ? tinlakeData[poolId as TinlakeDataKey]
+        : poolId === '1655476167' || poolId === '1615768079'
+        ? getHardCodedApy()
+        : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
-            return tranche && `${tranche} ${index !== tranchesAPY?.length - 1 ? '-' : ''} `
+            const formatted = formatPercentage(tranche)
+            return formatted && `${formatted} ${index !== tranchesAPY?.length - 1 ? '-' : ''}`
           })
         : '-',
     },
@@ -122,14 +146,17 @@ export const KeyMetrics = ({ poolId }: Props) => {
     {
       metric: 'Min. investment',
       value: minInvestmentPerTranche?.length
-        ? minInvestmentPerTranche.map((tranche, index) => {
-            return tranche && `${tranche} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
-          })
+        ? minInvestmentPerTranche
+            .sort((a, b) => Number(a) - Number(b))
+            .map((tranche, index) => {
+              const formatted = formatBalanceAbbreviated(tranche?.toNumber() ?? 0, '', 0)
+              return tranche && `$${formatted} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
+            })
         : '-',
     },
     {
       metric: 'Investor type',
-      value: metadata?.pool?.investorType ? metadata?.pool?.investorType : '-',
+      value: isBT3BT4 ? 'Private' : metadata?.pool?.investorType ?? '-',
     },
     ...(!isTinlakePool
       ? [
@@ -142,7 +169,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     {
       metric: 'Pool structure',
-      value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
+      value: isBT3BT4 ? 'Revolving' : metadata?.pool?.poolStructure ?? '-',
     },
     ...(metadata?.pool?.rating?.ratingValue
       ? [

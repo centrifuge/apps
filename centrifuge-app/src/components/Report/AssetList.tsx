@@ -309,7 +309,14 @@ export function AssetList({ pool }: { pool: Pool }) {
 
   return data.length > 0 ? (
     <Box paddingX={2}>
-      <DataTable data={data} columns={columns} hoverable defaultSortKey="maturity-date" defaultSortOrder="desc" />
+      <DataTable
+        data={data}
+        columns={columns}
+        hoverable
+        defaultSortKey="maturity-date"
+        defaultSortOrder="desc"
+        scrollable
+      />
     </Box>
   ) : (
     <UserFeedback reportType="Assets" />

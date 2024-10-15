@@ -9,13 +9,14 @@ const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${baseButton}
   ${primaryButton}
   grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
-  color: ${({ isActive, theme }) =>
-    isActive ? theme.colors.textGold : theme.colors.textInverted}; /* Example styling */
+  color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
   font-size: 14px;
   font-weight: 500;
   background-color: transparent;
+  border-radius: 4px;
   &:hover {
     color: ${({ theme }) => theme.colors.textGold};
+    background-color: rgba(145, 150, 155, 0.13);
   }
 `
 

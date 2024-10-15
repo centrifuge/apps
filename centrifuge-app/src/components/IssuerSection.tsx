@@ -14,7 +14,7 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { formatPercentage } from '../utils/formatting'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
@@ -28,7 +28,7 @@ type IssuerSectionProps = {
 }
 
 const StyledBox = styled(Box)`
-  padding: 30px 20px;
+  padding: 24px;
   &:hover {
     background: ${SUBTLE_GRAY};
     border-radius: 0px;
@@ -37,20 +37,14 @@ const StyledBox = styled(Box)`
 
 const HoverBox = styled(StyledBox)`
   padding: 8px 22px;
-  border-radius: 4px;
   background-color: ${SUBTLE_GRAY};
+  border: 3px solid transparent;
+  border-radius: 4px;
   &:hover {
-    a {
-      color: ${({ theme }) => theme.colors.textGold};
-    }
+    border-radius: 4px;
+    border-color: #91969b1a;
   }
 `
-
-const reportLinks = [
-  { label: 'Balance sheet', href: '/balance-sheet', icon: <IconBalanceSheet color="white" /> },
-  { label: 'Profit & loss', href: '/profit-and-loss', icon: <IconProfitAndLoss color="white" /> },
-  { label: 'Cash flow statement', href: '/cash-flow-statement', icon: <IconCashflow color="white" /> },
-]
 
 const StyledRouterTextLink = styled(RouterTextLink)`
   color: white;
@@ -67,6 +61,21 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 export function ReportDetails({ metadata }: IssuerSectionProps) {
   const pathname = useLocation().pathname
   const report = metadata?.pool?.reports?.[0]
+  const theme = useTheme()
+
+  const reportLinks = [
+    { label: 'Balance sheet', href: '/balance-sheet', icon: <IconBalanceSheet color={theme.colors.textSecondary} /> },
+    {
+      label: 'Profit & loss',
+      href: '/profit-and-loss',
+      icon: <IconProfitAndLoss color={theme.colors.textSecondary} />,
+    },
+    {
+      label: 'Cash flow statement',
+      href: '/cash-flow-statement',
+      icon: <IconCashflow color={theme.colors.textSecondary} />,
+    },
+  ]
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -89,7 +98,7 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
             >
               <Box display="flex" alignItems="center">
                 {link.icon}
-                <Text color="white" style={{ marginLeft: 4 }}>
+                <Text color="white" style={{ marginLeft: 8 }}>
                   {link.label}
                 </Text>
               </Box>
@@ -142,8 +151,8 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         {metadata?.pool?.issuer.logo && (
           <Box
             as="img"
-            maxWidth={80}
-            maxHeight={30}
+            maxWidth={100}
+            maxHeight={28}
             alt={metadata?.pool?.issuer.name}
             src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)}
           />
@@ -190,14 +199,19 @@ const Links = ({ links }: { links: { label: string; href?: string; show: boolean
 
         if (link.onClick) {
           return (
-            <PillButton key={`${link.label} ${index}`} variant="small" onClick={link.onClick}>
+            <PillButton key={`${link.label} ${index}`} variant="regular" onClick={link.onClick}>
               {link.label}
             </PillButton>
           )
         }
 
         return (
-          <AnchorPillButton style={{ marginRight: 8 }} variant="small" key={`${link.label} ${index}`} href={link.href}>
+          <AnchorPillButton
+            style={{ marginRight: 8 }}
+            variant="regular"
+            key={`${link.label} ${index}`}
+            href={link.href}
+          >
             {link.label}
           </AnchorPillButton>
         )
@@ -235,19 +249,23 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
 
 export const PoolAnalysis = ({ metadata, inverted }: IssuerSectionProps & { inverted?: boolean }) => {
   const report = metadata?.pool?.reports?.[0]
+  // Not sure why some pools have N/A, it should be empty but this is a fix for those pools in the meantime
+  const isEmpty = report?.author.name === 'N/A'
   return report?.author?.name || report?.author?.title ? (
-    <Stack gap={1}>
-      <Text color={inverted ? 'textPrimary' : 'white'} variant={inverted ? 'heading2' : 'heading4'}>
-        Pool analysis
-      </Text>
-      <Stack gap={0}>
-        <Text variant="body3" color="textSecondary">
-          Reviewer: {report?.author?.name || 'N/A'}
+    isEmpty ? null : (
+      <Stack gap={1}>
+        <Text color={inverted ? 'textPrimary' : 'white'} variant={inverted ? 'heading2' : 'heading4'}>
+          Pool analysis
         </Text>
-        <Text variant="body3" color="textSecondary">
-          Title: {report?.author?.title || 'N/A'}
-        </Text>
+        <Stack gap={0}>
+          <Text variant="body3" color="textSecondary">
+            Reviewer: {report?.author?.name || 'N/A'}
+          </Text>
+          <Text variant="body3" color="textSecondary">
+            Title: {report?.author?.title || 'N/A'}
+          </Text>
+        </Stack>
       </Stack>
-    </Stack>
+    )
   ) : null
 }

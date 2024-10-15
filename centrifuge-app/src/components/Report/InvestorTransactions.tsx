@@ -266,7 +266,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
 
   return data.length > 0 ? (
     <Box paddingX={2}>
-      <DataTable data={data} columns={columns} hoverable />
+      <DataTable data={data} columns={columns} hoverable scrollable />
     </Box>
   ) : (
     <UserFeedback reportType="Investor transactions" />
