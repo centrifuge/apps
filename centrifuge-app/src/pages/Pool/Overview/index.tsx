@@ -3,7 +3,7 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import { InvestRedeemContext, InvestRedeemProvider } from '../../../../src/components/InvestRedeem/InvestRedeemProvider'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
@@ -155,6 +155,7 @@ export function InvestButton(props: InvestRedeemProps) {
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
   const { connectedType, showNetworks } = useWallet()
+  const navigate = useNavigate()
 
   const getButtonText = (state: any) => {
     if (!state.isAllowedToInvest && connectedType !== null) {
@@ -181,7 +182,9 @@ export function InvestButton(props: InvestRedeemProps) {
               <Button
                 onClick={() => {
                   if (!state.isAllowedToInvest && connectedType !== null) {
-                    window.open(metadata?.onboarding?.externalOnboardingUrl)
+                    metadata?.onboarding?.externalOnboardingUrl
+                      ? window.open(metadata?.onboarding?.externalOnboardingUrl)
+                      : navigate(`/onboarding?poolId=${poolId}&trancheId=${trancheId}`)
                   } else if (connectedType === null) {
                     showNetworks()
                   } else {
