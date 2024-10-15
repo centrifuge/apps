@@ -249,7 +249,7 @@ export function PoolCard({
               </Text>
             </Box>
           ))}
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" mt={1}>
           <Text variant="body2">Asset type</Text>
           <Text variant="body2">{assetClass ?? '-'}</Text>
         </Box>

@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
@@ -36,8 +37,17 @@ import { RedeemForm } from './RedeemForm'
 export type InvestRedeemProps = {
   poolId: string
   trancheId: string
-  metadata: PoolMetaDataPartial
+  metadata?: PoolMetaDataPartial
 } & InputProps
+
+type HeaderProps = {
+  sumUnrealizedProfitAtMarketPrice?: CurrencyBalance
+  sumRealizedProfitFifoByPeriod?: CurrencyBalance
+} & InputProps
+
+type InputProps = {
+  defaultView?: 'invest' | 'redeem'
+}
 
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
@@ -73,7 +83,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
       >
         <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
           <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-            <Header />
+            <Header {...rest} />
             <InvestRedeemInput {...rest} />
             {!isTinlakePool && (connectedType === 'substrate' || isEvmOnSubstrate) && <LiquidityRewardsContainer />}
             <Footer />
@@ -82,10 +92,6 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
       </ConnectionGuard>
     </LoadBoundary>
   )
-}
-
-type InputProps = {
-  defaultView?: 'invest' | 'redeem'
 }
 
 function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
@@ -149,10 +155,9 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
   )
 }
 
-function Header() {
+function Header({ sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPrice }: HeaderProps) {
   const { state } = useInvestRedeem()
   const { connectedType } = useWallet()
-
   return (
     <Stack gap={2}>
       <Text variant="heading2">{state.trancheCurrency?.symbol} investment overview</Text>
@@ -161,7 +166,7 @@ function Header() {
           <TextWithPlaceholder variant="body3" color="textSecondary">
             Investment position
           </TextWithPlaceholder>
-          <Shelf gap={'3px'}>
+          <Shelf gap="3px">
             <TextWithPlaceholder
               variant="heading2"
               fontWeight="bold"
@@ -177,6 +182,46 @@ function Header() {
           </Shelf>
         </Stack>
       )}
+      <Box display="flex" justifyContent="space-between" width="50%">
+        <Stack>
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Realized P&L
+          </TextWithPlaceholder>
+          <Shelf gap={'3px'}>
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(sumRealizedProfitFifoByPeriod ?? 0, undefined, 2, 0)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
+            </TextWithPlaceholder>
+          </Shelf>
+        </Stack>
+        <Stack>
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Unrealized P&L
+          </TextWithPlaceholder>
+          <Shelf gap={'3px'}>
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(sumUnrealizedProfitAtMarketPrice ?? 0, undefined, 2, 0)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
+            </TextWithPlaceholder>
+          </Shelf>
+        </Stack>
+      </Box>
     </Stack>
   )
 }

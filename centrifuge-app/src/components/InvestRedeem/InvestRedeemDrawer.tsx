@@ -1,6 +1,7 @@
-import { DailyPoolState, Perquintill } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, DailyPoolState, Perquintill, Pool } from '@centrifuge/centrifuge-js'
 import { Box, Drawer, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { TinlakePool } from 'src/utils/tinlake/useTinlakePools'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LoadBoundary } from '../LoadBoundary'
@@ -31,6 +32,7 @@ export function InvestRedeemDrawer({
 }) {
   const [filter, setFilter] = React.useState<FilterOptions>('30days')
   const [index, setIndex] = React.useState(0)
+  const pool = usePool(poolId)
 
   const dateFrom = React.useMemo(() => {
     if (filter === 'YTD') {
@@ -57,10 +59,27 @@ export function InvestRedeemDrawer({
 
   const { poolStates: dailyPoolStates } = useDailyPoolStates(poolId, new Date(dateFrom)) || {}
 
+  const realizedUnrealizedValues = React.useMemo(() => {
+    const today = dailyPoolStates?.find(
+      (state) => new Date(state.timestamp).toDateString() === new Date().toDateString()
+    )
+
+    const sumRealizedProfitFifoByPeriod = new CurrencyBalance(
+      today?.sumRealizedProfitFifoByPeriod ?? 0,
+      pool.currency.decimals
+    ).toDecimal()
+    const sumUnrealizedProfitAtMarketPrice = new CurrencyBalance(
+      today?.sumUnrealizedProfitAtMarketPrice ?? 0,
+      pool.currency.decimals
+    )
+
+    return { sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPrice }
+  }, [dailyPoolStates])
+
   return (
     <Drawer isOpen={open} onClose={onClose}>
       <LoadBoundary>
-        <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
+        <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} {...realizedUnrealizedValues} />
       </LoadBoundary>
       <LoadBoundary>
         {dailyPoolStates?.length ? (
@@ -80,7 +99,7 @@ export function InvestRedeemDrawer({
             </Box>
 
             <TokenPriceChart
-              poolId={poolId}
+              pool={pool}
               trancheId={trancheId}
               dailyPoolStates={dailyPoolStates}
               filter={filter}
@@ -95,22 +114,20 @@ export function InvestRedeemDrawer({
 }
 
 const TokenPriceChart = React.memo(function TokenPriceChart({
-  poolId,
+  pool,
   trancheId,
   dailyPoolStates,
   filter,
   setFilter,
   index,
 }: {
-  poolId: string
+  pool: Pool | TinlakePool
   trancheId: string
   dailyPoolStates: DailyPoolStateProps[]
   filter: FilterOptions
   setFilter: any
   index: number
 }) {
-  const pool = usePool(poolId)
-
   const data = React.useMemo(() => {
     const tokenData =
       dailyPoolStates?.map((state) => {
@@ -134,7 +151,7 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
     return tokenData
   }, [dailyPoolStates, pool?.tranches, trancheId, filter])
 
-  if (!data.length) return
+  if (!data.length || !pool) return
 
   return (
     <PriceChart
