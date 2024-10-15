@@ -146,43 +146,47 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: metadata?.pool?.poolStructure ? metadata?.pool?.poolStructure : '-',
     },
     ...(metadata?.pool?.poolRatings?.length
-      ? metadata?.pool?.poolRatings.map((rating) => ({
-          metric: 'Rating',
-          value: (
-            <Shelf gap={2}>
-              <Tooltip
-                delay={300}
-                bodyWidth="maxContent"
-                body={
-                  <TooltipBody
-                    title={rating.agency ?? ''}
-                    links={[
-                      { text: 'View report', url: rating.reportUrl ?? '' },
-                      ...(rating.reportFile
-                        ? [
-                            {
-                              text: 'Download report',
-                              url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
-                            },
-                          ]
-                        : []),
-                    ]}
-                  />
-                }
-              >
-                <Box
-                  border={`1px solid ${theme.colors.backgroundInverted}`}
-                  borderRadius={20}
-                  padding="2px 10px"
-                  display="flex"
-                >
-                  {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
-                  <Text>{rating.value}</Text>
-                </Box>
-              </Tooltip>
-            </Shelf>
-          ),
-        }))
+      ? [
+          {
+            metric: 'Rating',
+            value: (
+              <Shelf gap={1}>
+                {metadata?.pool?.poolRatings.map((rating) => (
+                  <Tooltip
+                    delay={300}
+                    bodyWidth="maxContent"
+                    body={
+                      <TooltipBody
+                        title={rating.agency ?? ''}
+                        links={[
+                          { text: 'View report', url: rating.reportUrl ?? '' },
+                          ...(rating.reportFile
+                            ? [
+                                {
+                                  text: 'Download report',
+                                  url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
+                    }
+                  >
+                    <Box
+                      border={`1px solid ${theme.colors.backgroundInverted}`}
+                      borderRadius={20}
+                      padding="2px 10px"
+                      display="flex"
+                    >
+                      {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
+                      <Text>{rating.value}</Text>
+                    </Box>
+                  </Tooltip>
+                ))}
+              </Shelf>
+            ),
+          },
+        ]
       : []),
 
     {
