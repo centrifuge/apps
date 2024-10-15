@@ -35,7 +35,7 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  height: 320px;
+  height: 300px;
 
   margin-right: 12px;
   margin-bottom: 12px;
@@ -263,24 +263,21 @@ export function PoolCard({
             {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
           </Stack>
         </Box>
-        {metaData?.pool?.issuer?.shortDescription ||
-          (isTinlakePool && (
-            <Box marginY={12}>
-              <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
-                {isTinlakePool
-                  ? tinlakeTranches[tinlakeKey].shortDescription
-                  : metaData?.pool?.issuer?.shortDescription}
-              </Text>
-            </Box>
-          ))}
+        {(metaData?.pool?.issuer?.shortDescription || isTinlakePool) && (
+          <Box marginY={12}>
+            <Text as="p" variant="body3" color="textButtonPrimaryDisabled">
+              {isTinlakePool ? tinlakeTranches[tinlakeKey].shortDescription : metaData?.pool?.issuer?.shortDescription}
+            </Text>
+          </Box>
+        )}
+
         <Box display="flex" justifyContent="space-between" mt={1}>
-          <Text variant="body2">Asset type</Text>
-          <Text variant="body2">{assetClass ?? '-'}</Text>
+          <Text variant="body3">Asset type</Text>
+          <Text variant="body3">{assetClass ?? '-'}</Text>
         </Box>
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">Investor type</Text>
-          <Text variant="body2">
-            {' '}
+          <Text variant="body3">Investor type</Text>
+          <Text variant="body3">
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
           </Text>
         </Box>
