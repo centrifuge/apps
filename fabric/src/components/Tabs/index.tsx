@@ -50,7 +50,6 @@ const StyledTabsItem = styled.button<{
     background: 'transparent',
   },
   ({ $active, theme, styleOverrides, showBorder, variant }) => {
-    console.log(variant)
     return css({
       paddingTop: 1,
       paddingLeft: 2,

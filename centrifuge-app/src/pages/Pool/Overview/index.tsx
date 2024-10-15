@@ -156,35 +156,44 @@ export function InvestButton(props: InvestRedeemProps) {
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
   const { connectedType, showNetworks } = useWallet()
 
+  const getButtonText = (state: any) => {
+    if (!state.isAllowedToInvest && connectedType !== null) {
+      return 'Onboard'
+    } else if (connectedType === null) {
+      return 'Connect'
+    } else {
+      return state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'
+    }
+  }
+
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
       <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
         <InvestRedeemContext.Consumer>
           {({ state }) => {
-            if (!state.isAllowedToInvest && connectedType !== null) {
-              return (
-                <Button onClick={() => window.open(metadata?.onboarding?.externalOnboardingUrl)} variant="primary">
-                  Onboard
-                </Button>
-              )
-            } else if (connectedType === null) {
-              return (
-                <Button onClick={() => showNetworks()} variant="primary">
-                  Connect
-                </Button>
-              )
-            } else {
-              return (
-                <Button
-                  aria-label={`Invest in ${props.trancheId}`}
-                  onClick={() => connectAndOpen()}
-                  style={{ marginLeft: 'auto', width: '120px' }}
-                >
-                  {state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'}
-                </Button>
-              )
-            }
+            if (!state) return
+            const isLoading = state?.isDataLoading
+
+            const buttonText = getButtonText(state)
+
+            return (
+              <Button
+                onClick={() => {
+                  if (!state.isAllowedToInvest && connectedType !== null) {
+                    window.open(metadata?.onboarding?.externalOnboardingUrl)
+                  } else if (connectedType === null) {
+                    showNetworks()
+                  } else {
+                    connectAndOpen()
+                  }
+                }}
+                variant="primary"
+                loading={isLoading}
+              >
+                {buttonText}
+              </Button>
+            )
           }}
         </InvestRedeemContext.Consumer>
       </InvestRedeemProvider>

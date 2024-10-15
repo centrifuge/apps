@@ -39,10 +39,6 @@ const StyledButton = styled(Button)<StyledButtonProps>`
   }
 `
 
-const StyledAnchorButton = styled(AnchorButton)`
-  width: 80px;
-`
-
 type ReportFilterProps = {
   poolId: string
 }
@@ -180,7 +176,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
               </Box>
             </>
           ) : null}
-          <StyledAnchorButton
+          <AnchorButton
             disabled={!csvData}
             download={csvData?.fileName}
             href={csvData?.dataUrl}
@@ -189,7 +185,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
             variant="inverted"
           >
             Download
-          </StyledAnchorButton>
+          </AnchorButton>
         </Shelf>
       </Shelf>
       {transformDataChart?.length && (

@@ -182,7 +182,7 @@ function Header({ sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPric
           </Shelf>
         </Stack>
       )}
-      <Box display="flex" justifyContent="space-between" width="50%">
+      <Box display="flex">
         <Stack>
           <TextWithPlaceholder variant="body3" color="textSecondary">
             Realized P&L
@@ -202,11 +202,11 @@ function Header({ sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPric
             </TextWithPlaceholder>
           </Shelf>
         </Stack>
-        <Stack>
+        <Stack marginLeft="20px">
           <TextWithPlaceholder variant="body3" color="textSecondary">
             Unrealized P&L
           </TextWithPlaceholder>
-          <Shelf gap={'3px'}>
+          <Shelf gap="3px">
             <TextWithPlaceholder
               variant="heading2"
               fontWeight="bold"
