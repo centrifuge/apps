@@ -80,7 +80,7 @@ export const TrancheTokenCards = ({
         ),
       },
     ]
-  }, [pool, poolId, isTinlakePool, daysSinceCreation])
+  }, [pool, poolId, isTinlakePool, daysSinceCreation, metadata])
 
   const columns = useMemo(() => {
     return columnConfig.map((col, index) => {

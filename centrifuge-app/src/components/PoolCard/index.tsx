@@ -173,7 +173,7 @@ export function PoolCard({
         }
       })
       .reverse()
-  }, [calculateApy, getTinlakeMinInvestment])
+  }, [calculateApy, getTinlakeMinInvestment, isTinlakePool, metaData?.tranches, tinlakeObjKey, tranches])
 
   return (
     <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>

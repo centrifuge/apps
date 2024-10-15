@@ -52,7 +52,8 @@ export const Inner = styled(Grid)`
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
-    padding-left: 16px;
+    padding-left: 12px;
+    padding-right: 20px;
     height: 100vh;
   }
 `
@@ -100,7 +101,7 @@ export const LogoContainer = styled(Stack)`
 
   height: ${HEADER_HEIGHT}px;
   justify-content: center;
-  padding-left: 12px;
+  padding-left: 8px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
@@ -111,7 +112,7 @@ export const LogoContainer = styled(Stack)`
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     justify-content: start;
-    padding-top: ${({ theme }) => theme.space[2]}px;
+    padding-top: ${({ theme }) => theme.space[3]}px;
   }
 `
 
@@ -166,6 +167,7 @@ export const FooterContainer = styled(Box)`
   position: sticky;
   bottom: 0;
   width: 100%;
+  padding-left: 4px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     position: sticky;

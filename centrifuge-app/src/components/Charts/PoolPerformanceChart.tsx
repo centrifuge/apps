@@ -174,7 +174,7 @@ function PoolPerformanceChart() {
           seniorAPY: formattedSeniorAPY,
         }
       }) || [],
-    [truncatedPoolStates, todayAssetValue, pool, range]
+    [truncatedPoolStates, todayAssetValue, pool, range, todayJuniorApy, todaySeniorApy]
   )
 
   const today = {

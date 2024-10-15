@@ -34,10 +34,6 @@ function PoolDetailReporting({ poolId, isReportingTab }: { poolId: string; isRep
   const pool = usePool(poolId) as Pool
   const contentWrapperRef = React.useRef<HTMLDivElement>(null)
 
-  if (!poolId || !pool) {
-    return <Spinner mt={2} />
-  }
-
   // We want to scroll within the table and not the page,
   // this way we can keep the filters on top of the page while scrolling on the table
   React.useEffect(() => {
@@ -53,6 +49,10 @@ function PoolDetailReporting({ poolId, isReportingTab }: { poolId: string; isRep
       }
     }
   }, [isReportingTab])
+
+  if (!poolId || !pool) {
+    return <Spinner mt={2} />
+  }
 
   return (
     <div ref={contentWrapperRef}>
