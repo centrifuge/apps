@@ -1,7 +1,8 @@
 import { CurrencyBalance, Rate, Token } from '@centrifuge/centrifuge-js'
 import { Box, Card, Divider, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import styled from 'styled-components'
+import { useMemo } from 'react'
+import styled, { useTheme } from 'styled-components'
 import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
@@ -24,6 +25,10 @@ export type MetaData = {
   }
 }
 
+type TinlakeTranchesKey = 'silver' | 'blocktowerThree' | 'blocktowerFour'
+
+type TrancheWithCurrency = Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
+
 const StyledRouterTextLink = styled(RouterTextLink)`
   font-size: 12px;
   margin-top: 8px;
@@ -33,12 +38,14 @@ const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
   height: 320px;
+
   margin-right: 12px;
   margin-bottom: 12px;
   padding: 12px;
 
   &:hover {
-    border: 1px solid ${({ theme }) => theme.colors.backgroundInverted};
+    border: 1px solid ${({ theme }) => theme.colors.backgroundTertiary};
+    box-shadow: 0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) {
@@ -50,6 +57,33 @@ const StyledCard = styled(Card)`
   }
 `
 
+const tinlakeTranches = {
+  silver: {
+    Junior: '15%',
+    Senior: '7%',
+    shortDescription: ' Real estate bridge loans for fix and flip projects, maturing in 12-24 months.',
+    InvestorType: 'Qualified Investors',
+  },
+  blocktowerThree: {
+    Junior: '15%',
+    Senior: '4%',
+    shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
+    InvestorType: 'Private',
+  },
+  blocktowerFour: {
+    Junior: '15%',
+    Senior: '4%',
+    shortDescription: 'Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
+    InvestorType: 'Private',
+  },
+  none: {
+    Junior: '-',
+    Senior: '-',
+    shortDescription: '',
+    InvestorType: '-',
+  },
+}
+
 export type PoolCardProps = {
   poolId?: string
   name?: string
@@ -59,7 +93,7 @@ export type PoolCardProps = {
   apr?: Rate | null | undefined
   status?: PoolStatusKey
   iconUri?: string
-  tranches?: Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id'>[]
+  tranches?: TrancheWithCurrency[]
   metaData?: MetaData
   createdAt?: string
 }
@@ -76,42 +110,82 @@ export function PoolCard({
   metaData,
   createdAt,
 }: PoolCardProps) {
+  const theme = useTheme()
   const isOneTranche = tranches && tranches?.length === 1
-  const renderText = (text: string) => (
-    <Text fontWeight={500} as="h2" variant="body1">
-      {text}
-    </Text>
-  )
+  const isTinlakePool =
+    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
+    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
+    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
 
-  const tranchesData = tranches
-    ?.map((tranche) => {
-      const words = tranche.currency.name.trim().split(' ')
-      const metadata = metaData?.tranches[tranche.id] ?? null
-      const trancheName = words[words.length - 1]
-      const investmentBalance = new CurrencyBalance(
-        metadata?.minInitialInvestment ?? 0,
-        tranche.currency.decimals
-      ).toDecimal()
+  const tinlakeObjKey = () => {
+    if (name?.includes('Silver')) return 'silver'
+    else if (name?.includes('BlockTower Series 3')) return 'blocktowerThree'
+    else if (name?.includes('BlockTower Series 4')) return 'blocktowerFour'
+    else return 'none'
+  }
 
-      const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
+  const getTinlakeMinInvestment = (trancheName: 'Junior' | 'Senior') => {
+    if (name?.includes('Silver') && trancheName === 'Senior') return '5K'
+    else return '-'
+  }
 
-      function calculateApy() {
-        if (poolId === '4139607887') return formatPercentage(5, true, {}, 1)
-        if (poolId === '1655476167') return formatPercentage(15, true, {}, 1)
-        if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
-          return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
-        if (tranche.interestRatePerSec) return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
-        return '-'
-      }
+  const renderText = (text: string, isApr?: boolean) => {
+    if (isApr && poolId === '1615768079') {
+      return (
+        <Box display="flex">
+          <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'} style={{ width: 35 }}>
+            {text}
+          </Text>
+          <Text variant="label2" style={{ alignSelf: 'flex-end', marginLeft: '4px' }}>
+            Target
+          </Text>
+        </Box>
+      )
+    }
+    return (
+      <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'}>
+        {text}
+      </Text>
+    )
+  }
 
-      return {
-        name: trancheName,
-        apr: calculateApy(),
-        minInvestment:
-          metadata && metadata.minInitialInvestment ? `$${formatBalanceAbbreviated(investmentBalance, '', 0)}` : '-',
-      }
-    })
-    .reverse()
+  const calculateApy = (tranche: TrancheWithCurrency) => {
+    const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
+    if (poolId === '1655476167') return '15%'
+    if (poolId === '1615768079' && tranche.seniority === 0) return '8.0%'
+    if (poolId === '1615768079' && tranche.seniority === 1) return '16%'
+    if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
+      return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
+    if (tranche.interestRatePerSec) {
+      return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
+    }
+    return '-'
+  }
+
+  const tranchesData = useMemo(() => {
+    return tranches
+      ?.map((tranche: TrancheWithCurrency) => {
+        const key = tinlakeObjKey() as TinlakeTranchesKey
+        const words = tranche.currency.name.trim().split(' ')
+        const metadata = metaData?.tranches[tranche.id] ?? null
+        const trancheName = words[words.length - 1]
+        const investmentBalance = new CurrencyBalance(
+          metadata?.minInitialInvestment ?? 0,
+          tranche.currency.decimals
+        ).toDecimal()
+
+        return {
+          name: trancheName,
+          apr: isTinlakePool ? tinlakeTranches[key][trancheName as 'Junior' | 'Senior'] : calculateApy(tranche),
+          minInvestment: isTinlakePool
+            ? getTinlakeMinInvestment(trancheName as 'Junior' | 'Senior')
+            : metadata && metadata.minInitialInvestment
+            ? `$${formatBalanceAbbreviated(investmentBalance, '', 0)}`
+            : '-',
+        }
+      })
+      .reverse()
+  }, [calculateApy, getTinlakeMinInvestment, isTinlakePool, metaData?.tranches, tinlakeObjKey, tranches])
 
   return (
     <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>
@@ -124,7 +198,15 @@ export function PoolCard({
             </Text>
           </Box>
           {iconUri ? (
-            <Box as="img" src={iconUri} alt="" height={38} width={38} borderRadius="4px" />
+            <Box
+              as="img"
+              src={iconUri}
+              alt=""
+              height={38}
+              width={38}
+              border={`1px solid ${theme.colors.backgroundTertiary}`}
+              borderRadius={4}
+            />
           ) : (
             <Thumbnail type="pool" label="LP" size="large" />
           )}
@@ -143,7 +225,7 @@ export function PoolCard({
           padding={isOneTranche ? 0 : '8px'}
           display="flex"
           justifyContent="space-between"
-          width={isOneTranche ? '50%' : '100%'}
+          width={isOneTranche ? '60%' : '100%'}
         >
           {!isOneTranche && (
             <Stack>
@@ -158,9 +240,9 @@ export function PoolCard({
           )}
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-              APY
+              {poolId === '1655476167' ? 'Target' : 'APY'}
             </Text>
-            {tranchesData?.map((tranche) => renderText(`${tranche.apr}`))}
+            {tranchesData?.map((tranche) => renderText(`${tranche.apr}`, true))}
           </Stack>
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
@@ -169,20 +251,26 @@ export function PoolCard({
             {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
           </Stack>
         </Box>
-        {metaData?.pool?.issuer?.shortDescription && (
-          <Box marginY={12}>
-            <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
-              {metaData?.pool?.issuer?.shortDescription}
-            </Text>
-          </Box>
-        )}
-        <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">{assetClass && 'Asset type'}</Text>
-          <Text variant="body2">{assetClass ?? ''}</Text>
+        {metaData?.pool?.issuer?.shortDescription ||
+          (isTinlakePool && (
+            <Box marginY={12}>
+              <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
+                {isTinlakePool
+                  ? tinlakeTranches[tinlakeObjKey()].shortDescription
+                  : metaData?.pool?.issuer?.shortDescription}
+              </Text>
+            </Box>
+          ))}
+        <Box display="flex" justifyContent="space-between" mt={1}>
+          <Text variant="body2">Asset type</Text>
+          <Text variant="body2">{assetClass ?? '-'}</Text>
         </Box>
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body2">{metaData?.pool?.investorType && 'Investor Type'}</Text>
-          <Text variant="body2"> {metaData?.pool?.investorType ?? ''}</Text>
+          <Text variant="body2">Investor type</Text>
+          <Text variant="body2">
+            {' '}
+            {isTinlakePool ? tinlakeTranches[tinlakeObjKey()].InvestorType : metaData?.pool?.investorType ?? '-'}
+          </Text>
         </Box>
       </StyledCard>
     </RouterTextLink>

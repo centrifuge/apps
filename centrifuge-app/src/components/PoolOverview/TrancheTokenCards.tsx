@@ -7,8 +7,17 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { PoolMetaDataPartial } from '../PoolList'
 
-export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: Token[]; poolId: string }) => {
+export const TrancheTokenCards = ({
+  trancheTokens,
+  poolId,
+  metadata,
+}: {
+  trancheTokens: Token[]
+  poolId: string
+  metadata: PoolMetaDataPartial
+}) => {
   const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
@@ -23,6 +32,9 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
   const columnConfig = useMemo(() => {
     const calculateApy = (trancheToken: Token) => {
       if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
+      if (poolId === '1655476167') return '15%'
+      if (poolId === '1615768079' && trancheToken.seniority === 0) return '8%'
+      if (poolId === '1615768079' && trancheToken.seniority === 1) return '16%'
       if (daysSinceCreation < 30) return 'N/A'
       return trancheToken.yield30DaysAnnualized
         ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
@@ -34,9 +46,10 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
         header: 'Token',
         align: 'left',
         formatter: (v: any) => v,
+        width: '40%',
       },
       {
-        header: 'APY',
+        header: poolId === '1655476167' || poolId === '1615768079' ? 'Target' : 'APY',
         align: 'left',
         formatter: (v: any) => (v ? calculateApy(v) : '-'),
       },
@@ -48,7 +61,7 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
       {
         header: 'Token price',
         align: 'left',
-        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, pool?.currency.decimals) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, 6) : '-'),
       },
       ...(pool.tranches.length > 1
         ? [
@@ -64,24 +77,23 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
         : []),
       {
         header: '',
-        align: 'left',
-        formatter: (_: any, row: any) => {
-          return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
-        },
+        align: 'right',
+        formatter: (_: any, row: any) => (
+          <InvestButton poolId={poolId} trancheId={row.value[1].id} metadata={metadata} />
+        ),
       },
     ]
-  }, [pool, poolId, isTinlakePool, daysSinceCreation])
+  }, [pool, poolId, isTinlakePool, daysSinceCreation, metadata])
 
   const columns = useMemo(() => {
     return columnConfig.map((col, index) => {
       return {
-        align: col.align,
-        header: col.header,
         cell: (row: any) => (
           <Text paddingY={2} fontWeight={col.header === 'APY' ? '600' : '400'} variant="heading2">
             {col.formatter(row.value[index], row)}
           </Text>
         ),
+        ...col,
       }
     })
   }, [columnConfig])

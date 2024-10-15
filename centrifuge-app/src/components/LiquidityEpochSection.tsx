@@ -329,6 +329,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   } = useWallet()
   const { refetch: refetchBalances } = useTinlakeBalances()
   const { refetch: refetchInvestments } = useTinlakeInvestments(pool.id)
+  const isTinlakePool = pool.id?.startsWith('0x')
 
   const { execute: closeEpochTx, isLoading: loadingClose } = useTinlakeTransaction(
     pool.id,
@@ -469,7 +470,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   }
 
   return (
-    <PageSection title="Order overview" headerRight={epochButtonElement}>
+    <PageSection title="Order overview" headerRight={isTinlakePool ? <></> : epochButtonElement}>
       <Stack gap="2">
         <Stack gap="3">
           <DataTableGroup>

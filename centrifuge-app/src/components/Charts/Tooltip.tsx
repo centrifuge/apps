@@ -4,9 +4,9 @@ import { TooltipProps } from 'recharts'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 
-type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number }
+type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number; isRate?: boolean }
 
-export function CustomizedTooltip({ payload, currency, precision }: CustomizedTooltipProps) {
+export function CustomizedTooltip({ payload, currency, precision, isRate }: CustomizedTooltipProps) {
   if (payload && payload?.length > 0) {
     return (
       <TooltipContainer>
@@ -15,7 +15,7 @@ export function CustomizedTooltip({ payload, currency, precision }: CustomizedTo
           <TooltipEntry name={name} color={color} key={`${dataKey}${index}`}>
             {typeof value !== 'number'
               ? formatBalance(value[1] - value[0], currency, precision)
-              : unit === 'percent'
+              : unit === 'percent' || isRate
               ? formatPercentage(value)
               : formatBalance(value, currency, precision)}
           </TooltipEntry>

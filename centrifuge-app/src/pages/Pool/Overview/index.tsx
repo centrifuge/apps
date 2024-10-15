@@ -1,9 +1,11 @@
 import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { InvestRedeemContext, InvestRedeemProvider } from '../../../../src/components/InvestRedeem/InvestRedeemProvider'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
@@ -20,7 +22,6 @@ import { formatBalance } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
-import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -118,16 +119,22 @@ export function PoolDetailOverview() {
         </Grid>
         {tokens.length > 0 && (
           <React.Suspense fallback={<Spinner />}>
-            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} />
+            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} metadata={metadata} />
           </React.Suspense>
         )}
         <React.Suspense fallback={<Spinner />}>
-          <Grid gridTemplateColumns={'1fr 0.5fr'} gap={2} marginY={3}>
-            <Card p={3} backgroundColor="backgroundSecondary">
+          <Grid
+            gridTemplateColumns="1fr 0.5fr"
+            gap={2}
+            marginY={3}
+            borderBottom={`1px solid ${theme.colors.borderPrimary}`}
+            paddingBottom={3}
+          >
+            <Card p={2} backgroundColor="backgroundSecondary">
               <IssuerDetails metadata={metadata} />
             </Card>
             {metadata?.pool?.reports?.length || !isTinlakePool ? (
-              <Card p={3} backgroundColor="backgroundButtonSecondary">
+              <Card p={2} backgroundColor="backgroundButtonSecondary">
                 <ReportDetails metadata={metadata} />
               </Card>
             ) : null}
@@ -144,20 +151,52 @@ export function PoolDetailOverview() {
 }
 
 export function InvestButton(props: InvestRedeemProps) {
+  const { poolId, trancheId, metadata } = props
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
-  const isMedium = useIsAboveBreakpoint('M')
+  const { connectedType, showNetworks } = useWallet()
+
+  const getButtonText = (state: any) => {
+    if (!state.isAllowedToInvest && connectedType !== null) {
+      return 'Onboard'
+    } else if (connectedType === null) {
+      return 'Connect'
+    } else {
+      return state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'
+    }
+  }
 
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
-      <Button
-        aria-label={`Invest in ${props.trancheId}`}
-        onClick={() => connectAndOpen()}
-        style={{ marginLeft: 'auto', width: isMedium ? 'auto' : ' 100%' }}
-      >
-        Invest
-      </Button>
+      <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
+        <InvestRedeemContext.Consumer>
+          {({ state }) => {
+            if (!state) return
+            const isLoading = state?.isDataLoading
+
+            const buttonText = getButtonText(state)
+
+            return (
+              <Button
+                onClick={() => {
+                  if (!state.isAllowedToInvest && connectedType !== null) {
+                    window.open(metadata?.onboarding?.externalOnboardingUrl)
+                  } else if (connectedType === null) {
+                    showNetworks()
+                  } else {
+                    connectAndOpen()
+                  }
+                }}
+                variant="primary"
+                loading={isLoading}
+              >
+                {buttonText}
+              </Button>
+            )
+          }}
+        </InvestRedeemContext.Consumer>
+      </InvestRedeemProvider>
     </>
   )
 }

@@ -349,9 +349,10 @@ export type TooltipsProps = {
   label?: string | React.ReactNode
   props?: any
   size?: 'med' | 'sm'
+  color?: string
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export function Tooltips({ type, label: labelOverride, size = 'sm', props, ...textProps }: TooltipsProps) {
+export function Tooltips({ type, label: labelOverride, size = 'sm', props, color, ...textProps }: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   return (
     <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
@@ -359,7 +360,7 @@ export function Tooltips({ type, label: labelOverride, size = 'sm', props, ...te
         <Text
           textAlign="left"
           variant={size === 'sm' ? 'label2' : 'label1'}
-          color={size === 'sm' ? 'textPrimary' : 'textSecondary'}
+          color={size === 'sm' && !color ? 'textPrimary' : 'textSecondary'}
           fontWeight={size === 'sm' ? 'inherit' : 400}
         >
           {labelOverride || label}
