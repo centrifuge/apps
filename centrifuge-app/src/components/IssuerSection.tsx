@@ -213,7 +213,7 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
   return ratings?.length ? (
     <Stack gap={1}>
       <Text variant="heading2">Pool rating</Text>
-      <Shelf flexDirection="column" alignItems="flex-start">
+      <Shelf flexDirection="column" alignItems="flex-start" gap={2}>
         {ratings?.map((rating) => {
           return (
             <Stack gap={1} key={rating.agency}>

@@ -1,4 +1,4 @@
-import { FileType, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Stack } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
@@ -158,25 +158,34 @@ export function Issuer() {
       }
 
       if (values.poolRatings) {
-        const newRatingReportPromise = await Promise.all(
-          values.poolRatings.map((rating) => (rating.reportFile ? pinFile(rating.reportFile) : null))
+        const updatedRatings = await Promise.all(
+          values.poolRatings.map(async (newRating, index) => {
+            const existingRating = oldMetadata.pool.poolRatings?.[index]
+
+            if (JSON.stringify(newRating) === JSON.stringify(existingRating)) {
+              return existingRating
+            }
+
+            const newReportFile = typeof newRating.reportFile === 'object' ? newRating.reportFile : null
+            // remove the existing reportFile from the newRating so we don't accidentally overwrite it with the string representation
+            // the existing reportFile will still be captured in the existingRating
+            delete newRating.reportFile
+            const mergedRating = { ...existingRating, ...newRating }
+
+            if (newReportFile) {
+              try {
+                const pinnedFile = await pinFile(newReportFile)
+                mergedRating.reportFile = pinnedFile
+              } catch (error) {
+                console.error('Error pinning file:', error)
+              }
+            }
+
+            return mergedRating
+          })
         )
 
-        const ratings = values.poolRatings.map((rating, index) => {
-          let reportFile: FileType | null = rating.reportFile
-            ? { uri: rating.reportFile.name, mime: rating.reportFile.type }
-            : null
-          if (rating.reportFile && newRatingReportPromise[index]?.uri) {
-            reportFile = newRatingReportPromise[index] ?? null
-          }
-          return {
-            agency: rating.agency ?? '',
-            value: rating.value ?? '',
-            reportUrl: rating.reportUrl ?? '',
-            reportFile: reportFile ?? null,
-          }
-        })
-        newPoolMetadata.pool.poolRatings = ratings
+        newPoolMetadata.pool.poolRatings = updatedRatings as PoolMetadata['pool']['poolRatings']
       }
 
       execute([poolId, newPoolMetadata], { account })
