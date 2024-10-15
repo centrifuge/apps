@@ -121,6 +121,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: '30-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
+        : poolId === '1655476167'
+        ? '15%'
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)

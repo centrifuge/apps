@@ -137,6 +137,7 @@ export function PoolCard({
 
   const calculateApy = (tranche: TrancheWithCurrency) => {
     const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
+    if (poolId === '1655476167') return '15%'
     if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
       return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
     if (tranche.interestRatePerSec) {

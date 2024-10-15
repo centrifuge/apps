@@ -160,7 +160,7 @@ function PoolPerformanceChart() {
             nav: todayAssetValue,
             juniorTokenPrice: tranchePrices.juniorTokenPrice ?? 0,
             seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
-            juniorAPY: todayJuniorApy ?? 0,
+            juniorAPY: pool.id === '1655476167' ? 15 : todayJuniorApy,
             seniorAPY: todaySeniorApy,
           }
         }
@@ -181,7 +181,7 @@ function PoolPerformanceChart() {
     nav: todayAssetValue,
     price: todayPrice,
     currency: pool.currency.symbol,
-    juniorAPY: todayJuniorApy,
+    juniorAPY: pool.id === '1655476167' ? 15 : todayJuniorApy,
     seniorAPY: todaySeniorApy,
     ...trancheTodayPrice,
   }
