@@ -7,6 +7,7 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { PoolMetaDataPartial } from '../PoolList'
 
 export const TrancheTokenCards = ({
@@ -32,9 +33,11 @@ export const TrancheTokenCards = ({
   const columnConfig = useMemo(() => {
     const calculateApy = (trancheToken: Token) => {
       if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
-      if (poolId === '1655476167') return '15%'
-      if (poolId === '1615768079' && trancheToken.seniority === 0) return '8%'
-      if (poolId === '1615768079' && trancheToken.seniority === 1) return '16%'
+      if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+      if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
+        return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+      if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
+        return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
       if (daysSinceCreation < 30) return 'N/A'
       return trancheToken.yield30DaysAnnualized
         ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
@@ -49,7 +52,7 @@ export const TrancheTokenCards = ({
         width: '40%',
       },
       {
-        header: poolId === '1655476167' || poolId === '1615768079' ? 'Target' : 'APY',
+        header: poolId === DYF_POOL_ID || poolId === NS3_POOL_ID ? 'Target' : 'APY',
         align: 'left',
         formatter: (v: any) => (v ? calculateApy(v) : '-'),
       },

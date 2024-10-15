@@ -10,6 +10,7 @@ import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
+import { DYF_POOL_ID } from '../PoolCard'
 import { Tooltips, tooltipText } from '../Tooltips'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getOneDayPerMonth, getRangeNumber } from './utils'
@@ -160,7 +161,7 @@ function PoolPerformanceChart() {
             nav: todayAssetValue,
             juniorTokenPrice: tranchePrices.juniorTokenPrice ?? 0,
             seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
-            juniorAPY: pool.id === '1655476167' ? 15 : todayJuniorApy,
+            juniorAPY: pool.id === DYF_POOL_ID ? 15 : todayJuniorApy,
             seniorAPY: todaySeniorApy,
           }
         }
@@ -181,7 +182,7 @@ function PoolPerformanceChart() {
     nav: todayAssetValue,
     price: todayPrice,
     currency: pool.currency.symbol,
-    juniorAPY: pool.id === '1655476167' ? 15 : todayJuniorApy,
+    juniorAPY: pool.id === DYF_POOL_ID ? 15 : todayJuniorApy,
     seniorAPY: todaySeniorApy,
     ...trancheTodayPrice,
   }

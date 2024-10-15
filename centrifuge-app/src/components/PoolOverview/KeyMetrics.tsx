@@ -1,5 +1,5 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
-import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
+import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
@@ -10,6 +10,7 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { centrifugeTargetAPYs } from '../PoolCard'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
@@ -32,10 +33,7 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
   }
 }
 
-type TinlakeDataKey =
-  | '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
-  | '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
-  | '0x90040F96aB8f291b6d43A8972806e977631aFFdE'
+type TinlakeDataKey = keyof typeof tinlakeData
 
 const tinlakeData = {
   '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15% target',
@@ -77,6 +75,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
   const theme = useTheme()
+  const cent = useCentrifuge()
   const averageMaturity = useAverageMaturity(poolId)
 
   const expenseRatio = useMemo(() => {
@@ -107,11 +106,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
-  const getHardCodedApy = () => {
-    if (poolId === '1655476167') return '15%'
-    if (poolId === '1615768079') return '8% - 16%'
-  }
-
   const isBT3BT4 =
     poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
     poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
@@ -123,11 +117,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: poolId === '1655476167' || poolId === '1615768079' ? 'Target APY' : '30-day APY',
+      metric: centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] ? 'Target APY' : '30-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
-        : poolId === '1655476167' || poolId === '1615768079'
-        ? getHardCodedApy()
+        : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
+        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].join(' - ')
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)
@@ -171,36 +165,45 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: 'Pool structure',
       value: isBT3BT4 ? 'Revolving' : metadata?.pool?.poolStructure ?? '-',
     },
-    ...(metadata?.pool?.rating?.ratingValue
+    ...(metadata?.pool?.poolRatings?.length
       ? [
           {
             metric: 'Rating',
             value: (
-              <Tooltip
-                delay={300}
-                bodyWidth="maxContent"
-                body={
-                  <TooltipBody
-                    title={metadata?.pool?.rating?.ratingAgency ?? ''}
-                    subtitle="View Report"
-                    url={metadata?.pool?.rating?.ratingReportUrl ?? ''}
-                  />
-                }
-              >
-                <Box
-                  border={`1px solid ${theme.colors.backgroundInverted}`}
-                  borderRadius={20}
-                  padding="2px 10px"
-                  display="flex"
-                >
-                  {metadata?.pool?.rating?.ratingAgency?.includes('moody') ? (
-                    <IconMoody size={16} />
-                  ) : (
-                    <IconSp size={16} />
-                  )}
-                  <Text>{metadata?.pool?.rating?.ratingValue}</Text>
-                </Box>
-              </Tooltip>
+              <Shelf gap={1}>
+                {metadata?.pool?.poolRatings.map((rating) => (
+                  <Tooltip
+                    delay={300}
+                    bodyWidth="maxContent"
+                    body={
+                      <TooltipBody
+                        title={rating.agency ?? ''}
+                        links={[
+                          { text: 'View report', url: rating.reportUrl ?? '' },
+                          ...(rating.reportFile
+                            ? [
+                                {
+                                  text: 'Download report',
+                                  url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
+                    }
+                  >
+                    <Box
+                      border={`1px solid ${theme.colors.backgroundInverted}`}
+                      borderRadius={20}
+                      padding="2px 10px"
+                      display="flex"
+                    >
+                      {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
+                      <Text>{rating.value}</Text>
+                    </Box>
+                  </Tooltip>
+                ))}
+              </Shelf>
             ),
           },
         ]
@@ -259,21 +262,26 @@ const TooltipBody = ({
         </Text>
         {links ? (
           links.map((link, index) => (
-            <a key={index} target="_blank" rel="noopener noreferrer" href={link.url}>
+            <Shelf>
+              <a key={`${link.text}-${index}`} target="_blank" rel="noopener noreferrer" href={link.url}>
+                <Text variant="body3" color="white">
+                  {link.text}
+                </Text>
+              </a>
+              <IconArrowRightWhite size="iconSmall" />
+            </Shelf>
+          ))
+        ) : (
+          <Shelf>
+            <a target="_blank" rel="noopener noreferrer" href={url}>
               <Text variant="body3" color="white">
                 {subtitle}
               </Text>
             </a>
-          ))
-        ) : (
-          <a target="_blank" rel="noopener noreferrer" href={url}>
-            <Text variant="body3" color="white">
-              {subtitle}
-            </Text>
-          </a>
+            <IconArrowRightWhite size="iconSmall" />
+          </Shelf>
         )}
       </Box>
-      <IconArrowRightWhite size="iconSmall" />
     </Box>
   )
 }
