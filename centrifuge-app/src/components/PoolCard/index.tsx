@@ -27,7 +27,7 @@ export type MetaData = {
 
 type TinlakeTranchesKey = 'silver' | 'blocktowerThree' | 'blocktowerFour'
 
-type TrancheWithCurrency = Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id'>
+type TrancheWithCurrency = Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
 
 const StyledRouterTextLink = styled(RouterTextLink)`
   font-size: 12px;
@@ -129,15 +129,31 @@ export function PoolCard({
     else return '-'
   }
 
-  const renderText = (text: string) => (
-    <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'}>
-      {text}
-    </Text>
-  )
+  const renderText = (text: string, isApr?: boolean) => {
+    if (isApr && poolId === '1615768079') {
+      return (
+        <Box display="flex">
+          <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'} style={{ width: 35 }}>
+            {text}
+          </Text>
+          <Text variant="label2" style={{ alignSelf: 'flex-end', marginLeft: '4px' }}>
+            Target
+          </Text>
+        </Box>
+      )
+    }
+    return (
+      <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'}>
+        {text}
+      </Text>
+    )
+  }
 
   const calculateApy = (tranche: TrancheWithCurrency) => {
     const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
     if (poolId === '1655476167') return '15%'
+    if (poolId === '1615768079' && tranche.seniority === 0) return '8.0%'
+    if (poolId === '1615768079' && tranche.seniority === 1) return '16%'
     if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
       return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
     if (tranche.interestRatePerSec) {
@@ -158,14 +174,9 @@ export function PoolCard({
           tranche.currency.decimals
         ).toDecimal()
 
-        const apy = () => {
-          if (calculateApy(tranche) === '0.0%') return '-'
-          else return calculateApy(tranche)
-        }
-
         return {
           name: trancheName,
-          apr: isTinlakePool ? tinlakeTranches[key][trancheName as 'Junior' | 'Senior'] : apy(),
+          apr: isTinlakePool ? tinlakeTranches[key][trancheName as 'Junior' | 'Senior'] : calculateApy(tranche),
           minInvestment: isTinlakePool
             ? getTinlakeMinInvestment(trancheName as 'Junior' | 'Senior')
             : metadata && metadata.minInitialInvestment
@@ -229,9 +240,9 @@ export function PoolCard({
           )}
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-              APY
+              {poolId === '1655476167' ? 'Target' : 'APY'}
             </Text>
-            {tranchesData?.map((tranche) => renderText(`${tranche.apr}`))}
+            {tranchesData?.map((tranche) => renderText(`${tranche.apr}`, true))}
           </Stack>
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">

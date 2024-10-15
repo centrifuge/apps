@@ -107,6 +107,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
+  const getHardCodedApy = () => {
+    if (poolId === '1655476167') return '15%'
+    if (poolId === '1615768079') return '8% - 16%'
+  }
+
   const isBT3BT4 =
     poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
     poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
@@ -118,11 +123,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: '30-day APY',
+      metric: poolId === '1655476167' || poolId === '1615768079' ? 'Target APY' : '30-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
-        : poolId === '1655476167'
-        ? '15%'
+        : poolId === '1655476167' || poolId === '1615768079'
+        ? getHardCodedApy()
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)
