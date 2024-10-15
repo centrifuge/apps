@@ -32,7 +32,6 @@ export const TrancheTokenCards = ({
   const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
-  const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
 
   const getTrancheText = (trancheToken: Token) => {
     if (trancheToken.seniority === 0) return 'junior'
@@ -47,6 +46,7 @@ export const TrancheTokenCards = ({
       return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
     if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
       return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
+    const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
     if (daysSinceCreation < 30) return 'N/A'
     return trancheToken.yield30DaysAnnualized
       ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
