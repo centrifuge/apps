@@ -25,8 +25,6 @@ export type MetaData = {
   }
 }
 
-type TinlakeTranchesKey = 'silver' | 'blocktowerThree' | 'blocktowerFour'
-
 type TrancheWithCurrency = Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
 
 const StyledRouterTextLink = styled(RouterTextLink)`
@@ -58,31 +56,54 @@ const StyledCard = styled(Card)`
 `
 
 const tinlakeTranches = {
-  silver: {
-    Junior: '15%',
-    Senior: '7%',
+  NS2: {
+    name: 'New Silver 3',
+    tranches: [
+      { name: 'Junior', apr: '15%', minInvestment: '-' },
+      { name: 'Senior', apr: '7%', minInvestment: '5K' },
+    ],
     shortDescription: ' Real estate bridge loans for fix and flip projects, maturing in 12-24 months.',
-    InvestorType: 'Qualified Investors',
+    investorType: 'Qualified Investors',
   },
-  blocktowerThree: {
-    Junior: '15%',
-    Senior: '4%',
+  BT3: {
+    name: 'BlockTower Series 3',
+    tranches: [
+      { name: 'Junior', apr: '15%', minInvestment: '-' },
+      { name: 'Senior', apr: '4%', minInvestment: '-' },
+    ],
     shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
-    InvestorType: 'Private',
+    investorType: 'Private',
   },
-  blocktowerFour: {
-    Junior: '15%',
-    Senior: '4%',
+  BT4: {
+    name: 'BlockTower Series 4',
+    tranches: [
+      { name: 'Junior', apr: '15%', minInvestment: '-' },
+      { name: 'Senior', apr: '4%', minInvestment: '-' },
+    ],
     shortDescription: 'Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
-    InvestorType: 'Private',
+    investorType: 'Private',
   },
   none: {
-    Junior: '-',
-    Senior: '-',
+    name: '-',
+    tranches: [
+      { name: 'Junior', apr: '-', minInvestment: '-' },
+      { name: 'Senior', apr: '-', minInvestment: '-' },
+    ],
     shortDescription: '',
-    InvestorType: '-',
+    investorType: '-',
   },
 }
+
+export const DYF_POOL_ID = '1655476167'
+export const NS3_POOL_ID = '1615768079'
+
+export type CentrifugeTargetAPYs = keyof typeof centrifugeTargetAPYs
+export const centrifugeTargetAPYs = {
+  [DYF_POOL_ID]: ['15%'],
+  [NS3_POOL_ID]: ['8.0%', '16%'],
+}
+
+type TinlakeTranchesKey = keyof typeof tinlakeTranches
 
 export type PoolCardProps = {
   poolId?: string
@@ -112,25 +133,14 @@ export function PoolCard({
 }: PoolCardProps) {
   const theme = useTheme()
   const isOneTranche = tranches && tranches?.length === 1
-  const isTinlakePool =
-    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
-    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
-    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
+  const isTinlakePool = poolId?.startsWith('0x')
 
-  const tinlakeObjKey = () => {
-    if (name?.includes('Silver')) return 'silver'
-    else if (name?.includes('BlockTower Series 3')) return 'blocktowerThree'
-    else if (name?.includes('BlockTower Series 4')) return 'blocktowerFour'
-    else return 'none'
-  }
-
-  const getTinlakeMinInvestment = (trancheName: 'Junior' | 'Senior') => {
-    if (name?.includes('Silver') && trancheName === 'Senior') return '5K'
-    else return '-'
-  }
+  const tinlakeKey = (Object.keys(tinlakeTranches).find(
+    (key) => tinlakeTranches[key as TinlakeTranchesKey].name === name
+  ) || 'none') as TinlakeTranchesKey
 
   const renderText = (text: string, isApr?: boolean) => {
-    if (isApr && poolId === '1615768079') {
+    if (isApr && poolId === NS3_POOL_ID) {
       return (
         <Box display="flex">
           <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'} style={{ width: 35 }}>
@@ -151,9 +161,9 @@ export function PoolCard({
 
   const calculateApy = (tranche: TrancheWithCurrency) => {
     const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
-    if (poolId === '1655476167') return '15%'
-    if (poolId === '1615768079' && tranche.seniority === 0) return '8.0%'
-    if (poolId === '1615768079' && tranche.seniority === 1) return '16%'
+    if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[DYF_POOL_ID][0]
+    if (poolId === NS3_POOL_ID && tranche.seniority === 0) return centrifugeTargetAPYs[NS3_POOL_ID][0]
+    if (poolId === NS3_POOL_ID && tranche.seniority === 1) return centrifugeTargetAPYs[NS3_POOL_ID][1]
     if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
       return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
     if (tranche.interestRatePerSec) {
@@ -165,7 +175,6 @@ export function PoolCard({
   const tranchesData = useMemo(() => {
     return tranches
       ?.map((tranche: TrancheWithCurrency) => {
-        const key = tinlakeObjKey() as TinlakeTranchesKey
         const words = tranche.currency.name.trim().split(' ')
         const metadata = metaData?.tranches[tranche.id] ?? null
         const trancheName = words[words.length - 1]
@@ -176,16 +185,18 @@ export function PoolCard({
 
         return {
           name: trancheName,
-          apr: isTinlakePool ? tinlakeTranches[key][trancheName as 'Junior' | 'Senior'] : calculateApy(tranche),
+          apr: isTinlakePool
+            ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.apr
+            : calculateApy(tranche),
           minInvestment: isTinlakePool
-            ? getTinlakeMinInvestment(trancheName as 'Junior' | 'Senior')
+            ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.minInvestment
             : metadata && metadata.minInitialInvestment
             ? `$${formatBalanceAbbreviated(investmentBalance, '', 0)}`
             : '-',
         }
       })
       .reverse()
-  }, [calculateApy, getTinlakeMinInvestment, isTinlakePool, metaData?.tranches, tinlakeObjKey, tranches])
+  }, [calculateApy, isTinlakePool, metaData?.tranches, tinlakeKey, tranches])
 
   return (
     <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>
@@ -240,7 +251,7 @@ export function PoolCard({
           )}
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-              {poolId === '1655476167' ? 'Target' : 'APY'}
+              {poolId === DYF_POOL_ID ? 'Target' : 'APY'}
             </Text>
             {tranchesData?.map((tranche) => renderText(`${tranche.apr}`, true))}
           </Stack>
@@ -256,7 +267,7 @@ export function PoolCard({
             <Box marginY={12}>
               <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
                 {isTinlakePool
-                  ? tinlakeTranches[tinlakeObjKey()].shortDescription
+                  ? tinlakeTranches[tinlakeKey].shortDescription
                   : metaData?.pool?.issuer?.shortDescription}
               </Text>
             </Box>
@@ -269,7 +280,7 @@ export function PoolCard({
           <Text variant="body2">Investor type</Text>
           <Text variant="body2">
             {' '}
-            {isTinlakePool ? tinlakeTranches[tinlakeObjKey()].InvestorType : metaData?.pool?.investorType ?? '-'}
+            {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
           </Text>
         </Box>
       </StyledCard>

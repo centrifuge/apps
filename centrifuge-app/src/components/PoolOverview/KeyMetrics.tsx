@@ -10,6 +10,7 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { centrifugeTargetAPYs } from '../PoolCard'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
@@ -32,10 +33,7 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
   }
 }
 
-type TinlakeDataKey =
-  | '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
-  | '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
-  | '0x90040F96aB8f291b6d43A8972806e977631aFFdE'
+type TinlakeDataKey = keyof typeof tinlakeData
 
 const tinlakeData = {
   '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15% target',
@@ -108,11 +106,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
-  const getHardCodedApy = () => {
-    if (poolId === '1655476167') return '15%'
-    if (poolId === '1615768079') return '8% - 16%'
-  }
-
   const isBT3BT4 =
     poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
     poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
@@ -124,11 +117,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: poolId === '1655476167' || poolId === '1615768079' ? 'Target APY' : '30-day APY',
+      metric: centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] ? 'Target APY' : '30-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
-        : poolId === '1655476167' || poolId === '1615768079'
-        ? getHardCodedApy()
+        : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
+        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].join(' - ')
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)
