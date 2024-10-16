@@ -176,7 +176,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
               <Shelf gap={1}>
                 {metadata?.pool?.poolRatings.map((rating) => (
                   <Tooltip
-                    delay={300}
                     bodyWidth="maxContent"
                     body={
                       <TooltipBody
@@ -200,9 +199,10 @@ export const KeyMetrics = ({ poolId }: Props) => {
                       borderRadius={20}
                       padding="2px 10px"
                       display="flex"
+                      alignItems="center"
                     >
                       {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
-                      <Text>{rating.value}</Text>
+                      <Text style={{ marginLeft: 4 }}>{rating.value}</Text>
                     </Box>
                   </Tooltip>
                 ))}
