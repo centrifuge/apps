@@ -1,14 +1,14 @@
 import { black, blueScale, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
-const statusInfo = blueScale[500]
+const statusInfo = yellowScale[800]
 const statusOk = '#519b10'
 const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
 const statusDefaultBg = grayScale[100]
-const statusInfoBg = blueScale[50]
+const statusInfoBg = yellowScale[100]
 const statusOkBg = '#f1f7ec'
 const statusWarningBg = yellowScale[50]
 const statusCriticalBg = '#fcf0ee'
