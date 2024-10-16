@@ -20,6 +20,8 @@ type Row = {
   trancheId: string
 }
 
+const NS2 = '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
+
 export const TrancheTokenCards = ({
   trancheTokens,
   poolId,
@@ -41,6 +43,7 @@ export const TrancheTokenCards = ({
 
   const calculateApy = (trancheToken: Token) => {
     if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
+    if (poolId === NS2 && trancheToken.seniority === 0) return '15%'
     if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
     if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
       return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
@@ -68,7 +71,7 @@ export const TrancheTokenCards = ({
         },
       },
       {
-        header: 'APY',
+        header: poolId === DYF_POOL_ID || poolId === NS3_POOL_ID ? 'Target' : 'APY',
         align: 'left',
         cell: (row: Row) => {
           return (

@@ -66,7 +66,7 @@ const StyledText = styled(Text)`
 
 const tinlakeTranches = {
   NS2: {
-    name: 'New Silver 3',
+    name: 'New Silver Series 2',
     tranches: [
       { name: 'Junior', apr: '15%', minInvestment: '-' },
       { name: 'Senior', apr: '7%', minInvestment: '5K' },
@@ -147,6 +147,8 @@ export function PoolCard({
   const tinlakeKey = (Object.keys(tinlakeTranches).find(
     (key) => tinlakeTranches[key as TinlakeTranchesKey].name === name
   ) || 'none') as TinlakeTranchesKey
+
+  console.log(tinlakeKey, name)
 
   const renderText = (text: string, isApr?: boolean) => {
     if (isApr && poolId === NS3_POOL_ID) {
