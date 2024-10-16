@@ -148,8 +148,6 @@ export function PoolCard({
     (key) => tinlakeTranches[key as TinlakeTranchesKey].name === name
   ) || 'none') as TinlakeTranchesKey
 
-  console.log(tinlakeKey, name)
-
   const renderText = (text: string, isApr?: boolean) => {
     if (isApr && poolId === NS3_POOL_ID) {
       return (
