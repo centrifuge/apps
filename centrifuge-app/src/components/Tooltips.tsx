@@ -348,7 +348,7 @@ export type TooltipsProps = {
   type?: keyof typeof tooltipText
   label?: string | React.ReactNode
   props?: any
-  size?: 'med' | 'sm'
+  size?: 'med' | 'sm' | 'xs'
   color?: string
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
@@ -359,7 +359,7 @@ export function Tooltips({ type, label: labelOverride, size = 'sm', props, color
       {typeof label === 'string' ? (
         <Text
           textAlign="left"
-          variant={size === 'sm' ? 'label2' : 'label1'}
+          variant={size === 'sm' ? 'label2' : size === 'xs' ? 'body4' : 'label1'}
           color={size === 'sm' && !color ? 'textPrimary' : 'textSecondary'}
           fontWeight={size === 'sm' ? 'inherit' : 400}
         >

@@ -7,6 +7,7 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
 import { RouterTextLink } from '../TextLink'
+import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 
 export type InnerMetadata = {
@@ -56,9 +57,16 @@ const StyledCard = styled(Card)`
   }
 `
 
+const StyledText = styled(Text)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+`
+
 const tinlakeTranches = {
   NS2: {
-    name: 'New Silver 3',
+    name: 'New Silver Series 2',
     tranches: [
       { name: 'Junior', apr: '15%', minInvestment: '-' },
       { name: 'Senior', apr: '7%', minInvestment: '5K' },
@@ -144,12 +152,15 @@ export function PoolCard({
     if (isApr && poolId === NS3_POOL_ID) {
       return (
         <Box display="flex">
-          <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'} style={{ width: 35 }}>
+          <Text
+            fontWeight={500}
+            as="h2"
+            variant={isOneTranche ? 'heading1' : 'body1'}
+            style={{ width: 35, marginRight: 4 }}
+          >
             {text}
           </Text>
-          <Text variant="label2" style={{ alignSelf: 'flex-end', marginLeft: '4px' }}>
-            Target
-          </Text>
+          <Tooltips type="targetAPY" color="textSecondary" label="Target" size="xs" />
         </Box>
       )
     }
@@ -273,13 +284,13 @@ export function PoolCard({
 
         <Box display="flex" justifyContent="space-between" mt={1}>
           <Text variant="body3">Asset type</Text>
-          <Text variant="body3">{assetClass ?? '-'}</Text>
+          <StyledText variant="body3">{assetClass ?? '-'}</StyledText>
         </Box>
         <Box display="flex" justifyContent="space-between">
           <Text variant="body3">Investor type</Text>
-          <Text variant="body3">
+          <StyledText variant="body3">
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
-          </Text>
+          </StyledText>
         </Box>
       </StyledCard>
     </RouterTextLink>

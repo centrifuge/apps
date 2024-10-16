@@ -481,7 +481,7 @@ function CustomLegend({
                 <Dot color={item.color} />
                 {hasType(item) ? (
                   <Text variant="body3" style={{ lineHeight: 1.8 }}>
-                    <Tooltips type={item.type} label={item.label} color="textSecondary" />
+                    <Tooltips type={item.type} label={item.label} color="textSecondary" size="sm" />
                   </Text>
                 ) : (
                   <Text color="textSecondary" variant="body3" style={{ lineHeight: 1.8 }}>

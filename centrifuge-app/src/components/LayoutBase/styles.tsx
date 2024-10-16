@@ -47,12 +47,13 @@ export const Inner = styled(Grid)`
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     overflow: visible;
     height: 100vh;
+    padding-right: 0px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
-    padding-left: 12px;
+    padding-left: 20px;
     padding-right: 20px;
     height: 100vh;
   }
@@ -66,8 +67,6 @@ export const MobileBar = styled(Box)`
   z-index: 3;
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
   padding: 1rem;
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -149,6 +148,7 @@ export const WalletInner = styled(Stack)`
     justify-content: flex-end;
     height: 50px;
     margin-right: 30px;
+    margin-top: 15px;
   }
 `
 
@@ -182,8 +182,6 @@ export const ToolbarContainer = styled(Box)`
   bottom: 0;
   width: 100%;
 
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
-
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
     bottom: auto;
@@ -203,12 +201,12 @@ export const ContentWrapper = styled.div`
       theme.breakpoints['L']}) {
     margin-left: 7vw;
     width: calc(100% - 7vw);
-    margin-top: 0;
+    margin-top: 10px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     margin-left: 15vw;
     width: calc(100% - 15vw);
-    margin-top: 0;
+    margin-top: 10px;
   }
 `
