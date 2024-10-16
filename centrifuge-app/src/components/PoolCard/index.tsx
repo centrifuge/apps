@@ -56,6 +56,13 @@ const StyledCard = styled(Card)`
   }
 `
 
+const StyledText = styled(Text)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+`
+
 const tinlakeTranches = {
   NS2: {
     name: 'New Silver 3',
@@ -273,13 +280,13 @@ export function PoolCard({
 
         <Box display="flex" justifyContent="space-between" mt={1}>
           <Text variant="body3">Asset type</Text>
-          <Text variant="body3">{assetClass ?? '-'}</Text>
+          <StyledText variant="body3">{assetClass ?? '-'}</StyledText>
         </Box>
         <Box display="flex" justifyContent="space-between">
           <Text variant="body3">Investor type</Text>
-          <Text variant="body3">
+          <StyledText variant="body3">
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
-          </Text>
+          </StyledText>
         </Box>
       </StyledCard>
     </RouterTextLink>
