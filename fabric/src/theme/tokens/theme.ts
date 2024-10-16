@@ -1,14 +1,14 @@
-import { black, blackScale, blueScale, centrifugeBlue, gold, grayScale, yellowScale } from './colors'
+import { black, blueScale, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
-const statusInfo = blueScale[500]
+const statusInfo = yellowScale[800]
 const statusOk = '#519b10'
 const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
-const statusDefaultBg = grayScale[300]
-const statusInfoBg = blueScale[50]
+const statusDefaultBg = grayScale[100]
+const statusInfoBg = yellowScale[100]
 const statusOkBg = '#f1f7ec'
 const statusWarningBg = yellowScale[50]
 const statusCriticalBg = '#fcf0ee'
@@ -31,7 +31,7 @@ const colors = {
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[800],
 
-  borderPrimary: grayScale[100],
+  borderPrimary: grayScale[50],
   borderSecondary: grayScale[300],
 
   statusDefault,
@@ -58,39 +58,39 @@ const colors = {
   textButtonPrimaryPressed: black,
   textButtonPrimaryDisabled: grayScale[500],
   borderButtonPrimary: gold,
-  borderButtonPrimaryFocus: yellowScale[800],
-  borderButtonPrimaryHover: yellowScale[800],
-  borderButtonPrimaryPressed: yellowScale[800],
+  borderButtonPrimaryFocus: yellowScale[100],
+  borderButtonPrimaryHover: yellowScale[100],
+  borderButtonPrimaryPressed: yellowScale[100],
   borderButtonPrimaryDisabled: 'transparent',
   shadowButtonPrimary: 'transparent',
 
   backgroundButtonSecondary: black,
-  backgroundButtonSecondaryFocus: blackScale[500],
-  backgroundButtonSecondaryHover: blackScale[500],
-  backgroundButtonSecondaryPressed: blackScale[500],
+  backgroundButtonSecondaryFocus: black,
+  backgroundButtonSecondaryHover: black,
+  backgroundButtonSecondaryPressed: black,
   backgroundButtonSecondaryDisabled: grayScale[300],
   textButtonSecondary: 'white',
-  textButtonSecondaryFocus: gold,
-  textButtonSecondaryHover: gold,
-  textButtonSecondaryPressed: gold,
+  textButtonSecondaryFocus: 'white',
+  textButtonSecondaryHover: 'white',
+  textButtonSecondaryPressed: 'white',
   textButtonSecondaryDisabled: grayScale[500],
-  borderButtonSecondary: grayScale[300],
-  borderButtonSecondaryFocus: gold,
-  borderButtonSecondaryHover: gold,
-  borderButtonSecondaryPressed: gold,
+  borderButtonSecondary: black,
+  borderButtonSecondaryFocus: black,
+  borderButtonSecondaryHover: black,
+  borderButtonSecondaryPressed: black,
   borderButtonSecondaryDisabled: 'transparent',
-  shadowButtonSecondary: '#A8BFFD35',
+  shadowButtonSecondary: 'transparent',
 
   backgroundButtonTertiary: 'transparent',
   backgroundButtonTertiaryFocus: 'transparent',
   backgroundButtonTertiaryHover: 'tranparent',
   backgroundButtonTertiaryPressed: 'transparent',
   backgroundButtonTertiaryDisabled: 'transparent',
-  textButtonTertiary: centrifugeBlue,
-  textButtonTertiaryFocus: centrifugeBlue,
-  textButtonTertiaryHover: grayScale[800],
-  textButtonTertiaryPressed: centrifugeBlue,
-  textButtonTertiaryDisabled: grayScale[500],
+  textButtonTertiary: grayScale[800],
+  textButtonTertiaryFocus: gold,
+  textButtonTertiaryHover: gold,
+  textButtonTertiaryPressed: gold,
+  textButtonTertiaryDisabled: grayScale[300],
   borderButtonTertiary: 'transparent',
   borderButtonTertiaryFocus: 'transparent',
   borderButtonTertiaryHover: 'transparent',
@@ -102,17 +102,17 @@ const colors = {
   backgroundButtonInvertedHover: grayScale[100],
   backgroundButtonInvertedPressed: grayScale[100],
   backgroundButtonInvertedDisabled: grayScale[100],
-  textButtonInverted: centrifugeBlue,
-  textButtonInvertedFocus: centrifugeBlue,
-  textButtonInvertedHover: centrifugeBlue,
-  textButtonInvertedPressed: centrifugeBlue,
+  textButtonInverted: black,
+  textButtonInvertedFocus: black,
+  textButtonInvertedHover: black,
+  textButtonInvertedPressed: black,
   textButtonInvertedDisabled: grayScale[500],
   borderButtonInverted: grayScale[100],
-  borderButtonInvertedFocus: centrifugeBlue,
-  borderButtonInvertedHover: centrifugeBlue,
-  borderButtonInvertedPressed: centrifugeBlue,
+  borderButtonInvertedFocus: grayScale[50],
+  borderButtonInvertedHover: grayScale[50],
+  borderButtonInvertedPressed: grayScale[50],
   borderButtonInvertedDisabled: 'transparent',
-  shadowButtonInverted: '#E0E7FF',
+  shadowButtonInverted: 'transparent',
 }
 
 export const colorTheme = {

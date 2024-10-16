@@ -6,7 +6,7 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { IssuerDetails, RatingDetails, ReportDetails } from '../../../components/IssuerSection'
+import { IssuerDetails, PoolAnalysis, RatingDetails } from '../../../components/IssuerSection'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
@@ -25,6 +25,7 @@ type Values = Pick<
   | 'issuerLogo'
   | 'issuerDescription'
   | 'issuerShortDescription'
+  | 'issuerCategories'
   | 'executiveSummary'
   | 'website'
   | 'forum'
@@ -33,9 +34,7 @@ type Values = Pick<
   | 'reportUrl'
   | 'reportAuthorName'
   | 'reportAuthorTitle'
-  | 'ratingAgency'
-  | 'ratingValue'
-  | 'ratingReportUrl'
+  | 'poolRatings'
 > & {
   reportAuthorAvatar: string | null | File
 }
@@ -60,6 +59,7 @@ export function Issuer() {
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
       issuerShortDescription: metadata?.pool?.issuer?.shortDescription ?? '',
+      issuerCategories: metadata?.pool?.issuer?.categories ?? [],
       executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
@@ -71,9 +71,11 @@ export function Issuer() {
       reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar
         ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}`
         : null,
-      ratingAgency: metadata?.pool?.rating?.ratingAgency ?? '',
-      ratingValue: metadata?.pool?.rating?.ratingValue ?? '',
-      ratingReportUrl: metadata?.pool?.rating?.ratingReportUrl ?? '',
+      poolRatings:
+        metadata?.pool?.poolRatings?.map((rating) => ({
+          ...rating,
+          reportFile: rating.reportFile ? `report.${rating.reportFile.mime?.split('/')[1]}` : ('' as any),
+        })) ?? [],
     }),
     [metadata, logoFile]
   )
@@ -91,21 +93,24 @@ export function Issuer() {
       const execSummaryChanged = values.executiveSummary !== initialValues.executiveSummary
       const logoChanged = values.issuerLogo !== initialValues.issuerLogo
 
+      const pinFile = async (file: File) => {
+        const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(file as File)))
+        return { uri: pinned.uri, mime: (file as File).type }
+      }
+
       if (!hasChanges) {
         setIsEditing(false)
         actions.setSubmitting(false)
         return
       }
       let execSummaryUri
-      if (execSummaryChanged) {
-        execSummaryUri = (
-          await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(values.executiveSummary as File)))
-        ).uri
+      if (execSummaryChanged && values.executiveSummary) {
+        execSummaryUri = (await pinFile(values.executiveSummary)).uri
         prefetchMetadata(execSummaryUri)
       }
       let logoUri
       if (logoChanged && values.issuerLogo) {
-        logoUri = (await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(values.issuerLogo as File)))).uri
+        logoUri = (await pinFile(values.issuerLogo)).uri
         prefetchMetadata(logoUri)
       }
       const newPoolMetadata: PoolMetadata = {
@@ -120,6 +125,7 @@ export function Issuer() {
             logo:
               logoChanged && logoUri ? { uri: logoUri, mime: values.issuerLogo!.type } : oldMetadata.pool.issuer.logo,
             shortDescription: values.issuerShortDescription,
+            categories: values.issuerCategories,
           },
           links: {
             executiveSummary: execSummaryUri
@@ -129,11 +135,6 @@ export function Issuer() {
             website: values.website,
           },
           details: values.details,
-          rating: {
-            ratingAgency: values.ratingAgency,
-            ratingValue: values.ratingValue,
-            ratingReportUrl: values.ratingReportUrl,
-          },
         },
       }
 
@@ -141,9 +142,7 @@ export function Issuer() {
         let avatar = null
         const avatarChanged = values.reportAuthorAvatar !== initialValues.reportAuthorAvatar
         if (avatarChanged && values.reportAuthorAvatar) {
-          const pinned = await lastValueFrom(
-            cent.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar as File))
-          )
+          const pinned = await pinFile(values.reportAuthorAvatar as File)
           avatar = { uri: pinned.uri, mime: (values.reportAuthorAvatar as File).type }
         }
         newPoolMetadata.pool.reports = [
@@ -156,6 +155,37 @@ export function Issuer() {
             uri: values.reportUrl,
           },
         ]
+      }
+
+      if (values.poolRatings) {
+        const updatedRatings = await Promise.all(
+          values.poolRatings.map(async (newRating, index) => {
+            const existingRating = oldMetadata.pool.poolRatings?.[index]
+
+            if (JSON.stringify(newRating) === JSON.stringify(existingRating)) {
+              return existingRating
+            }
+
+            const newReportFile = typeof newRating.reportFile === 'object' ? newRating.reportFile : null
+            // remove the existing reportFile from the newRating so we don't accidentally overwrite it with the string representation
+            // the existing reportFile will still be captured in the existingRating
+            delete newRating.reportFile
+            const mergedRating = { ...existingRating, ...newRating }
+
+            if (newReportFile) {
+              try {
+                const pinnedFile = await pinFile(newReportFile)
+                mergedRating.reportFile = pinnedFile
+              } catch (error) {
+                console.error('Error pinning file:', error)
+              }
+            }
+
+            return mergedRating
+          })
+        )
+
+        newPoolMetadata.pool.poolRatings = updatedRatings as PoolMetadata['pool']['poolRatings']
       }
 
       execute([poolId, newPoolMetadata], { account })
@@ -216,8 +246,8 @@ export function Issuer() {
           ) : (
             <Stack gap={2}>
               <IssuerDetails metadata={metadata} />
-              {metadata?.pool?.reports?.[0] && <ReportDetails metadata={metadata} />}
-              {metadata?.pool?.rating && <RatingDetails metadata={metadata} />}
+              {metadata?.pool?.reports?.[0] && <PoolAnalysis inverted metadata={metadata} />}
+              {metadata?.pool?.poolRatings?.length && <RatingDetails metadata={metadata} />}
             </Stack>
           )}
         </PageSection>

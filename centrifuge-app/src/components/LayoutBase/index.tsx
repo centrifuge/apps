@@ -12,6 +12,7 @@ import {
   FooterContainer,
   Inner,
   LogoContainer,
+  MobileBar,
   Root,
   ToolbarContainer,
   WalletContainer,
@@ -30,20 +31,32 @@ export function LayoutBase(): JSX.Element {
           </WalletInner>
         </WalletPositioner>
       </WalletContainer>
-      <Inner>
-        <LogoContainer>
-          <LogoLink />
-        </LogoContainer>
-        <ToolbarContainer as="aside">
-          <Menu />
-        </ToolbarContainer>
-        {isMedium && (
+      {isMedium ? (
+        <Inner>
+          <LogoContainer>
+            <LogoLink />
+          </LogoContainer>
+          <ToolbarContainer as="aside">
+            <Menu />
+          </ToolbarContainer>
           <FooterContainer>
             <Footer />
           </FooterContainer>
-        )}
-      </Inner>
-      <ContentWrapper>
+        </Inner>
+      ) : (
+        <>
+          <LogoContainer>
+            <LogoLink />
+          </LogoContainer>
+          <MobileBar>
+            <ToolbarContainer as="aside">
+              <Menu />
+            </ToolbarContainer>
+          </MobileBar>
+        </>
+      )}
+      {/* The ID functions so we can deactive scrolling in certain pages, example in the data page */}
+      <ContentWrapper id="content-wrapper">
         <Outlet />
       </ContentWrapper>
     </Root>

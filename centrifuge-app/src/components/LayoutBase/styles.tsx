@@ -26,32 +26,50 @@ export const Root = styled(Box)`
     }
   }
 `
-
 export const Inner = styled(Grid)`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   background-color: transparent;
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  overflow-y: auto;
   z-index: 2;
   padding-bottom: 1rem;
+  width: 100vw;
+  bottom: 0;
+  overflow-y: auto;
+  padding-right: 12px;
+
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
     width: 6vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     overflow: visible;
+    height: 100vh;
+    padding-right: 0px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
-    padding-left: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
+    height: 100vh;
   }
+`
+
+export const MobileBar = styled(Box)`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 3;
+  background-color: ${({ theme }) => theme.colors.backgroundInverted};
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `
 
 export const HeaderBackground = styled(Box)`
@@ -75,12 +93,14 @@ export const HeaderBackground = styled(Box)`
 export const LogoContainer = styled(Stack)`
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
   z-index: ${({ theme }) => theme.zIndices.header};
-  position: sticky;
+  position: absolute;
   top: 0;
+  width: 100%;
+  z-index: 0;
 
   height: ${HEADER_HEIGHT}px;
   justify-content: center;
-  padding-left: 12px;
+  padding-left: 8px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
@@ -91,12 +111,12 @@ export const LogoContainer = styled(Stack)`
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     justify-content: start;
-    padding-top: ${({ theme }) => theme.space[2]}px;
+    padding-top: ${({ theme }) => theme.space[3]}px;
   }
 `
 
 export const WalletContainer = styled(Stack)`
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   z-index: ${({ theme }) => theme.zIndices.header};
@@ -106,6 +126,9 @@ export const WalletContainer = styled(Stack)`
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     margin-right: 20px;
+    position: fixed;
+    top: 0;
+    right: 0;
   }
 `
 
@@ -120,11 +143,12 @@ export const WalletInner = styled(Stack)`
   justify-content: center;
   pointer-events: auto;
   width: 250px;
-  margin-right: 40px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
     height: 50px;
+    margin-right: 30px;
+    margin-top: 15px;
   }
 `
 
@@ -143,6 +167,7 @@ export const FooterContainer = styled(Box)`
   position: sticky;
   bottom: 0;
   width: 100%;
+  padding-left: 4px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     position: sticky;
@@ -156,8 +181,6 @@ export const ToolbarContainer = styled(Box)`
   position: sticky;
   bottom: 0;
   width: 100%;
-
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
@@ -178,12 +201,12 @@ export const ContentWrapper = styled.div`
       theme.breakpoints['L']}) {
     margin-left: 7vw;
     width: calc(100% - 7vw);
-    margin-top: 0;
+    margin-top: 10px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     margin-left: 15vw;
     width: calc(100% - 15vw);
-    margin-top: 0;
+    margin-top: 10px;
   }
 `

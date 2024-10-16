@@ -57,6 +57,7 @@ const placements: {
 }
 
 const Container = styled(Stack)<{ pointer: PlacementAxis }>`
+  background-color: ${({ theme }) => theme.colors.backgroundInverted};
   filter: ${({ theme }) => `drop-shadow(${theme.shadows.cardInteractive})`};
 
   &::before {
@@ -65,7 +66,7 @@ const Container = styled(Stack)<{ pointer: PlacementAxis }>`
     content: '';
     position: absolute;
     ${({ pointer }) => placements[pointer!]}
-    border: ${({ theme }) => `var(--size) solid ${theme.colors.backgroundPrimary}`};
+    border: ${({ theme }) => `var(--size) solid ${theme.colors.backgroundInverted}`};
     transform: rotate(-45deg);
   }
 `
@@ -117,7 +118,9 @@ export function Tooltip({
                   {title}
                 </Text>
               )}
-              <Text variant="body3">{body}</Text>
+              <Text variant="body4" color="white">
+                {body}
+              </Text>
             </Container>
           )}
         />

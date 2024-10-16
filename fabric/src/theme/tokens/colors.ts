@@ -2,10 +2,12 @@ export const black = '#252B34'
 export const gold = '#FFC012'
 
 export const grayScale = {
+  10: '#cfcfcf33',
   50: '#F6F6F6',
   100: '#E7E7E7',
   300: '#CFCFCF',
   500: '#91969B',
+  600: '#667085',
   800: '#252B34',
   900: '#0F1115',
 }

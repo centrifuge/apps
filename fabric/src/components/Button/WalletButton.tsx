@@ -28,8 +28,9 @@ const StyledButton = styled.button`
   appearance: none;
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
   outline: 0;
-  border-radius: 40px;
+  border-radius: 4px;
   white-space: nowrap;
+  border: 3px solid transparent;
 `
 
 const IdenticonWrapper = styled(Flex)({

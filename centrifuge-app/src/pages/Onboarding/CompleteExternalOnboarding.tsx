@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const CompleteExternalOnboarding = ({ openNewTab, poolId, poolSymbol }: Props) => {
-  const { refetchOnboardingUser, isOnboardingExternally } = useOnboarding()
+  const { refetchOnboardingUser } = useOnboarding()
 
   const onFocus = () => {
     refetchOnboardingUser()

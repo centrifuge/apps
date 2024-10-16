@@ -35,15 +35,18 @@ export function formatBalanceAbbreviated(
       ? amount.toNumber()
       : amount
   let formattedAmount = ''
-  if (amountNumber >= 1e9) {
+  const absAmount = Math.abs(amountNumber)
+
+  if (absAmount >= 1e9) {
     formattedAmount = `${(amountNumber / 1e9).toFixed(decimals)}B`
-  } else if (amountNumber >= 1e6) {
+  } else if (absAmount >= 1e6) {
     formattedAmount = `${(amountNumber / 1e6).toFixed(decimals)}M`
-  } else if (amountNumber > 999) {
+  } else if (absAmount > 999) {
     formattedAmount = `${(amountNumber / 1e3).toFixed(decimals)}K`
   } else {
     formattedAmount = `${amountNumber.toFixed(decimals)}`
   }
+
   return currency ? `${formattedAmount} ${currency}` : formattedAmount
 }
 

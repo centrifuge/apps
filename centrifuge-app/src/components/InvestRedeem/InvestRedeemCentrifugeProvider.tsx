@@ -1,5 +1,5 @@
 import { CurrencyBalance, findBalance, Pool } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -24,6 +24,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
   const liquidityState = useLiquidityRewards().state
+  const [isStableLoading, setIsStableLoading] = React.useState(true)
+  const { connectedType } = useWallet()
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -81,10 +83,26 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     }, [pendingTransaction?.status])
   }
 
+  const isDataLoading = React.useMemo(() => {
+    return balances === null || order === null || isMetadataLoading
+  }, [balances, order, isMetadataLoading])
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isDataLoading && connectedType) {
+        setIsStableLoading(true)
+      } else {
+        setIsStableLoading(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [isDataLoading])
+
   const state: InvestRedeemState = {
     poolId,
     trancheId,
-    isDataLoading: balances == null || order == null || isMetadataLoading,
+    isDataLoading: isStableLoading,
     isAllowedToInvest,
     isPoolBusy: isCalculatingOrders,
     isFirstInvestment: order?.submittedAt === 0 && order.investCurrency.isZero(),

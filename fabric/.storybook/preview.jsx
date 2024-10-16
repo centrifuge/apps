@@ -1,13 +1,9 @@
 import * as React from 'react'
 import { ThemeProvider } from 'styled-components'
 import { Box, GlobalStyle } from '../src'
-import altairDark from '../src/theme/altairDark'
-import altairLight from '../src/theme/altairLight'
 import centrifugeTheme from '../src/theme/centrifugeTheme'
 
 const themes = {
-  altairDark,
-  altairLight,
   centrifugeTheme,
 }
 

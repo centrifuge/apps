@@ -77,7 +77,8 @@ export function IssuerPoolHeader({ actions }: Props) {
         <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
-        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
+        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reports</NavigationTabsItem>}
+        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/data`}>Data</NavigationTabsItem>}
         <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>

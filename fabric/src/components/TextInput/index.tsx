@@ -11,6 +11,7 @@ export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   InputUnitProps & {
     action?: React.ReactNode
     symbol?: React.ReactNode
+    row?: boolean
   }
 export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> &
   InputUnitProps & {
@@ -49,13 +50,12 @@ export const StyledTextInput = styled.input`
     margin: 0;
   }
 `
-
-export const StyledInputBox = styled(Shelf)`
+export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean }>`
   width: 100%;
   position: relative;
   background: ${({ theme }) => theme.colors.backgroundPage};
-  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
-  border-radius: ${({ theme }) => theme.radii.input}px;
+  border: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `1px solid ${theme.colors.borderPrimary}`)};
+  border-radius: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `${theme.radii.input}px`)};
 
   &::before {
     content: '';
@@ -80,7 +80,7 @@ export const StyledInputAction = styled.button`
   cursor: pointer;
   appearance: none;
   border: none;
-  background: ${(props) => props.theme.colors.backgroundButtonSecondary};
+  background: ${(props) => props.theme.colors.backgroundButtonInverted};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -103,7 +103,7 @@ export const StyledInputAction = styled.button`
 export function InputAction({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <StyledInputAction type="button" {...props}>
-      <Text variant="interactive1" color="textInverted" fontWeight={400}>
+      <Text variant="interactive1" color="textButtonInverted" fontWeight={400}>
         {children}
       </Text>
     </StyledInputAction>
@@ -114,11 +114,12 @@ export function TextInputBox(
   props: Omit<TextInputProps, 'label' | 'secondaryLabel'> & {
     error?: boolean
     inputRef?: React.Ref<HTMLInputElement>
+    row?: boolean
   }
 ) {
-  const { error, disabled, action, symbol, inputRef, inputElement, ...inputProps } = props
+  const { error, disabled, action, symbol, inputRef, inputElement, row, ...inputProps } = props
   return (
-    <StyledInputBox alignItems="stretch" height="input">
+    <StyledInputBox hideBorder={!!row} alignItems="stretch" height="input">
       {inputElement ?? <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />}
       {symbol && (
         <Flex alignSelf="center" pr={1}>
@@ -160,7 +161,7 @@ export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id,
           type="search"
           disabled={disabled}
           error={!!errorMessage}
-          symbol={<IconSearch size="iconMedium" color="textPrimary" />}
+          symbol={<IconSearch size="iconSmall" color="textSecondary" />}
           {...inputProps}
         />
       }
@@ -168,9 +169,10 @@ export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id,
   )
 }
 
-export function DateInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+export function DateInput({ label, secondaryLabel, disabled, errorMessage, id, row, ...inputProps }: TextInputProps) {
   const defaultId = React.useId()
   id ??= defaultId
+
   return (
     <InputUnit
       id={id}
@@ -178,12 +180,14 @@ export function DateInput({ label, secondaryLabel, disabled, errorMessage, id, .
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
+      row={row}
       inputElement={
         <TextInputBox
           type="date"
           disabled={disabled}
           error={!!errorMessage}
           required // hides the reset button in Firefox
+          row={row}
           {...inputProps}
         />
       }

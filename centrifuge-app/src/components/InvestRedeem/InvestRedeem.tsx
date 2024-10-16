@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
@@ -16,7 +17,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useGmp } from '../../utils/useGmp'
@@ -25,6 +25,7 @@ import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
 import { LiquidityRewardsProvider } from '../LiquidityRewards/LiquidityRewardsProvider'
 import { LoadBoundary } from '../LoadBoundary'
+import { PoolMetaDataPartial } from '../PoolList'
 import { Transactions } from '../Portfolio/Transactions'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
@@ -35,7 +36,17 @@ import { RedeemForm } from './RedeemForm'
 export type InvestRedeemProps = {
   poolId: string
   trancheId: string
+  metadata?: PoolMetaDataPartial
 } & InputProps
+
+type HeaderProps = {
+  sumUnrealizedProfitAtMarketPrice?: CurrencyBalance
+  sumRealizedProfitFifoByPeriod?: CurrencyBalance
+} & InputProps
+
+type InputProps = {
+  defaultView?: 'invest' | 'redeem'
+}
 
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
@@ -71,7 +82,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
       >
         <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
           <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-            <Header />
+            <Header {...rest} />
             <InvestRedeemInput {...rest} />
             {!isTinlakePool && (connectedType === 'substrate' || isEvmOnSubstrate) && <LiquidityRewardsContainer />}
             <Footer />
@@ -80,10 +91,6 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
       </ConnectionGuard>
     </LoadBoundary>
   )
-}
-
-type InputProps = {
-  defaultView?: 'invest' | 'redeem'
 }
 
 function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
@@ -96,18 +103,13 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
     if (!state.order.remainingRedeemToken.isZero()) defaultView = 'redeem'
   }
   const [view, setView] = React.useState<'invest' | 'redeem'>(defaultView ?? 'invest')
-  const theme = useTheme()
 
   const { data: metadata } = usePoolMetadata(pool)
 
   return (
-    <Stack>
+    <Stack gap={2}>
       {renderGmp(state.poolId, state.trancheId)}
-      <Flex
-        style={{
-          boxShadow: `inset 0 -2px 0 ${theme.colors.borderPrimary}`,
-        }}
-      >
+      <Flex>
         <Tabs
           selectedIndex={view === 'invest' ? 0 : 1}
           onChange={(index) => setView(index === 0 ? 'invest' : 'redeem')}
@@ -116,7 +118,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
           <TabsItem ariaLabel="Go to redeem tab">Redeem</TabsItem>
         </Tabs>
       </Flex>
-      <Box p={2} backgroundColor="backgroundSecondary">
+      <Box p={2} borderWidth="1px" borderColor="borderPrimary" borderStyle="solid" borderRadius="10px">
         {state.isDataLoading ? (
           <Spinner />
         ) : state.isAllowedToInvest ? (
@@ -152,51 +154,73 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
   )
 }
 
-function Header() {
+function Header({ sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPrice }: HeaderProps) {
   const { state } = useInvestRedeem()
   const { connectedType } = useWallet()
-
   return (
     <Stack gap={2}>
-      <Text variant="heading2" textAlign="center">
-        {state.trancheCurrency?.symbol} investment overview
-      </Text>
+      <Text variant="heading2">{state.trancheCurrency?.symbol} investment overview</Text>
       {connectedType && (
-        <Shelf
-          justifyContent="space-between"
-          borderWidth="1px 0"
-          borderColor="borderPrimary"
-          borderStyle="solid"
-          py={1}
-        >
-          <Stack>
-            <TextWithPlaceholder variant="body3" color="textSecondary">
-              Position
+        <Stack>
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Investment position
+          </TextWithPlaceholder>
+          <Shelf gap="3px">
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(state.investmentValue, undefined, 2, 0)}
             </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
-              {formatBalance(state.investmentValue, state.poolCurrency?.displayName, 2, 0)}
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
             </TextWithPlaceholder>
-          </Stack>
-          {/*
-          <Stack>
-            <TextWithPlaceholder variant="body3" color="textSecondary">
-              Cost basis
-            </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
-              -
-            </TextWithPlaceholder>
-          </Stack>
-
-          <Stack>
-            <TextWithPlaceholder variant="body3" color="textSecondary">
-              Profit
-            </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
-              -
-            </TextWithPlaceholder>
-          </Stack> */}
-        </Shelf>
+          </Shelf>
+        </Stack>
       )}
+      <Box display="flex">
+        <Stack>
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Realized P&L
+          </TextWithPlaceholder>
+          <Shelf gap={'3px'}>
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(sumRealizedProfitFifoByPeriod ?? 0, undefined, 2, 0)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
+            </TextWithPlaceholder>
+          </Shelf>
+        </Stack>
+        <Stack marginLeft="20px">
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Unrealized P&L
+          </TextWithPlaceholder>
+          <Shelf gap="3px">
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(sumUnrealizedProfitAtMarketPrice ?? 0, undefined, 2, 0)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
+            </TextWithPlaceholder>
+          </Shelf>
+        </Stack>
+      </Box>
     </Stack>
   )
 }
@@ -209,7 +233,9 @@ function Footer() {
     <>
       {state.actingAddress && connectedType === 'substrate' && (
         <Stack gap={2}>
-          <Text variant="heading4">Transaction history</Text>
+          <Text variant="heading6" color="textPrimary" fontWeight={600}>
+            Transaction history
+          </Text>
           <Transactions onlyMostRecent narrow address={state.actingAddress} trancheId={state.trancheId} />
         </Stack>
       )}
