@@ -47,12 +47,13 @@ export const Inner = styled(Grid)`
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     overflow: visible;
     height: 100vh;
+    padding-right: 0px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
-    padding-left: 12px;
+    padding-left: 20px;
     padding-right: 20px;
     height: 100vh;
   }
@@ -66,8 +67,6 @@ export const MobileBar = styled(Box)`
   z-index: 3;
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
   padding: 1rem;
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,8 +180,6 @@ export const ToolbarContainer = styled(Box)`
   position: sticky;
   bottom: 0;
   width: 100%;
-
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
