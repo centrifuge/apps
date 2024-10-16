@@ -1,6 +1,17 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import {
+  Box,
+  Card,
+  IconArrowRightWhite,
+  IconMoody,
+  IconParticula,
+  IconSp,
+  Shelf,
+  Stack,
+  Text,
+  Tooltip,
+} from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
@@ -34,6 +45,11 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
 }
 
 type TinlakeDataKey = keyof typeof tinlakeData
+
+const ratingIcons: { [key: string]: JSX.Element } = {
+  "Moody's": <IconMoody size={16} />,
+  Particula: <IconParticula size={16} />,
+}
 
 const tinlakeData = {
   '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15%',
@@ -201,7 +217,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
                       display="flex"
                       alignItems="center"
                     >
-                      {rating.agency?.includes("Moody's") ? <IconMoody size={16} /> : <IconSp size={16} />}
+                      {rating.agency && ratingIcons[rating.agency] ? ratingIcons[rating.agency] : <IconSp size={16} />}
                       <Text style={{ marginLeft: 4 }}>{rating.value}</Text>
                     </Box>
                   </Tooltip>
