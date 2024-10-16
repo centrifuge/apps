@@ -82,7 +82,7 @@ const tinlakeTranches = {
     ],
     shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     investorType: 'Private',
-    assetType: 'Structure Credit',
+    assetType: 'Structured Credit',
   },
   BT4: {
     name: 'BlockTower Series 4',
@@ -92,7 +92,7 @@ const tinlakeTranches = {
     ],
     shortDescription: 'Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     investorType: 'Private',
-    assetType: 'Structure Credit',
+    assetType: 'Structured Credit',
   },
   none: {
     name: '-',

@@ -216,6 +216,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
                       padding="2px 10px"
                       display="flex"
                       alignItems="center"
+                      width={80}
+                      justifyContent="center"
                     >
                       {rating.agency && ratingIcons[rating.agency] ? ratingIcons[rating.agency] : <IconSp size={16} />}
                       <Text style={{ marginLeft: 4 }}>{rating.value}</Text>
