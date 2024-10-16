@@ -286,7 +286,6 @@ export const PoolAnalysis = ({ metadata, inverted }: IssuerSectionProps & { inve
   // Not sure why some pools have N/A, it should be empty but this is a fix for those pools in the meantime
   const isEmpty = report?.author.name === 'N/A'
 
-  console.log(report)
   return report?.author?.name || report?.author?.title ? (
     isEmpty ? null : (
       <Stack gap={1}>

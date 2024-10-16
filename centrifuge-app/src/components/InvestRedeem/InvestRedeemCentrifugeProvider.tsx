@@ -1,5 +1,5 @@
 import { CurrencyBalance, findBalance, Pool } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -25,6 +25,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const trancheMeta = metadata?.tranches?.[trancheId]
   const liquidityState = useLiquidityRewards().state
   const [isStableLoading, setIsStableLoading] = React.useState(true)
+  const { connectedType } = useWallet()
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -88,7 +89,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (isDataLoading) {
+      if (isDataLoading && connectedType) {
         setIsStableLoading(true)
       } else {
         setIsStableLoading(false)

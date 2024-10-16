@@ -1,5 +1,6 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { Decimal } from 'decimal.js-light'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { InvestButton, Token } from '../../pages/Pool/Overview'
@@ -9,6 +10,15 @@ import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { PoolMetaDataPartial } from '../PoolList'
+
+type Row = {
+  tokenName: string
+  apy: Decimal
+  tvl: Decimal
+  tokenPrice: Decimal
+  subordination: Decimal
+  trancheId: string
+}
 
 export const TrancheTokenCards = ({
   trancheTokens,
@@ -22,7 +32,6 @@ export const TrancheTokenCards = ({
   const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
-  const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
 
   const getTrancheText = (trancheToken: Token) => {
     if (trancheToken.seniority === 0) return 'junior'
@@ -30,50 +39,78 @@ export const TrancheTokenCards = ({
     return 'mezzanine'
   }
 
-  const columnConfig = useMemo(() => {
-    const calculateApy = (trancheToken: Token) => {
-      if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
-      if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-      if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
-        return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-      if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
-        return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
-      if (daysSinceCreation < 30) return 'N/A'
-      return trancheToken.yield30DaysAnnualized
-        ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
-        : '-'
-    }
+  const calculateApy = (trancheToken: Token) => {
+    if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
+    if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+    if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
+      return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+    if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
+      return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
+    const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
+    if (daysSinceCreation < 30) return 'N/A'
+    return trancheToken.yield30DaysAnnualized
+      ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
+      : '-'
+  }
 
+  const columns = useMemo(() => {
     return [
       {
         header: 'Token',
-        align: 'left',
-        formatter: (v: any) => v,
         width: '40%',
+        align: 'left',
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="400" variant="heading2">
+              {row.tokenName}
+            </Text>
+          )
+        },
       },
       {
-        header: poolId === DYF_POOL_ID || poolId === NS3_POOL_ID ? 'Target' : 'APY',
+        header: 'APY',
         align: 'left',
-        formatter: (v: any) => (v ? calculateApy(v) : '-'),
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="600" variant="heading2">
+              {row.apy}
+            </Text>
+          )
+        },
       },
       {
         header: `TVL (${pool?.currency.symbol})`,
         align: 'left',
-        formatter: (v: any) => (v ? formatBalance(v) : '-'),
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="400" variant="heading2">
+              {formatBalance(row.tvl)}
+            </Text>
+          )
+        },
       },
       {
-        header: 'Token price',
+        header: `Token price (${pool?.currency.symbol})`,
         align: 'left',
-        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, 6) : '-'),
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="400" variant="heading2">
+              {formatBalance(row.tokenPrice, undefined, 6)}
+            </Text>
+          )
+        },
       },
       ...(pool.tranches.length > 1
         ? [
             {
               header: 'Subordination',
               align: 'left',
-              formatter: (_: any, row: any) => {
-                if (row.value[1].seniority === 0) return '-'
-                return formatPercentage(row.value[1].protection)
+              cell: (row: Row) => {
+                return (
+                  <Text paddingY={2} fontWeight="400" variant="heading2">
+                    {formatPercentage(row.subordination)}
+                  </Text>
+                )
               },
             },
           ]
@@ -81,30 +118,24 @@ export const TrancheTokenCards = ({
       {
         header: '',
         align: 'right',
-        formatter: (_: any, row: any) => (
-          <InvestButton poolId={poolId} trancheId={row.value[1].id} metadata={metadata} />
-        ),
+        cell: (row: Row) => {
+          return <InvestButton poolId={poolId} trancheId={row.trancheId} metadata={metadata} />
+        },
       },
     ]
-  }, [pool, poolId, isTinlakePool, daysSinceCreation, metadata])
-
-  const columns = useMemo(() => {
-    return columnConfig.map((col, index) => {
-      return {
-        cell: (row: any) => (
-          <Text paddingY={2} fontWeight={col.header === 'APY' ? '600' : '400'} variant="heading2">
-            {col.formatter(row.value[index], row)}
-          </Text>
-        ),
-        ...col,
-      }
-    })
-  }, [columnConfig])
+  }, [pool.tranches, metadata, poolId])
 
   const dataTable = useMemo(() => {
-    return trancheTokens.map((tranche) => ({
-      value: [tranche.name, tranche, tranche.valueLocked, tranche.tokenPrice],
-    }))
+    return trancheTokens.map((tranche) => {
+      return {
+        tokenName: tranche.name,
+        apy: calculateApy(tranche),
+        tvl: tranche.valueLocked,
+        tokenPrice: tranche.tokenPrice,
+        subordination: tranche.protection,
+        trancheId: tranche.id,
+      }
+    })
   }, [trancheTokens])
 
   return (
