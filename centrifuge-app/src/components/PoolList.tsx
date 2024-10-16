@@ -87,7 +87,7 @@ export function PoolList() {
               ? Array(6)
                   .fill(true)
                   .map((_, index) => (
-                    <Box as="li" key={index} width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}>
+                    <Box as="li" key={index} width={isLarge ? '33%' : isMedium ? '48%' : '100%'}>
                       <PoolCard />
                     </Box>
                   ))
@@ -96,7 +96,7 @@ export function PoolList() {
                     as="li"
                     key={pool.poolId}
                     status={pool.status}
-                    width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+                    width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
                   >
                     <PoolCard {...pool} />
                   </PoolCardBox>
@@ -136,7 +136,7 @@ function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
             as="li"
             key={pool.poolId}
             status={pool.status}
-            width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+            width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
           >
             <PoolCard {...pool} />
           </PoolCardBox>

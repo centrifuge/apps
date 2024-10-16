@@ -124,7 +124,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
         : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
-        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].join(' - ')
+        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].reverse().join(' - ')
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)

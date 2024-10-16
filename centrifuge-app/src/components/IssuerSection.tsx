@@ -182,13 +182,13 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
           </Text>
         </Box>
         {metadata?.pool?.issuer?.categories?.length ? (
-          <Box width="50%" bg="white" padding={2} borderRadius={10} ml={1} height="min-content">
+          <Box width="50%" bg="white" padding={2} borderRadius={10} ml={1} height="min-content" alignSelf="center">
             {metadata?.pool?.issuer?.categories.map((category) => (
               <Box display="flex" justifyContent="space-between" padding={1}>
-                <Text color="textSecondary" variant="body2" style={{ minWidth: 120, textTransform: 'capitalize' }}>
+                <Text color="textSecondary" variant="body3" style={{ minWidth: 120, textTransform: 'capitalize' }}>
                   {formatCamelCase(category.customType) || formatCamelCase(category.type)}
                 </Text>
-                <Text variant="body2" style={{ fontWeight: 500 }}>
+                <Text variant="body3" style={{ fontWeight: 500 }}>
                   {category.type.includes('Rate') ? formatPercentage(category.value) : category.value}
                 </Text>
               </Box>
