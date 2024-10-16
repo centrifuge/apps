@@ -71,7 +71,7 @@ export function CardPortfolioValue({
           <Text variant="heading2">Overview</Text>
 
           <Shelf gap={1} alignContent="center" height="48px">
-            <Box width="3px" backgroundColor="#1253FF" height="48px" />
+            <Box width="3px" backgroundColor={colors.textGold} height="48px" />
             <Shelf gap={4}>
               <Stack gap="4px">
                 <Text {...headingProps}>Current portfolio value</Text>
@@ -79,12 +79,6 @@ export function CardPortfolioValue({
                   {formatBalance(currentPortfolioValue || 0, config.baseCurrency)}
                 </TextWithPlaceholder>
               </Stack>
-              {/* <Stack gap="4px">
-                <Text {...headingProps}>Profit</Text>
-                <TextWithPlaceholder {...balanceProps} isLoading={!portfolioValue} color="#519B10">
-                  + {formatBalance(Dec(portfolioValue || 0), config.baseCurrency)}
-                </TextWithPlaceholder>
-              </Stack> */}
             </Shelf>
           </Shelf>
         </Stack>

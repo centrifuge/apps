@@ -1,3 +1,7 @@
+type ChartDataProps = {
+  [key: string]: any
+}
+
 export const getRangeNumber = (rangeValue: string, poolAge?: number) => {
   if (rangeValue === '30d') {
     return 30
@@ -20,4 +24,26 @@ export const getRangeNumber = (rangeValue: string, poolAge?: number) => {
   }
 
   return 30
+}
+
+export const getOneDayPerMonth = (chartData: ChartDataProps[], key: string): (string | number)[] => {
+  const seenMonths = new Set<string>()
+  const result: (string | number)[] = []
+
+  chartData.forEach((item) => {
+    const value = item[key]
+    if (value) {
+      const date = new Date(value)
+      if (!isNaN(date.getTime())) {
+        const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' })
+
+        if (!seenMonths.has(monthYear)) {
+          seenMonths.add(monthYear)
+          result.push(date.getTime())
+        }
+      }
+    }
+  })
+
+  return result
 }

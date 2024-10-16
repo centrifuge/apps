@@ -102,16 +102,18 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
-      const domain = domains?.find((domain) => domain.isActive && domain.hasDeployedLp)
-      const updateTokenPrices = domain
-        ? Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
-            return domain.currencies
-              .filter((cur) => !!poolsByCurrency[cur.address])
-              .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
-              .map(([tid, curKey]) =>
-                cent.liquidityPools.updateTokenPrice([poolId, tid, curKey, domain.chainId], { batch: true })
-              )
-          })
+      const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
+      const updateTokenPrices = deployedDomains
+        ? deployedDomains.flatMap((domain) =>
+            Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+              return domain.currencies
+                .filter((cur) => !!poolsByCurrency[cur.address])
+                .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+                .map(([tid, curKey]) =>
+                  cent.liquidityPools.updateTokenPrice([poolId, tid, curKey, domain.chainId], { batch: true })
+                )
+            })
+          )
         : []
 
       return combineLatest([cent.pools.closeEpoch([poolId, false], { batch: true }), ...updateTokenPrices]).pipe(
@@ -216,7 +218,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
         pool.currency.decimals
       )
     }, new CurrencyBalance(0, pool.currency.decimals))
-  }, [externalLoans, pool?.nav, form.values.feed])
+  }, [externalLoans, form.values.feed, pool.currency.decimals])
 
   const pendingNav = totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
 

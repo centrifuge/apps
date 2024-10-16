@@ -12,6 +12,7 @@ import {
   WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import {
+  ConnectionGuard,
   truncateAddress,
   useBalances,
   useCentrifuge,
@@ -110,15 +111,17 @@ export function Orders({ buyOrSell }: OrdersProps) {
         align: 'left',
         header: '',
         cell: (row: SwapOrder) => (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSelectedOrder(row)
-            }}
-            small
-          >
-            Fulfill order
-          </Button>
+          <ConnectionGuard networks={['centrifuge']} body="">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSelectedOrder(row)
+              }}
+              small
+            >
+              Fulfill order
+            </Button>
+          </ConnectionGuard>
         ),
         flex: '1',
       },

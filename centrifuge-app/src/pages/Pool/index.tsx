@@ -10,7 +10,9 @@ export default function PoolDetailPage() {
     <Routes>
       <Route path="/" element={<PoolDetailOverviewTab />} />
       <Route path="reporting/:report" element={<PoolDetailReportingTab />} />
+      <Route path="data/:report" element={<PoolDetailReportingTab />} />
       <Route path="reporting" element={<PoolDetailReportingTab />} />
+      <Route path="data" element={<PoolDetailReportingTab />} />
       <Route path="liquidity" element={<PoolDetailLiquidityTab />} />
       <Route path="assets" element={<PoolDetailAssetsTab />} />
       <Route path="fees" element={<PoolFeesTab />} />

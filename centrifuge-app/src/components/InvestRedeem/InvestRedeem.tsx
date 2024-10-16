@@ -16,7 +16,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import { ethConfig } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -97,18 +96,13 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
     if (!state.order.remainingRedeemToken.isZero()) defaultView = 'redeem'
   }
   const [view, setView] = React.useState<'invest' | 'redeem'>(defaultView ?? 'invest')
-  const theme = useTheme()
 
   const { data: metadata } = usePoolMetadata(pool)
 
   return (
-    <Stack>
+    <Stack gap={2}>
       {renderGmp(state.poolId, state.trancheId)}
-      <Flex
-        style={{
-          boxShadow: `inset 0 -2px 0 ${theme.colors.borderPrimary}`,
-        }}
-      >
+      <Flex>
         <Tabs
           selectedIndex={view === 'invest' ? 0 : 1}
           onChange={(index) => setView(index === 0 ? 'invest' : 'redeem')}
@@ -117,7 +111,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
           <TabsItem ariaLabel="Go to redeem tab">Redeem</TabsItem>
         </Tabs>
       </Flex>
-      <Box p={2} backgroundColor="backgroundSecondary">
+      <Box p={2} borderWidth="1px" borderColor="borderPrimary" borderStyle="solid" borderRadius="10px">
         {state.isDataLoading ? (
           <Spinner />
         ) : state.isAllowedToInvest ? (
@@ -159,44 +153,27 @@ function Header() {
 
   return (
     <Stack gap={2}>
-      <Text variant="heading2" textAlign="center">
-        {state.trancheCurrency?.symbol} investment overview
-      </Text>
+      <Text variant="heading2">{state.trancheCurrency?.symbol} investment overview</Text>
       {connectedType && (
-        <Shelf
-          justifyContent="space-between"
-          borderWidth="1px 0"
-          borderColor="borderPrimary"
-          borderStyle="solid"
-          py={1}
-        >
-          <Stack>
-            <TextWithPlaceholder variant="body3" color="textSecondary">
-              Position
+        <Stack>
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Investment position
+          </TextWithPlaceholder>
+          <Shelf gap={'3px'}>
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(state.investmentValue, undefined, 2, 0)}
             </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
-              {formatBalance(state.investmentValue, state.poolCurrency?.displayName, 2, 0)}
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
             </TextWithPlaceholder>
-          </Stack>
-          {/*
-          <Stack>
-            <TextWithPlaceholder variant="body3" color="textSecondary">
-              Cost basis
-            </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
-              -
-            </TextWithPlaceholder>
-          </Stack>
-
-          <Stack>
-            <TextWithPlaceholder variant="body3" color="textSecondary">
-              Profit
-            </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
-              -
-            </TextWithPlaceholder>
-          </Stack> */}
-        </Shelf>
+          </Shelf>
+        </Stack>
       )}
     </Stack>
   )
@@ -210,7 +187,9 @@ function Footer() {
     <>
       {state.actingAddress && connectedType === 'substrate' && (
         <Stack gap={2}>
-          <Text variant="heading4">Transaction history</Text>
+          <Text variant="heading6" color="textPrimary" fontWeight={600}>
+            Transaction history
+          </Text>
           <Transactions onlyMostRecent narrow address={state.actingAddress} trancheId={state.trancheId} />
         </Stack>
       )}

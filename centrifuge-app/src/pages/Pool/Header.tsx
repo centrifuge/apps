@@ -3,7 +3,6 @@ import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { Eththumbnail } from '../../components/EthThumbnail'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
@@ -30,14 +29,11 @@ export function PoolDetailHeader({ actions }: Props) {
   return (
     <PageHeader
       title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
-      subtitle={
-        <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
-      }
       parent={{ to: `/pools${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
       icon={
-        <Eththumbnail show={isTinlakePool}>
+        <>
           {metadata?.pool?.icon ? (
-            <Box as="img" width="iconLarge" height="iconLarge" src={iconUri} />
+            <Box as="img" width="iconLarge" height="iconLarge" src={iconUri} borderRadius={4} />
           ) : (
             <Shelf
               width="iconLarge"
@@ -49,7 +45,7 @@ export function PoolDetailHeader({ actions }: Props) {
               <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
             </Shelf>
           )}
-        </Eththumbnail>
+        </>
       }
       border={false}
       actions={actions}
@@ -67,7 +63,8 @@ export function PoolDetailHeader({ actions }: Props) {
           <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
-          {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
+          {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reports</NavigationTabsItem>}
+          {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/data`}>Data</NavigationTabsItem>}
           {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/fees`}>Fees</NavigationTabsItem>}
         </NavigationTabs>
       </Shelf>

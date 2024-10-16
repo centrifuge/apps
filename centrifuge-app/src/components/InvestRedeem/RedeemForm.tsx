@@ -168,11 +168,12 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
               <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
             {!!preSubmitAction ? (
-              <Button {...preSubmitAction} type="submit">
+              <Button {...preSubmitAction} type="submit" variant="secondary">
                 Redeem
               </Button>
             ) : !state.collectType || claimDismissed ? (
               <Button
+                variant="secondary"
                 type="submit"
                 loading={isRedeeming}
                 loadingMessage={loadingMessage}

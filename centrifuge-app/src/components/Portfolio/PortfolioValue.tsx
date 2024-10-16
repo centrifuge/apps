@@ -1,8 +1,10 @@
 import { Card, Stack, Text } from '@centrifuge/fabric'
+import { useMemo } from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDate } from '../../utils/date'
-import { formatBalance } from '../../utils/formatting'
-import { getRangeNumber } from '../Charts/utils'
+import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { CustomTick } from '../Charts/PoolPerformanceChart'
+import { getOneDayPerMonth, getRangeNumber } from '../Charts/utils'
 import { useDailyPortfolioValue } from './usePortfolio'
 
 const chartColor = '#006ef5'
@@ -31,17 +33,19 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
   const rangeNumber = getRangeNumber(rangeValue)
   const dailyPortfolioValue = useDailyPortfolioValue(address, rangeNumber)
 
-  const getXAxisInterval = () => {
-    if (!rangeNumber) return dailyPortfolioValue ? Math.floor(dailyPortfolioValue.length / 10) : 45
-    if (rangeNumber <= 30) return 5
-    if (rangeNumber > 30 && rangeNumber <= 90) {
-      return 14
+  const chartData = dailyPortfolioValue?.map((value) => ({
+    ...value,
+    portfolioValue: value.portfolioValue.toNumber(),
+  }))
+
+  const yAxisDomain = useMemo(() => {
+    if (chartData?.length) {
+      const values = chartData.map((data) => data.portfolioValue)
+      return [Math.min(...values), Math.max(...values)]
     }
-    if (rangeNumber > 90 && rangeNumber <= 180) {
-      return 30
-    }
-    return 45
-  }
+  }, [chartData])
+
+  if (!chartData?.length) return
 
   return (
     <ResponsiveContainer height={300} maxHeight={300} minHeight={300}>
@@ -51,7 +55,7 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
           right: 20,
           bottom: 0,
         }}
-        data={dailyPortfolioValue?.reverse()}
+        data={chartData?.reverse()}
       >
         <defs>
           <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -60,28 +64,30 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
           </linearGradient>
         </defs>
         <CartesianGrid vertical={false} />
-
         <XAxis
-          dataKey={({ dateInMilliseconds }) =>
-            `${dateInMilliseconds?.toLocaleString('default', { month: 'short' })} ${dateInMilliseconds?.getDate()}`
-          }
+          dataKey="dateInMilliseconds"
           tickLine={false}
           axisLine={false}
           style={{
             fontSize: '10px',
           }}
           dy={4}
-          interval={getXAxisInterval()}
+          interval={0}
+          minTickGap={100000}
+          type="category"
+          ticks={getOneDayPerMonth(chartData, 'dateInMilliseconds')}
+          tick={<CustomTick />}
         />
         <YAxis
-          dataKey={({ portfolioValue }) => portfolioValue}
+          dataKey="portfolioValue"
           tickCount={10}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => value.toLocaleString()}
+          tickFormatter={(value) => formatBalanceAbbreviated(value, '', 2)}
           style={{
             fontSize: '10px',
           }}
+          domain={yAxisDomain}
           label={{
             value: 'USD',
             position: 'top',

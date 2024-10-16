@@ -1,34 +1,37 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { ReportComponent } from '.'
-import { usePool } from '../../utils/usePools'
+import { usePool } from '../../../src/utils/usePools'
 import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
+import { DataFilter } from './DataFilter'
 import { ReportContextProvider } from './ReportContext'
 import { ReportFilter } from './ReportFilter'
 
 export function PoolReportPage({ header }: { header: React.ReactNode }) {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  if (!poolId) throw new Error('Pool not found')
+  const params = useParams<{ pid: string; '*': string }>()
+  const location = useLocation()
+  const { pid: poolId } = params
 
-  const pool = usePool(poolId) as Pool
+  if (!poolId) throw new Error('Pool not found')
 
   return (
     <ReportContextProvider>
       {header}
 
-      {pool && <ReportFilter pool={pool} />}
+      {location.pathname.includes('reporting') ? <ReportFilter poolId={poolId} /> : <DataFilter poolId={poolId} />}
 
       <LoadBoundary>
-        <PoolDetailReporting pool={pool} />
+        <PoolDetailReporting poolId={poolId} />
       </LoadBoundary>
     </ReportContextProvider>
   )
 }
 
-function PoolDetailReporting({ pool }: { pool: Pool }) {
-  if (!pool) {
+function PoolDetailReporting({ poolId }: { poolId: string }) {
+  const pool = usePool(poolId) as Pool
+  if (!poolId || !pool) {
     return <Spinner mt={2} />
   }
 

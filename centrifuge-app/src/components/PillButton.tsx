@@ -8,24 +8,25 @@ const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
   css({
     display: 'inline-block',
     appearance: 'none',
-    border: 0,
     color: 'textPrimary',
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     backgroundColor: 'backgroundSecondary',
     textDecoration: 'none',
-    '&:visited,&:active': {
+    borderRadius: 20,
+    '&:visited, &:active': {
       color: 'textPrimary',
     },
     '&:hover': {
-      color: 'textSelected',
+      color: 'textGold',
     },
   }),
-  {
+  ({ theme }) => ({
+    border: `1px solid ${theme.colors.textPrimary}`,
     '&:focus-visible': {
       boxShadow: '3px 3px 0 var(--fabric-focus)',
     },
-  },
+  }),
   ({ variant }) =>
     variant === 'regular'
       ? css({
