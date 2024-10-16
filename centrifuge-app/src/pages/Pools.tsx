@@ -38,7 +38,7 @@ export default function PoolsPage() {
           </Text>
           <Box mt={40}>
             <Box display="flex">
-              <Text color="textDisabled" variant="body2" style={{ marginRight: 8 }}>
+              <Text color="#82888D" variant="body2" style={{ marginRight: 8 }}>
                 Total value locked (TVL)
               </Text>
             </Box>

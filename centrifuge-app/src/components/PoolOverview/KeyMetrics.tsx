@@ -1,7 +1,6 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
-import { NetworkIcon, formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
+import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
@@ -11,6 +10,7 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { centrifugeTargetAPYs } from '../PoolCard'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
@@ -31,6 +31,14 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
   currency: {
     name: string
   }
+}
+
+type TinlakeDataKey = keyof typeof tinlakeData
+
+const tinlakeData = {
+  '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15%',
+  '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7': '4% - 15%',
+  '0x90040F96aB8f291b6d43A8972806e977631aFFdE': '4% - 15%',
 }
 
 const getTodayValue = (data: DailyTrancheStateArr | null | undefined): DailyTrancheStateArr | undefined => {
@@ -66,28 +74,27 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
-  const totalNav = pool.nav.total.toFloat()
   const theme = useTheme()
+  const cent = useCentrifuge()
   const averageMaturity = useAverageMaturity(poolId)
 
-  const pendingFees = useMemo(() => {
-    return new CurrencyBalance(
-      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
-      pool.currency.decimals
+  const expenseRatio = useMemo(() => {
+    return (
+      poolFees?.map((f) => f.amounts?.percentOfNav.toPercent().toNumber()).reduce((acc, f) => acc + (f ?? 0), 0) ?? 0
     )
-  }, [poolFees, pool.currency.decimals])
-
-  const expenseRatio = (pendingFees.toFloat() / totalNav) * 100
+  }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
     const thirtyDayAPY = getTodayValue(dailyTranches)
     if (!thirtyDayAPY) return null
 
-    return Object.keys(thirtyDayAPY).map((key) => {
-      return thirtyDayAPY[key][0].yield30DaysAnnualized
-        ? formatPercentage(thirtyDayAPY[key][0].yield30DaysAnnualized)
-        : null
-    })
+    return Object.keys(thirtyDayAPY)
+      .map((key) => {
+        return thirtyDayAPY[key][0].yield30DaysAnnualized
+          ? thirtyDayAPY[key][0].yield30DaysAnnualized.toPercent().toNumber()
+          : 0
+      })
+      .sort((a, b) => a - b)
   }, [dailyTranches])
 
   const minInvestmentPerTranche = useMemo(() => {
@@ -95,13 +102,14 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     return Object.values(metadata.tranches).map((item) => {
       const minInv = new CurrencyBalance(item.minInitialInvestment ?? 0, pool.currency.decimals).toDecimal()
-      return item.minInitialInvestment ? formatBalanceAbbreviated(minInv, '', 0) : null
+      return item.minInitialInvestment ? minInv : null
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
   const isBT3BT4 =
-    poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
-    poolId.toLowerCase() === '0x55d86d51ac3bcab7ab7d2124931fba106c8b60c7'
+    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
+    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
+    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
 
   const metrics = [
     {
@@ -109,10 +117,18 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: '30-day APY',
-      value: tranchesAPY?.length
+      metric:
+        centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] || tinlakeData[poolId as TinlakeDataKey]
+          ? 'Target APY'
+          : '30-day APY',
+      value: tinlakeData[poolId as TinlakeDataKey]
+        ? tinlakeData[poolId as TinlakeDataKey]
+        : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
+        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].join(' - ')
+        : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
-            return tranche && `${tranche} ${index !== tranchesAPY?.length - 1 ? '-' : ''} `
+            const formatted = formatPercentage(tranche)
+            return formatted && `${formatted} ${index !== tranchesAPY?.length - 1 ? '-' : ''}`
           })
         : '-',
     },
@@ -127,19 +143,18 @@ export const KeyMetrics = ({ poolId }: Props) => {
     {
       metric: 'Min. investment',
       value: minInvestmentPerTranche?.length
-        ? minInvestmentPerTranche.map((tranche, index) => {
-            return tranche && `${tranche} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
-          })
+        ? minInvestmentPerTranche
+            .sort((a, b) => Number(a) - Number(b))
+            .map((tranche, index) => {
+              const formatted = formatBalanceAbbreviated(tranche?.toNumber() ?? 0, '', 0)
+              return tranche && `$${formatted} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
+            })
         : '-',
     },
-    ...(metadata?.pool?.investorType
-      ? [
-          {
-            metric: 'Investor type',
-            value: metadata?.pool.investorType,
-          },
-        ]
-      : []),
+    {
+      metric: 'Investor type',
+      value: isBT3BT4 ? 'Private' : metadata?.pool?.investorType ?? '-',
+    },
     ...(!isTinlakePool
       ? [
           {
@@ -148,78 +163,83 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-    ...(metadata?.pool?.poolStructure
-      ? [
-          {
-            metric: 'Pool structure',
-            value: metadata?.pool?.poolStructure,
-          },
-        ]
-      : []),
-    ...(metadata?.pool?.rating?.ratingValue
+
+    {
+      metric: 'Pool structure',
+      value: isBT3BT4 ? 'Revolving' : metadata?.pool?.poolStructure ?? '-',
+    },
+    ...(metadata?.pool?.poolRatings?.length
       ? [
           {
             metric: 'Rating',
             value: (
-              <Tooltip
-                delay={300}
-                bodyWidth="maxContent"
-                body={
-                  <TooltipBody
-                    title={metadata?.pool?.rating?.ratingAgency ?? ''}
-                    subtitle="View Report"
-                    url={metadata?.pool?.rating?.ratingReportUrl ?? ''}
-                  />
-                }
-              >
-                <Box
-                  border={`1px solid ${theme.colors.backgroundInverted}`}
-                  borderRadius={20}
-                  padding="2px 10px"
-                  display="flex"
-                >
-                  {metadata?.pool?.rating?.ratingAgency?.includes('moody') ? (
-                    <IconMoody size={16} />
-                  ) : (
-                    <IconSp size={16} />
-                  )}
-                  <Text>{metadata?.pool?.rating?.ratingValue}</Text>
-                </Box>
-              </Tooltip>
+              <Shelf gap={1}>
+                {metadata?.pool?.poolRatings.map((rating) => (
+                  <Tooltip
+                    delay={300}
+                    bodyWidth="maxContent"
+                    body={
+                      <TooltipBody
+                        title={rating.agency ?? ''}
+                        links={[
+                          { text: 'View report', url: rating.reportUrl ?? '' },
+                          ...(rating.reportFile
+                            ? [
+                                {
+                                  text: 'Download report',
+                                  url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
+                    }
+                  >
+                    <Box
+                      border={`1px solid ${theme.colors.backgroundInverted}`}
+                      borderRadius={20}
+                      padding="2px 10px"
+                      display="flex"
+                    >
+                      {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
+                      <Text>{rating.value}</Text>
+                    </Box>
+                  </Tooltip>
+                ))}
+              </Shelf>
             ),
           },
         ]
       : []),
-    ...(!!expenseRatio
-      ? [
-          {
-            metric: <Tooltips type="expenseRatio" size="med" />,
-            value: `${formatBalance(expenseRatio * 100, '', 2)}%`,
-          },
-        ]
-      : []),
+
+    {
+      metric: <Tooltips type="expenseRatio" size="med" />,
+      value: expenseRatio ? `${formatBalance(expenseRatio, '', 2)}%` : '-',
+    },
   ]
 
   return (
-    <Card p={3}>
+    <Card p={2}>
       <Stack gap={1}>
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" marginTop={2}>
           <Text variant="body2" fontWeight="500">
             Overview
           </Text>
           <PoolStatus status={getPoolStatus(pool)} />
         </Box>
         <Box marginTop={2}>
-          {metrics.map(({ metric, value }, index) => (
-            <Box key={index} display="flex" justifyContent="space-between" mt="6px">
-              <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
-                {metric}
-              </Text>
-              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                {value}
-              </Text>
-            </Box>
-          ))}
+          {metrics.map(({ metric, value }, index) => {
+            return (
+              <Box key={index} display="flex" justifyContent="space-between" paddingY={1}>
+                <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {metric}
+                </Text>
+                <Text variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {value}
+                </Text>
+              </Box>
+            )
+          })}
         </Box>
       </Stack>
     </Card>
@@ -245,21 +265,26 @@ const TooltipBody = ({
         </Text>
         {links ? (
           links.map((link, index) => (
-            <a key={index} target="_blank" rel="noopener noreferrer" href={link.url}>
-              <Text variant="body4" color="white">
+            <Shelf>
+              <a key={`${link.text}-${index}`} target="_blank" rel="noopener noreferrer" href={link.url}>
+                <Text variant="body3" color="white">
+                  {link.text}
+                </Text>
+              </a>
+              <IconArrowRightWhite size="iconSmall" />
+            </Shelf>
+          ))
+        ) : (
+          <Shelf>
+            <a target="_blank" rel="noopener noreferrer" href={url}>
+              <Text variant="body3" color="white">
                 {subtitle}
               </Text>
             </a>
-          ))
-        ) : (
-          <a target="_blank" rel="noopener noreferrer" href={url}>
-            <Text variant="body4" color="white">
-              {subtitle}
-            </Text>
-          </a>
+            <IconArrowRightWhite size="iconSmall" />
+          </Shelf>
         )}
       </Box>
-      <IconArrowRightWhite size="iconSmall" />
     </Box>
   )
 }

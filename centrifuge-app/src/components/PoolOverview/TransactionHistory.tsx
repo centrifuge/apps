@@ -22,6 +22,8 @@ type Row = {
   amount: CurrencyBalance | undefined
   hash: string
   netFlow?: 'positive' | 'negative' | 'neutral'
+  label: string
+  sublabel?: string
 }
 
 export const TransactionHistory = ({
@@ -65,7 +67,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'CASH_TRANSFER') {
       return {
-        label: 'Cash transfer',
+        label: 'Cash transfer from',
         amount: transaction.amount,
         netFlow,
       }
@@ -73,7 +75,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'DEPOSIT_FROM_INVESTMENTS') {
       return {
-        label: 'Deposit from investments',
+        label: 'Deposit from investments into',
         amount: transaction.amount,
         netFlow: 'positive',
       }
@@ -97,7 +99,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'BORROWED') {
       return {
-        label: 'Purchase',
+        label: 'Purchase of',
         amount: transaction.amount,
         netFlow,
       }
@@ -105,7 +107,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'INCREASE_DEBT') {
       return {
-        label: 'Correction ↑',
+        label: 'Correction ↑ of',
         amount: transaction.amount,
         netFlow: 'positive',
       }
@@ -113,7 +115,7 @@ export const TransactionHistoryTable = ({
 
     if (transaction.type === 'DECREASE_DEBT') {
       return {
-        label: 'Correction ↓',
+        label: 'Correction ↓ of',
         amount: transaction.amount,
         netFlow: 'negative',
       }
@@ -141,16 +143,17 @@ export const TransactionHistoryTable = ({
       new BN(transaction.principalAmount || 0).isZero()
     ) {
       return {
-        label: 'Interest payment',
+        label: 'Interest payment from',
         amount: transaction.interestAmount,
         netFlow,
       }
     }
 
     return {
-      label: 'Principal payment',
+      label: 'Sale of',
       amount: transaction.principalAmount,
       netFlow,
+      sublabel: 'settled into',
     }
   }
 
@@ -194,7 +197,7 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { amount, netFlow } = getLabelAndAmount(transaction)
+      const { amount, netFlow, label, sublabel } = getLabelAndAmount(transaction)
       return {
         activeAssetId,
         netFlow,
@@ -207,6 +210,8 @@ export const TransactionHistoryTable = ({
         toAssetName: transaction.toAsset?.name,
         amount: amount || 0,
         hash: transaction.hash,
+        label,
+        sublabel,
       }
     }) || []
 
@@ -224,32 +229,22 @@ export const TransactionHistoryTable = ({
     {
       align: 'left',
       header: <SortableTableHeader label="Transaction" />,
-      cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
+      cell: ({ assetId, assetName, toAssetId, toAssetName, label, sublabel, fromAssetName, fromAssetId }: Row) => {
         const base = `${basePath}/${poolId}/assets/`
-        return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
+        const isCashTransfer = label === 'Cash transfer from'
+        return (
           <Text as="span" variant="body3">
-            {fromAssetName} &rarr;{' '}
-            <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}>{toAssetName}</RouterTextLink>
-          </Text>
-        ) : fromAssetId && toAssetId && activeAssetId === toAssetId.split('-')[1] ? (
-          <Text as="span" variant="body3">
-            <RouterTextLink to={`${base}${fromAssetId?.split('-')[1]}`}>{fromAssetName}</RouterTextLink> &rarr;{' '}
-            {toAssetName}
-          </Text>
-        ) : fromAssetId && toAssetId ? (
-          <Text as="span" variant="body3">
-            <RouterTextLink to={`${base}${fromAssetId?.split('-')[1]}`}>{fromAssetName}</RouterTextLink> &rarr;{' '}
-            <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}>{toAssetName}</RouterTextLink>
-          </Text>
-        ) : activeAssetId !== assetId?.split('-')[1] ? (
-          <Text as="span" variant="body3">
-            <RouterTextLink to={`${base}${assetId?.split('-')[1]}`}>
-              {assetName || `Asset ${assetId?.split('-')[1]}`}
-            </RouterTextLink>
-          </Text>
-        ) : (
-          <Text as="span" variant="body3">
-            {assetName || `Asset ${assetId?.split('-')[1]}`}
+            {label}{' '}
+            <RouterTextLink to={`${base}${isCashTransfer ? fromAssetId?.split('-')[1] : assetId.split('-')[1]}`}>
+              {isCashTransfer ? fromAssetName : assetName}
+            </RouterTextLink>{' '}
+            {toAssetName ? (
+              <>
+                {' '}
+                {sublabel ? sublabel : `to`}{' '}
+                <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}> {toAssetName}</RouterTextLink>
+              </>
+            ) : null}
           </Text>
         )
       },

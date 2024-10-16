@@ -111,7 +111,7 @@ export const PriceChart = ({ data, currency, filter, setFilter, isPrice }: Price
             />
           )}
           <CartesianGrid stroke={theme.colors.borderPrimary} />
-          <Tooltip content={<CustomizedTooltip currency={currency} precision={6} />} />
+          <Tooltip content={<CustomizedTooltip currency={currency} precision={6} isRate={!isPrice} />} />
           <Area
             type="monotone"
             dataKey={isPrice ? 'price' : 'apy'}

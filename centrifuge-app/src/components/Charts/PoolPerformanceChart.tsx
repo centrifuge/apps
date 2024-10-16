@@ -10,6 +10,7 @@ import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
+import { DYF_POOL_ID } from '../PoolCard'
 import { Tooltips, tooltipText } from '../Tooltips'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getOneDayPerMonth, getRangeNumber } from './utils'
@@ -22,7 +23,6 @@ type ChartData = {
   currency?: string
   seniorAPY: number | null | undefined
   juniorAPY: number | null
-  isToday: boolean
 }
 
 type GraphDataItemWithType = {
@@ -115,7 +115,7 @@ function PoolPerformanceChart() {
     return true
   })
 
-  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
+  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>(rangeFilters[0])
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
@@ -123,6 +123,16 @@ function PoolPerformanceChart() {
   const todayPrice = pool?.tranches
     ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
     : null
+
+  const todayJuniorApy = pool?.tranches
+    ?.find((pool) => pool.seniority === 0)
+    ?.yield30DaysAnnualized?.toPercent()
+    .toNumber()
+
+  const todaySeniorApy = pool?.tranches
+    ?.find((pool) => pool.seniority === 1)
+    ?.yield30DaysAnnualized?.toPercent()
+    .toNumber()
 
   const trancheTodayPrice = calculateTranchePrices(pool as Pool)
 
@@ -151,9 +161,8 @@ function PoolPerformanceChart() {
             nav: todayAssetValue,
             juniorTokenPrice: tranchePrices.juniorTokenPrice ?? 0,
             seniorTokenPrice: tranchePrices.seniorTokenPrice ?? null,
-            juniorAPY: formattedJuniorAPY,
-            seniorAPY: formattedSeniorAPY,
-            isToday: true,
+            juniorAPY: pool.id === DYF_POOL_ID ? 15 : todayJuniorApy,
+            seniorAPY: todaySeniorApy,
           }
         }
 
@@ -164,20 +173,17 @@ function PoolPerformanceChart() {
           seniorTokenPrice: seniorTokenPrice !== 0 ? seniorTokenPrice : null,
           juniorAPY: formattedJuniorAPY,
           seniorAPY: formattedSeniorAPY,
-          isToday: false,
         }
       }) || [],
-    [truncatedPoolStates, todayAssetValue, pool, range]
+    [truncatedPoolStates, todayAssetValue, pool, range, todayJuniorApy, todaySeniorApy]
   )
-
-  const todayData = data.find((day) => day.isToday)
 
   const today = {
     nav: todayAssetValue,
     price: todayPrice,
     currency: pool.currency.symbol,
-    juniorAPY: todayData?.juniorAPY,
-    seniorAPY: todayData?.seniorAPY,
+    juniorAPY: pool.id === DYF_POOL_ID ? 15 : todayJuniorApy,
+    seniorAPY: todaySeniorApy,
     ...trancheTodayPrice,
   }
 
@@ -217,10 +223,10 @@ function PoolPerformanceChart() {
           Pool performance
         </Text>
         <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
             Price
           </TabsItem>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
             APY
           </TabsItem>
         </Tabs>
@@ -258,7 +264,7 @@ function PoolPerformanceChart() {
               <YAxis
                 stroke="none"
                 tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
                 yAxisId="left"
                 width={80}
@@ -266,11 +272,15 @@ function PoolPerformanceChart() {
               <YAxis
                 stroke="none"
                 tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                 yAxisId="right"
                 orientation="right"
-                domain={selectedTabIndex === 0 ? ['dataMin - 0.25', 'dataMax + 0.25'] : [0, 'dataMax + 0.25']}
+                domain={
+                  selectedTabIndex === 0
+                    ? ['auto', 'auto']
+                    : [(dataMin: number) => [Math.round(dataMin)], (dataMax: number) => [Math.round(dataMax)]]
+                }
               />
               <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
@@ -401,8 +411,6 @@ function CustomLegend({
   setRange: (value: { value: string; label: string }) => void
   selectedTabIndex: number
 }) {
-  const juniorAPY = data.juniorAPY ?? 0
-
   const Dot = ({ color }: { color: string }) => (
     <Box width="8px" height="8px" borderRadius="50%" backgroundColor={color} marginRight="4px" />
   )
@@ -419,7 +427,7 @@ function CustomLegend({
     navData,
     {
       color: 'textGold',
-      label: 'Junior token price',
+      label: data.seniorTokenPrice ? 'Junior token price' : 'Token price',
       value: formatBalance(data.juniorTokenPrice ?? 0, '', 3),
       type: 'singleTrancheTokenPrice',
       show: true,
@@ -437,8 +445,8 @@ function CustomLegend({
     navData,
     {
       color: 'textGold',
-      label: 'Junior APY',
-      value: formatPercentage(juniorAPY),
+      label: data.seniorAPY ? 'Junior APY' : 'APY',
+      value: formatPercentage(data.juniorAPY ?? 0),
       show: !!data.juniorAPY,
     },
     {
@@ -468,13 +476,15 @@ function CustomLegend({
           }
 
           return (
-            <Stack key={index} pl={1} display="flex" marginRight="20px">
+            <Stack key={index} display="flex" marginRight="20px">
               <Box display="flex" alignItems="center">
                 <Dot color={item.color} />
                 {hasType(item) ? (
-                  <Tooltips type={item.type} label={item.label} />
-                ) : (
                   <Text variant="body3" style={{ lineHeight: 1.8 }}>
+                    <Tooltips type={item.type} label={item.label} color="textSecondary" size="sm" />
+                  </Text>
+                ) : (
+                  <Text color="textSecondary" variant="body3" style={{ lineHeight: 1.8 }}>
                     {item.label}
                   </Text>
                 )}
@@ -505,7 +515,7 @@ export const CustomTick = ({ x, y, payload }: CustomTickProps) => {
   return (
     <g transform={`translate(${x},${y})`}>
       <text
-        style={{ fontSize: '10px', fill: theme.colors.textPrimary, letterSpacing: '-0.5px' }}
+        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
         x={0}
         y={0}
         dy={16}

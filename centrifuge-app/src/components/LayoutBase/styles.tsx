@@ -39,6 +39,7 @@ export const Inner = styled(Grid)`
   width: 100vw;
   bottom: 0;
   overflow-y: auto;
+  padding-right: 12px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
@@ -46,12 +47,14 @@ export const Inner = styled(Grid)`
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
     overflow: visible;
     height: 100vh;
+    padding-right: 0px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     width: 15vw;
     background-color: ${({ theme }) => theme.colors.backgroundInverted};
-    padding-left: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
     height: 100vh;
   }
 `
@@ -64,8 +67,6 @@ export const MobileBar = styled(Box)`
   z-index: 3;
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
   padding: 1rem;
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -99,7 +100,7 @@ export const LogoContainer = styled(Stack)`
 
   height: ${HEADER_HEIGHT}px;
   justify-content: center;
-  padding-left: 12px;
+  padding-left: 8px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
@@ -110,7 +111,7 @@ export const LogoContainer = styled(Stack)`
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     justify-content: start;
-    padding-top: ${({ theme }) => theme.space[2]}px;
+    padding-top: ${({ theme }) => theme.space[3]}px;
   }
 `
 
@@ -146,7 +147,8 @@ export const WalletInner = styled(Stack)`
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
     height: 50px;
-    margin-right: 40px;
+    margin-right: 30px;
+    margin-top: 15px;
   }
 `
 
@@ -165,6 +167,7 @@ export const FooterContainer = styled(Box)`
   position: sticky;
   bottom: 0;
   width: 100%;
+  padding-left: 4px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     position: sticky;
@@ -178,8 +181,6 @@ export const ToolbarContainer = styled(Box)`
   position: sticky;
   bottom: 0;
   width: 100%;
-
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
@@ -200,12 +201,12 @@ export const ContentWrapper = styled.div`
       theme.breakpoints['L']}) {
     margin-left: 7vw;
     width: calc(100% - 7vw);
-    margin-top: 0;
+    margin-top: 10px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     margin-left: 15vw;
     width: calc(100% - 15vw);
-    margin-top: 0;
+    margin-top: 10px;
   }
 `

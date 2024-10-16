@@ -238,13 +238,15 @@ export function Holdings({
 
   return address && tokens.length ? (
     <>
-      <InvestRedeemDrawer
-        poolId={investPoolId || redeemPoolId || ''}
-        trancheId={investTrancheId || redeemTrancheId || ''}
-        open={!!(openRedeemDrawer || openInvestDrawer)}
-        onClose={() => navigate(pathname, { replace: true })}
-        defaultView={openRedeemDrawer ? 'redeem' : 'invest'}
-      />
+      {investPoolId || redeemPoolId ? (
+        <InvestRedeemDrawer
+          poolId={investPoolId || redeemPoolId || ''}
+          trancheId={investTrancheId || redeemTrancheId || ''}
+          open={!!(openRedeemDrawer || openInvestDrawer)}
+          onClose={() => navigate(pathname, { replace: true })}
+          defaultView={openRedeemDrawer ? 'redeem' : 'invest'}
+        />
+      ) : null}
       <TransferTokensDrawer
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}

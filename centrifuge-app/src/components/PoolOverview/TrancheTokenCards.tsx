@@ -1,5 +1,6 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { Decimal } from 'decimal.js-light'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { InvestButton, Token } from '../../pages/Pool/Overview'
@@ -7,12 +8,32 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
+import { PoolMetaDataPartial } from '../PoolList'
 
-export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: Token[]; poolId: string }) => {
+type Row = {
+  tokenName: string
+  apy: Decimal
+  tvl: Decimal
+  tokenPrice: Decimal
+  subordination: Decimal
+  trancheId: string
+}
+
+const NS2 = '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
+
+export const TrancheTokenCards = ({
+  trancheTokens,
+  poolId,
+  metadata,
+}: {
+  trancheTokens: Token[]
+  poolId: string
+  metadata: PoolMetaDataPartial
+}) => {
   const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
-  const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
 
   const getTrancheText = (trancheToken: Token) => {
     if (trancheToken.seniority === 0) return 'junior'
@@ -20,76 +41,104 @@ export const TrancheTokenCards = ({ trancheTokens, poolId }: { trancheTokens: To
     return 'mezzanine'
   }
 
-  const columnConfig = useMemo(() => {
-    const calculateApy = (trancheToken: Token) => {
-      if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
-      if (daysSinceCreation < 30) return 'N/A'
-      return trancheToken.yield30DaysAnnualized
-        ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
-        : '-'
-    }
+  const calculateApy = (trancheToken: Token) => {
+    if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
+    if (poolId === NS2 && trancheToken.seniority === 0) return '15%'
+    if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+    if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
+      return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+    if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
+      return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
+    const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
+    if (daysSinceCreation < 30) return 'N/A'
+    return trancheToken.yield30DaysAnnualized
+      ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
+      : '-'
+  }
 
+  const columns = useMemo(() => {
     return [
       {
         header: 'Token',
+        width: '40%',
         align: 'left',
-        formatter: (v: any) => v,
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="400" variant="heading2">
+              {row.tokenName}
+            </Text>
+          )
+        },
       },
       {
-        header: 'APY',
+        header: poolId === DYF_POOL_ID || poolId === NS3_POOL_ID ? 'Target' : 'APY',
         align: 'left',
-        formatter: (v: any) => (v ? calculateApy(v) : '-'),
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="600" variant="heading2">
+              {row.apy}
+            </Text>
+          )
+        },
       },
       {
         header: `TVL (${pool?.currency.symbol})`,
         align: 'left',
-        formatter: (v: any) => (v ? formatBalance(v) : '-'),
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="400" variant="heading2">
+              {formatBalance(row.tvl)}
+            </Text>
+          )
+        },
       },
       {
-        header: 'Token price',
+        header: `Token price (${pool?.currency.symbol})`,
         align: 'left',
-        formatter: (v: any) => (v ? formatBalance(v, pool?.currency.symbol, pool?.currency.decimals) : '-'),
+        cell: (row: Row) => {
+          return (
+            <Text paddingY={2} fontWeight="400" variant="heading2">
+              {formatBalance(row.tokenPrice, undefined, 6)}
+            </Text>
+          )
+        },
       },
       ...(pool.tranches.length > 1
         ? [
             {
               header: 'Subordination',
               align: 'left',
-              formatter: (_: any, row: any) => {
-                if (row.value[1].seniority === 0) return '-'
-                return formatPercentage(row.value[1].protection)
+              cell: (row: Row) => {
+                return (
+                  <Text paddingY={2} fontWeight="400" variant="heading2">
+                    {formatPercentage(row.subordination)}
+                  </Text>
+                )
               },
             },
           ]
         : []),
       {
         header: '',
-        align: 'left',
-        formatter: (_: any, row: any) => {
-          return <InvestButton poolId={poolId} trancheId={row.value[1].id} />
+        align: 'right',
+        cell: (row: Row) => {
+          return <InvestButton poolId={poolId} trancheId={row.trancheId} metadata={metadata} />
         },
       },
     ]
-  }, [pool, poolId, isTinlakePool, daysSinceCreation])
-
-  const columns = useMemo(() => {
-    return columnConfig.map((col, index) => {
-      return {
-        align: col.align,
-        header: col.header,
-        cell: (row: any) => (
-          <Text paddingY={2} fontWeight={col.header === 'APY' ? '600' : '400'} variant="heading2">
-            {col.formatter(row.value[index], row)}
-          </Text>
-        ),
-      }
-    })
-  }, [columnConfig])
+  }, [pool.tranches, metadata, poolId])
 
   const dataTable = useMemo(() => {
-    return trancheTokens.map((tranche) => ({
-      value: [`${tranche.name} ${getTrancheText(tranche)}`, tranche, tranche.valueLocked, tranche.tokenPrice],
-    }))
+    return trancheTokens.map((tranche) => {
+      return {
+        tokenName: tranche.name,
+        apy: calculateApy(tranche),
+        tvl: tranche.valueLocked,
+        tokenPrice: tranche.tokenPrice,
+        subordination: tranche.protection,
+        trancheId: tranche.id,
+      }
+    })
   }, [trancheTokens])
 
   return (

@@ -9,6 +9,7 @@ export type TabsProps = {
   selectedIndex: number
   onChange?: (index: number) => void
   children: (React.ReactElement<TabsItemProps> | string | boolean | null | undefined)[]
+  variant?: 'primary' | 'secondary'
 }
 
 export function Tabs({ selectedIndex, onChange, children }: TabsProps) {
@@ -29,7 +30,12 @@ export function Tabs({ selectedIndex, onChange, children }: TabsProps) {
   )
 }
 
-const StyledTabsItem = styled.button<{ $active?: boolean; styleOverrides?: React.CSSProperties, showBorder?: boolean }>(
+const StyledTabsItem = styled.button<{
+  $active?: boolean
+  styleOverrides?: React.CSSProperties
+  showBorder?: boolean
+  variant: 'primary' | 'secondary'
+}>(
   {
     display: 'flex',
     alignItems: 'center',
@@ -43,18 +49,22 @@ const StyledTabsItem = styled.button<{ $active?: boolean; styleOverrides?: React
     appearance: 'none',
     background: 'transparent',
   },
-  ({ $active, theme, styleOverrides, showBorder }) => {
+  ({ $active, theme, styleOverrides, showBorder, variant }) => {
     return css({
       paddingTop: 1,
       paddingLeft: 2,
       paddingRight: 2,
       paddingBottom: 2,
       color: $active ? 'textPrimary' : 'textSecondary',
-      boxShadow: $active ? `inset 0 -2px 0 ${theme.colors.textGold}` : showBorder ? `inset 0 -2px 0 ${theme.colors.textDisabled}` : 'none',
+      boxShadow: $active
+        ? `inset 0 -2px 0 ${variant === 'secondary' ? theme.colors.textPrimary : theme.colors.textGold}`
+        : showBorder
+        ? `inset 0 -2px 0 ${theme.colors.textDisabled}`
+        : 'none',
       fontWeight: 400,
 
       '&:hover, &:active, &:focus-visible': {
-        color: 'textGold',
+        color: $active ? 'textPrimary' : 'textGold',
       },
       ...styleOverrides,
     })
@@ -80,6 +90,7 @@ export function TabsItem({
   ariaLabel,
   styleOverrides,
   showBorder,
+  variant = 'primary',
   ...rest
 }: TabsItemPrivateProps) {
   return (
@@ -90,6 +101,7 @@ export function TabsItem({
       aria-label={ariaLabel}
       styleOverrides={styleOverrides}
       showBorder={showBorder}
+      variant={variant}
       {...rest}
     >
       <Text variant="interactive1" color="inherit" fontWeight={400}>

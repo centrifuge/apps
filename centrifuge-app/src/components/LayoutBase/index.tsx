@@ -55,7 +55,8 @@ export function LayoutBase(): JSX.Element {
           </MobileBar>
         </>
       )}
-      <ContentWrapper>
+      {/* The ID functions so we can deactive scrolling in certain pages, example in the data page */}
+      <ContentWrapper id="content-wrapper">
         <Outlet />
       </ContentWrapper>
     </Root>
