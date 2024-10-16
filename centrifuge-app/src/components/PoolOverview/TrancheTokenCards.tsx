@@ -10,6 +10,7 @@ import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { PoolMetaDataPartial } from '../PoolList'
+import { Tooltips } from '../Tooltips'
 
 type Row = {
   tokenName: string
@@ -18,9 +19,8 @@ type Row = {
   tokenPrice: Decimal
   subordination: Decimal
   trancheId: string
+  isTarget: boolean
 }
-
-const NS2 = '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
 
 export const TrancheTokenCards = ({
   trancheTokens,
@@ -34,6 +34,7 @@ export const TrancheTokenCards = ({
   const pool = usePool(poolId)
   const theme = useTheme()
   const isTinlakePool = poolId.startsWith('0x')
+  const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
 
   const getTrancheText = (trancheToken: Token) => {
     if (trancheToken.seniority === 0) return 'junior'
@@ -43,18 +44,20 @@ export const TrancheTokenCards = ({
 
   const calculateApy = (trancheToken: Token) => {
     if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
-    if (poolId === NS2 && trancheToken.seniority === 0) return '15%'
+    if (isTinlakePool && trancheToken.seniority === 0) return '15%'
     if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
     if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
       return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
     if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
       return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
-    const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
     if (daysSinceCreation < 30) return 'N/A'
     return trancheToken.yield30DaysAnnualized
       ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
       : '-'
   }
+
+  const getTarget = (tranche: Token) =>
+    (isTinlakePool && tranche.seniority === 0) || poolId === DYF_POOL_ID || poolId === NS3_POOL_ID
 
   const columns = useMemo(() => {
     return [
@@ -71,13 +74,16 @@ export const TrancheTokenCards = ({
         },
       },
       {
-        header: poolId === DYF_POOL_ID || poolId === NS3_POOL_ID ? 'Target' : 'APY',
+        header: 'APY',
         align: 'left',
         cell: (row: Row) => {
           return (
-            <Text paddingY={2} fontWeight="600" variant="heading2">
-              {row.apy}
-            </Text>
+            <Box>
+              <Text style={{ marginRight: 4 }} fontWeight="600" variant="heading2">
+                {row.apy}
+              </Text>
+              {row.isTarget && <Tooltips label="target" type="targetAPY" size="xs" />}
+            </Box>
           )
         },
       },
@@ -137,9 +143,10 @@ export const TrancheTokenCards = ({
         tokenPrice: tranche.tokenPrice,
         subordination: tranche.protection,
         trancheId: tranche.id,
+        isTarget: getTarget(tranche),
       }
     })
-  }, [trancheTokens])
+  }, [trancheTokens, getTarget])
 
   return (
     <Shelf gap={3}>
