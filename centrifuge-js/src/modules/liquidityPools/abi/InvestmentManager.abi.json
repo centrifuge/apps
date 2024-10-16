@@ -1,1 +1,9 @@
-["function poolManager() view returns (address)"]
+[
+  {
+    "inputs": [],
+    "name": "poolManager",
+    "outputs": [{ "internalType": "contract IPoolManager", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

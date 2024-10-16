@@ -335,7 +335,7 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
         <Spinner size="iconSmall" />
       )}
       {activeDomains.data
-        ?.filter((domain) => domain.isActive)
+        ?.filter((domain) => domain.isActive && domain.chainId !== 5)
         .map((domain) => {
           const chain = (evmChains as any)[domain.chainId]
           return (

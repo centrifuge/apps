@@ -1,6 +1,4 @@
-import { Contract } from '@ethersproject/contracts'
-import { InfuraProvider } from '@ethersproject/providers'
-import { Wallet } from '@ethersproject/wallet'
+import { Contract, InfuraProvider, Wallet } from 'ethers'
 import { Request } from 'express'
 import { lastValueFrom } from 'rxjs'
 import { HttpError, reportHttpError } from '../httpError'
@@ -196,16 +194,11 @@ export const addTinlakeInvestorToMemberList = async (wallet: Request['wallet'], 
       : pool.addresses.JUNIOR_MEMBERLIST
 
     const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
-    const tx = await memberAdminContract.functions.updateMember(
-      memberlistAddress,
-      wallet.address,
-      OneHundredYearsFromNow,
-      {
-        gasLimit: 1000000,
-        // TODO: find a better number, this is causing errors on goerli
-        // maxPriorityFeePerGas: 4000000000, // 4 gwei
-      }
-    )
+    const tx = await memberAdminContract.updateMember(memberlistAddress, wallet.address, OneHundredYearsFromNow, {
+      gasLimit: 1000000,
+      // TODO: find a better number, this is causing errors on goerli
+      // maxPriorityFeePerGas: 4000000000, // 4 gwei
+    })
     const finalizedTx = await tx.wait()
     console.log(`tx finalized: ${finalizedTx.transactionHash}, nonce=${tx.nonce}`)
     return { txHash: finalizedTx.transactionHash }

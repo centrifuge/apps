@@ -1,10 +1,10 @@
-import type { JsonRpcSigner, TransactionRequest } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
-import { SignedBlock } from '@polkadot/types/interfaces'
+import { EventRecord, SignedBlock } from '@polkadot/types/interfaces'
 import { DefinitionRpc, DefinitionsCall, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
+import type { JsonRpcSigner, TransactionRequest } from 'ethers'
 import 'isomorphic-fetch'
 import {
   Observable,
@@ -17,6 +17,7 @@ import {
   firstValueFrom,
   from,
   map,
+  mergeAll,
   mergeWith,
   of,
   share,
@@ -295,19 +296,67 @@ type Events = ISubmittableResult['events']
 
 const txCompletedEvents: Record<string, Subject<Events>> = {}
 const blockEvents: Record<string, Observable<Events>> = {}
+const parachainUrlCache = new Set<string | null>()
 
 export class CentrifugeBase {
   config: Config
-  parachainUrl: string
   relayChainUrl: string
   subqueryUrl: string
+  rpcEndpoints: string[]
 
   constructor(config: UserProvidedConfig = {}) {
     this.config = { ...defaultConfig, ...config }
-    this.parachainUrl = this.config.network === 'centrifuge' ? this.config.centrifugeWsUrl : this.config.altairWsUrl
     this.relayChainUrl = this.config.network === 'centrifuge' ? this.config.polkadotWsUrl : this.config.kusamaWsUrl
     this.subqueryUrl =
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
+    this.rpcEndpoints = this.config.centrifugeWsUrl.split(',').map((url) => url.trim())
+  }
+
+  private async findHealthyWs(): Promise<string | null> {
+    const url = await Promise.any(this.rpcEndpoints.map((url) => this.checkWsHealth(url)))
+    if (url) {
+      console.log(`Connection to ${url} established`)
+      return url
+    }
+    console.error('Error: No healthy parachain URL found')
+    return null
+  }
+
+  private checkWsHealth(url: string, timeoutMs: number = 5000): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(url)
+      const timer = setTimeout(() => {
+        ws.close()
+        console.log(`Connection to ${url} timed out`)
+        reject()
+      }, timeoutMs)
+
+      ws.onopen = () => {
+        clearTimeout(timer)
+        ws.close()
+        resolve(url)
+      }
+
+      ws.onerror = () => {
+        clearTimeout(timer)
+        ws.close()
+        console.log(`Connection to ${url} failed`)
+        reject()
+      }
+    })
+  }
+
+  private async getCachedParachainUrl(): Promise<string> {
+    const match = this.rpcEndpoints.find((url) => parachainUrlCache.has(url))
+    if (match) {
+      return match
+    }
+    const healthyUrl = await this.findHealthyWs()
+    if (!healthyUrl) {
+      throw new Error('No healthy parachain URL available')
+    }
+    parachainUrlCache.add(healthyUrl)
+    return healthyUrl
   }
 
   async getChainId() {
@@ -457,9 +506,11 @@ export class CentrifugeBase {
             blockNumber: (result as any).blockNumber ? Number((result as any).blockNumber?.toString()) : undefined,
           }
         }),
-        tap((result) => {
+        tap(async (result) => {
           options?.onStatusChange?.(result)
-          if (result.status === 'InBlock') this.getTxCompletedEvents().next(result.events)
+          if (result.status === 'InBlock') {
+            ;(await this.getTxCompletedEvents()).next(result.events)
+          }
         }),
         takeWhile((result) => {
           return result.status !== 'InBlock' && !result.error
@@ -596,39 +647,50 @@ export class CentrifugeBase {
   }
 
   getBlockEvents() {
-    if (blockEvents[this.parachainUrl]) return blockEvents[this.parachainUrl]
-    const $api = this.getApi()
+    return from(this.getCachedParachainUrl()).pipe(
+      switchMap((url) => {
+        if (blockEvents[url]) return blockEvents[url]
+        const $api = this.getApi()
 
-    return (blockEvents[this.parachainUrl] = $api.pipe(
-      switchMap((api) =>
-        api.queryMulti([api.query.system.events, api.query.system.number]).pipe(
-          bufferCount(2, 1), // Delay the events by one block, to make sure storage has been updated
-          filter(([[events]]) => !!(events as any)?.length),
-          map(([[events]]) => events as any)
-        )
-      ),
-      share()
-    ))
+        return (blockEvents[url] = $api.pipe(
+          switchMap((api) =>
+            api.queryMulti([api.query.system.events, api.query.system.number]).pipe(
+              bufferCount(2, 1),
+              filter(([[events]]) => !!(events as any)?.length),
+              map(([[events]]) => events as any)
+            )
+          ),
+          share()
+        ))
+      })
+    )
   }
 
-  getTxCompletedEvents() {
-    return txCompletedEvents[this.parachainUrl] || (txCompletedEvents[this.parachainUrl] = new Subject())
+  async getTxCompletedEvents() {
+    const parachainUrl = await this.getCachedParachainUrl()
+    return txCompletedEvents[parachainUrl] || (txCompletedEvents[parachainUrl] = new Subject<EventRecord[]>())
   }
 
   getEvents() {
     return this.getBlockEvents().pipe(
-      mergeWith(this.getTxCompletedEvents()),
+      mergeWith(from(this.getTxCompletedEvents()).pipe(mergeAll())),
       combineLatestWith(this.getApi()),
       map(([events, api]) => ({ events, api }))
     )
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi)
+    return from(this.getCachedParachainUrl()).pipe(
+      switchMap((parachainUrl) =>
+        getPolkadotApi(parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi)
+      )
+    )
   }
 
   getApiPromise() {
-    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi))
+    return this.getCachedParachainUrl().then((parachainUrl) =>
+      firstValueFrom(getPolkadotApi(parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi))
+    )
   }
 
   getRelayChainApi() {

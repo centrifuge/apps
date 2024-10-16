@@ -1,9 +1,9 @@
 import Centrifuge, { Account, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { UserProvidedConfig } from '@centrifuge/centrifuge-js/dist/CentrifugeBase'
-import { getAddress, isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
+import { getAddress, isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 

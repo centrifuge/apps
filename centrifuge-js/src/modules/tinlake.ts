@@ -1,11 +1,10 @@
-import { Contract } from '@ethersproject/contracts'
-import { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
+import { Contract, Interface, TransactionRequest, TransactionResponse } from 'ethers'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { CurrencyBalance } from '../utils/BN'
-import { calculateOptimalSolution, Orders, State } from '../utils/solver/tinlakeSolver'
+import { Orders, State, calculateOptimalSolution } from '../utils/solver/tinlakeSolver'
 import { abis } from './tinlake/abi'
 
 const contracts: Record<string, Contract> = {}
@@ -69,10 +68,10 @@ export function getTinlakeModule(inst: Centrifuge) {
     if (!inst.config.evmSigner) throw new Error('Needs signer')
     if (!abi) throw new Error('ABI not found')
     if (!contracts[contractAddress]) {
-      contracts[contractAddress] = new Contract(contractAddress, abi)
+      contracts[contractAddress] = new Contract(contractAddress, new Interface(abi))
     }
 
-    return contracts[contractAddress].connect(inst.config.evmSigner)
+    return contracts[contractAddress].connect(inst.config.evmSigner) as Contract
   }
 
   function pending(txPromise: Promise<TransactionResponse>) {
@@ -199,7 +198,9 @@ export function getTinlakeModule(inst: Centrifuge) {
       : toBN(await coordinator.epochSeniorAsset())
 
     const minDropRatio = toBN(await assessor.minSeniorRatio())
+
     const maxDropRatio = toBN(await assessor.maxSeniorRatio())
+
     const maxReserve = toBN(await assessor.maxReserve())
 
     return { reserve, netAssetValue, seniorAsset, minDropRatio, maxDropRatio, maxReserve }
@@ -221,6 +222,7 @@ export function getTinlakeModule(inst: Centrifuge) {
       const feed = contract(contractAddresses, contractVersions, 'FEED')
 
       const epochNAV = toBN(await feed.currentNAV())
+
       const epochReserve = toBN(await contract(contractAddresses, contractVersions, 'RESERVE').totalBalance())
       const epochSeniorTokenPrice = toBN(
         await assessor['calcSeniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
@@ -231,16 +233,20 @@ export function getTinlakeModule(inst: Centrifuge) {
 
       return {
         dropInvest: toBN(await seniorTranche.totalSupply()),
+
         dropRedeem: toBN(await seniorTranche.totalRedeem())
           .mul(epochSeniorTokenPrice)
           .div(e27),
+
         tinInvest: toBN(await juniorTranche.totalSupply()),
+
         tinRedeem: toBN(await juniorTranche.totalRedeem())
           .mul(epochJuniorTokenPrice)
           .div(e27),
       }
     }
     const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+
     const orderState = await coordinator.order()
 
     return {
@@ -259,9 +265,14 @@ export function getTinlakeModule(inst: Centrifuge) {
 
     return {
       dropInvest: toBN(await coordinator.weightSeniorSupply()),
+
       dropRedeem: toBN(await coordinator.weightSeniorRedeem()),
+
       tinInvest: toBN(await coordinator.weightJuniorSupply()),
+
       tinRedeem: toBN(await coordinator.weightJuniorRedeem()),
+
+      seniorAsset: toBN(await coordinator.weightSeniorAsset()),
     }
   }
 
@@ -272,6 +283,7 @@ export function getTinlakeModule(inst: Centrifuge) {
     options: TransactionRequest = {}
   ) {
     const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+
     return pending(coordinator.closeEpoch({ ...options, gasLimit: 5000000 }))
   }
 
@@ -283,6 +295,7 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const submissionTx = (async () => {
       const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+
       if ((await coordinator.submissionPeriod()) !== true) throw new Error('Not in submission period')
       const state = await getEpochState(contractAddresses, contractVersions, [])
       const orders = await getOrders(contractAddresses, contractVersions, [])
@@ -363,6 +376,7 @@ export function getTinlakeModule(inst: Centrifuge) {
     }
 
     const lastEpochClosed = toBN(await coordinator.lastEpochClosed()).toNumber()
+
     const minimumEpochTime = toBN(await coordinator.minimumEpochTime()).toNumber()
     if (submissionPeriod === false) {
       if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) return 'can-be-closed'

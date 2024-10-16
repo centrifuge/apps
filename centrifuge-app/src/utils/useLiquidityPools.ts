@@ -25,17 +25,20 @@ export function useActiveDomains(poolId?: string, suspense?: boolean) {
     ['activeDomains', poolId, routers?.length],
     async () => {
       const results = await Promise.allSettled(
-        routers!.map((r) => {
-          async function getManager() {
-            const rpcProvider = getProvider(r.chainId)
-            const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
-              rpcProvider,
-            })
-            const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId!], { rpcProvider })
-            return [manager, pool] as const
-          }
-          return withTimeout(getManager(), 15000)
-        })
+        routers!
+          // remove all goerli networks since providers don't support goerli anymore
+          .filter((r) => r.chainId !== 5 && r.chainId !== 84531)
+          .map((r) => {
+            async function getManager() {
+              const rpcProvider = getProvider(r.chainId)
+              const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
+                rpcProvider,
+              })
+              const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId!], { rpcProvider })
+              return [manager, pool] as const
+            }
+            return withTimeout(getManager(), 15000)
+          })
       )
       return results
         .map((result, i) => {

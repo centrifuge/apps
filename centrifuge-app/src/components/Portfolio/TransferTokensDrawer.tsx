@@ -24,10 +24,10 @@ import {
   TabsItem,
   Text,
 } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+import { isAddress as isEvmAddress } from 'ethers'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useEffect } from 'react'
 import { useQuery } from 'react-query'

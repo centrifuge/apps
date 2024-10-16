@@ -1,7 +1,7 @@
 import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { Card, Stack, Text } from '@centrifuge/fabric'
-import { utils } from 'ethers'
+import { toUtf8String } from 'ethers'
 import { first, map } from 'rxjs'
 import { Tooltips } from '../../components/Tooltips'
 import { formatDate, getAge } from '../../utils/date'
@@ -28,7 +28,7 @@ export function PricingValues({ loan, pool }: Props) {
         const currentAssetPrice = Object.entries(info.content)
           .filter(([key]) => {
             if ('priceId' in pricing && 'isin' in pricing.priceId) {
-              return utils.toUtf8String(JSON.parse(key).isin) === pricing.priceId.isin
+              return toUtf8String(JSON.parse(key).isin) === pricing.priceId.isin
             } else {
               return JSON.parse(key).poolLoanId[1].toString() === loan.id.toString()
             }

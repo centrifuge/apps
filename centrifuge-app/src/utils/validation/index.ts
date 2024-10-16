@@ -1,7 +1,7 @@
 import { ExternalPricingInfo } from '@centrifuge/centrifuge-js'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
+import { isAddress as isEvmAddress } from 'ethers'
 import { Dec } from '../Decimal'
 import { daysBetween } from '../date'
 import { formatPercentage } from '../formatting'

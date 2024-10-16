@@ -17,7 +17,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ethConfig } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useGmp } from '../../utils/useGmp'
@@ -63,7 +62,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
   const domainsWithAtLeastOneLP =
     domains && domains.filter((domain) => Object.values(domain.liquidityPools[trancheId] ?? {}).some((p) => !!p))
 
-  const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
+  const networks: Network[] = poolId.startsWith('0x') ? [1] : ['centrifuge']
   if (domainsWithAtLeastOneLP) {
     networks.push(...domainsWithAtLeastOneLP.map((d) => d.chainId))
   }
