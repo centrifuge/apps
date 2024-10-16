@@ -1,6 +1,17 @@
 import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Card, IconArrowRightWhite, IconMoody, IconSp, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import {
+  Box,
+  Card,
+  IconArrowRightWhite,
+  IconMoody,
+  IconParticula,
+  IconSp,
+  Shelf,
+  Stack,
+  Text,
+  Tooltip,
+} from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
@@ -34,6 +45,11 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
 }
 
 type TinlakeDataKey = keyof typeof tinlakeData
+
+const ratingIcons: { [key: string]: JSX.Element } = {
+  "Moody's": <IconMoody size={16} />,
+  Particula: <IconParticula size={16} />,
+}
 
 const tinlakeData = {
   '0x53b2d22d07E069a3b132BfeaaD275b10273d381E': '7% - 15%',
@@ -124,7 +140,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
         : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
-        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].join(' - ')
+        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].reverse().join(' - ')
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)
@@ -176,17 +192,16 @@ export const KeyMetrics = ({ poolId }: Props) => {
               <Shelf gap={1}>
                 {metadata?.pool?.poolRatings.map((rating) => (
                   <Tooltip
-                    delay={300}
                     bodyWidth="maxContent"
                     body={
                       <TooltipBody
                         title={rating.agency ?? ''}
                         links={[
-                          { text: 'View report', url: rating.reportUrl ?? '' },
+                          { text: 'Go to report', url: rating.reportUrl ?? '' },
                           ...(rating.reportFile
                             ? [
                                 {
-                                  text: 'Download report',
+                                  text: 'View PDF report',
                                   url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
                                 },
                               ]
@@ -200,9 +215,12 @@ export const KeyMetrics = ({ poolId }: Props) => {
                       borderRadius={20}
                       padding="2px 10px"
                       display="flex"
+                      alignItems="center"
+                      width={80}
+                      justifyContent="center"
                     >
-                      {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
-                      <Text>{rating.value}</Text>
+                      {rating.agency && ratingIcons[rating.agency] ? ratingIcons[rating.agency] : <IconSp size={16} />}
+                      <Text style={{ marginLeft: 4 }}>{rating.value}</Text>
                     </Box>
                   </Tooltip>
                 ))}

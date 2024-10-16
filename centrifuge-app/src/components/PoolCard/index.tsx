@@ -36,8 +36,7 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  height: 300px;
-
+  height: 320px;
   margin-right: 12px;
   margin-bottom: 12px;
   padding: 12px;
@@ -72,7 +71,8 @@ const tinlakeTranches = {
       { name: 'Senior', apr: '7%', minInvestment: '5K' },
     ],
     shortDescription: ' Real estate bridge loans for fix and flip projects, maturing in 12-24 months.',
-    investorType: 'Qualified Investors',
+    investorType: 'Qualified US and non-US investors',
+    assetType: 'Residential real estate',
   },
   BT3: {
     name: 'BlockTower Series 3',
@@ -82,6 +82,7 @@ const tinlakeTranches = {
     ],
     shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     investorType: 'Private',
+    assetType: 'Structured Credit',
   },
   BT4: {
     name: 'BlockTower Series 4',
@@ -91,6 +92,7 @@ const tinlakeTranches = {
     ],
     shortDescription: 'Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
     investorType: 'Private',
+    assetType: 'Structured Credit',
   },
   none: {
     name: '-',
@@ -100,16 +102,18 @@ const tinlakeTranches = {
     ],
     shortDescription: '',
     investorType: '-',
+    assetType: '-',
   },
 }
 
 export const DYF_POOL_ID = '1655476167'
 export const NS3_POOL_ID = '1615768079'
+export const NS2 = '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
 
 export type CentrifugeTargetAPYs = keyof typeof centrifugeTargetAPYs
 export const centrifugeTargetAPYs = {
   [DYF_POOL_ID]: ['15%'],
-  [NS3_POOL_ID]: ['8.0%', '16%'],
+  [NS3_POOL_ID]: ['16%', '8%'],
 }
 
 type TinlakeTranchesKey = keyof typeof tinlakeTranches
@@ -148,19 +152,26 @@ export function PoolCard({
     (key) => tinlakeTranches[key as TinlakeTranchesKey].name === name
   ) || 'none') as TinlakeTranchesKey
 
-  const renderText = (text: string, isApr?: boolean) => {
-    if (isApr && poolId === NS3_POOL_ID) {
+  const renderText = (text: string, isApr?: boolean, seniority?: number) => {
+    if (
+      (isApr && poolId === NS3_POOL_ID) ||
+      (isApr && poolId === DYF_POOL_ID) ||
+      (isApr && isTinlakePool && seniority === 0)
+    ) {
       return (
-        <Box display="flex">
+        <Box display="flex" alignItems="baseline">
           <Text
             fontWeight={500}
             as="h2"
             variant={isOneTranche ? 'heading1' : 'body1'}
-            style={{ width: 35, marginRight: 4 }}
+            style={{
+              width: isOneTranche ? 40 : 35,
+              marginRight: isOneTranche ? 12 : 4,
+            }}
           >
             {text}
           </Text>
-          <Tooltips type="targetAPY" color="textSecondary" label="Target" size="xs" />
+          <Tooltips type="targetAPY" color="textSecondary" label="target" size="xs" />
         </Box>
       )
     }
@@ -196,6 +207,7 @@ export function PoolCard({
         ).toDecimal()
 
         return {
+          seniority: tranche.seniority,
           name: trancheName,
           apr: isTinlakePool
             ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.apr
@@ -263,12 +275,12 @@ export function PoolCard({
           )}
           <Stack>
             <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
-              {poolId === DYF_POOL_ID ? 'Target' : 'APY'}
+              APY
             </Text>
-            {tranchesData?.map((tranche) => renderText(`${tranche.apr}`, true))}
+            {tranchesData?.map((tranche) => renderText(`${tranche.apr}`, true, tranche.seniority))}
           </Stack>
           <Stack>
-            <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+            <Text as="span" variant="body2" color="textButtonPrimaryDisabled">
               Min. investment
             </Text>
             {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
@@ -276,19 +288,21 @@ export function PoolCard({
         </Box>
         {(metaData?.pool?.issuer?.shortDescription || isTinlakePool) && (
           <Box marginY={12}>
-            <Text as="p" variant="body3" color="textButtonPrimaryDisabled">
+            <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
               {isTinlakePool ? tinlakeTranches[tinlakeKey].shortDescription : metaData?.pool?.issuer?.shortDescription}
             </Text>
           </Box>
         )}
 
         <Box display="flex" justifyContent="space-between" mt={1}>
-          <Text variant="body3">Asset type</Text>
-          <StyledText variant="body3">{assetClass ?? '-'}</StyledText>
+          <Text variant="body2">Asset type</Text>
+          <StyledText variant="body2">
+            {isTinlakePool ? tinlakeTranches[tinlakeKey].assetType : assetClass ?? '-'}
+          </StyledText>
         </Box>
         <Box display="flex" justifyContent="space-between">
-          <Text variant="body3">Investor type</Text>
-          <StyledText variant="body3">
+          <Text variant="body2">Investor type</Text>
+          <StyledText variant="body2">
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
           </StyledText>
         </Box>
