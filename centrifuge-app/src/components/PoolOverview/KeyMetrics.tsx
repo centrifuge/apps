@@ -181,11 +181,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
                       <TooltipBody
                         title={rating.agency ?? ''}
                         links={[
-                          { text: 'View report', url: rating.reportUrl ?? '' },
+                          { text: 'Go to report', url: rating.reportUrl ?? '' },
                           ...(rating.reportFile
                             ? [
                                 {
-                                  text: 'Download report',
+                                  text: 'View PDF report',
                                   url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
                                 },
                               ]
@@ -201,7 +201,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
                       display="flex"
                       alignItems="center"
                     >
-                      {rating.agency?.includes('moody') ? <IconMoody size={16} /> : <IconSp size={16} />}
+                      {rating.agency?.includes("Moody's") ? <IconMoody size={16} /> : <IconSp size={16} />}
                       <Text style={{ marginLeft: 4 }}>{rating.value}</Text>
                     </Box>
                   </Tooltip>
