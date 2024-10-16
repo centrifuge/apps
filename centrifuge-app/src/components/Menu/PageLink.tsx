@@ -3,6 +3,7 @@ import { Link, LinkProps, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { prefetchRoute } from '../Root'
+import { LIGHT_BACKGROUND } from './Toggle'
 import { baseButton, primaryButton } from './styles'
 
 const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
@@ -12,7 +13,7 @@ const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
   font-size: 14px;
   font-weight: 500;
-  background-color: transparent;
+  background-color: ${({ isActive }) => (isActive ? LIGHT_BACKGROUND : 'transparent')};
   border-radius: 4px;
   &:hover {
     color: ${({ theme }) => theme.colors.textGold};

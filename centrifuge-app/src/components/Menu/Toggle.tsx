@@ -2,6 +2,8 @@ import { Text } from '@centrifuge/fabric'
 import styled from 'styled-components'
 import { baseButton, primaryButton } from './styles'
 
+export const LIGHT_BACKGROUND = 'rgba(145, 150, 155, 0.13)'
+
 export const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${baseButton}
   ${primaryButton}
@@ -10,7 +12,7 @@ export const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
     stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr ${theme.sizes.iconSmall}px`};
   color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
   border-radius: 4px;
-  background-color: transparent;
+  background-color: ${({ isActive }) => (isActive ? LIGHT_BACKGROUND : 'transparent')};
 
   &:hover {
     color: ${({ theme }) => theme.colors.textGold};
