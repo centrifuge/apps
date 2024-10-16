@@ -1,7 +1,6 @@
 import { ActiveLoan, CurrencyBalance, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Button, CurrencyInput, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -43,9 +42,8 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
         const oldQuantity = loan.pricing.outstandingQuantity
         const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
         const quantity = Price.fromFloat(values.quantity)
-        const amount = new CurrencyBalance(price.mul(new BN(quantity.toDecimal().toString())), pool.currency.decimals)
         isIncrease = oldQuantity.lt(quantity)
-        const diff = amount.sub(oldQuantity)
+        const diff = quantity.sub(oldQuantity)
         principal = {
           external: {
             price: price.toString(),
