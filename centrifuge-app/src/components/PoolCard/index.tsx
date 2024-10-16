@@ -7,6 +7,7 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
 import { RouterTextLink } from '../TextLink'
+import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 
 export type InnerMetadata = {
@@ -151,12 +152,15 @@ export function PoolCard({
     if (isApr && poolId === NS3_POOL_ID) {
       return (
         <Box display="flex">
-          <Text fontWeight={500} as="h2" variant={isOneTranche ? 'heading1' : 'body1'} style={{ width: 35 }}>
+          <Text
+            fontWeight={500}
+            as="h2"
+            variant={isOneTranche ? 'heading1' : 'body1'}
+            style={{ width: 35, marginRight: 4 }}
+          >
             {text}
           </Text>
-          <Text variant="label2" style={{ alignSelf: 'flex-end', marginLeft: '4px' }}>
-            Target
-          </Text>
+          <Tooltips type="targetAPY" color="textSecondary" label="Target" size="xs" />
         </Box>
       )
     }
