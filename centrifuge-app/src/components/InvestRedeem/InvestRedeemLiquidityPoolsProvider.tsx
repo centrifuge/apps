@@ -10,7 +10,6 @@ import {
 import BN from 'bn.js'
 import { TransactionRequest } from 'ethers'
 import * as React from 'react'
-import { useEffect } from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
@@ -41,20 +40,13 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     isLoading: isInvestmentLoading,
   } = useLiquidityPoolInvestment(poolId, trancheId, lpIndex)
   const provider = useEvmProvider()
-  const [chainId, setChainId] = React.useState(1)
+  const { evm } = useWallet()
+  const chainId = evm.chainId || 1
 
   const isAllowedToInvest = lpInvest?.isAllowedToInvest
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
-
-  useEffect(() => {
-    const getChainId = async () => {
-      const chainId = Number((await provider?.provider!.getNetwork())?.chainId || 1n)
-      setChainId(chainId)
-    }
-    getChainId()
-  }, [provider])
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
