@@ -1,6 +1,6 @@
 import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, PricingInfo } from '@centrifuge/centrifuge-js'
 import { AssetTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
-import { StatusChip, Tooltip } from '@centrifuge/fabric'
+import { Text, Tooltip } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
@@ -124,12 +124,6 @@ export const TransactionTable = ({
       })
   }, [transactions, maturityDate, pricing, decimals])
 
-  const getStatusChipType = (type: AssetTransactionType) => {
-    if (type === 'BORROWED' || type === 'CREATED' || type === 'PRICED') return 'info'
-    if (type === 'REPAID') return 'ok'
-    return 'default'
-  }
-
   const getStatusText = (type: AssetTransactionType) => {
     if (type === 'BORROWED') return 'Financed'
     if (type === 'REPAID') return 'Repaid'
@@ -143,7 +137,7 @@ export const TransactionTable = ({
     {
       align: 'left',
       header: 'Type',
-      cell: (row: Row) => <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>,
+      cell: (row: Row) => <Text variant="heading4">{getStatusText(row.type)}</Text>,
     },
     {
       align: 'left',

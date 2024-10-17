@@ -1,14 +1,14 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import type { Networkish } from '@ethersproject/networks'
-import type { BaseProvider, Web3Provider } from '@ethersproject/providers'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { EIP1193 } from '@web3-react/eip1193'
 import { EMPTY, Empty } from '@web3-react/empty'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { createWeb3ReactStoreAndActions } from '@web3-react/store'
-import { Actions, Provider, Web3ReactState, Web3ReactStore } from '@web3-react/types'
+import { Actions, Provider as Web3ReactProvider, Web3ReactState, Web3ReactStore } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
+import type { Networkish } from 'ethers'
+import { BrowserProvider } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useWallet } from '../WalletProvider'
@@ -37,7 +37,7 @@ export function useConnectorState(connector?: Connector | null) {
   return state
 }
 
-const providerKeys = new WeakMap<Provider, string>()
+const providerKeys = new WeakMap<Web3ReactProvider, string>()
 function getProviderKey(connector: Connector) {
   let providerKey
   if (connector.provider) {
@@ -50,10 +50,7 @@ function getProviderKey(connector: Connector) {
   return providerKey
 }
 
-export function useProviderForConnector<T extends BaseProvider = Web3Provider>(
-  connector?: Connector | null,
-  network?: Networkish
-) {
+export function useProviderForConnector<T extends BrowserProvider>(connector?: Connector | null, network?: Networkish) {
   const conn = connector ?? emptyConnector
   const state = useConnectorState(conn)
   const isActive = computeIsActive(state)
@@ -61,8 +58,8 @@ export function useProviderForConnector<T extends BaseProvider = Web3Provider>(
   const { data: provider } = useQuery(
     ['evmProvider', getProviderKey(conn), typeof network === 'object' ? network.chainId : network],
     async () => {
-      const { Web3Provider } = await import('@ethersproject/providers')
-      const provider = new Web3Provider(conn.provider!, network)
+      const { BrowserProvider } = await import('ethers')
+      const provider = new BrowserProvider(conn.provider!, network)
       return provider
     },
     { enabled: !!conn.provider && isActive, staleTime: Infinity }

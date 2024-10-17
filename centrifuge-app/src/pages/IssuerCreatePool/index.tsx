@@ -3,6 +3,7 @@ import {
   AddFee,
   CurrencyKey,
   FeeTypes,
+  FileType,
   PoolMetadataInput,
   TrancheInput,
 } from '@centrifuge/centrifuge-js/dist/modules/pools'
@@ -91,7 +92,7 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport'
+  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport' | 'poolRatings'
 > & {
   poolIcon: File | null
   issuerLogo: File | null
@@ -115,9 +116,12 @@ export type CreatePoolValues = Omit<
   investorType: string
   issuerShortDescription: string
   issuerCategories: { type: string; value: string }[]
-  ratingAgency: string
-  ratingValue: string
-  ratingReportUrl: string
+  poolRatings: {
+    agency?: string
+    value?: string
+    reportUrl?: string
+    reportFile?: File | null
+  }[]
   poolStructure: string
 }
 
@@ -150,9 +154,7 @@ const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
-  ratingAgency: '',
-  ratingValue: '',
-  ratingReportUrl: '',
+  poolRatings: [],
 
   tranches: [createEmptyTranche('')],
   adminMultisig: {
@@ -426,15 +428,20 @@ function CreatePoolForm() {
         return
       }
 
+      const pinFile = async (file: File): Promise<FileType> => {
+        const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(file)))
+        return { uri: pinned.uri, mime: file.type }
+      }
+
       // Handle pinning files (pool icon, issuer logo, and executive summary)
-      const promises = [lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon)))]
+      const promises = [pinFile(values.poolIcon)]
 
       if (values.issuerLogo) {
-        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))))
+        promises.push(pinFile(values.issuerLogo))
       }
 
       if (!isTestEnv && values.executiveSummary) {
-        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))))
+        promises.push(pinFile(values.executiveSummary))
       }
 
       const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
@@ -454,9 +461,7 @@ function CreatePoolForm() {
       if (values.reportUrl) {
         let avatar = null
         if (values.reportAuthorAvatar) {
-          const pinned = await lastValueFrom(
-            centrifuge.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar))
-          )
+          const pinned = await pinFile(values.reportAuthorAvatar)
           avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
         }
         metadataValues.poolReport = {
@@ -466,12 +471,25 @@ function CreatePoolForm() {
           url: values.reportUrl,
         }
       }
-      if (values.ratingReportUrl) {
-        metadataValues.poolRating = {
-          ratingAgency: values.ratingAgency,
-          ratingValue: values.ratingValue,
-          ratingReportUrl: values.ratingReportUrl,
-        }
+      if (values.poolRatings) {
+        const newRatingReportPromise = await Promise.all(
+          values.poolRatings.map((rating) => (rating.reportFile ? pinFile(rating.reportFile) : null))
+        )
+        const ratings = values.poolRatings.map((rating, index) => {
+          let reportFile: FileType | null = rating.reportFile
+            ? { uri: rating.reportFile.name, mime: rating.reportFile.type }
+            : null
+          if (rating.reportFile && newRatingReportPromise[index]?.uri) {
+            reportFile = newRatingReportPromise[index] ?? null
+          }
+          return {
+            agency: rating.agency ?? '',
+            value: rating.value ?? '',
+            reportUrl: rating.reportUrl ?? '',
+            reportFile: reportFile ?? null,
+          }
+        })
+        metadataValues.poolRatings = ratings
       }
 
       const nonJuniorTranches = metadataValues.tranches.slice(1)
@@ -631,7 +649,7 @@ function CreatePoolForm() {
                   {({ field, form, meta }: FieldProps) => (
                     <Select
                       name="poolType"
-                      label={<Tooltips type="poolType" variant="secondary" />}
+                      label={<Tooltips type="poolType" size="sm" />}
                       onChange={(event) => form.setFieldValue('poolType', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -668,7 +686,7 @@ function CreatePoolForm() {
                   {({ field, meta, form }: FieldProps) => (
                     <Select
                       name="assetClass"
-                      label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
+                      label={<Tooltips type="assetClass" label="Asset class*" size="sm" />}
                       onChange={(event) => {
                         form.setFieldValue('assetClass', event.target.value)
                         form.setFieldValue('subAssetClass', '', false)
@@ -687,7 +705,7 @@ function CreatePoolForm() {
                   {({ field, meta, form }: FieldProps) => (
                     <FieldWithErrorMessage
                       name="investorType"
-                      label={<Tooltips type="investorType" label="Investor Type*" variant="secondary" />}
+                      label={<Tooltips type="investorType" label="Investor Type*" size="sm" />}
                       onChange={(event: any) => form.setFieldValue('investorType', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -719,7 +737,7 @@ function CreatePoolForm() {
                     return (
                       <Select
                         name="currency"
-                        label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
+                        label={<Tooltips type="currency" label="Currency*" size="sm" />}
                         onChange={(event) => form.setFieldValue('currency', event.target.value)}
                         onBlur={field.onBlur}
                         errorMessage={meta.touched && meta.error ? meta.error : undefined}

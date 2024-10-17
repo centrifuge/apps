@@ -3,19 +3,21 @@ import { Link, LinkProps, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { prefetchRoute } from '../Root'
+import { LIGHT_BACKGROUND } from './Toggle'
 import { baseButton, primaryButton } from './styles'
 
 const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${baseButton}
   ${primaryButton}
   grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
-  color: ${({ isActive, theme }) =>
-    isActive ? theme.colors.textGold : theme.colors.textInverted}; /* Example styling */
+  color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
   font-size: 14px;
   font-weight: 500;
-  background-color: transparent;
+  background-color: ${({ isActive }) => (isActive ? LIGHT_BACKGROUND : 'transparent')};
+  border-radius: 4px;
   &:hover {
     color: ${({ theme }) => theme.colors.textGold};
+    background-color: rgba(145, 150, 155, 0.13);
   }
 `
 

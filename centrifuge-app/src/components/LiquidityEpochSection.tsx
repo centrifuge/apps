@@ -8,6 +8,7 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Contract } from 'ethers'
 import * as React from 'react'
 import { switchMap } from 'rxjs'
 import { Dec } from '../utils/Decimal'
@@ -329,6 +330,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   } = useWallet()
   const { refetch: refetchBalances } = useTinlakeBalances()
   const { refetch: refetchInvestments } = useTinlakeInvestments(pool.id)
+  const isTinlakePool = pool.id?.startsWith('0x')
 
   const { execute: closeEpochTx, isLoading: loadingClose } = useTinlakeTransaction(
     pool.id,
@@ -336,9 +338,9 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     (cent) => cent.tinlake.closeEpoch,
     {
       onSuccess: async () => {
-        const signer = provider!.getSigner()
+        const signer = await provider!.getSigner()
         const connectedCent = cent.connectEvm(selectedAddress!, signer)
-        const coordinator = connectedCent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR')
+        const coordinator = connectedCent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR') as Contract
         if ((await coordinator.submissionPeriod()) === true) {
           // didn't execute right away, run solver
           solveEpochTx([])
@@ -469,7 +471,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   }
 
   return (
-    <PageSection title="Order overview" headerRight={epochButtonElement}>
+    <PageSection title="Order overview" headerRight={isTinlakePool ? <></> : epochButtonElement}>
       <Stack gap="2">
         <Stack gap="3">
           <DataTableGroup>

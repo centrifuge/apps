@@ -7,7 +7,7 @@ import {
   useTransactions,
   useWallet,
 } from '@centrifuge/centrifuge-react'
-import { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
+import { TransactionRequest, TransactionResponse } from 'ethers'
 import * as React from 'react'
 import { Observable, lastValueFrom, tap } from 'rxjs'
 import { useGmp } from '../useGmp'
@@ -36,7 +36,7 @@ export function useEvmTransaction<T extends Array<any>>(
     gmpOptions?: { poolId: string; trancheId: string }
   ) {
     try {
-      const signer = provider!.getSigner()
+      const signer = await provider!.getSigner()
       const connectedCent = centrifuge.connectEvm(selectedAddress!, signer)
       const transaction = transactionCallback(connectedCent)
       updateTransaction(id, { status: 'unconfirmed' })

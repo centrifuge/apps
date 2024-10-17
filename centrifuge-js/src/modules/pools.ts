@@ -1,4 +1,3 @@
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { StorageKey, u32 } from '@polkadot/types'
@@ -7,6 +6,7 @@ import { ISubmittableResult } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+import { isAddress as isEvmAddress } from 'ethers'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
@@ -653,7 +653,7 @@ export type IssuerDetail = {
   body: string
 }
 
-type FileType = { uri: string; mime: string }
+export type FileType = { uri: string; mime: string }
 
 export type PoolReport = {
   author: {
@@ -692,11 +692,12 @@ export interface PoolMetadataInput {
     authorAvatar: FileType | null
     url: string
   }
-  poolRating?: {
-    ratingAgency?: string
-    ratingValue?: string
-    ratingReportUrl?: string
-  }
+  poolRatings: {
+    agency?: string
+    value?: string
+    reportUrl?: string
+    reportFile?: FileType | null
+  }[]
 
   executiveSummary: FileType | null
   website: string
@@ -760,11 +761,12 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
     reports?: PoolReport[]
-    rating?: {
-      ratingAgency?: string
-      ratingValue?: string
-      ratingReportUrl?: string
-    }
+    poolRatings?: {
+      agency?: string
+      value?: string
+      reportUrl?: string
+      reportFile?: FileType | null
+    }[]
   }
   pod?: {
     indexer?: string | null
@@ -851,6 +853,7 @@ export type AssetTransaction = {
     id: string
     metadata: string
     type: AssetType
+    currentPrice: string | null
   }
   fromAsset?: {
     id: string
@@ -939,6 +942,9 @@ type Holder = {
 
 export type ExternalLoan = Loan & {
   pricing: ExternalPricingInfo
+}
+export type InternalLoan = Loan & {
+  pricing: InternalPricingInfo
 }
 
 export type Permissions = {
@@ -1144,13 +1150,7 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
-        rating: metadata.poolRating
-          ? {
-              ratingAgency: metadata.poolRating.ratingAgency,
-              ratingValue: metadata.poolRating.ratingValue,
-              ratingReportUrl: metadata.poolRating.ratingReportUrl,
-            }
-          : undefined,
+        poolRatings: metadata.poolRatings.length > 0 ? metadata.poolRatings : [],
         reports: metadata.poolReport
           ? [
               {

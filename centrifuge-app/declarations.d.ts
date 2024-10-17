@@ -17,4 +17,5 @@ interface ImportMetaEnv {
   REACT_APP_ALCHEMY_KEY: string
   REACT_APP_WALLETCONNECT_ID: string
   REACT_APP_PRIME_IPFS_HASH: string
+  REACT_APP_ONFINALITY_KEY: string
 }

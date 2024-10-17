@@ -15,7 +15,7 @@ import {
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
-import { getAddress } from '@ethersproject/address'
+import { getAddress } from 'ethers'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'

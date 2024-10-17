@@ -22,8 +22,8 @@ import {
   Text,
   TextWithPlaceholder,
 } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
+import { isAddress as isEvmAddress } from 'ethers'
 import React, { useMemo } from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'

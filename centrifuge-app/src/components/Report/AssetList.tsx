@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Text } from '@centrifuge/fabric'
+import { Box, Text } from '@centrifuge/fabric'
 import { useContext, useEffect, useMemo } from 'react'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
@@ -308,7 +308,16 @@ export function AssetList({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable defaultSortKey="maturity-date" defaultSortOrder="desc" />
+    <Box paddingX={2}>
+      <DataTable
+        data={data}
+        columns={columns}
+        hoverable
+        defaultSortKey="maturity-date"
+        defaultSortOrder="desc"
+        scrollable
+      />
+    </Box>
   ) : (
     <UserFeedback reportType="Assets" />
   )

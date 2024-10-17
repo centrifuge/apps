@@ -18,9 +18,9 @@ import {
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
 import { Button, IconMinusCircle, InputErrorMessage, SelectInner, Stack, Text, TextInput } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress, sortAddresses } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
+import { isAddress as isEvmAddress } from 'ethers'
 import {
   ErrorMessage,
   Field,

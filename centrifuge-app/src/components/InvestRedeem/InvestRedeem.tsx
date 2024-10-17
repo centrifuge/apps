@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
@@ -16,7 +17,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ethConfig } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useGmp } from '../../utils/useGmp'
@@ -25,6 +25,7 @@ import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
 import { LiquidityRewardsProvider } from '../LiquidityRewards/LiquidityRewardsProvider'
 import { LoadBoundary } from '../LoadBoundary'
+import { PoolMetaDataPartial } from '../PoolList'
 import { Transactions } from '../Portfolio/Transactions'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
@@ -35,7 +36,17 @@ import { RedeemForm } from './RedeemForm'
 export type InvestRedeemProps = {
   poolId: string
   trancheId: string
+  metadata?: PoolMetaDataPartial
 } & InputProps
+
+type HeaderProps = {
+  sumUnrealizedProfitAtMarketPrice?: CurrencyBalance
+  sumRealizedProfitFifoByPeriod?: CurrencyBalance
+} & InputProps
+
+type InputProps = {
+  defaultView?: 'invest' | 'redeem'
+}
 
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
@@ -51,7 +62,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
   const domainsWithAtLeastOneLP =
     domains && domains.filter((domain) => Object.values(domain.liquidityPools[trancheId] ?? {}).some((p) => !!p))
 
-  const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
+  const networks: Network[] = poolId.startsWith('0x') ? [1] : ['centrifuge']
   if (domainsWithAtLeastOneLP) {
     networks.push(...domainsWithAtLeastOneLP.map((d) => d.chainId))
   }
@@ -71,7 +82,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
       >
         <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
           <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-            <Header />
+            <Header {...rest} />
             <InvestRedeemInput {...rest} />
             {!isTinlakePool && (connectedType === 'substrate' || isEvmOnSubstrate) && <LiquidityRewardsContainer />}
             <Footer />
@@ -80,10 +91,6 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
       </ConnectionGuard>
     </LoadBoundary>
   )
-}
-
-type InputProps = {
-  defaultView?: 'invest' | 'redeem'
 }
 
 function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
@@ -147,10 +154,9 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
   )
 }
 
-function Header() {
+function Header({ sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPrice }: HeaderProps) {
   const { state } = useInvestRedeem()
   const { connectedType } = useWallet()
-
   return (
     <Stack gap={2}>
       <Text variant="heading2">{state.trancheCurrency?.symbol} investment overview</Text>
@@ -159,7 +165,7 @@ function Header() {
           <TextWithPlaceholder variant="body3" color="textSecondary">
             Investment position
           </TextWithPlaceholder>
-          <Shelf gap={'3px'}>
+          <Shelf gap="3px">
             <TextWithPlaceholder
               variant="heading2"
               fontWeight="bold"
@@ -175,6 +181,46 @@ function Header() {
           </Shelf>
         </Stack>
       )}
+      <Box display="flex">
+        <Stack>
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Realized P&L
+          </TextWithPlaceholder>
+          <Shelf gap={'3px'}>
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(sumRealizedProfitFifoByPeriod ?? 0, undefined, 2, 0)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
+            </TextWithPlaceholder>
+          </Shelf>
+        </Stack>
+        <Stack marginLeft="20px">
+          <TextWithPlaceholder variant="body3" color="textSecondary">
+            Unrealized P&L
+          </TextWithPlaceholder>
+          <Shelf gap="3px">
+            <TextWithPlaceholder
+              variant="heading2"
+              fontWeight="bold"
+              isLoading={state.isDataLoading}
+              width={12}
+              variance={0}
+            >
+              {formatBalance(sumUnrealizedProfitAtMarketPrice ?? 0, undefined, 2, 0)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading2" isLoading={state.isDataLoading} width={12} variance={0}>
+              {state.poolCurrency?.displayName}
+            </TextWithPlaceholder>
+          </Shelf>
+        </Stack>
+      </Box>
     </Stack>
   )
 }

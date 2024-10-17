@@ -1,10 +1,10 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
-import { JsonRpcProvider } from '@ethersproject/providers'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
+import { AbstractProvider, getDefaultProvider, JsonRpcProvider } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
@@ -63,9 +63,18 @@ export type WalletContextType = {
     selectedWallet: EvmConnectorMeta | null
     isSmartContractWallet: boolean
     selectedAddress: string | null
-    getProvider(chainId: number): JsonRpcProvider
+    getProvider(chainId: number): JsonRpcProvider | AbstractProvider
   }
 }
+
+const unsupportedNetworksByDefaultProvider = [
+  'base-sepolia',
+  'base-mainnet',
+  'celo-alfajores',
+  'celo-mainnet',
+  'arbitrum-sepolia',
+  'arbitrum-mainnet',
+]
 
 const WalletContext = React.createContext<WalletContextType>(null as any)
 
@@ -129,10 +138,13 @@ type WalletProviderProps = {
   showAdvancedAccounts?: boolean
   showTestNets?: boolean
   showFinoa?: boolean
+  infuraApiKey?: string
+  alchemyApiKey?: string
+  tenderlyApiKey?: string
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
-const cachedProviders: Record<number, JsonRpcProvider> = {}
+const cachedProviders = new Map<number, JsonRpcProvider | AbstractProvider>()
 
 export function WalletProvider({
   children,
@@ -148,6 +160,9 @@ export function WalletProvider({
   showAdvancedAccounts,
   showTestNets,
   showFinoa,
+  infuraApiKey,
+  alchemyApiKey,
+  tenderlyApiKey,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
@@ -156,7 +171,7 @@ export function WalletProvider({
   const centEvmChainId = useCentEvmChainId()
 
   const evmChains = React.useMemo(() => {
-    const centUrl = new URL(cent.parachainUrl)
+    const centUrl = new URL(cent.config.centrifugeWsUrl.split(',')[0])
     centUrl.protocol = 'https:'
     const chains = {
       ...evmChainsProp,
@@ -241,10 +256,20 @@ export function WalletProvider({
   const [proxies] = useCentrifugeQuery(['allProxies'], (cent) => cent.proxies.getAllProxies())
 
   function getProvider(chainId: number) {
-    return (
-      cachedProviders[chainId] ||
-      (cachedProviders[chainId] = new JsonRpcProvider((evmChains as any)[chainId].urls[0], chainId))
-    )
+    const defaultUrl = (evmChains as any)[chainId].urls[0]
+    const network = (evmChains as any)[chainId].network
+    if (!cachedProviders.has(chainId)) {
+      let networkish = unsupportedNetworksByDefaultProvider.includes(network) ? defaultUrl : network
+      const provider = getDefaultProvider(networkish, {
+        infura: infuraApiKey,
+        alchemy: alchemyApiKey,
+        tenderly: tenderlyApiKey,
+        exclusive: ['infura', 'alchemy', 'tenderly'],
+      })
+      cachedProviders.set(chainId, provider)
+      return provider
+    }
+    return cachedProviders.get(chainId) as JsonRpcProvider | AbstractProvider
   }
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {

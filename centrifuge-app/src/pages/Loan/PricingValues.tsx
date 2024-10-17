@@ -1,12 +1,13 @@
-import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { useCentrifugeApi, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { Card, Stack, Text } from '@centrifuge/fabric'
+import { toUtf8String } from 'ethers'
+import { first, map } from 'rxjs'
 import { Tooltips } from '../../components/Tooltips'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
-import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAvailableFinancing } from '../../utils/useLoans'
-import { useAssetTransactions } from '../../utils/usePools'
 import { MetricsTable } from './MetricsTable'
 
 type Props = {
@@ -16,9 +17,32 @@ type Props = {
 
 export function PricingValues({ loan, pool }: Props) {
   const { pricing } = loan
-
-  const assetTransactions = useAssetTransactions(loan.poolId)
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
+  const api = useCentrifugeApi()
+
+  const [oracleCollection] = useCentrifugeQuery(['oracleCollection', pool.id], () =>
+    api.query.oraclePriceCollection.collection(pool.id).pipe(
+      first(),
+      map((data) => {
+        const info = data.toPrimitive() as any
+        const currentAssetPrice = Object.entries(info.content)
+          .filter(([key]) => {
+            if ('priceId' in pricing && 'isin' in pricing.priceId) {
+              return toUtf8String(JSON.parse(key).isin) === pricing.priceId.isin
+            } else {
+              return JSON.parse(key).poolLoanId[1].toString() === loan.id.toString()
+            }
+          })
+          .map(([_, value]: [string, any]) => {
+            return value[0] // current price
+          })
+        return {
+          value: CurrencyBalance.fromFloat(currentAssetPrice?.[0] ?? 0, pool.currency.decimals),
+          timestamp: info.lastUpdated,
+        }
+      })
+    )
+  )
 
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
@@ -27,19 +51,10 @@ export function PricingValues({ loan, pool }: Props) {
   if ('valuationMethod' in pricing && pricing.valuationMethod === 'oracle') {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
-    let latestOraclePrice = pricing.oracle[0]
-    pricing.oracle.forEach((price) => {
-      if (price.timestamp > latestOraclePrice.timestamp) {
-        latestOraclePrice = price
-      }
-    })
-
-    const borrowerAssetTransactions = assetTransactions?.filter(
-      (assetTransaction) => assetTransaction.asset.id === `${loan.poolId}-${loan.id}`
-    )
-    const latestPrice = getLatestPrice(latestOraclePrice, borrowerAssetTransactions, pool.currency.decimals)
+    const latestPrice = oracleCollection || { value: new CurrencyBalance(0, pool.currency.decimals), timestamp: 0 }
 
     const days = latestPrice.timestamp > 0 ? getAge(new Date(latestPrice.timestamp).toISOString()) : undefined
+    const priceLastUpdated = days && days.includes('0') ? 'Today' : `${days} ago`
 
     const accruedPrice = 'currentPrice' in loan && loan.currentPrice
 
@@ -53,7 +68,7 @@ export function PricingValues({ loan, pool }: Props) {
             metrics={[
               ...('isin' in pricing.priceId ? [{ label: 'ISIN', value: pricing.priceId.isin }] : []),
               {
-                label: `Current price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
+                label: `Current price${latestPrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
                 value: accruedPrice
                   ? `${formatBalance(accruedPrice || latestPrice, pool.currency.symbol, 6, 2)}`
                   : latestPrice
@@ -64,9 +79,11 @@ export function PricingValues({ loan, pool }: Props) {
                 label: <Tooltips type="linearAccrual" />,
                 value: pricing.withLinearPricing ? 'Enabled' : 'Disabled',
               },
-              ...(!pricing.withLinearPricing
-                ? [{ label: 'Price last updated', value: days ? `${days} ago` : `Today` }]
-                : [{ label: 'Last manual price update', value: days ? `${days} ago` : `Today` }]),
+              ...(loan.status === 'Active' && loan.outstandingDebt.toDecimal().lte(0)
+                ? []
+                : !pricing.withLinearPricing
+                ? [{ label: 'Price last updated', value: priceLastUpdated }]
+                : [{ label: 'Last manual price update', value: priceLastUpdated }]),
               ...(pricing.interestRate.gtn(0)
                 ? [
                     {

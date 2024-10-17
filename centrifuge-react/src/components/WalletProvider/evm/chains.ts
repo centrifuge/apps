@@ -7,6 +7,7 @@ type BasicChainInformation = {
 }
 
 type ExtendedChainInformation = BasicChainInformation & {
+  network: string
   name: string
   nativeCurrency: AddEthereumChainParameter['nativeCurrency']
   blockExplorerUrl: string
@@ -46,11 +47,6 @@ const chainExtendedInfo = {
     name: 'Ethereum',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     blockExplorerUrl: 'https://etherscan.io/',
-  },
-  5: {
-    name: 'Ethereum Görli',
-    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.etherscan.io/',
   },
 }
 

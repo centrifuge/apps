@@ -1,4 +1,4 @@
-import { isAddress } from '@ethersproject/address'
+import { isAddress } from 'ethers'
 import { NextFunction, Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { getValidSubstrateAddress } from '../utils/networks/centrifuge'

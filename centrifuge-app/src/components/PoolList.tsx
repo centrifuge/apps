@@ -22,6 +22,19 @@ const PoolCardBox = styled<typeof Box & { status?: PoolStatusKey }>(Box)`
   }
 `
 
+const StyledBox = styled(Box)`
+  background-color: transparent;
+  border: none;
+  &:hover {
+    svg {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+    div {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+  }
+`
+
 const upcomingPools: PoolCardProps[] = []
 
 export function PoolList() {
@@ -74,7 +87,7 @@ export function PoolList() {
               ? Array(6)
                   .fill(true)
                   .map((_, index) => (
-                    <Box as="li" key={index} width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}>
+                    <Box as="li" key={index} width={isLarge ? '33%' : isMedium ? '48%' : '100%'}>
                       <PoolCard />
                     </Box>
                   ))
@@ -83,7 +96,7 @@ export function PoolList() {
                     as="li"
                     key={pool.poolId}
                     status={pool.status}
-                    width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+                    width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
                   >
                     <PoolCard {...pool} />
                   </PoolCardBox>
@@ -93,7 +106,7 @@ export function PoolList() {
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <Box display="flex" alignItems="center" marginBottom={1}>
+          <StyledBox display="flex" alignItems="center" marginBottom={1} as="button">
             <Text
               style={{ cursor: 'pointer' }}
               color="textSecondary"
@@ -103,7 +116,7 @@ export function PoolList() {
               {showArchived ? 'Hide archived pools' : 'View archived pools'}
             </Text>
             {!showArchived && <IconChevronRight color="textSecondary" size={18} />}
-          </Box>
+          </StyledBox>
           {showArchived && <ArchivedPools pools={archivedPools} />}
         </>
       )}
@@ -123,7 +136,7 @@ function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
             as="li"
             key={pool.poolId}
             status={pool.status}
-            width={isExtraLarge ? '25%' : isLarge ? '33%' : isMedium ? '48%' : '100%'}
+            width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
           >
             <PoolCard {...pool} />
           </PoolCardBox>
@@ -140,7 +153,6 @@ export function poolsToPoolCardProps(
 ): PoolCardProps[] {
   return pools.map((pool) => {
     const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
-
     return {
       poolId: pool.id,
       name: metaData?.pool?.name,
@@ -151,6 +163,7 @@ export function poolsToPoolCardProps(
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
       tranches: pool.tranches,
       metaData: metaData as MetaData,
+      createdAt: pool.createdAt ?? '',
     }
   })
 }

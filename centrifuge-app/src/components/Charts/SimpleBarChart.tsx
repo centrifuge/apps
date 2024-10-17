@@ -11,10 +11,12 @@ import { TooltipContainer, TooltipTitle } from './Tooltip'
 type SimpleBarChartProps = {
   currency?: CurrencyMetadata
   data: { name: string; yAxis: number }[]
+  groupBy?: string
 }
 
-export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
+export const SimpleBarChart = ({ currency, data, groupBy }: SimpleBarChartProps) => {
   const theme = useTheme()
+  const isSmallerBar = groupBy === 'daily' || false
 
   const getOneDayPerMonth = () => {
     const seenMonths = new Set<string>()
@@ -56,7 +58,7 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
             type="category"
             dataKey="name"
             ticks={getOneDayPerMonth()}
-            tick={<CustomTick />}
+            tick={(props) => <CustomTick {...props} />}
             angle={45}
           />
           <YAxis
@@ -92,7 +94,7 @@ export const SimpleBarChart = ({ currency, data }: SimpleBarChartProps) => {
             fill={theme.colors.backgroundTertiary}
             strokeWidth={0}
             fillOpacity={1}
-            maxBarSize={20}
+            barSize={isSmallerBar ? 20 : 80}
           />
         </BarChart>
       </ResponsiveContainer>

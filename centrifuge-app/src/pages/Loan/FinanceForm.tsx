@@ -4,7 +4,6 @@ import Centrifuge, {
   CreatedLoan,
   CurrencyBalance,
   CurrencyMetadata,
-  ExternalLoan,
   Loan as LoanType,
   Pool,
   WithdrawAddress,
@@ -77,7 +76,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
       <Stack gap={2} p={1}>
         <Text variant="heading2">Purchase</Text>
         <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
-        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
+        <ExternalFinanceForm loan={loan} source={source} />
       </Stack>
     )
   }
@@ -561,7 +560,8 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
       const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
       return source === 'reserve' ? amount.lte(totalAvailable) && !!withdrawalAddresses.length : true
     },
-    getBatch: () => {
+    getBatch: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
+      if (!values.withdraw) return of([])
       const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
       if (!withdrawalAddresses.length) return of([])
       return combineLatest(

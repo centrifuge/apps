@@ -28,7 +28,7 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan): [LabelStatus, string]
 
   if (l.status === 'Active' && l.pricing.maturityDate) {
     const isTinlakeLoan = 'riskGroup' in l
-    if (isTinlakeLoan) return ['info', 'Ongoing']
+    if (isTinlakeLoan) return ['warning', 'Ongoing']
 
     const days = daysBetween(today, l.pricing.maturityDate)
     if (days === 0) return ['warning', 'Due today']
@@ -37,7 +37,7 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan): [LabelStatus, string]
     if (days === -1) return ['critical', `Due ${Math.abs(days)} day ago`]
     if (days < -1) return ['critical', `Due ${Math.abs(days)} days ago`]
   }
-  return ['info', 'Ongoing']
+  return ['warning', 'Ongoing']
 }
 
 export function LoanLabel({ loan }: Props) {

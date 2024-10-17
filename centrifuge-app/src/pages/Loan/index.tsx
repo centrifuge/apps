@@ -1,4 +1,4 @@
-import { Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -11,13 +11,11 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
-import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -39,6 +37,7 @@ import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset } from '../../utils/usePermissions'
 import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
+import { CorrectionForm } from './CorrectionForm'
 import { FinanceForm } from './FinanceForm'
 import { HoldingsValues } from './HoldingsValues'
 import { KeyMetrics } from './KeyMetrics'
@@ -66,6 +65,7 @@ function ActionButtons({ loan }: { loan: LoanType }) {
   const canBorrow = useCanBorrowAsset(loan.poolId, loan.id)
   const [financeShown, setFinanceShown] = React.useState(false)
   const [repayShown, setRepayShown] = React.useState(false)
+  const [correctionShown, setCorrectionShown] = React.useState(false)
   if (!loan || !canBorrow || isTinlakeLoan(loan) || !canBorrow || loan.status === 'Closed') return null
   return (
     <>
@@ -81,6 +81,13 @@ function ActionButtons({ loan }: { loan: LoanType }) {
           </Stack>
         </LoadBoundary>
       </Drawer>
+      <Drawer isOpen={correctionShown} onClose={() => setCorrectionShown(false)} innerPaddingTop={2}>
+        <LoadBoundary>
+          <Stack gap={2}>
+            <CorrectionForm loan={loan as ActiveLoan} />
+          </Stack>
+        </LoadBoundary>
+      </Drawer>
 
       <Shelf gap={2}>
         {!(loan.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)) ||
@@ -92,6 +99,11 @@ function ActionButtons({ loan }: { loan: LoanType }) {
         {loan.outstandingDebt.gtn(0) && (
           <Button onClick={() => setRepayShown(true)} small>
             {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
+          </Button>
+        )}
+        {loan.outstandingDebt.gtn(0) && (
+          <Button onClick={() => setCorrectionShown(true)} small>
+            Correction
           </Button>
         )}
       </Shelf>
@@ -145,16 +157,9 @@ function Loan() {
         </RouterLinkButton>
       </Box>
       <PageHeader
-        icon={
-          loanId === '0' ? (
-            <Box as="img" src={usdcLogo} alt="" height="iconMedium" width="iconMedium" />
-          ) : (
-            <Thumbnail type="asset" label={loan?.id ?? ''} size="large" />
-          )
-        }
         title={
           <Shelf>
-            <Box mr="16px">
+            <Box mr="16px" ml={2}>
               <TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>
             </Box>
             {loan && <LoanLabel loan={loan} />}
@@ -295,7 +300,7 @@ function Loan() {
       {isTinlakePool && loan && 'owner' in loan ? (
         <PageSection title={<Box>NFT</Box>}>
           <Shelf gap={6}>
-            <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={loanId} />
+            <LabelValueStack label={<Tooltips type="id" />} value={loanId} />
             <LabelValueStack
               label="Owner"
               value={

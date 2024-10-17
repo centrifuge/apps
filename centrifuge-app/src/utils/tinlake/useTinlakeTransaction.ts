@@ -1,5 +1,5 @@
 import Centrifuge, { TinlakeContractAddresses, TinlakeContractVersions } from '@centrifuge/centrifuge-js'
-import { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
+import { TransactionRequest, TransactionResponse } from 'ethers'
 import { Observable } from 'rxjs'
 import { usePool } from '../usePools'
 import { useEvmTransaction } from './useEvmTransaction'

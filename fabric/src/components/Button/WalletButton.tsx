@@ -28,14 +28,9 @@ const StyledButton = styled.button`
   appearance: none;
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
   outline: 0;
-  border-radius: 40px;
+  border-radius: 4px;
   white-space: nowrap;
-  & > span {
-    border-color: ${({ theme }) => theme.colors.backgroundPrimary};
-    :hover {
-      border-color: ${({ theme }) => theme.colors.backgroundPrimary};
-    }
-  }
+  border: 3px solid transparent;
 `
 
 const IdenticonWrapper = styled(Flex)({

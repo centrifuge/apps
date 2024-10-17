@@ -1,6 +1,6 @@
-import type { JsonRpcSigner } from '@ethersproject/providers'
 import { AddressOrPair } from '@polkadot/api/types'
 import { Signer } from '@polkadot/types/types'
+import type { JsonRpcSigner } from 'ethers'
 import { CentrifugeBase, UserProvidedConfig } from './CentrifugeBase'
 import { getAuthModule } from './modules/auth'
 import { getLiquidityPoolsModule } from './modules/liquidityPools'

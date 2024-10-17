@@ -24,7 +24,7 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
 
   return (
     <IdContext.Provider value={id}>
-      <Stack gap={1} flexDirection={row ? 'row' : 'column'} alignItems={row ? 'center' : null}>
+      <Stack gap={row ? 0 : 1} flexDirection={row ? 'row' : 'column'} alignItems={row ? 'center' : null}>
         {label && (
           <InputLabel row={row} disabled={disabled}>
             {label}
