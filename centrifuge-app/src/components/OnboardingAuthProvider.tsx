@@ -59,12 +59,13 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
 
   const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
     try {
+      const signer = await provider?.getSigner()
       if (selectedAccount?.address && selectedWallet?.signer) {
         await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer as Signer, cent, proxy)
-      } else if (isEvmOnSubstrate && selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId, isEvmOnSubstrate)
-      } else if (selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner(), evm.chainId)
+      } else if (isEvmOnSubstrate && selectedAddress && signer) {
+        await loginWithEvm(selectedAddress, signer, evmChainId, isEvmOnSubstrate)
+      } else if (selectedAddress && signer) {
+        await loginWithEvm(selectedAddress, signer, evm.chainId)
       }
       throw new Error('network not supported')
     } catch {

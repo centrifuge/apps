@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { Contract, Signature } from 'ethers'
 
 export async function signERC2612Permit(
   provider: any,
@@ -9,7 +9,7 @@ export async function signERC2612Permit(
   deadline: number
 ) {
   const tokenAddress = typeof token === 'string' ? token : token.verifyingContract
-  const tokenContract = new ethers.Contract(
+  const tokenContract = new Contract(
     tokenAddress,
     ['function name() view returns (string)', 'function nonces(address) view returns (uint256)'],
     provider
@@ -51,9 +51,8 @@ export async function signERC2612Permit(
     deadline,
   }
 
-  const signer = await provider.getSigner(owner)
-  const signature = await signer.signTypedData(domain, types, values)
-  const { v, r, s } = ethers.Signature.from(signature)
+  const signature = await provider.signTypedData(domain, types, values)
+  const { v, r, s } = Signature.from(signature)
 
   return {
     owner,
