@@ -6,7 +6,13 @@ import {
   CurrencyMetadata,
   ExternalLoan,
 } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  useCentrifugeApi,
+  useCentrifugeQuery,
+  useCentrifugeTransaction,
+  useEvmProvider,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -21,10 +27,11 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
+import { stringToHex } from '@polkadot/util'
 import { BN } from 'bn.js'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { combineLatest, switchMap } from 'rxjs'
+import { Observable, catchError, combineLatest, from, map, of, switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
@@ -41,6 +48,22 @@ import { usePool, usePoolAccountOrders, usePoolFees } from '../../utils/usePools
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { nonNegativeNumber } from '../../utils/validation'
 import { isCashLoan, isExternalLoan } from '../Loan/utils'
+
+type Attestation = {
+  portfolio: {
+    decimals: number
+    assets: {
+      asset: string
+      quantity: string
+      price: string
+    }[]
+    netAssetValue: string
+    netFeeValue: string
+    tokenSupply: string[]
+    tokenPrice: string[]
+    signature?: string
+  }
+}
 
 type FormValues = {
   feed: {
@@ -70,6 +93,8 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
   })
+  const provider = useEvmProvider()
+  const { substrate } = useWallet()
   const poolFees = usePoolFees(poolId)
 
   const externalLoans = React.useMemo(
@@ -102,6 +127,59 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
+      const attestation: Attestation = {
+        portfolio: {
+          decimals: pool.currency.decimals,
+          assets: externalLoans.map((l) => ({
+            asset: l.id,
+            quantity: l.pricing.outstandingQuantity.toString(),
+            price: (l as ActiveLoan).currentPrice?.toString() ?? '0',
+          })),
+          netAssetValue: pool.nav.total.toString(),
+          netFeeValue: pool.nav.fees.toString(),
+          tokenSupply: pool.tranches.map((t) => t.totalIssuance.toString()),
+          tokenPrice: pool.tranches.map((t) => t.tokenPrice?.toString() ?? '0'),
+        },
+      }
+
+      let $signMessage: Observable<string | null> = of(null)
+      if (provider) {
+        $signMessage = from(provider.getSigner()).pipe(
+          switchMap((signer) => from(signer.signMessage(JSON.stringify(attestation)))),
+          catchError((error) => {
+            console.error('EVM signing failed:', error)
+            return of(null)
+          })
+        )
+      } else if (substrate?.selectedAccount?.address && substrate?.selectedWallet?.signer?.signRaw) {
+        $signMessage = from(
+          substrate.selectedWallet.signer.signRaw({
+            address: substrate.selectedAccount.address,
+            data: stringToHex(JSON.stringify(attestation)),
+            type: 'bytes',
+          })
+        ).pipe(
+          map(({ signature }) => signature),
+          catchError((error) => {
+            console.error('Substrate signing failed:', error)
+            return of(null)
+          })
+        )
+      }
+
+      const $attestationHash = $signMessage.pipe(
+        switchMap((signature) => {
+          if (signature) {
+            attestation.portfolio.signature = signature
+            return cent.metadata.pinJson(attestation)
+          } else {
+            console.warn('No signature available')
+            return of(null)
+          }
+        }),
+        map((result) => (result ? result.ipfsHash : null))
+      )
+
       const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
       const updateTokenPrices = deployedDomains
         ? deployedDomains.flatMap((domain) =>
@@ -116,8 +194,15 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           )
         : []
 
-      return combineLatest([cent.pools.closeEpoch([poolId, false], { batch: true }), ...updateTokenPrices]).pipe(
-        switchMap(([closeTx, ...updateTokenPricesTxs]) => {
+      return combineLatest([
+        $attestationHash,
+        cent.pools.closeEpoch([poolId, false], { batch: true }),
+        ...updateTokenPrices,
+      ]).pipe(
+        switchMap(([attestationHash, closeTx, ...updateTokenPricesTxs]) => {
+          if (!attestationHash) {
+            throw new Error('Attestation signing failed')
+          }
           const [values] = args
           const batch = [
             ...values.feed
@@ -127,8 +212,8 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
               }),
             api.tx.oraclePriceCollection.updateCollection(poolId),
-            api.tx.loans.updatePortfolioValuation(poolId),
-            ...updateTokenPricesTxs,
+            api.tx.remarks.remark([{ Named: attestationHash }], api.tx.loans.updatePortfolioValuation(poolId)),
+            api.tx.utility.batch(updateTokenPricesTxs),
           ]
 
           if (liquidityAdminAccount && orders?.length) {
