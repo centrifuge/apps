@@ -80,6 +80,7 @@ const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 const PoolsPage = React.lazy(() => import('../pages/Pools'))
+const ManualKybRedirectPage = React.lazy(() => import('../pages/Onboarding/KnowYourBusiness/ManualKybRedirect'))
 
 const router = createHashRouter([
   {
@@ -143,6 +144,11 @@ const router = createHashRouter([
         handle: { component: ConvertAddressPage },
       },
       { path: '/nav-management/:pid', element: <NavManagementPage />, handle: { component: NavManagementPage } },
+      {
+        path: '/manual-kyb-redirect',
+        element: <ManualKybRedirectPage />,
+        handle: { component: ManualKybRedirectPage },
+      },
       { path: '*', element: <NotFoundPage />, handle: { component: NotFoundPage } },
     ],
     errorElement: <NotFoundPage />,
