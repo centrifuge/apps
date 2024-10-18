@@ -33,7 +33,7 @@ function Portfolio() {
             Track and manage your portfolio
           </Text>
         </Stack>
-        <CardPortfolioValue address={address} chainId={chainId} showGraph={false} />
+        <CardPortfolioValue address={address} chainId={chainId} />
       </LayoutSection>
 
       {transactions?.investorTransactions.length === 0 && connectedNetwork === 'centrifuge' ? (
