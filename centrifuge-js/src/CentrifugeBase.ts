@@ -6,6 +6,7 @@ import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
 import type { JsonRpcSigner, TransactionRequest } from 'ethers'
 import 'isomorphic-fetch'
+import WebSocket from 'isomorphic-ws'
 import {
   Observable,
   Subject,

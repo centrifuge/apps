@@ -34,6 +34,7 @@
     "@styled-system/css": "^5.1.5",
     "bn.js": "^5.2.1",
     "formik": "^2.4.5",
+    "isomorphic-ws": "^5.0.0",
     "merkletreejs": "^0.3.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -47,7 +48,8 @@
     "styled-components": "^5.3.5",
     "styled-system": "^5.1.5",
     "typescript": "~5.3.3",
-    "vitest": "^1.2.1"
+    "vitest": "^1.2.1",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@synthetixio/synpress": "^3.7.3",
@@ -61,6 +63,7 @@
     "@types/styled-system": "^5",
     "@types/styled-system__css": "^5.0.16",
     "@types/styled-system__should-forward-prop": "^5",
+    "@types/ws": "^8",
     "@typescript-eslint/eslint-plugin": "5.30.5",
     "@typescript-eslint/parser": "5.30.5",
     "@vitejs/plugin-react": "^4.2.1",
