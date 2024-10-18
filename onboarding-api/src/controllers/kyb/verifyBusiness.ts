@@ -153,7 +153,6 @@ const startManualKyb = async (req: Request, res: Response, user: EntityUser) => 
     process.env.NODE_ENV === 'development' ? `${protocol}://${host}` : `https://${host}/${process.env.K_SERVICE}`
 
   const payloadmanualKYB = {
-    manual_review: 1,
     enable_extra_proofs: 1,
     labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
     verification_mode: 'any',
