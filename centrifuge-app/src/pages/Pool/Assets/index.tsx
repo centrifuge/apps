@@ -1,10 +1,7 @@
-import { ActiveLoan, Loan } from '@centrifuge/centrifuge-js'
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
+import { Box, IconPlus, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import currencyDollar from '../../../assets/images/currency-dollar.svg'
-import daiLogo from '../../../assets/images/dai-logo.svg'
-import usdcLogo from '../../../assets/images/usdc-logo.svg'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -48,18 +45,9 @@ export function PoolDetailAssets() {
     )
   }
 
-  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string; presentValue: CurrencyBalance } {
     return pricing && typeof pricing.valuationMethod === 'string'
   }
-
-  const ongoingAssets = (loans &&
-    [...loans].filter(
-      (loan) =>
-        loan.status === 'Active' &&
-        hasValuationMethod(loan.pricing) &&
-        loan.pricing.valuationMethod !== 'cash' &&
-        !loan.outstandingDebt.isZero()
-    )) as ActiveLoan[]
 
   const offchainAssets = !isTinlakePool
     ? loans.filter(
@@ -71,48 +59,35 @@ export function PoolDetailAssets() {
     Dec(0)
   )
 
-  const overdueAssets = loans.filter(
-    (loan) =>
-      loan.status === 'Active' &&
-      loan.outstandingDebt.gtn(0) &&
-      loan.pricing.maturityDate &&
-      new Date(loan.pricing.maturityDate).getTime() < Date.now()
-  )
+  const totalPresentValue = loans.reduce((sum, loan) => {
+    if (hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash') {
+      return sum.add(loan.pricing.presentValue?.toDecimal() || Dec(0))
+    }
+    return sum
+  }, Dec(0))
 
-  const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
+  const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
-      label: <Tooltips type="totalNav" />,
+      label: 'Total NAV',
       value: formatBalance(pool.nav.total.toDecimal(), pool.currency.symbol),
+      heading: true,
     },
     {
-      label: (
-        <Shelf alignItems="center" gap="2px">
-          <Box as="img" src={isTinlakePool ? daiLogo : usdcLogo} alt="" height={13} width={13} />
-          <Tooltips type="onchainReserve" />
-        </Shelf>
-      ),
+      label: <Tooltips type="onchainReserve" />,
       value: formatBalance(pool.reserve.total || 0, pool.currency.symbol),
+      heading: false,
     },
     ...(!isTinlakePool
       ? [
           {
-            label: (
-              <Shelf alignItems="center" gap="2px">
-                <Box as="img" src={currencyDollar} alt="" height={13} width={13} />
-                <Tooltips type="offchainCash" />
-              </Shelf>
-            ),
-            value: formatBalance(offchainReserve, 'USD'),
+            label: <Tooltips type="offchainCash" />,
+            value: formatBalance(offchainReserve, pool.currency.symbol),
+            heading: false,
           },
           {
             label: 'Total assets',
-            value: loans.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash')
-              .length,
-          },
-          { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
-          {
-            label: 'Overdue assets',
-            value: <Text color={overdueAssets.length > 0 ? 'statusCritical' : 'inherit'}>{overdueAssets.length}</Text>,
+            value: formatBalance(totalPresentValue, pool.currency.symbol),
+            heading: false,
           },
         ]
       : []),
@@ -134,8 +109,8 @@ function CreateAssetButton({ poolId }: { poolId: string }) {
   const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
 
   return canCreateAssets ? (
-    <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small>
-      Create asset
+    <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small icon={<IconPlus />}>
+      Create assets
     </RouterLinkButton>
   ) : null
 }
