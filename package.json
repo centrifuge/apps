@@ -51,5 +51,6 @@
     "@types/react": "^18.0.27",
     "@types/eslint": "7.28.0",
     "@babel/traverse": "^7.23.9"
-  }
+  },
+  "packageManager": "yarn@3.6.4"
 }
