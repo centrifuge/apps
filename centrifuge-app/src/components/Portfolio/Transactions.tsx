@@ -208,7 +208,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
       </Stack>
     </PaginationProvider>
   ) : (
-    <Shelf border={`1px solid ${theme.colors.backgroundTertiary}`} borderRadius="6px" justifyContent="center" p={2}>
+    <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
       <Text color="textSecondary" variant="body2">
         No transactions displayed yet
       </Text>
