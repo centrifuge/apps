@@ -241,6 +241,12 @@ export const DataRow = styled(Row)<any>`
       borderBottomStyle: 'solid',
       borderBottomWidth: '1px',
       borderBottomColor: 'borderPrimary',
+      borderLeftStyle: 'solid',
+      borderLeftWidth: '1px',
+      borderLeftColor: 'borderPrimary',
+      borderRightStyle: 'solid',
+      borderRightWidth: '1px',
+      borderRightColor: 'borderPrimary',
       backgroundColor: 'transparent',
       // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':
