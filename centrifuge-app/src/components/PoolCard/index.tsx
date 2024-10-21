@@ -1,30 +1,15 @@
-import { CurrencyBalance, Rate, Token } from '@centrifuge/centrifuge-js'
-import { Box, Card, Divider, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { CurrencyBalance, PoolMetadata, Rate, Token } from '@centrifuge/centrifuge-js'
+import { Box, Card, Divider, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
+import { RatingPill } from '../PoolOverview/KeyMetrics'
 import { RouterTextLink } from '../TextLink'
 import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
-
-export type InnerMetadata = {
-  minInitialInvestment?: CurrencyBalance
-}
-
-export type MetaData = {
-  tranches: {
-    [key: string]: InnerMetadata
-  }
-  pool: {
-    issuer: {
-      shortDescription?: string
-    }
-    investorType?: string
-  }
-}
 
 type TrancheWithCurrency = Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
 
@@ -36,7 +21,7 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  height: 320px;
+  height: 340px;
   margin-right: 12px;
   margin-bottom: 12px;
   padding: 12px;
@@ -127,8 +112,9 @@ export type PoolCardProps = {
   apr?: Rate | null | undefined
   status?: PoolStatusKey
   iconUri?: string
+  isArchive?: boolean
   tranches?: TrancheWithCurrency[]
-  metaData?: MetaData
+  metaData?: PoolMetadata
   createdAt?: string
 }
 
@@ -143,16 +129,19 @@ export function PoolCard({
   tranches,
   metaData,
   createdAt,
+  isArchive,
 }: PoolCardProps) {
   const theme = useTheme()
   const isOneTranche = tranches && tranches?.length === 1
   const isTinlakePool = poolId?.startsWith('0x')
+  const ratings = metaData?.pool?.poolRatings ?? []
 
   const tinlakeKey = (Object.keys(tinlakeTranches).find(
     (key) => tinlakeTranches[key as TinlakeTranchesKey].name === name
   ) || 'none') as TinlakeTranchesKey
 
   const renderText = (text: string, isApr?: boolean, seniority?: number) => {
+    if (isArchive) return
     if (
       (isApr && poolId === NS3_POOL_ID) ||
       (isApr && poolId === DYF_POOL_ID) ||
@@ -306,6 +295,18 @@ export function PoolCard({
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
           </StyledText>
         </Box>
+        {ratings.length ? (
+          <Box mt={2} mb={2} display="flex" justifyContent="space-between" alignItems="center">
+            <Text variant="body2" color="textSecondary">
+              Rating
+            </Text>
+            <Shelf gap={1}>
+              {ratings.map((rating) => {
+                return <RatingPill {...rating} />
+              })}
+            </Shelf>
+          </Box>
+        ) : null}
       </StyledCard>
     </RouterTextLink>
   )
