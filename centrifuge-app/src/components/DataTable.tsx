@@ -129,7 +129,7 @@ export const DataTable = <T extends Record<string, any>>({
       {showHeader && (
         <HeaderRow styles={headerStyles} scrollable={scrollable}>
           {columns.map((col, i) => (
-            <HeaderCol key={i} align={col?.align}>
+            <HeaderCol key={i} align={col?.align} isLabel={col.isLabel}>
               <Text variant="body3">
                 {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
                   ? React.cloneElement(col.header as React.ReactElement<any>, {
@@ -142,6 +142,7 @@ export const DataTable = <T extends Record<string, any>>({
           ))}
         </HeaderRow>
       )}
+
       {pinnedData?.map((row, i) => (
         <DataRow
           hoverable={hoverable}
@@ -281,6 +282,13 @@ export const DataCol = styled(Text)<{ align: Column['align']; isLabel?: boolean 
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
+  ${({ isLabel }) =>
+    isLabel &&
+    css({
+      position: 'sticky',
+      left: 0,
+      zIndex: 1,
+    })}
 
   ${({ align }) => {
     switch (align) {
@@ -302,9 +310,18 @@ export const DataCol = styled(Text)<{ align: Column['align']; isLabel?: boolean 
   }}
 `
 
-const HeaderCol = styled(DataCol)`
+const HeaderCol = styled(DataCol)<{ isLabel?: boolean }>`
   height: 32px;
   align-items: center;
+
+  ${({ isLabel }) =>
+    isLabel &&
+    css({
+      position: 'sticky',
+      left: 0,
+      zIndex: 2,
+      backgroundColor: 'backgroundSecondary',
+    })}
 
   &:has(:focus-visible) {
     box-shadow: inset 0 0 0 3px var(--fabric-focus);
