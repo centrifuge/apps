@@ -1,7 +1,10 @@
 import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
-import { Box, IconPlus, Shelf, Text } from '@centrifuge/fabric'
+import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import styled from 'styled-components'
+import { RouterTextLink } from '../../../../src/components/TextLink'
+import { useBasePath } from '../../../../src/utils/useBasePath'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -13,6 +16,13 @@ import { useLoans } from '../../../utils/useLoans'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
+import { OffchainMenu } from './OffchainMenu'
+
+const StyledRouterTextLink = styled(RouterTextLink)`
+  text-decoration: unset;
+  display: flex;
+  align-items: center;
+`
 
 export function PoolDetailAssetsTab() {
   return (
@@ -33,6 +43,10 @@ export function PoolDetailAssets() {
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
   const isTinlakePool = poolId.startsWith('0x')
+  const basePath = useBasePath()
+  const cashLoans = isTinlakePool
+    ? []
+    : loans?.filter((loan) => loan.pricing && loan.pricing?.valuationMethod === 'cash')
 
   if (!pool) return null
 
@@ -74,14 +88,19 @@ export function PoolDetailAssets() {
     },
     {
       label: <Tooltips type="onchainReserve" />,
-      value: formatBalance(pool.reserve.total || 0, pool.currency.symbol),
+      value: (
+        <StyledRouterTextLink to={`${basePath}/${pool.id}/assets/0`}>
+          <Text>{formatBalance(pool.reserve.total || 0, pool.currency.symbol)}</Text>
+          <IconChevronRight size={20} />
+        </StyledRouterTextLink>
+      ),
       heading: false,
     },
     ...(!isTinlakePool
       ? [
           {
             label: <Tooltips type="offchainCash" />,
-            value: formatBalance(offchainReserve, pool.currency.symbol),
+            value: <OffchainMenu value={formatBalance(offchainReserve, pool.currency.symbol)} loans={cashLoans} />,
             heading: false,
           },
           {
