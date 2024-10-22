@@ -90,6 +90,7 @@ type ThemeSpace = SpaceValue[] & {
 // Typography
 
 export type TextVariantName =
+  | 'heading'
   | 'heading1'
   | 'heading2'
   | 'heading3'
