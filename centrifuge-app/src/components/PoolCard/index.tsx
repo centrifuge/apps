@@ -21,11 +21,11 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  height: 340px;
   margin-right: 12px;
   margin-bottom: 12px;
   padding: 12px;
   border: 1px solid rgba(207, 207, 207, 0.5);
+  height: 350px;
 
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.textPrimary};
