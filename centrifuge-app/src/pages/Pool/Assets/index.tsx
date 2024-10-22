@@ -44,9 +44,14 @@ export function PoolDetailAssets() {
   const loans = useLoans(poolId)
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
-  const cashLoans = isTinlakePool
-    ? []
-    : loans?.filter((loan) => loan.pricing && loan.pricing?.valuationMethod === 'cash')
+  const cashLoans = (loans ?? []).filter(
+    (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash'
+  )
+  const nonCashLoans = (loans ?? []).filter(
+    (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
+  )
+
+  console.log(nonCashLoans)
 
   if (!pool) return null
 
@@ -117,8 +122,8 @@ export function PoolDetailAssets() {
       <PageSummary data={pageSummaryData}>
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
-      <Box px="5" py="2">
-        <LoanList loans={loans} />
+      <Box padding={3}>
+        <LoanList loans={nonCashLoans} />
       </Box>
     </>
   )
