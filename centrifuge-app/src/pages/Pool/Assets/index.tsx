@@ -1,7 +1,7 @@
 import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
-import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Button, IconChevronRight, IconDownload, IconPlus, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import styled from 'styled-components'
 import { RouterTextLink } from '../../../../src/components/TextLink'
 import { useBasePath } from '../../../../src/utils/useBasePath'
@@ -37,6 +37,7 @@ export function PoolDetailAssetsTab() {
 
 export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const navigate = useNavigate()
 
   if (!poolId) throw new Error('Pool not found')
 
@@ -122,6 +123,29 @@ export function PoolDetailAssets() {
       <PageSummary data={pageSummaryData}>
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
+      <Box
+        paddingX={1}
+        paddingLeft={3}
+        paddingRight={3}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Text variant="heading4">Assets</Text>
+        <Box display="flex">
+          <Button
+            variant="inverted"
+            style={{ marginRight: 12 }}
+            small
+            onClick={() => navigate(`${basePath}/${poolId}/data/asset-tx`)}
+          >
+            View asset transactions
+          </Button>
+          <Button variant="inverted" icon={<IconDownload size={20} />} small>
+            Download
+          </Button>
+        </Box>
+      </Box>
       <Box padding={3}>
         <LoanList loans={nonCashLoans} />
       </Box>
