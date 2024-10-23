@@ -52,8 +52,6 @@ export function PoolDetailAssets() {
     (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
   )
 
-  console.log(nonCashLoans)
-
   if (!pool) return null
 
   if (!loans?.length) {
@@ -147,7 +145,7 @@ export function PoolDetailAssets() {
         </Box>
       </Box>
       <Box padding={3}>
-        <LoanList loans={nonCashLoans} />
+        <LoanList loans={loans} />
       </Box>
     </>
   )

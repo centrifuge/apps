@@ -1,5 +1,5 @@
 import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
-import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Pagination,
@@ -13,15 +13,13 @@ import {
 import get from 'lodash/get'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
-import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
-import { formatBalance } from '../utils/formatting'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { useAllPoolAssetSnapshots, usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
 import { prefetchRoute } from './Root'
@@ -31,6 +29,11 @@ type Row = (Loan | TinlakeLoan) & {
   originationDateSortKey: string
   status: 'Created' | 'Active' | 'Closed' | ''
   maturityDate: string | null
+  marketPrice: CurrencyBalance
+  marketValue: CurrencyBalance
+  unrealizedPL: CurrencyBalance
+  realizedPL: CurrencyBalance
+  portfolioPercentage: string
 }
 
 type Props = {
@@ -44,55 +47,69 @@ export function LoanList({ loans }: Props) {
   const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()
+  const snapshots = useAllPoolAssetSnapshots(pool.id, new Date().toString())
+  const loansData = isTinlakePool
+    ? loans
+    : (loans ?? []).filter((loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash')
 
-  const { data: poolMetadata } = usePoolMetadata(pool)
-  const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
-  const templateId = templateIds.at(-1)
-  const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+  const snapshotsValues =
+    snapshots?.reduce((acc: { [key: string]: any }, snapshot) => {
+      const id = snapshot.assetId.split('-')[1]
+      acc[id] = {
+        marketPrice: snapshot.currentPrice,
+        marketValue: snapshot.presentValue,
+        unrealizedPL: snapshot.unrealizedProfitAtMarketPrice,
+        realizedPL: snapshot.sumRealizedProfitFifo,
+      }
+      return acc
+    }, {}) ?? {}
+
+  const totalMarketValue = Object.values(snapshotsValues).reduce((sum, snapshot) => {
+    return sum + (snapshot.marketValue?.toDecimal().toNumber() ?? 0)
+  }, 0)
+
   const loansWithLabelStatus = React.useMemo(() => {
-    return loans.sort((a, b) => {
+    return loansData.sort((a, b) => {
       const aId = get(a, 'id') as string
       const bId = get(b, 'id') as string
 
       return aId.localeCompare(bId)
     })
-  }, [isTinlakePool, loans])
+  }, [isTinlakePool, loansData])
 
   const filters = useFilters({
-    data: loansWithLabelStatus,
+    data: loansWithLabelStatus as Loan[],
   })
 
   React.useEffect(() => {
     prefetchRoute('/pools/1/assets/1')
   }, [])
 
-  const additionalColumns: Column[] =
-    templateMetadata?.keyAttributes
-      ?.filter((key) => key !== 'term')
-      .map((key) => {
-        const attr = templateMetadata.attributes![key]
-        return {
-          align: 'left',
-          header: attr.label,
-          cell: (l: Row) => <AssetMetadataField name={key} attribute={attr} loan={l} />,
-        }
-      }) || []
+  const rows: Row[] = filters.data.map((loan) => {
+    const snapshot = snapshotsValues?.[loan.id]
+    const marketValue = snapshot?.marketValue?.toDecimal().toNumber() ?? 0
 
-  const rows: Row[] = filters.data.map((loan) => ({
-    nftIdSortKey: loan.asset.nftId,
-    idSortKey: parseInt(loan.id, 10),
-    outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
-    originationDateSortKey:
-      loan.status === 'Active' &&
-      loan?.originationDate &&
-      'interestRate' in loan.pricing &&
-      !loan?.pricing.interestRate?.isZero() &&
-      !loan?.totalBorrowed?.isZero()
-        ? loan.originationDate
-        : '',
-    maturityDate: loan.pricing.maturityDate,
-    ...loan,
-  }))
+    const portfolioPercentage =
+      loan.status === 'Closed' || totalMarketValue === 0 ? 0 : (marketValue / totalMarketValue) * 100
+
+    return {
+      nftIdSortKey: loan.asset.nftId,
+      idSortKey: parseInt(loan.id, 10),
+      outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
+      originationDateSortKey:
+        loan.status === 'Active' &&
+        loan?.originationDate &&
+        'interestRate' in loan.pricing &&
+        !loan?.pricing.interestRate?.isZero() &&
+        !loan?.totalBorrowed?.isZero()
+          ? loan.originationDate
+          : '',
+      maturityDate: loan.pricing.maturityDate,
+      portfolioPercentage,
+      ...snapshot,
+      ...loan,
+    }
+  })
 
   const hasMaturityDate = rows.some((loan) => loan.maturityDate)
 
@@ -102,25 +119,21 @@ export function LoanList({ loans }: Props) {
       header: <SortableTableHeader label={isTinlakePool ? 'NFT ID' : 'Asset'} />,
       cell: (l: Row) => <AssetName loan={l} />,
       sortKey: 'idSortKey',
-      width: 'minmax(300px, 1fr)',
     },
-    ...(additionalColumns?.length
-      ? additionalColumns
-      : [
-          {
-            align: 'left',
-            header: <SortableTableHeader label="Financing date" />,
-            cell: (l: Row) => {
-              if (l.poolId.startsWith('0x') && l.id !== '0') {
-                return formatDate((l as TinlakeLoan).originationDate)
-              }
-              return l.status === 'Active' && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
-                ? formatDate(l.originationDate)
-                : '-'
-            },
-            sortKey: 'originationDateSortKey',
-          },
-        ]),
+
+    {
+      align: 'left',
+      header: <SortableTableHeader label="Financing date" />,
+      cell: (l: Row) => {
+        if (l.poolId.startsWith('0x') && l.id !== '0') {
+          return formatDate((l as TinlakeLoan).originationDate)
+        }
+        return l.status === 'Active' && 'valuationMethod' in l.pricing && l.pricing.valuationMethod !== 'cash'
+          ? formatDate(l.originationDate)
+          : '-'
+      },
+      sortKey: 'originationDateSortKey',
+    },
     ...(hasMaturityDate
       ? [
           {
@@ -138,12 +151,67 @@ export function LoanList({ loans }: Props) {
           },
         ]
       : []),
-    {
-      align: 'left',
-      header: <SortableTableHeader label="Amount" />,
-      cell: (l: Row) => <Amount loan={l} />,
-      sortKey: 'outstandingDebtSortKey',
-    },
+    ...(isTinlakePool
+      ? []
+      : [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Amount" />,
+            cell: (l: Row) => <Amount loan={l} />,
+            sortKey: 'outstandingDebtSortKey',
+          },
+        ]),
+    ...(isTinlakePool
+      ? []
+      : [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Market price" />,
+            cell: (l: Row) => formatBalance(l.marketPrice ?? '', pool.currency, 2, 0),
+            sortKey: 'marketPriceSortKey',
+          },
+        ]),
+    ...(isTinlakePool
+      ? []
+      : [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Market value" />,
+            cell: (l: Row) => formatBalance(l.marketValue ?? 0, pool.currency, 2, 0),
+            sortKey: 'marketValueSortKey',
+          },
+        ]),
+    ...(isTinlakePool
+      ? []
+      : [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Unrealized P&L" />,
+            cell: (l: Row) => formatBalance(l.unrealizedPL ?? '', pool.currency, 2, 0),
+            sortKey: 'unrealizedPLSortKey',
+          },
+        ]),
+    ...(isTinlakePool
+      ? []
+      : [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Realized P&L" />,
+            cell: (l: Row) => formatBalance(l.realizedPL ?? '', pool.currency, 2, 0),
+            sortKey: 'realizedPLSortKey',
+          },
+        ]),
+    ...(isTinlakePool
+      ? []
+      : [
+          {
+            align: 'left',
+            header: <SortableTableHeader label="Portfolio" />,
+            cell: (l: Row) => formatPercentage(l.portfolioPercentage ?? 0, true, undefined, 1),
+            sortKey: 'portfolioSortKey',
+            width: '80px',
+          },
+        ]),
   ].filter(Boolean) as Column[]
 
   const pagination = usePagination({ data: rows, pageSize: 20 })
@@ -170,25 +238,6 @@ export function LoanList({ loans }: Props) {
         )}
       </Stack>
     </PaginationContainer>
-  )
-}
-
-function AssetMetadataField({ loan, name, attribute }: { loan: Row; name: string; attribute: LoanTemplateAttribute }) {
-  const isTinlakePool = loan.poolId.startsWith('0x')
-  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
-  const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-
-  return (
-    <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
-      <TextWithPlaceholder
-        isLoading={isLoading}
-        width={12}
-        variant="body2"
-        style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
-      >
-        {metadata?.properties?.[name] ? formatNftAttribute(metadata?.properties?.[name], attribute) : '-'}
-      </TextWithPlaceholder>
-    </Shelf>
   )
 }
 

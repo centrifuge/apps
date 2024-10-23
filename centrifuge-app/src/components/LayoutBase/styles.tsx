@@ -206,7 +206,6 @@ export const ContentWrapper = styled.div`
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     margin-left: 15vw;
-    width: calc(100% - 15vw);
     margin-top: 10px;
   }
 `

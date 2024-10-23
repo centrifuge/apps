@@ -5,24 +5,22 @@ import {
   Card,
   Drawer,
   Grid,
-  IconChevronLeft,
+  IconArrowLeft,
   Shelf,
   Spinner,
   Stack,
   Text,
-  TextWithPlaceholder,
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { LoanLabel } from '../../../src/components/LoanLabel'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../components/LoadBoundary'
-import { LoanLabel } from '../../components/LoanLabel'
-import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
@@ -151,22 +149,16 @@ function Loan() {
 
   return (
     <FullHeightStack>
-      <Box mt={2} ml={2}>
-        <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
-          {poolMetadata?.pool?.name ?? 'Pool assets'}
-        </RouterLinkButton>
+      <Box display="flex" alignItems="center" width="50%" justifyContent="space-between" mt={15} mb={24}>
+        <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconArrowLeft} variant="tertiary" />
+        <Box display="flex" alignItems="center">
+          <Text variant="heading1" style={{ marginRight: 8 }}>
+            {name}
+          </Text>
+          {loan && <LoanLabel loan={loan} />}
+        </Box>
       </Box>
-      <PageHeader
-        title={
-          <Shelf>
-            <Box mr="16px" ml={2}>
-              <TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>
-            </Box>
-            {loan && <LoanLabel loan={loan} />}
-          </Shelf>
-        }
-        subtitle={loan && !isTinlakeLoan(loan) && <ActionButtons loan={loan} />}
-      />
+
       {loanId === '0' && (
         <>
           <AssetSummary
