@@ -1,6 +1,6 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
@@ -81,7 +81,7 @@ export function PoolList() {
     <Stack>
       <Stack>
         <Box overflow="auto">
-          <Box as="ul" role="list" display="flex" flexWrap="wrap">
+          <Grid as="ul" columns={[1, 2, 3]} gap={2}>
             {metadataIsLoading
               ? Array(6)
                   .fill(true)
@@ -91,21 +91,16 @@ export function PoolList() {
                     </Box>
                   ))
               : filteredPools.map((pool) => (
-                  <PoolCardBox
-                    as="li"
-                    key={pool.poolId}
-                    status={pool.status}
-                    width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
-                  >
+                  <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
                     <PoolCard {...pool} />
                   </PoolCardBox>
                 ))}
-          </Box>
+          </Grid>
         </Box>
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <StyledBox display="flex" alignItems="center" marginBottom={1} as="button">
+          <StyledBox display="flex" alignItems="center" marginBottom={2} marginTop={2} as="button">
             <Text
               style={{ cursor: 'pointer' }}
               color="textSecondary"
@@ -128,18 +123,13 @@ function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
   const isLarge = useIsAboveBreakpoint('L')
   return (
     <Stack gap={1} overflow="auto">
-      <Box as="ul" role="list" display="flex" flexWrap="wrap">
+      <Grid as="ul" columns={[1, 2, 3]} gap={2}>
         {pools.map((pool) => (
-          <PoolCardBox
-            as="li"
-            key={pool.poolId}
-            status={pool.status}
-            width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
-          >
-            <PoolCard {...pool} isArchive />
+          <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
+            <PoolCard {...pool} />
           </PoolCardBox>
         ))}
-      </Box>
+      </Grid>
     </Stack>
   )
 }
