@@ -849,6 +849,7 @@ export type AssetTransaction = {
   interestAmount: CurrencyBalance | undefined
   hash: string
   realizedProfitFifo: CurrencyBalance | undefined
+  unrealizedProfitAtMarketPrice: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string

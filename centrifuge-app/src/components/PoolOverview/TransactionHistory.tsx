@@ -286,9 +286,7 @@ export const TransactionHistoryTable = ({
   return (
     <Stack gap={2}>
       <Shelf justifyContent="space-between">
-        <Text fontSize="18px" fontWeight="500">
-          Transaction history
-        </Text>
+        <Text variant="heading4">Transaction history</Text>
         <Shelf>
           {transactions?.length! > 8 && preview && (
             <AnchorButton href={`#/pools/${poolId}/transactions`} small variant="inverted">

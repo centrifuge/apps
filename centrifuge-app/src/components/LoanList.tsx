@@ -93,6 +93,7 @@ export function LoanList({ loans }: Props) {
       loan.status === 'Closed' || totalMarketValue === 0 ? 0 : (marketValue / totalMarketValue) * 100
 
     return {
+      ...snapshot,
       nftIdSortKey: loan.asset.nftId,
       idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
@@ -106,7 +107,6 @@ export function LoanList({ loans }: Props) {
           : '',
       maturityDate: loan.pricing.maturityDate,
       portfolioPercentage,
-      ...snapshot,
       ...loan,
     }
   })
@@ -220,7 +220,7 @@ export function LoanList({ loans }: Props) {
     <PaginationContainer pagination={pagination}>
       <Stack gap={2}>
         <LoadBoundary>
-          <Box overflow="auto" width="100%" borderWidth="0 1px" borderStyle="solid" borderColor="borderPrimary">
+          <Box overflow="auto">
             <DataTable
               data={rows}
               columns={columns}

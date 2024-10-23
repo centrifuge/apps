@@ -48,9 +48,6 @@ export function PoolDetailAssets() {
   const cashLoans = (loans ?? []).filter(
     (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash'
   )
-  const nonCashLoans = (loans ?? []).filter(
-    (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
-  )
 
   if (!pool) return null
 
@@ -100,7 +97,7 @@ export function PoolDetailAssets() {
       ),
       heading: false,
     },
-    ...(!isTinlakePool
+    ...(!isTinlakePool && cashLoans.length
       ? [
           {
             label: <Tooltips type="offchainCash" />,

@@ -1,11 +1,11 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Box, Card, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Card, IconDownload, Shelf, Spinner, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
-import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useLoan } from '../../utils/useLoans'
 import { useAssetSnapshots } from '../../utils/usePools'
@@ -25,50 +25,13 @@ interface Props {
   loanId: string
 }
 
-const FilterButton = styled(Stack)`
-  &:hover {
-    cursor: pointer;
-  }
-`
-
-const filterOptions = [
-  { value: 'price', label: 'Price' },
-  { value: 'value', label: 'Asset value' },
-] as const
-
 function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
   const theme = useTheme()
   const chartColor = theme.colors.accentPrimary
   const asset = useLoan(poolId, loanId)
   const assetSnapshots = useAssetSnapshots(poolId, loanId)
 
-  const [activeFilter, setActiveFilter] = React.useState<(typeof filterOptions)[number]>(filterOptions[0])
-
-  React.useEffect(() => {
-    if (assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') {
-      setActiveFilter(filterOptions[1])
-    }
-  }, [assetSnapshots])
-
-  const dataUrl: any = React.useMemo(() => {
-    if (!assetSnapshots || !assetSnapshots?.length) {
-      return undefined
-    }
-
-    const formatted = assetSnapshots.map((assetObject: Record<string, any>) => {
-      const keys = Object.keys(assetObject)
-      const newObj: Record<string, any> = {}
-
-      keys.forEach((assetKey) => {
-        newObj[assetKey] =
-          assetObject[assetKey] instanceof CurrencyBalance ? assetObject[assetKey].toFloat() : assetObject[assetKey]
-      })
-
-      return newObj
-    })
-
-    return getCSVDownloadUrl(formatted as any)
-  }, [assetSnapshots])
+  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0)
 
   const data: ChartData[] = React.useMemo(() => {
     if (!asset || !assetSnapshots) return []
@@ -157,58 +120,76 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     [data, assetSnapshots]
   )
 
+  const dataUrl: any = React.useMemo(() => {
+    if (!assetSnapshots || !assetSnapshots?.length) {
+      return undefined
+    }
+
+    const formatted = assetSnapshots.map((assetObject: Record<string, any>) => {
+      const keys = Object.keys(assetObject)
+      const newObj: Record<string, any> = {}
+
+      keys.forEach((assetKey) => {
+        newObj[assetKey] =
+          assetObject[assetKey] instanceof CurrencyBalance ? assetObject[assetKey].toFloat() : assetObject[assetKey]
+      })
+
+      return newObj
+    })
+
+    return getCSVDownloadUrl(formatted as any)
+  }, [assetSnapshots])
+
   if (!assetSnapshots) return <Spinner style={{ margin: 'auto', height: 350 }} />
 
   return (
-    <Card p={3} height={350}>
+    <Card p={3} height={320} variant="secondary">
       <Stack gap={2}>
-        <Shelf justifyContent="space-between">
-          <Text fontSize="18px" fontWeight="500">
-            {asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
-              ? 'Asset performance'
-              : 'Cash balance'}
-          </Text>
-          {!isChartEmpty && (
-            <AnchorButton
-              href={dataUrl}
-              download={`asset-${loanId}-timeseries.csv`}
-              variant="inverted"
-              icon={IconDownload}
-              small
-            >
-              Download
-            </AnchorButton>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Box display="flex">
+            <Text variant="heading4">
+              {asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
+                ? 'Asset performance'
+                : 'Cash balance'}
+            </Text>
+            <Text variant="body2" style={{ marginLeft: 4 }}>
+              ({pool.currency.name ?? 'USD'})
+            </Text>
+          </Box>
+          {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
+            <Stack>
+              <Shelf justifyContent="flex-end">
+                {data.length > 0 && (
+                  <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+                    <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
+                      Price
+                    </TabsItem>
+                    <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
+                      Asset value
+                    </TabsItem>
+                  </Tabs>
+                )}
+              </Shelf>
+            </Stack>
           )}
-        </Shelf>
+          <AnchorButton
+            download={`pool-${poolId}-timeseries.csv`}
+            href={dataUrl}
+            variant="inverted"
+            icon={IconDownload}
+            small
+          >
+            Download
+          </AnchorButton>
+        </Box>
 
-        {isChartEmpty && <Text variant="label1">No data yet</Text>}
-
-        {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
-          <Stack>
-            <Shelf justifyContent="flex-end">
-              {data.length > 0 &&
-                filterOptions.map((filter, index) => (
-                  <React.Fragment key={filter.label}>
-                    <FilterButton gap={1} onClick={() => setActiveFilter(filter)}>
-                      <Text variant="body3" whiteSpace="nowrap">
-                        <Text variant={filter.value === activeFilter.value && 'emphasized'}>{filter.label}</Text>
-                      </Text>
-                      <Box
-                        width="100%"
-                        backgroundColor={filter.value === activeFilter.value ? '#000000' : '#E0E0E0'}
-                        height="2px"
-                      />
-                    </FilterButton>
-                    {index !== filterOptions.length - 1 && (
-                      <Box width="24px" backgroundColor="#E0E0E0" height="2px" alignSelf="flex-end" />
-                    )}
-                  </React.Fragment>
-                ))}
-            </Shelf>
-          </Stack>
+        {isChartEmpty && (
+          <Text variant="body3" style={{ margin: '80px auto 0px' }}>
+            No data available
+          </Text>
         )}
 
-        <Shelf gap={4} width="100%" color="textSecondary">
+        <Shelf gap={4} width="100%">
           {data?.length ? (
             <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
               <LineChart data={data} margin={{ left: -36 }}>
@@ -225,7 +206,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                   tickFormatter={(tick: number) => {
                     return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
                   }}
-                  style={{ fontSize: 8, fill: theme.colors.textSecondary, letterSpacing: '-0.7px' }}
+                  style={{ fontSize: 8, fill: theme.colors.textPrimary, letterSpacing: '-0.7px' }}
                   dy={4}
                   interval={10}
                   angle={-40}
@@ -234,9 +215,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                 <YAxis
                   stroke="none"
                   tickLine={false}
-                  style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
+                  style={{ fontSize: '10px', fill: theme.colors.textPrimary }}
                   tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
-                  domain={activeFilter.value === 'price' ? priceRange : [0, 'auto']}
+                  domain={selectedTabIndex === 0 ? priceRange : [0, 'auto']}
                   width={90}
                 />
                 <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
@@ -249,22 +230,22 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                           {payload.map(({ value }, index) => (
                             <>
                               <Shelf justifyContent="space-between" pl="4px" key={index}>
-                                <Text variant="label2">{'Value'}</Text>
-                                <Text variant="label2">
+                                <Text variant="body3">{'Value'}</Text>
+                                <Text variant="body3">
                                   {payload[0].payload.historicPV
-                                    ? formatBalance(payload[0].payload.historicPV, 'USD', 2)
+                                    ? formatBalance(payload[0].payload.historicPV, pool.currency.name, 2)
                                     : payload[0].payload.futurePV
-                                    ? `~${formatBalance(payload[0].payload.futurePV, 'USD', 2)}`
+                                    ? `~${formatBalance(payload[0].payload.futurePV, pool.currency.name, 2)}`
                                     : '-'}
                                 </Text>
                               </Shelf>
                               <Shelf justifyContent="space-between" pl="4px" key={index}>
-                                <Text variant="label2">{'Price'}</Text>
-                                <Text variant="label2">
+                                <Text variant="body3">Price</Text>
+                                <Text variant="body3">
                                   {payload[0].payload.historicPrice
-                                    ? formatBalance(payload[0].payload.historicPrice, 'USD', 6)
+                                    ? formatBalance(payload[0].payload.historicPrice, pool.currency.name, 6)
                                     : payload[0].payload.futurePrice
-                                    ? `~${formatBalance(payload[0].payload.futurePrice, 'USD', 6)}`
+                                    ? `~${formatBalance(payload[0].payload.futurePrice, pool.currency.name, 6)}`
                                     : '-'}
                                 </Text>
                               </Shelf>
@@ -277,7 +258,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                   }}
                 />
 
-                {activeFilter.value === 'price' && (
+                {selectedTabIndex === 0 && (
                   <Line
                     type="monotone"
                     dataKey="historicPrice"
@@ -286,7 +267,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                     dot={false}
                   />
                 )}
-                {activeFilter.value === 'price' && (
+                {selectedTabIndex === 0 && (
                   <Line
                     type="monotone"
                     dataKey="futurePrice"
@@ -297,7 +278,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                   />
                 )}
 
-                {activeFilter.value === 'value' && (
+                {selectedTabIndex === 1 && (
                   <Line
                     type="monotone"
                     dataKey="historicPV"
@@ -306,7 +287,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                     dot={false}
                   />
                 )}
-                {activeFilter.value === 'value' && (
+                {selectedTabIndex === 1 && (
                   <Line
                     type="monotone"
                     dataKey="futurePV"

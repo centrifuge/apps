@@ -59,11 +59,9 @@ export function PricingValues({ loan, pool }: Props) {
     const accruedPrice = 'currentPrice' in loan && loan.currentPrice
 
     return (
-      <Card p={3}>
+      <Card p={3} variant="secondary">
         <Stack gap={2}>
-          <Text fontSize="18px" fontWeight="500">
-            Pricing
-          </Text>
+          <Text variant="heading4">Pricing</Text>
           <MetricsTable
             metrics={[
               ...('isin' in pricing.priceId ? [{ label: 'ISIN', value: pricing.priceId.isin }] : []),
@@ -76,7 +74,7 @@ export function PricingValues({ loan, pool }: Props) {
                   : '-',
               },
               {
-                label: <Tooltips type="linearAccrual" />,
+                label: <Tooltips type="linearAccrual" size="med" />,
                 value: pricing.withLinearPricing ? 'Enabled' : 'Disabled',
               },
               ...(loan.status === 'Active' && loan.outstandingDebt.toDecimal().lte(0)
@@ -102,9 +100,7 @@ export function PricingValues({ loan, pool }: Props) {
   return (
     <Card p={3}>
       <Stack gap={2}>
-        <Text fontSize="18px" fontWeight="500">
-          Pricing
-        </Text>
+        <Text variant="heading4">Pricing</Text>
         <MetricsTable
           metrics={[
             ...('valuationMethod' in pricing && pricing.valuationMethod !== 'cash'

@@ -32,7 +32,7 @@ const colors = {
   backgroundInverted: grayScale[800],
 
   borderPrimary: grayScale[50],
-  borderSecondary: 'rgba(207, 207, 207, 0.50)',
+  borderSecondary: grayScale[100],
 
   statusDefault,
   statusInfo,

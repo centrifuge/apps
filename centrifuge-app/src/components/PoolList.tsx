@@ -86,7 +86,7 @@ export function PoolList() {
               ? Array(6)
                   .fill(true)
                   .map((_, index) => (
-                    <Box as="li" key={index} width={isLarge ? '33%' : isMedium ? '48%' : '100%'}>
+                    <Box as="li" key={index}>
                       <PoolCard />
                     </Box>
                   ))

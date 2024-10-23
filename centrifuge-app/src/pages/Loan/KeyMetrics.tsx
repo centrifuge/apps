@@ -143,23 +143,21 @@ export function KeyMetrics({ pool, loan }: Props) {
     loan.pricing.valuationMethod === 'oracle' &&
     loan.pricing.notional.gtn(0) &&
     currentYTM
-      ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
+      ? [{ label: <Tooltips type="currentYtm" size="med" />, value: formatPercentage(currentYTM) }]
       : []),
     ...(loan.pricing.maturityDate &&
     'valuationMethod' in loan.pricing &&
     loan.pricing.valuationMethod === 'oracle' &&
     loan.pricing.notional.gtn(0) &&
     averageWeightedYTM
-      ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
+      ? [{ label: <Tooltips type="averageYtm" size="med" />, value: formatPercentage(averageWeightedYTM) }]
       : []),
   ]
 
   return (
-    <Card p={3}>
+    <Card p={3} variant="secondary">
       <Stack gap={2}>
-        <Text fontSize="18px" fontWeight="500">
-          Key metrics
-        </Text>
+        <Text variant="heading4">Key metrics</Text>
         <MetricsTable metrics={metrics} />
       </Stack>
     </Card>
