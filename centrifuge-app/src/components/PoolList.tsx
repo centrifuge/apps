@@ -9,7 +9,7 @@ import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
-import { MetaData, PoolCard, PoolCardProps } from './PoolCard'
+import { PoolCard, PoolCardProps } from './PoolCard'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
 import { filterPools } from './PoolFilter/utils'
 
@@ -44,7 +44,6 @@ export function PoolList() {
   const [listedPools, , metadataIsLoading] = useListedPools()
   const isLarge = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
-  const isExtraLarge = useIsAboveBreakpoint('XL')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -127,7 +126,6 @@ export function PoolList() {
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
   const isMedium = useIsAboveBreakpoint('M')
   const isLarge = useIsAboveBreakpoint('L')
-  const isExtraLarge = useIsAboveBreakpoint('XL')
   return (
     <Stack gap={1} overflow="auto">
       <Box as="ul" role="list" display="flex" flexWrap="wrap">
@@ -138,7 +136,7 @@ function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
             status={pool.status}
             width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
           >
-            <PoolCard {...pool} />
+            <PoolCard {...pool} isArchive />
           </PoolCardBox>
         ))}
       </Box>
@@ -162,7 +160,7 @@ export function poolsToPoolCardProps(
       status: getPoolStatus(pool),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
       tranches: pool.tranches,
-      metaData: metaData as MetaData,
+      metaData: metaData as PoolMetadata,
       createdAt: pool.createdAt ?? '',
     }
   })

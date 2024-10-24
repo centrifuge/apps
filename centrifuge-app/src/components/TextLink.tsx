@@ -10,9 +10,6 @@ export const TextLink = styled.span`
   border: none;
   background: transparent;
   cursor: pointer;
-  &:hover {
-    text-decoration: none;
-  }
   &:visited,
   &:active {
     color: inherit;

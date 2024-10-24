@@ -39,7 +39,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
     return [
       {
         align: 'left',
-        header: '',
+        header: 'Type',
         cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body3'}>{row.name}</Text>,
         width: '200px',
       },

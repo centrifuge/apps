@@ -46,6 +46,13 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
 
 type TinlakeDataKey = keyof typeof tinlakeData
 
+export type RatingType = {
+  agency?: string
+  reportUrl?: string
+  reportFile?: any
+  value?: string
+}
+
 const ratingIcons: { [key: string]: JSX.Element } = {
   "Moody's": <IconMoody size={16} />,
   Particula: <IconParticula size={16} />,
@@ -90,8 +97,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
-  const theme = useTheme()
-  const cent = useCentrifuge()
   const averageMaturity = useAverageMaturity(poolId)
 
   const expenseRatio = useMemo(() => {
@@ -190,39 +195,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
             metric: 'Rating',
             value: (
               <Shelf gap={1}>
-                {metadata?.pool?.poolRatings.map((rating) => (
-                  <Tooltip
-                    bodyWidth="maxContent"
-                    body={
-                      <TooltipBody
-                        title={rating.agency ?? ''}
-                        links={[
-                          { text: 'Go to report', url: rating.reportUrl ?? '' },
-                          ...(rating.reportFile
-                            ? [
-                                {
-                                  text: 'View PDF report',
-                                  url: cent.metadata.parseMetadataUrl(rating.reportFile?.uri ?? ''),
-                                },
-                              ]
-                            : []),
-                        ]}
-                      />
-                    }
-                  >
-                    <Box
-                      border={`1px solid ${theme.colors.backgroundInverted}`}
-                      borderRadius={20}
-                      padding="2px 10px"
-                      display="flex"
-                      alignItems="center"
-                      width={80}
-                      justifyContent="center"
-                    >
-                      {rating.agency && ratingIcons[rating.agency] ? ratingIcons[rating.agency] : <IconSp size={16} />}
-                      <Text style={{ marginLeft: 4 }}>{rating.value}</Text>
-                    </Box>
-                  </Tooltip>
+                {metadata?.pool?.poolRatings.map((rating: RatingType) => (
+                  <RatingPill {...rating} />
                 ))}
               </Shelf>
             ),
@@ -275,6 +249,10 @@ const TooltipBody = ({
   url?: string
   links?: { text: string; url: string }[]
 }) => {
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+  }
+
   return (
     <Box backgroundColor="backgroundInverted" display="flex" alignItems="center" borderRadius="8px">
       <Box display="flex" flexDirection="column" marginRight="12px">
@@ -283,8 +261,8 @@ const TooltipBody = ({
         </Text>
         {links ? (
           links.map((link, index) => (
-            <Shelf>
-              <a key={`${link.text}-${index}`} target="_blank" rel="noopener noreferrer" href={link.url}>
+            <Shelf key={`${link.text}-${index}`}>
+              <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick}>
                 <Text variant="body3" color="white">
                   {link.text}
                 </Text>
@@ -294,7 +272,7 @@ const TooltipBody = ({
           ))
         ) : (
           <Shelf>
-            <a target="_blank" rel="noopener noreferrer" href={url}>
+            <a href={url} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick}>
               <Text variant="body3" color="white">
                 {subtitle}
               </Text>
@@ -313,7 +291,7 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
 
   const renderTooltipBody = (networkName: string, tranches: Tranche[], baseUrl: string) => {
     const links = tranches.map((tranche) => ({
-      text: `View ${tranche.currency.name.split(' ').at(-1)}`,
+      text: `View Transactions`,
       url: `${baseUrl}/token/${tranche.id}`,
     }))
 
@@ -351,5 +329,48 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
           )
         })}
     </Shelf>
+  )
+}
+
+export const RatingPill = ({ agency, reportUrl, reportFile, value, size }: RatingType) => {
+  const theme = useTheme()
+  const cent = useCentrifuge()
+  return (
+    <Box key={`${agency}-${reportUrl}`}>
+      <Tooltip
+        bodyWidth="maxContent"
+        body={
+          <TooltipBody
+            title={agency ?? ''}
+            links={[
+              { text: 'Go to report', url: reportUrl ?? '' },
+              ...(reportFile
+                ? [
+                    {
+                      text: 'View PDF report',
+                      url: cent.metadata.parseMetadataUrl(reportFile?.uri ?? ''),
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        }
+      >
+        <Box
+          border={`1px solid ${theme.colors.backgroundInverted}`}
+          borderRadius={20}
+          padding="2px 0px"
+          display="flex"
+          alignItems="center"
+          width={70}
+          justifyContent="center"
+        >
+          {agency && ratingIcons[agency] ? ratingIcons[agency] : <IconSp size={16} />}
+          <Text variant="body2" style={{ marginLeft: 4 }}>
+            {value}
+          </Text>
+        </Box>
+      </Tooltip>
+    </Box>
   )
 }
