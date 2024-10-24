@@ -22,9 +22,10 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
   const columnConfig = [
     {
       header: 'Asset ID',
-      align: 'left',
+      align: 'center',
       csvOnly: false,
       formatter: noop,
+      width: '80px',
     },
     {
       header: 'Asset name',
@@ -34,7 +35,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Epoch',
-      align: 'right',
+      align: 'center',
       csvOnly: false,
       formatter: noop,
     },
@@ -46,7 +47,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Transaction type',
-      align: 'right',
+      align: 'left',
       csvOnly: false,
       formatter: noop,
     },
@@ -58,14 +59,15 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Currency',
-      align: 'right',
+      align: 'left',
       csvOnly: true,
       formatter: noop,
     },
     {
       header: 'Transaction',
-      align: 'right',
+      align: 'center',
       csvOnly: false,
+      width: '80px',
       formatter: (v: any) => (
         <IconAnchor
           href={explorer.tx(v)}
@@ -113,6 +115,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       header: col.header,
       cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
       csvOnly: col.csvOnly,
+      width: col.width ?? '252px',
     }))
     .filter((col) => !col.csvOnly)
 

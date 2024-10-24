@@ -40,7 +40,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Currency amount',
-      align: 'right',
+      align: 'left',
       csvOnly: false,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },

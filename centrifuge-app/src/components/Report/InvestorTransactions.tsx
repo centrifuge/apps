@@ -47,7 +47,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Epoch',
-      align: 'left',
+      align: 'center',
       sortable: false,
       csvOnly: false,
       formatter: noop,
@@ -68,7 +68,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Currency amount',
-      align: 'right',
+      align: 'left',
       sortable: true,
       csvOnly: false,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
@@ -82,7 +82,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Token amount',
-      align: 'right',
+      align: 'left',
       sortable: true,
       csvOnly: false,
       formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[9], 2) : '-'),
@@ -96,7 +96,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Price',
-      align: 'right',
+      align: 'left',
       sortable: true,
       csvOnly: false,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 6) : '-'),
@@ -110,9 +110,10 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     },
     {
       header: 'Transaction',
-      align: 'left',
+      align: 'center',
       sortable: false,
       csvOnly: false,
+      width: '100px',
       formatter: (v: any) => (
         <IconAnchor
           href={explorer.tx(v)}
@@ -139,6 +140,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       align: col.align,
       header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
       cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row.value)}</Text>,
+      width: col.width ?? '200px',
       sortKey: col.sortable ? `value[${index}]` : undefined,
       csvOnly: col.csvOnly,
     }))
