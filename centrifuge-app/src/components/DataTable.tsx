@@ -463,6 +463,5 @@ const StyledHeader = styled(Text)`
   &:hover,
   &:focus-visible {
     cursor: pointer;
-    color: ${({ theme }) => theme.colors.textInteractiveHover};
   }
 `
