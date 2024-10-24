@@ -5,24 +5,22 @@ import {
   Card,
   Drawer,
   Grid,
-  IconChevronLeft,
+  IconArrowLeft,
   Shelf,
   Spinner,
   Stack,
   Text,
-  TextWithPlaceholder,
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import styled, { useTheme } from 'styled-components'
-import { AssetSummary } from '../../components/AssetSummary'
+import styled from 'styled-components'
+import { AssetSummary } from '../../../src/components/AssetSummary'
+import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../components/LoadBoundary'
-import { LoanLabel } from '../../components/LoanLabel'
-import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
@@ -68,7 +66,7 @@ function ActionButtons({ loan }: { loan: LoanType }) {
   const [correctionShown, setCorrectionShown] = React.useState(false)
   if (!loan || !canBorrow || isTinlakeLoan(loan) || !canBorrow || loan.status === 'Closed') return null
   return (
-    <>
+    <Box marginLeft="auto">
       <Drawer isOpen={financeShown} onClose={() => setFinanceShown(false)} innerPaddingTop={2}>
         <LoadBoundary>
           <FinanceForm loan={loan} />
@@ -92,27 +90,26 @@ function ActionButtons({ loan }: { loan: LoanType }) {
       <Shelf gap={2}>
         {!(loan.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)) ||
         !loan.pricing.maturityDate ? (
-          <Button onClick={() => setFinanceShown(true)} small>
+          <Button onClick={() => setFinanceShown(true)} small variant="secondary">
             {isCashLoan(loan) ? 'Deposit' : isExternalLoan(loan) ? 'Purchase' : 'Finance'}
           </Button>
         ) : null}
         {loan.outstandingDebt.gtn(0) && (
-          <Button onClick={() => setRepayShown(true)} small>
+          <Button onClick={() => setRepayShown(true)} small variant="inverted">
             {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
           </Button>
         )}
         {loan.outstandingDebt.gtn(0) && (
-          <Button onClick={() => setCorrectionShown(true)} small>
+          <Button onClick={() => setCorrectionShown(true)} small variant="inverted">
             Correction
           </Button>
         )}
       </Shelf>
-    </>
+    </Box>
   )
 }
 
 function Loan() {
-  const theme = useTheme()
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
   if (!poolId || !loanId) throw new Error('Loan no found')
   const basePath = useBasePath()
@@ -124,6 +121,8 @@ function Loan() {
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const borrowerAssetTransactions = useBorrowerAssetTransactions(`${poolId}`, `${loanId}`)
+  const isOracle = loan && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+  const loanStatus = getLoanLabelStatus(loan)[1]
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -149,51 +148,53 @@ function Loan() {
 
   const originationDate = loan && 'originationDate' in loan ? new Date(loan?.originationDate).toISOString() : undefined
 
+  const getCurrentValue = () => {
+    if (loanId === '0') return pool.reserve.total
+    else return loan?.presentValue || 0
+  }
+
+  if (metadataIsLoading) return
+
   return (
     <FullHeightStack>
-      <Box mt={2} ml={2}>
-        <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
-          {poolMetadata?.pool?.name ?? 'Pool assets'}
-        </RouterLinkButton>
+      <Box display="flex" alignItems="center" width="50%" justifyContent="space-between" mt={15} mb={24}>
+        <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconArrowLeft} variant="tertiary" />
+        <Box display="flex" alignItems="center">
+          <Text variant="heading1" style={{ marginRight: 8 }}>
+            {name}
+          </Text>
+          {loan && <LoanLabel loan={loan} />}
+        </Box>
       </Box>
-      <PageHeader
-        title={
-          <Shelf>
-            <Box mr="16px" ml={2}>
-              <TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>
-            </Box>
-            {loan && <LoanLabel loan={loan} />}
-          </Shelf>
-        }
-        subtitle={loan && !isTinlakeLoan(loan) && <ActionButtons loan={loan} />}
-      />
+
+      <AssetSummary
+        data={[
+          {
+            label: 'Current value',
+            value: `${formatBalance(getCurrentValue(), pool.currency.symbol, 2, 2)}`,
+          },
+        ]}
+      >
+        <ActionButtons loan={loan} />
+      </AssetSummary>
+
       {loanId === '0' && (
-        <>
-          <AssetSummary
-            data={[
-              {
-                label: 'Current value',
-                value: `${formatBalance(pool.reserve.total, pool.currency.symbol, 2, 2)}`,
-              },
-            ]}
+        <PageSection>
+          <TransactionHistoryTable
+            transactions={borrowerAssetTransactions ?? []}
+            poolId={poolId}
+            preview={false}
+            activeAssetId={loanId}
           />
-          <PageSection>
-            <TransactionHistoryTable
-              transactions={borrowerAssetTransactions ?? []}
-              poolId={poolId}
-              preview={false}
-              activeAssetId={loanId}
-            />
-          </PageSection>
-        </>
+        </PageSection>
       )}
       {loan && pool && (
-        <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4} flex={1}>
-          <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr 34fr']} gap={[2, 2]}>
+        <LayoutSection pt={2} pb={4} flex={1}>
+          <Grid height="fit-content" gridTemplateColumns={isOracle ? ['1fr', '66fr 34fr'] : ['1fr']} gap={[2, 2]}>
             <React.Suspense fallback={<Spinner />}>
               <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
             </React.Suspense>
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
+            {isOracle && (
               <React.Suspense fallback={<Spinner />}>
                 <KeyMetrics pool={pool} loan={loan} />
               </React.Suspense>
@@ -206,7 +207,7 @@ function Loan() {
             gridAutoRows="minContent"
             gap={[2, 2, 2]}
           >
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
+            {isOracle && (
               <React.Suspense fallback={<Spinner />}>
                 <HoldingsValues
                   pool={pool as Pool}
@@ -217,7 +218,7 @@ function Loan() {
               </React.Suspense>
             )}
 
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' && (
               <React.Suspense fallback={<Spinner />}>
                 <PricingValues loan={loan} pool={pool} />
               </React.Suspense>
@@ -228,11 +229,9 @@ function Loan() {
               if (!isPublic) return null
               return (
                 <React.Suspense fallback={<Spinner />}>
-                  <Card p={3}>
+                  <Card p={3} variant="secondary">
                     <Stack gap={2}>
-                      <Text fontSize="18px" fontWeight="500">
-                        {section.name}
-                      </Text>
+                      <Text variant="heading4">{section.name}</Text>
                       <MetricsTable
                         metrics={section.attributes
                           .filter(
@@ -260,38 +259,28 @@ function Loan() {
 
           {borrowerAssetTransactions?.length ? (
             'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
-              <Card p={3}>
-                <TransactionHistoryTable
-                  transactions={borrowerAssetTransactions ?? []}
-                  poolId={poolId}
-                  preview={false}
-                  activeAssetId={loanId}
-                />
-              </Card>
+              <TransactionHistoryTable
+                transactions={borrowerAssetTransactions ?? []}
+                poolId={poolId}
+                preview={false}
+                activeAssetId={loanId}
+              />
             ) : (
               <Grid height="fit-content" gridTemplateColumns={['1fr']} gap={[2, 2, 3]}>
-                <Card p={3}>
-                  <Stack gap={2}>
-                    <Text fontSize="18px" fontWeight="500">
-                      Transaction history
-                    </Text>
-
-                    <TransactionTable
-                      transactions={borrowerAssetTransactions}
-                      currency={pool.currency.symbol}
-                      loanType={
-                        'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                          ? 'external'
-                          : 'internal'
-                      }
-                      poolType={poolMetadata?.pool?.asset.class}
-                      decimals={pool.currency.decimals}
-                      pricing={loan.pricing as PricingInfo}
-                      maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
-                      originationDate={originationDate ? new Date(originationDate) : undefined}
-                    />
-                  </Stack>
-                </Card>
+                <Stack gap={2}>
+                  <Text variant="heading4">Transaction history</Text>
+                  <TransactionTable
+                    transactions={borrowerAssetTransactions}
+                    currency={pool.currency.symbol}
+                    loanType={isOracle ? 'external' : 'internal'}
+                    poolType={poolMetadata?.pool?.asset.class}
+                    decimals={pool.currency.decimals}
+                    pricing={loan.pricing as PricingInfo}
+                    maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
+                    originationDate={originationDate ? new Date(originationDate) : undefined}
+                    loanStatus={loanStatus}
+                  />
+                </Stack>
               </Grid>
             )
           ) : null}

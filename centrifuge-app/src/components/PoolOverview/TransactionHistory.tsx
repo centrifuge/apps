@@ -225,6 +225,7 @@ export const TransactionHistoryTable = ({
         </Text>
       ),
       sortKey: 'transactionDate',
+      width: '200px',
     },
     {
       align: 'left',
@@ -249,9 +250,10 @@ export const TransactionHistoryTable = ({
         )
       },
       sortKey: 'transaction',
+      width: '60%',
     },
     {
-      align: 'right',
+      align: 'left',
       header: <SortableTableHeader label="Amount" />,
       cell: ({ amount, netFlow }: Row) => (
         <Text as="span" variant="body3">
@@ -259,9 +261,10 @@ export const TransactionHistoryTable = ({
         </Text>
       ),
       sortKey: 'amount',
+      width: '250px',
     },
     {
-      align: 'right',
+      align: 'center',
       header: 'View transaction',
       cell: ({ hash }: Row) => {
         return (
@@ -276,15 +279,14 @@ export const TransactionHistoryTable = ({
           </Stack>
         )
       },
+      width: '110px',
     },
   ]
 
   return (
     <Stack gap={2}>
       <Shelf justifyContent="space-between">
-        <Text fontSize="18px" fontWeight="500">
-          Transaction history
-        </Text>
+        <Text variant="heading4">Transaction history</Text>
         <Shelf>
           {transactions?.length! > 8 && preview && (
             <AnchorButton href={`#/pools/${poolId}/transactions`} small variant="inverted">

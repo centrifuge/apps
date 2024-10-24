@@ -19,6 +19,7 @@ type Props = {
   poolType?: string
   maturityDate?: Date
   originationDate: Date | undefined
+  loanStatus: string
 }
 
 type Row = {
@@ -31,6 +32,7 @@ type Row = {
   position: Decimal
   yieldToMaturity: Decimal | null
   realizedProfitFifo: CurrencyBalance | null
+  unrealizedProfitAtMarketPrice: CurrencyBalance | null
 }
 
 export const TransactionTable = ({
@@ -41,6 +43,7 @@ export const TransactionTable = ({
   pricing,
   poolType,
   maturityDate,
+  loanStatus,
 }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions?.sort((a, b) => {
@@ -120,6 +123,7 @@ export const TransactionTable = ({
             return sum
           }, Dec(0)),
           realizedProfitFifo: transaction.realizedProfitFifo,
+          unrealizedProfitAtMarketPrice: transaction.unrealizedProfitAtMarketPrice,
         }
       })
   }, [transactions, maturityDate, pricing, decimals])
@@ -189,10 +193,15 @@ export const TransactionTable = ({
           },
           {
             align: 'left',
-            header: `Realized P&L`,
+            header: loanStatus === 'Closed' || loanStatus === 'Repaid' ? 'Realized P&L' : 'Unrealized P&L',
             cell: (row: Row) =>
-              row.realizedProfitFifo
-                ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+              row.realizedProfitFifo || row.unrealizedProfitAtMarketPrice
+                ? formatBalance(
+                    loanStatus === 'Closed' ? row.unrealizedProfitAtMarketPrice ?? 0 : row.realizedProfitFifo ?? 0,
+                    undefined,
+                    2,
+                    2
+                  )
                 : '-',
           },
           {
@@ -214,10 +223,15 @@ export const TransactionTable = ({
           },
           {
             align: 'left',
-            header: `Realized P&L`,
+            header: loanStatus === 'Closed' || loanStatus === 'Repaid' ? 'Realized P&L' : 'Unrealized P&L',
             cell: (row: Row) =>
-              row.realizedProfitFifo
-                ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+              row.realizedProfitFifo || row.unrealizedProfitAtMarketPrice
+                ? formatBalance(
+                    loanStatus === 'Closed' ? row.unrealizedProfitAtMarketPrice ?? 0 : row.realizedProfitFifo ?? 0,
+                    undefined,
+                    2,
+                    2
+                  )
                 : '-',
           },
         ]),
