@@ -203,7 +203,7 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
       const validAddress = validator(recipientAddress) ? recipientAddress : undefined
       if (!validAddress) {
         errors.recipientAddress = 'Invalid address'
-      } else if (!allowedTranches.includes(holding.trancheId)) {
+      } else if (!isNativeTransfer && !allowedTranches.includes(holding.trancheId)) {
         errors.recipientAddress = 'Recipient is not allowed to receive this token'
       }
       if (!values.isDisclaimerAgreed && values.recipientAddress.startsWith('0x') && isNativeTransfer) {

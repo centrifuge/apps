@@ -194,7 +194,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
               symbol: centBalances?.native.currency.symbol ?? 'CFG',
               name: centBalances?.native.currency.symbol ?? 'CFG',
               decimals: centBalances?.native.currency.decimals ?? 18,
-              key: 'centrifuge',
+              key: 'Native',
               isPoolCurrency: false,
               isPermissioned: false,
               displayName: centBalances?.native.currency.symbol ?? 'CFG',
