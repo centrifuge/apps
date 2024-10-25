@@ -12,7 +12,7 @@ type Props = {
 
 export function MetricsTable({ metrics }: Props) {
   return (
-    <Box borderStyle="solid" borderWidth="1px" borderColor="borderPrimary">
+    <Box>
       {metrics.map(({ label, value }, index) => {
         const multirow = value && value.length > 20
         const asLink = value && /^(https?:\/\/[^\s]+)$/.test(value)
@@ -33,25 +33,21 @@ export function MetricsTable({ metrics }: Props) {
             }
           : {}
 
-        const combinedStyle: React.CSSProperties = { ...defaultStyle, ...multiRowStyle }
+        const combinedStyle: React.CSSProperties = { ...defaultStyle, ...multiRowStyle, textAlign: 'right' }
 
         return (
           <Grid
-            borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
-            borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
-            borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderPrimary'}
             key={index}
-            px={1}
             gridTemplateColumns="1fr 1fr"
             width="100%"
             alignItems="center"
             gap={2}
             height={multirow ? 'auto' : 32}
           >
-            <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+            <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
               {label}
             </Text>
-            <Text variant="body3" style={combinedStyle}>
+            <Text variant="heading4" style={combinedStyle}>
               {asLink ? <AnchorTextLink href={value}>{value}</AnchorTextLink> : value}
             </Text>
           </Grid>

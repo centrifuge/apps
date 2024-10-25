@@ -76,7 +76,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     ]
       .concat(
         poolStates.map((state, index) => ({
-          align: 'right',
+          align: 'left',
           timestamp: state.timestamp,
           header: new Date(state.timestamp).toLocaleDateString('en-US', {
             day: 'numeric',
