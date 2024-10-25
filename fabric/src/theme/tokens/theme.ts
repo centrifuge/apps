@@ -31,8 +31,8 @@ const colors = {
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[800],
 
-  borderPrimary: grayScale[50],
-  borderSecondary: grayScale[300],
+  borderPrimary: grayScale[100],
+  borderSecondary: 'rgba(207, 207, 207, 0.50)',
 
   statusDefault,
   statusInfo,
@@ -62,7 +62,7 @@ const colors = {
   borderButtonPrimaryHover: yellowScale[100],
   borderButtonPrimaryPressed: yellowScale[100],
   borderButtonPrimaryDisabled: 'transparent',
-  shadowButtonPrimary: 'transparent',
+  shadowButtonPrimary: yellowScale[100],
 
   backgroundButtonSecondary: black,
   backgroundButtonSecondaryFocus: black,
@@ -112,7 +112,7 @@ const colors = {
   borderButtonInvertedHover: grayScale[50],
   borderButtonInvertedPressed: grayScale[50],
   borderButtonInvertedDisabled: 'transparent',
-  shadowButtonInverted: 'transparent',
+  shadowButtonInverted: grayScale[50],
 }
 
 export const colorTheme = {
