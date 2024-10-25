@@ -332,12 +332,13 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
   )
 }
 
-export const RatingPill = ({ agency, reportUrl, reportFile, value, size }: RatingType) => {
+export const RatingPill = ({ agency, reportUrl, reportFile, value }: RatingType) => {
   const theme = useTheme()
   const cent = useCentrifuge()
   return (
     <Box key={`${agency}-${reportUrl}`}>
       <Tooltip
+        triggerStyle={{ textDecoration: 'none' }}
         bodyWidth="maxContent"
         body={
           <TooltipBody

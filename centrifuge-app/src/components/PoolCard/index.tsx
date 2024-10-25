@@ -21,23 +21,13 @@ const StyledRouterTextLink = styled(RouterTextLink)`
 const StyledCard = styled(Card)`
   width: 100%;
   max-width: 100%;
-  margin-right: 12px;
-  margin-bottom: 12px;
   padding: 12px;
-  border: 1px solid rgba(207, 207, 207, 0.5);
+  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
   height: 350px;
 
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.textPrimary};
     box-shadow: 0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03);
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints['M']}) {
-    width: auto;
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints['XL']}) {
-    width: auto;
   }
 `
 

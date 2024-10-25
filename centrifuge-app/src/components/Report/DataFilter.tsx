@@ -76,6 +76,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
         alignItems="flex-start"
         gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))"
         gap={2}
+        marginTop={2}
       >
         <Select
           name="data"

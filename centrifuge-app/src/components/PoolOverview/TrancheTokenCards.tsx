@@ -150,7 +150,13 @@ export const TrancheTokenCards = ({
 
   return (
     <Shelf gap={3}>
-      <Box marginY={2} backgroundColor="white" borderRadius="card" width="100%" overflow="auto">
+      <Box
+        marginY={2}
+        backgroundColor="white"
+        width="100%"
+        overflow="auto"
+        borderBottom={`1px solid ${theme.colors.borderPrimary}`}
+      >
         <DataTable
           headerStyles={{
             backgroundColor: 'white',
@@ -159,6 +165,7 @@ export const TrancheTokenCards = ({
           }}
           columns={columns}
           data={dataTable}
+          hideBorder
         />
       </Box>
     </Shelf>

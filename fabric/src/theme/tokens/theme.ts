@@ -31,7 +31,7 @@ const colors = {
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[800],
 
-  borderPrimary: grayScale[50],
+  borderPrimary: grayScale[100],
   borderSecondary: grayScale[300],
 
   statusDefault,

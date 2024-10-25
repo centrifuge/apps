@@ -51,6 +51,7 @@ export type DataTableProps<T = any> = {
   pageSize?: number
   page?: number
   headerStyles?: React.CSSProperties
+  hideBorder?: boolean
 } & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
@@ -101,6 +102,7 @@ export const DataTable = <T extends Record<string, any>>({
   page = 1,
   headerStyles,
   scrollable = false,
+  hideBorder,
 }: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
@@ -127,7 +129,7 @@ export const DataTable = <T extends Record<string, any>>({
   return (
     <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0} scrollable={scrollable}>
       {showHeader && (
-        <HeaderRow styles={headerStyles} scrollable={scrollable}>
+        <HeaderRow styles={headerStyles} scrollable={scrollable} hideBorder={hideBorder}>
           {columns.map((col, i) => (
             <HeaderCol key={i} align={col?.align} isLabel={col.isLabel}>
               <Text variant="body3">
@@ -151,6 +153,7 @@ export const DataTable = <T extends Record<string, any>>({
           to={onRowClicked ? onRowClicked(row) : undefined}
           key={keyField ? row[keyField] : i}
           tabIndex={onRowClicked ? 0 : undefined}
+          hideBorder={hideBorder}
         >
           {columns.map((col, index) => (
             <DataCol variant="body2" align={col?.align} key={index} isLabel={col.isLabel}>
@@ -168,6 +171,7 @@ export const DataTable = <T extends Record<string, any>>({
             to={onRowClicked ? onRowClicked(row) : undefined}
             key={keyField ? row[keyField] : i}
             tabIndex={onRowClicked ? 0 : undefined}
+            hideBorder={hideBorder}
           >
             {columns.map((col, index) => (
               <DataCol
@@ -185,7 +189,7 @@ export const DataTable = <T extends Record<string, any>>({
       })}
       {/* summary row is not included in sorting */}
       {summary && (
-        <DataRow data-testId={`row-summary-${groupIndex ?? 0}`}>
+        <DataRow data-testId={`row-summary-${groupIndex ?? 0}`} hideBorder={hideBorder}>
           {columns.map((col, i) => (
             <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
               {col.cell(summary, i)}
@@ -207,7 +211,7 @@ const TableGrid = styled(Grid)<{ scrollable?: boolean }>`
   ${({ scrollable }) =>
     scrollable &&
     css({
-      maxHeight: 'calc(100vh - 180px)',
+      maxHeight: 'calc(100vh - 320px)',
       overflowY: 'auto',
       overflowX: 'auto',
     })}
@@ -217,37 +221,37 @@ const Row = styled('div')`
   display: grid;
   grid-template-columns: subgrid;
   grid-column: start / end;
-  box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderPrimary}, 1px 0 0 0 ${theme.colors.borderPrimary}`};
 `
 
-const HeaderRow = styled(Row)<{ styles?: any; scrollable?: boolean }>(({ styles, scrollable }) =>
-  css({
-    backgroundColor: 'backgroundSecondary',
-    borderStyle: 'solid',
-    borderWidth: '1px 0',
-    borderColor: 'borderPrimary',
-    position: scrollable ? 'sticky' : 'static',
-    top: scrollable ? 0 : 'auto',
-    zIndex: scrollable ? 10 : 'auto',
-    borderTopLeftRadius: '8px',
-    borderTopRightRadius: '8px',
-    ...styles,
-  })
+const HeaderRow = styled(Row)<{ styles?: any; scrollable?: boolean; hideBorder?: boolean }>(
+  ({ styles, scrollable, hideBorder }) =>
+    css({
+      backgroundColor: 'backgroundSecondary',
+      borderStyle: 'solid',
+      borderWidth: hideBorder ? 0 : 1,
+      borderColor: hideBorder ? 'transparent' : 'borderPrimary',
+      position: scrollable ? 'sticky' : 'static',
+      top: scrollable ? 0 : 'auto',
+      zIndex: scrollable ? 10 : 'auto',
+      borderTopLeftRadius: hideBorder ? 0 : '8px',
+      borderTopRightRadius: hideBorder ? 0 : '8px',
+      ...styles,
+    })
 )
 
 export const DataRow = styled(Row)<any>`
-  ${({ hoverable, as: comp }) =>
+  ${({ hoverable, as: comp, hideBorder }) =>
     css({
       width: '100%',
       borderBottomStyle: 'solid',
-      borderBottomWidth: '1px',
-      borderBottomColor: 'borderPrimary',
+      borderBottomWidth: hideBorder ? 0 : '1px',
+      borderBottomColor: hideBorder ? 'transparent' : 'borderPrimary',
       borderLeftStyle: 'solid',
-      borderLeftWidth: '1px',
-      borderLeftColor: 'borderPrimary',
+      borderLeftWidth: hideBorder ? 0 : '1px',
+      borderLeftColor: hideBorder ? 'transparent' : 'borderPrimary',
       borderRightStyle: 'solid',
-      borderRightWidth: '1px',
-      borderRightColor: 'borderPrimary',
+      borderRightWidth: hideBorder ? 0 : '1px',
+      borderRightColor: hideBorder ? 'transparent' : 'borderPrimary',
       backgroundColor: 'transparent',
       // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':
