@@ -116,7 +116,7 @@ export function Tooltip({
               pointer={pointer}
             >
               {!!title && (
-                <Text variant="body3" fontWeight={600}>
+                <Text variant="body3" fontWeight={600} color="white">
                   {title}
                 </Text>
               )}

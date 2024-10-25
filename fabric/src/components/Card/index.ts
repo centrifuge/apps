@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Box, BoxProps } from '../Box'
 
 type Props = {
-  variant?: 'default' | 'interactive' | 'overlay'
+  variant?: 'default' | 'interactive' | 'overlay' | 'secondary'
   backgroundColor?: string
 }
 
@@ -14,9 +14,9 @@ export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }
   css({
     bg: backgroundColor ?? 'white',
     borderRadius: 'card',
-    borderWidth: variant === 'default' && !backgroundColor ? 1 : 0,
+    borderWidth: variant === 'default' || (variant === 'secondary' && !backgroundColor) ? 1 : 0,
     borderStyle: 'solid',
-    borderColor: 'borderPrimary',
+    borderColor: variant === 'secondary' ? 'borderSecondary' : 'borderPrimary',
     boxShadow: variant === 'interactive' ? 'cardInteractive' : variant === 'overlay' ? 'cardOverlay' : undefined,
     transition: 'box-shadow 100ms ease',
 
