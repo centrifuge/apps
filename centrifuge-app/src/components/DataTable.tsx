@@ -104,9 +104,19 @@ export const DataTable = <T extends Record<string, any>>({
   scrollable = false,
   hideBorder,
 }: DataTableProps<T>) => {
+  const tableRef = React.useRef<HTMLDivElement>(null)
+  const [offsetTop, setOffsetTop] = React.useState(0)
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
+
+  React.useEffect(() => {
+    if (tableRef.current) {
+      const rect = tableRef.current.getBoundingClientRect()
+      const offsetFromTopOfScreen = rect.top + window.scrollY
+      setOffsetTop(offsetFromTopOfScreen)
+    }
+  }, [])
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
 
@@ -127,7 +137,15 @@ export const DataTable = <T extends Record<string, any>>({
   const templateColumns = `[start] ${columns.map((col) => col.width ?? 'minmax(min-content, 1fr)').join(' ')} [end]`
 
   return (
-    <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0} scrollable={scrollable}>
+    <TableGrid
+      ref={tableRef}
+      gridTemplateColumns={templateColumns}
+      gridAutoRows="auto"
+      gap={0}
+      rowGap={0}
+      scrollable={scrollable}
+      offsetTop={offsetTop}
+    >
       {showHeader && (
         <HeaderRow styles={headerStyles} scrollable={scrollable} hideBorder={hideBorder}>
           {columns.map((col, i) => (
@@ -207,11 +225,12 @@ export const DataTable = <T extends Record<string, any>>({
   )
 }
 
-const TableGrid = styled(Grid)<{ scrollable?: boolean }>`
-  ${({ scrollable }) =>
+const TableGrid = styled(Grid)<{ scrollable?: boolean; offsetTop?: number }>`
+  ${({ scrollable, offsetTop }) =>
     scrollable &&
     css({
-      maxHeight: 'calc(100vh - 320px)',
+      maxHeight: `calc(100vh - ${offsetTop}px)`,
+      paddingBottom: 20,
       overflowY: 'auto',
       overflowX: 'auto',
     })}
