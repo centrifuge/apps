@@ -28,6 +28,10 @@ type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
 }
 
+const ButtonSections = styled(RouterTextLink)`
+  text-decoration: unset;
+`
+
 const StyledBox = styled(Box)`
   padding: 24px;
   &:hover {
@@ -36,7 +40,10 @@ const StyledBox = styled(Box)`
   }
 `
 
-const HoverBox = styled(StyledBox)`
+const StyledRouterTextLink = styled(RouterTextLink)`
+  color: white;
+  text-decoration: unset;
+  font-size: 14px;
   padding: 8px 22px;
   background-color: ${SUBTLE_GRAY};
   border: 3px solid transparent;
@@ -45,12 +52,6 @@ const HoverBox = styled(StyledBox)`
     border-radius: 4px;
     border-color: #91969b1a;
   }
-`
-
-const StyledRouterTextLink = styled(RouterTextLink)`
-  color: white;
-  text-decoration: unset;
-  font-size: 14px;
   :active {
     color: white;
   }
@@ -98,14 +99,12 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
         <Text color="white" variant="heading4">
           Reports
         </Text>
-        <HoverBox backgroundColor={SUBTLE_GRAY}>
-          <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
-        </HoverBox>
+        <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
       </Box>
 
       <Box marginY={2} backgroundColor={SUBTLE_GRAY} borderRadius={10}>
         {reportLinks.map((link, i) => (
-          <StyledRouterTextLink to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
+          <ButtonSections to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
             <StyledBox
               borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
               display="flex"
@@ -120,7 +119,7 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
               </Box>
               <IconChevronRight color="white" />
             </StyledBox>
-          </StyledRouterTextLink>
+          </ButtonSections>
         ))}
       </Box>
 
