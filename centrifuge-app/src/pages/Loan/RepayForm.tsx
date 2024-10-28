@@ -14,11 +14,12 @@ import {
   useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { useTheme } from 'styled-components'
 import { copyable } from '../../components/Report/utils'
 import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
@@ -56,8 +57,7 @@ export function RepayForm({ loan }: { loan: CreatedLoan | ActiveLoan }) {
     return (
       <Stack gap={2} p={1}>
         <Text variant="heading2">Sell</Text>
-        <SourceSelect loan={loan} value={destination} onChange={setDestination} action="repay" />
-        <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} />
+        <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} setDestination={setDestination} />
       </Stack>
     )
   }
@@ -65,15 +65,23 @@ export function RepayForm({ loan }: { loan: CreatedLoan | ActiveLoan }) {
   return (
     <Stack gap={2} p={1}>
       <Text variant="heading2">{isCashLoan(loan) ? 'Withdraw' : 'Repay'}</Text>
-      <SourceSelect loan={loan} value={destination} onChange={setDestination} action="repay" />
-      <InternalRepayForm loan={loan} destination={destination} />
+      <InternalRepayForm loan={loan} destination={destination} setDestination={setDestination} />
     </Stack>
   )
 }
 /**
  * Repay form for loans with `valuationMethod: outstandingDebt, discountedCashflow, cash`
  */
-function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLoan; destination: string }) {
+function InternalRepayForm({
+  loan,
+  destination,
+  setDestination,
+}: {
+  loan: ActiveLoan | CreatedLoan
+  destination: string
+  setDestination: (destination: string) => void
+}) {
+  const theme = useTheme()
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account?.actingAddress)
@@ -225,154 +233,184 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
     <>
       <FormikProvider value={repayForm}>
         <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-          <Field
-            validate={combine(
-              positiveNumberNotRequired(),
-              maxNotRequired(maxPrincipal.toNumber(), 'Principal exceeds available debt')
-            )}
-            name="principal"
+          <Box
+            padding="24px 16px"
+            backgroundColor={theme.colors.backgroundSecondary}
+            borderRadius={10}
+            border={`1px solid ${theme.colors.borderPrimary}`}
           >
-            {({ field, form }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                  label={isCashLoan(loan) ? 'Amount' : 'Principal'}
-                  disabled={isRepayLoading}
-                  currency={displayCurrency}
-                  onChange={(value) => form.setFieldValue('principal', value)}
-                  onSetMax={() => {
-                    form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)
+            <Stack gap={2}>
+              <SourceSelect loan={loan} value={destination} onChange={setDestination} action="repay" />
+              <Field
+                validate={combine(
+                  positiveNumberNotRequired(),
+                  maxNotRequired(maxPrincipal.toNumber(), 'Principal exceeds available debt')
+                )}
+                name="principal"
+              >
+                {({ field, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                      label={isCashLoan(loan) ? 'Amount' : 'Principal'}
+                      disabled={isRepayLoading}
+                      currency={displayCurrency}
+                      onChange={(value) => form.setFieldValue('principal', value)}
+                      onSetMax={() => {
+                        form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)
+                      }}
+                      secondaryLabel={`${formatBalance(maxPrincipal, displayCurrency)} outstanding`}
+                    />
+                  )
+                }}
+              </Field>
+              {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && !isCashLoan(loan) && (
+                <Field
+                  validate={combine(
+                    positiveNumberNotRequired(),
+                    maxNotRequired(maxInterest.toNumber(), 'Interest exceeds available debt')
+                  )}
+                  name="interest"
+                >
+                  {({ field, form }: FieldProps) => {
+                    return (
+                      <CurrencyInput
+                        {...field}
+                        value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                        label="Interest"
+                        secondaryLabel={`${formatBalance(
+                          loan.outstandingInterest,
+                          displayCurrency,
+                          2
+                        )} interest accrued`}
+                        disabled={isRepayLoading}
+                        currency={displayCurrency}
+                        onChange={(value) => form.setFieldValue('interest', value)}
+                        onSetMax={() => form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)}
+                      />
+                    )
                   }}
-                  secondaryLabel={`${formatBalance(maxPrincipal, displayCurrency)} outstanding`}
-                />
-              )
-            }}
-          </Field>
-          {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && !isCashLoan(loan) && (
-            <Field
-              validate={combine(
-                positiveNumberNotRequired(),
-                maxNotRequired(maxInterest.toNumber(), 'Interest exceeds available debt')
+                </Field>
               )}
-              name="interest"
-            >
-              {({ field, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Interest"
-                    secondaryLabel={`${formatBalance(loan.outstandingInterest, displayCurrency, 2)} interest accrued`}
-                    disabled={isRepayLoading}
-                    currency={displayCurrency}
-                    onChange={(value) => form.setFieldValue('interest', value)}
-                    onSetMax={() => form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)}
-                  />
-                )
-              }}
-            </Field>
-          )}
-          {!isCashLoan(loan) && (
-            <Field
-              name="amountAdditional"
-              validate={combine(
-                nonNegativeNumberNotRequired(),
-                maxNotRequired(maxAvailable.toNumber(), 'Additional amount exceeds available debt')
+              {!isCashLoan(loan) && (
+                <Field
+                  name="amountAdditional"
+                  validate={combine(
+                    nonNegativeNumberNotRequired(),
+                    maxNotRequired(maxAvailable.toNumber(), 'Additional amount exceeds available debt')
+                  )}
+                >
+                  {({ field, form }: FieldProps) => {
+                    return (
+                      <CurrencyInput
+                        {...field}
+                        value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                        label="Additional amount"
+                        disabled={isRepayLoading}
+                        currency={displayCurrency}
+                        onChange={(value) => form.setFieldValue('amountAdditional', value)}
+                      />
+                    )
+                  }}
+                </Field>
               )}
-            >
-              {({ field, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label={<Tooltips type="additionalAmountInput" />}
-                    disabled={isRepayLoading}
-                    currency={displayCurrency}
-                    onChange={(value) => form.setFieldValue('amountAdditional', value)}
-                  />
-                )
-              }}
-            </Field>
-          )}
-          {destination === 'other' && (
-            <Field name="category">
-              {({ field }: FieldProps) => {
-                return (
-                  <Select
-                    options={[
-                      { label: 'Correction', value: 'correction' },
-                      { label: 'Tax', value: 'tax' },
-                      { label: 'Miscellaneous', value: 'miscellaneous' },
-                    ]}
-                    label="Category"
-                    {...field}
-                  />
-                )
-              }}
-            </Field>
-          )}
-          {poolFees.render()}
+              {destination === 'other' && (
+                <Field name="category">
+                  {({ field }: FieldProps) => {
+                    return (
+                      <Select
+                        options={[
+                          { label: 'Correction', value: 'correction' },
+                          { label: 'Tax', value: 'tax' },
+                          { label: 'Miscellaneous', value: 'miscellaneous' },
+                        ]}
+                        label="Category"
+                        {...field}
+                      />
+                    )
+                  }}
+                </Field>
+              )}
+              {poolFees.render()}
 
-          <ErrorMessage type="critical" condition={Dec(repayForm.values.principal || 0).gt(maxPrincipal)}>
-            {isCashLoan(loan) ? 'Amount' : 'Principal'} (
-            {formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than the outstanding{' '}
-            {isCashLoan(loan) ? 'balance' : 'principal'} ({formatBalance(maxPrincipal, displayCurrency, 2)}).
-          </ErrorMessage>
+              <ErrorMessage type="critical" condition={Dec(repayForm.values.principal || 0).gt(maxPrincipal)}>
+                {isCashLoan(loan) ? 'Amount' : 'Principal'} (
+                {formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than the
+                outstanding {isCashLoan(loan) ? 'balance' : 'principal'} (
+                {formatBalance(maxPrincipal, displayCurrency, 2)}).
+              </ErrorMessage>
 
-          <ErrorMessage type="critical" condition={Dec(repayForm.values.interest || 0).gt(maxInterest)}>
-            Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than the
-            outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
-          </ErrorMessage>
+              <ErrorMessage type="critical" condition={Dec(repayForm.values.interest || 0).gt(maxInterest)}>
+                Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than the
+                outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
+              </ErrorMessage>
 
-          <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(balance)}>
-            The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is insufficient.
-            Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
-            {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
-          </ErrorMessage>
+              <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(balance)}>
+                The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
+                insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+                {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
+              </ErrorMessage>
+            </Stack>
+          </Box>
 
-          <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+          <Stack
+            gap={2}
+            mt={2}
+            border={`1px solid ${theme.colors.borderPrimary}`}
+            padding="24px 16px"
+            borderRadius={10}
+          >
             <Text variant="heading4">Transaction summary</Text>
-            <Stack gap={1}>
-              <Shelf justifyContent="space-between">
-                <Tooltips
-                  type={maxAvailable === UNLIMITED ? 'repayFormAvailableBalanceUnlimited' : 'repayFormAvailableBalance'}
-                />
-                <Text variant="label2">
-                  {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-                </Text>
-              </Shelf>
-
+            <Box paddingX={2} mt={2}>
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
-                  <Text variant="label2" color="textPrimary">
-                    {isCashLoan(loan) ? 'Withdrawal amount' : 'Repayment amount'}
+                  <Tooltips
+                    type={
+                      maxAvailable === UNLIMITED ? 'repayFormAvailableBalanceUnlimited' : 'repayFormAvailableBalance'
+                    }
+                    size="med"
+                  />
+                  <Text variant="body2">
+                    {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
                   </Text>
-                  <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
                 </Shelf>
+
+                <Stack gap={1}>
+                  <Shelf justifyContent="space-between">
+                    <Text variant="body2" color="textSecondary">
+                      {isCashLoan(loan) ? 'Withdrawal amount' : 'Repayment amount'}
+                    </Text>
+                    <Text variant="body2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
+                  </Shelf>
+                </Stack>
+
+                {poolFees.renderSummary()}
               </Stack>
 
-              {poolFees.renderSummary()}
-            </Stack>
-
-            {destination === 'reserve' ? (
-              <InlineFeedback status="default">
-                <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
-              </InlineFeedback>
-            ) : destination === 'other' ? (
-              <InlineFeedback status="default">
-                <Text color="statusDefault">
-                  Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to a
-                  decrease in the NAV of the pool.
-                </Text>
-              </InlineFeedback>
-            ) : (
-              <InlineFeedback status="default">
-                <Text color="statusDefault">
-                  Virtual accounting process. No onchain stablecoin transfers are expected.
-                </Text>
-              </InlineFeedback>
-            )}
+              <Stack mt={3}>
+                {destination === 'reserve' ? (
+                  <InlineFeedback status="default">
+                    <Text variant="body2" color="statusDefault">
+                      Stablecoins will be transferred to the onchain reserve.
+                    </Text>
+                  </InlineFeedback>
+                ) : destination === 'other' ? (
+                  <InlineFeedback status="default">
+                    <Text variant="body2" color="statusDefault">
+                      Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to
+                      a decrease in the NAV of the pool.
+                    </Text>
+                  </InlineFeedback>
+                ) : (
+                  <InlineFeedback status="default">
+                    <Text variant="body2" color="statusDefault">
+                      Virtual accounting process. No onchain stablecoin transfers are expected.
+                    </Text>
+                  </InlineFeedback>
+                )}
+              </Stack>
+            </Box>
           </Stack>
 
           <Stack gap={1}>

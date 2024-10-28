@@ -61,7 +61,7 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
   margin-left: 30px;
 
   > span {
-    width: 35px;
+    width: 34px;
   }
   &:hover {
     background-color: ${({ theme }) => theme.colors.backgroundTertiary};
@@ -169,7 +169,7 @@ function Loan() {
 
   return (
     <Stack>
-      <Box display="flex" alignItems="center" width="50%" justifyContent="space-between" mt={15} mb={24}>
+      <Box display="flex" alignItems="center" width="55%" justifyContent="space-between" mt={15} mb={24}>
         <StyledRouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconArrowLeft} variant="tertiary" />
         <Box display="flex" alignItems="center">
           <Text variant="heading1" style={{ marginRight: 8 }}>

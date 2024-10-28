@@ -41,6 +41,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
+import { useTheme } from 'styled-components'
 import { AnchorTextLink } from '../../components/TextLink'
 import { parachainIcons, parachainNames } from '../../config'
 import { Dec, min } from '../../utils/Decimal'
@@ -75,8 +76,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
     return (
       <Stack gap={2} p={1}>
         <Text variant="heading2">Purchase</Text>
-        <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
-        <ExternalFinanceForm loan={loan} source={source} />
+        <ExternalFinanceForm loan={loan} source={source} setSource={setSource} />
       </Stack>
     )
   }
@@ -84,8 +84,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   return (
     <Stack gap={2} p={1}>
       <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
-      <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
-      <InternalFinanceForm loan={loan} source={source} />
+      <InternalFinanceForm loan={loan} source={source} onChange={setSource} />
     </Stack>
   )
 }
@@ -93,7 +92,16 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
 /**
  * Finance form for loans with `valuationMethod: outstandingDebt, discountedCashflow, cash`
  */
-function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string }) {
+function InternalFinanceForm({
+  loan,
+  source,
+  onChange,
+}: {
+  loan: LoanType
+  source: string
+  onChange: (source: string) => void
+}) {
+  const theme = useTheme()
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
@@ -189,104 +197,120 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
     <>
       {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
-          <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            <Field
-              name="principal"
-              validate={combine(positiveNumber(), (val) => {
-                const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
-                if (maxAvailable !== UNLIMITED && principalValue.gt(maxAvailable)) {
-                  return `Principal exceeds available financing`
-                }
-                return ''
-              })}
-            >
-              {({ field, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label={isCashLoan(loan) ? 'Amount' : 'Principal'}
-                    currency={displayCurrency}
-                    onChange={(value) => form.setFieldValue('principal', value)}
-                    onSetMax={
-                      maxAvailable !== UNLIMITED ? () => form.setFieldValue('principal', maxAvailable) : undefined
-                    }
-                  />
-                )
-              }}
-            </Field>
-            {source === 'other' && (
-              <Field name="category">
-                {({ field }: FieldProps) => {
+          <Box
+            padding="24px 16px"
+            backgroundColor={theme.colors.backgroundSecondary}
+            borderRadius={10}
+            border={`1px solid ${theme.colors.borderPrimary}`}
+          >
+            <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
+              <SourceSelect loan={loan} value={source} onChange={onChange} action="finance" />
+              <Field
+                name="principal"
+                validate={combine(positiveNumber(), (val) => {
+                  const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
+                  if (maxAvailable !== UNLIMITED && principalValue.gt(maxAvailable)) {
+                    return `Principal exceeds available financing`
+                  }
+                  return ''
+                })}
+              >
+                {({ field, form }: FieldProps) => {
                   return (
-                    <Select
-                      options={[
-                        { label: 'Interest', value: 'interest' },
-                        { label: 'Correction', value: 'correction' },
-                        { label: 'Miscellaneous', value: 'miscellaneous' },
-                      ]}
-                      label="Category"
+                    <CurrencyInput
                       {...field}
+                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                      label={isCashLoan(loan) ? 'Amount' : 'Principal'}
+                      currency={displayCurrency}
+                      onChange={(value) => form.setFieldValue('principal', value)}
+                      onSetMax={
+                        maxAvailable !== UNLIMITED ? () => form.setFieldValue('principal', maxAvailable) : undefined
+                      }
                     />
                   )
                 }}
               </Field>
-            )}
-            {source === 'reserve' && withdraw.render()}
+              {source === 'other' && (
+                <Field name="category">
+                  {({ field }: FieldProps) => {
+                    return (
+                      <Select
+                        options={[
+                          { label: 'Interest', value: 'interest' },
+                          { label: 'Correction', value: 'correction' },
+                          { label: 'Miscellaneous', value: 'miscellaneous' },
+                        ]}
+                        label="Category"
+                        {...field}
+                      />
+                    )
+                  }}
+                </Field>
+              )}
+              {source === 'reserve' && withdraw.render()}
 
-            {poolFees.render()}
+              {poolFees.render()}
 
-            <ErrorMessage
-              type="critical"
-              condition={totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable)}
-            >
-              {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
-              {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
-              {formatBalance(maxAvailable, displayCurrency, 2)}).
-            </ErrorMessage>
+              <ErrorMessage
+                type="critical"
+                condition={totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable)}
+              >
+                {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
+                {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
+                {formatBalance(maxAvailable, displayCurrency, 2)}).
+              </ErrorMessage>
 
-            <ErrorMessage
-              type="default"
-              condition={
-                source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available)
-              }
-            >
-              There is an additional{' '}
-              {formatBalance(
-                new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
-                displayCurrency
-              )}{' '}
-              available from repayments or deposits. This requires first executing the orders on the{' '}
-              <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
-            </ErrorMessage>
+              <ErrorMessage
+                type="default"
+                condition={
+                  source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available)
+                }
+              >
+                There is an additional{' '}
+                {formatBalance(
+                  new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
+                  displayCurrency
+                )}{' '}
+                available from repayments or deposits. This requires first executing the orders on the{' '}
+                <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
+              </ErrorMessage>
+            </Stack>
+          </Box>
 
-            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
-              <Text variant="heading4">Transaction summary</Text>
-              <Stack gap={1}>
+          <Stack
+            gap={2}
+            mt={2}
+            border={`1px solid ${theme.colors.borderPrimary}`}
+            padding="24px 16px"
+            borderRadius={10}
+          >
+            <Text variant="heading4">Transaction summary</Text>
+            <Box padding={2}>
+              <Stack gap={1} mb={3}>
                 <Shelf justifyContent="space-between">
-                  <Text variant="label2" color="textPrimary">
-                    Available balance
-                  </Text>
-                  <Text variant="label2">
-                    <Tooltip
-                      body={
-                        maxAvailable === UNLIMITED
-                          ? 'Unlimited because this is a virtual accounting process.'
-                          : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
-                      }
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-                    </Tooltip>
+                  <Tooltip
+                    body={
+                      maxAvailable === UNLIMITED
+                        ? 'Unlimited because this is a virtual accounting process.'
+                        : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
+                    }
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    <Text variant="body2" color="textSecondary">
+                      Available balance
+                    </Text>
+                  </Tooltip>
+                  <Text variant="heading4">
+                    {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
                   </Text>
                 </Shelf>
 
                 <Stack gap={1}>
                   <Shelf justifyContent="space-between">
-                    <Text variant="label2" color="textPrimary">
+                    <Text variant="body2" color="textSecondary">
                       {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
                     </Text>
-                    <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                    <Text variant="heading4">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
                   </Shelf>
                 </Stack>
 
@@ -295,42 +319,42 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
-                  <Text color="statusDefault">
-                    Stablecoins will be transferred to the specified withdrawal addresses, on the specified networks. A
-                    delay until the transfer is completed is to be expected.
+                  <Text variant="body2" color="statusDefault">
+                    Stablecoins will be transferred to the designated withdrawal addresses on the specified networks. A
+                    delay may occur before the transfer is completed.
                   </Text>
                 </InlineFeedback>
               ) : source === 'other' ? (
                 <InlineFeedback status="default">
-                  <Text color="statusDefault">
+                  <Text variant="body2" color="statusDefault">
                     Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to
                     an increase in the NAV of the pool.
                   </Text>
                 </InlineFeedback>
               ) : (
                 <InlineFeedback status="default">
-                  <Text color="statusDefault">
+                  <Text variant="body2" color="statusDefault">
                     Virtual accounting process. No onchain stablecoin transfers are expected.
                   </Text>
                 </InlineFeedback>
               )}
-            </Stack>
+            </Box>
+          </Stack>
 
-            <Stack>
-              <Button
-                type="submit"
-                loading={isFinanceLoading}
-                disabled={
-                  !financeForm.values.principal ||
-                  !withdraw.isValid(financeForm) ||
-                  !poolFees.isValid(financeForm) ||
-                  !financeForm.isValid ||
-                  maxAvailable.eq(0)
-                }
-              >
-                {isCashLoan(loan) ? 'Deposit' : 'Finance'}
-              </Button>
-            </Stack>
+          <Stack>
+            <Button
+              type="submit"
+              loading={isFinanceLoading}
+              disabled={
+                !financeForm.values.principal ||
+                !withdraw.isValid(financeForm) ||
+                !poolFees.isValid(financeForm) ||
+                !financeForm.isValid ||
+                maxAvailable.eq(0)
+              }
+            >
+              {isCashLoan(loan) ? 'Deposit' : 'Finance'}
+            </Button>
           </Stack>
         </FormikProvider>
       )}
@@ -372,16 +396,18 @@ function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: With
     )
 
   return (
-    <Select
-      name="withdraw"
-      label="Withdrawal address"
-      onChange={(event) => helpers.setValue(JSON.parse(event.target.value))}
-      onBlur={field.onBlur}
-      errorMessage={(meta.touched || form.submitCount > 0) && meta.error ? meta.error : undefined}
-      value={field.value ? JSON.stringify(field.value) : ''}
-      options={options}
-      disabled={withdrawAddresses.length === 1}
-    />
+    <>
+      <Text variant="heading4">Withdrawal address</Text>
+      <Select
+        name="withdraw"
+        onChange={(event) => helpers.setValue(JSON.parse(event.target.value))}
+        onBlur={field.onBlur}
+        errorMessage={(meta.touched || form.submitCount > 0) && meta.error ? meta.error : undefined}
+        value={field.value ? JSON.stringify(field.value) : ''}
+        options={options}
+        disabled={withdrawAddresses.length === 1}
+      />
+    </>
   )
 }
 

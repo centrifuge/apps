@@ -1,10 +1,11 @@
 import { ActiveLoan, CurrencyBalance, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
@@ -25,6 +26,7 @@ export type CorrectionValues = {
 }
 
 export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
+  const theme = useTheme()
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
@@ -116,105 +118,111 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
     <FormikProvider value={correctionForm}>
       <Stack as={Form} gap={2} p={1} noValidate ref={correctionFormRef}>
         <Text variant="heading2">Correction</Text>
-        <Stack gap={1}>
-          {isExternalLoan(loan) ? (
-            <>
-              <Shelf gap={1}>
-                <Field
-                  name="quantity"
-                  validate={combine(
-                    required(),
-                    positiveNumber(),
-                    max(availableFinancing.toNumber(), 'The amount exceeds the available financing')
-                  )}
-                >
-                  {({ field, form, meta }: FieldProps) => {
-                    return (
-                      <CurrencyInput
-                        {...field}
-                        label="Quantity"
-                        placeholder="0"
-                        onChange={(value) => form.setFieldValue('quantity', value)}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                      />
-                    )
-                  }}
-                </Field>
-                <Field name="price" validate={combine(required(), positiveNumber(), maxPriceVariance(loan.pricing))}>
-                  {({ field, form, meta }: FieldProps) => {
-                    return (
-                      <CurrencyInput
-                        {...field}
-                        label="Price"
-                        currency={pool.currency.symbol}
-                        onChange={(value) => form.setFieldValue('price', value)}
-                        decimals={8}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                      />
-                    )
-                  }}
-                </Field>
-              </Shelf>
-              <Shelf justifyContent="space-between">
-                <Text variant="label2" color="textPrimary">
-                  ={' '}
-                  {formatBalance(
-                    Dec(correctionForm.values.price || 0).mul(correctionForm.values.quantity || 0),
-                    pool.currency.symbol,
-                    2
-                  )}{' '}
-                  principal
-                </Text>
-              </Shelf>
-            </>
-          ) : isInternalLoan(loan) ? (
+        <Box
+          padding="24px 16px"
+          backgroundColor={theme.colors.backgroundSecondary}
+          borderRadius={10}
+          border={`1px solid ${theme.colors.borderPrimary}`}
+        >
+          <Stack gap={1}>
+            {isExternalLoan(loan) ? (
+              <>
+                <Shelf gap={1}>
+                  <Field
+                    name="quantity"
+                    validate={combine(
+                      required(),
+                      positiveNumber(),
+                      max(availableFinancing.toNumber(), 'The amount exceeds the available financing')
+                    )}
+                  >
+                    {({ field, form, meta }: FieldProps) => {
+                      return (
+                        <CurrencyInput
+                          {...field}
+                          label="Quantity"
+                          placeholder="0"
+                          onChange={(value) => form.setFieldValue('quantity', value)}
+                          errorMessage={meta.touched ? meta.error : undefined}
+                        />
+                      )
+                    }}
+                  </Field>
+                  <Field name="price" validate={combine(required(), positiveNumber(), maxPriceVariance(loan.pricing))}>
+                    {({ field, form, meta }: FieldProps) => {
+                      return (
+                        <CurrencyInput
+                          {...field}
+                          label="Price"
+                          currency={pool.currency.symbol}
+                          onChange={(value) => form.setFieldValue('price', value)}
+                          decimals={8}
+                          errorMessage={meta.touched ? meta.error : undefined}
+                        />
+                      )
+                    }}
+                  </Field>
+                </Shelf>
+                <Shelf justifyContent="flex-end">
+                  <Text variant="body2" color="textPrimary">
+                    ={' '}
+                    {formatBalance(
+                      Dec(correctionForm.values.price || 0).mul(correctionForm.values.quantity || 0),
+                      pool.currency.symbol,
+                      2
+                    )}{' '}
+                    principal
+                  </Text>
+                </Shelf>
+              </>
+            ) : isInternalLoan(loan) ? (
+              <FieldWithErrorMessage
+                name="principal"
+                validate={combine(
+                  positiveNumber(),
+                  max(availableFinancing.toNumber(), 'The amount exceeds the available financing')
+                )}
+              >
+                {({ field, form, meta }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                      label={isCashLoan(loan) ? 'Amount' : 'Principal'}
+                      currency={pool.currency.symbol}
+                      onChange={(value) => form.setFieldValue('principal', value)}
+                      errorMessage={meta.touched ? meta.error : undefined}
+                    />
+                  )
+                }}
+              </FieldWithErrorMessage>
+            ) : null}
             <FieldWithErrorMessage
-              name="principal"
-              validate={combine(
-                positiveNumber(),
-                max(availableFinancing.toNumber(), 'The amount exceeds the available financing')
-              )}
-            >
-              {({ field, form, meta }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label={isCashLoan(loan) ? 'Amount' : 'Principal'}
-                    currency={pool.currency.symbol}
-                    onChange={(value) => form.setFieldValue('principal', value)}
-                    errorMessage={meta.touched ? meta.error : undefined}
-                  />
-                )
-              }}
-            </FieldWithErrorMessage>
-          ) : null}
-          <FieldWithErrorMessage
-            validate={required()}
-            name="reason"
-            as={TextInput}
-            label="Reason"
-            placeholder=""
-            maxLength={40}
-          />
-        </Stack>
+              validate={required()}
+              name="reason"
+              as={TextInput}
+              label="Reason"
+              placeholder=""
+              maxLength={40}
+            />
+            {poolFees.render()}
+          </Stack>
+        </Box>
 
-        {poolFees.render()}
-
-        <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+        <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} padding="24px 16px" borderRadius={10}>
           <Text variant="heading4">Summary</Text>
           <Stack gap={1}>
             <Shelf justifyContent="space-between">
-              <Text variant="label2" color="textPrimary">
+              <Text variant="body2" color="textSecondary">
                 Old holdings
               </Text>
-              <Text variant="label2">{formatBalance(oldPrincipal, pool.currency.symbol, 2)}</Text>
+              <Text variant="body2">{formatBalance(oldPrincipal, pool.currency.symbol, 2)}</Text>
             </Shelf>
             <Shelf justifyContent="space-between">
-              <Text variant="label2" color="textPrimary">
+              <Text variant="body2" color="textSecondary">
                 New holdings
               </Text>
-              <Text variant="label2">
+              <Text variant="body2">
                 {formatBalance(newPrincipal, pool.currency.symbol, 2)} (
                 <Text color={isIncrease ? 'statusOk' : 'statusCritical'}>
                   {isIncrease ? '+' : ''}
