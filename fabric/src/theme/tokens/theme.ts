@@ -2,7 +2,7 @@ import { black, blueScale, gold, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
 const statusInfo = yellowScale[800]
-const statusOk = '#519b10'
+const statusOk = '#277917'
 const statusWarning = yellowScale[800]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'

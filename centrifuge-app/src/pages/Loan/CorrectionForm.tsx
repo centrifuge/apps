@@ -211,7 +211,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
 
         <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} padding="24px 16px" borderRadius={10}>
           <Text variant="heading4">Summary</Text>
-          <Stack gap={1}>
+          <Stack gap={1} mb={1}>
             <Shelf justifyContent="space-between">
               <Text variant="body2" color="textSecondary">
                 Old holdings

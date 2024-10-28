@@ -65,14 +65,18 @@ export function Toast({ status = 'info', label, sublabel, onDismiss, onStatusCha
     onStatusChange && onStatusChange(status)
   }, [status, onStatusChange])
   return (
-    <Card variant="overlay">
+    <Card variant="overlay" backgroundColor={`${statusColors[status]}Bg`}>
       <Shelf gap={2} px={2} py={1}>
         <Box minWidth="iconMedium" display="flex">
           <Icon size="iconMedium" color={statusColors[status]} />
         </Box>
         <Stack alignItems="flex-start">
-          <Text variant="heading4">{label}</Text>
-          <StyledSublabel variant="label2">{sublabel}</StyledSublabel>
+          <Text variant="heading4" color={statusColors[status]} style={{ fontWeight: 700 }}>
+            {label}
+          </Text>
+          <StyledSublabel variant="body3" color={statusColors[status]}>
+            {sublabel}
+          </StyledSublabel>
         </Stack>
         <Shelf ml="auto">
           {action}
