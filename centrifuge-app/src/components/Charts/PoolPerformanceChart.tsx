@@ -276,6 +276,7 @@ function PoolPerformanceChart() {
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                 yAxisId="right"
                 orientation="right"
+                domain={selectedTabIndex === 0 ? ['auto', 'auto'] : ['dataMin', 'dataMax']}
               />
               <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
