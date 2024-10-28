@@ -79,7 +79,7 @@ const colors = {
   borderButtonSecondaryHover: black,
   borderButtonSecondaryPressed: black,
   borderButtonSecondaryDisabled: 'transparent',
-  shadowButtonSecondary: 'transparent',
+  shadowButtonSecondary: grayScale[100],
 
   backgroundButtonTertiary: 'transparent',
   backgroundButtonTertiaryFocus: 'transparent',

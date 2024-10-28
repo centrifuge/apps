@@ -222,7 +222,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
         <Box marginTop={2}>
           {metrics.map(({ metric, value }, index) => {
             return (
-              <Box key={index} display="flex" justifyContent="space-between" paddingY={1}>
+              <Box key={index} display="flex" justifyContent="space-between" paddingY={1} alignItems="center">
                 <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
                   {metric}
                 </Text>

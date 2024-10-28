@@ -32,7 +32,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     cardActive: ' 0 0 0 1px var(--fabric-focus), 0 1px 5px rgba(0, 0, 0, 0.2)',
     cardOverlay: '4px 8px 24px rgba(0, 0, 0, 0.2)',
     buttonPrimary: `0px 0px 0px 3px var(--fabric-shadowButtonPrimary)`,
-    buttonSecondary: `1px 2px 1px var(--fabric-shadowButtonSecondary)`,
+    buttonSecondary: `0px 0px 0px 3px var(--fabric-shadowButtonSecondary)`,
     buttonInverted: `0px 0px 0px 3px var(--fabric-shadowButtonInverted)`,
   },
   zIndices: {
