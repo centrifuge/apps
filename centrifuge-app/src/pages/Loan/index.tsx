@@ -1,4 +1,12 @@
-import { ActiveLoan, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import {
+  ActiveLoan,
+  AssetTransaction,
+  ExternalPricingInfo,
+  Loan as LoanType,
+  Pool,
+  PricingInfo,
+  TinlakeLoan,
+} from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -162,7 +170,8 @@ function Loan() {
 
   const getCurrentValue = () => {
     if (loanId === '0') return pool.reserve.total
-    else return loan?.presentValue || 0
+    if (loan && 'presentValue' in loan) return loan.presentValue
+    return 0
   }
 
   if (metadataIsLoading) return
@@ -223,9 +232,9 @@ function Loan() {
               <React.Suspense fallback={<Spinner />}>
                 <HoldingsValues
                   pool={pool as Pool}
-                  transactions={borrowerAssetTransactions}
+                  transactions={borrowerAssetTransactions as AssetTransaction[] | null | undefined}
                   currentFace={currentFace}
-                  pricing={loan.pricing}
+                  pricing={loan.pricing as ExternalPricingInfo}
                 />
               </React.Suspense>
             )}
@@ -290,7 +299,7 @@ function Loan() {
                     pricing={loan.pricing as PricingInfo}
                     maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
                     originationDate={originationDate ? new Date(originationDate) : undefined}
-                    loanStatus={loanStatus}
+                    loanStatus={loanStatus ?? ''}
                   />
                 </Stack>
               </Grid>
