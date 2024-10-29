@@ -153,7 +153,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                 : 'Cash balance'}
             </Text>
             <Text variant="body2" style={{ marginLeft: 4 }}>
-              ({pool.currency.name ?? 'USD'})
+              ({pool.currency.symbol ?? 'USD'})
             </Text>
           </Box>
           {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
@@ -233,9 +233,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                 <Text variant="body3">{'Value'}</Text>
                                 <Text variant="body3">
                                   {payload[0].payload.historicPV
-                                    ? formatBalance(payload[0].payload.historicPV, pool.currency.name, 2)
+                                    ? formatBalance(payload[0].payload.historicPV, pool.currency.symbol, 2)
                                     : payload[0].payload.futurePV
-                                    ? `~${formatBalance(payload[0].payload.futurePV, pool.currency.name, 2)}`
+                                    ? `~${formatBalance(payload[0].payload.futurePV, pool.currency.symbol, 2)}`
                                     : '-'}
                                 </Text>
                               </Shelf>
@@ -243,9 +243,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                 <Text variant="body3">Price</Text>
                                 <Text variant="body3">
                                   {payload[0].payload.historicPrice
-                                    ? formatBalance(payload[0].payload.historicPrice, pool.currency.name, 6)
+                                    ? formatBalance(payload[0].payload.historicPrice, pool.currency.symbol, 6)
                                     : payload[0].payload.futurePrice
-                                    ? `~${formatBalance(payload[0].payload.futurePrice, pool.currency.name, 6)}`
+                                    ? `~${formatBalance(payload[0].payload.futurePrice, pool.currency.symbol, 6)}`
                                     : '-'}
                                 </Text>
                               </Shelf>

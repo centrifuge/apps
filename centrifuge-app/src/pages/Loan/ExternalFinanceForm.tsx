@@ -164,7 +164,8 @@ export function ExternalFinanceForm({
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Box
-              padding="24px 16px"
+              px={3}
+              py={2}
               backgroundColor={theme.colors.backgroundSecondary}
               borderRadius={10}
               border={`1px solid ${theme.colors.borderPrimary}`}
@@ -247,13 +248,7 @@ export function ExternalFinanceForm({
               <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
             </ErrorMessage>
 
-            <Stack
-              gap={2}
-              mt={2}
-              border={`1px solid ${theme.colors.borderPrimary}`}
-              padding="24px 16px"
-              borderRadius={10}
-            >
+            <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
               <Text variant="heading4">Transaction summary</Text>
               <Box padding={2}>
                 <Stack gap={1} mb={3}>

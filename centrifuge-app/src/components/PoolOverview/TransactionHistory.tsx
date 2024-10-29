@@ -254,13 +254,13 @@ export const TransactionHistoryTable = ({
     },
     {
       align: 'left',
-      header: <SortableTableHeader label="Amount" />,
+      header: <SortableTableHeader label="Quantity" />,
       cell: ({ amount, netFlow }: Row) => (
         <Text as="span" variant="body3">
           {amount ? `${activeAssetId && netFlow === 'negative' ? '-' : ''}${formatBalance(amount, 'USD', 2, 2)}` : ''}
         </Text>
       ),
-      sortKey: 'amount',
+      sortKey: 'quantity',
       width: '250px',
     },
     {

@@ -198,7 +198,8 @@ function InternalFinanceForm({
       {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Box
-            padding="24px 16px"
+            px={3}
+            py={2}
             backgroundColor={theme.colors.backgroundSecondary}
             borderRadius={10}
             border={`1px solid ${theme.colors.borderPrimary}`}
@@ -277,13 +278,7 @@ function InternalFinanceForm({
             </Stack>
           </Box>
 
-          <Stack
-            gap={2}
-            mt={2}
-            border={`1px solid ${theme.colors.borderPrimary}`}
-            padding="24px 16px"
-            borderRadius={10}
-          >
+          <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
             <Text variant="heading4">Transaction summary</Text>
             <Box padding={2}>
               <Stack gap={1} mb={3}>

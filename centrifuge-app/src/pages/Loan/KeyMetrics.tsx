@@ -127,13 +127,13 @@ export function KeyMetrics({ pool, loan }: Props) {
           sumRealizedProfitFifo
             ? {
                 label: 'Realized P&L',
-                value: formatBalance(sumRealizedProfitFifo, pool.currency.symbol),
+                value: formatBalance(sumRealizedProfitFifo, pool.currency.symbol, 2, 2),
               }
             : (null as never),
           unrealizedProfitAtMarketPrice
             ? {
                 label: 'Unrealized P&L',
-                value: formatBalance(unrealizedProfitAtMarketPrice, pool.currency.symbol),
+                value: formatBalance(unrealizedProfitAtMarketPrice, pool.currency.symbol, 2, 2),
               }
             : (null as never),
         ].filter(Boolean)

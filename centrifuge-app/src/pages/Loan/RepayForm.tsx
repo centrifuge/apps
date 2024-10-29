@@ -234,7 +234,8 @@ function InternalRepayForm({
       <FormikProvider value={repayForm}>
         <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
           <Box
-            padding="24px 16px"
+            px={3}
+            py={2}
             backgroundColor={theme.colors.backgroundSecondary}
             borderRadius={10}
             border={`1px solid ${theme.colors.borderPrimary}`}
@@ -354,13 +355,7 @@ function InternalRepayForm({
             </Stack>
           </Box>
 
-          <Stack
-            gap={2}
-            mt={2}
-            border={`1px solid ${theme.colors.borderPrimary}`}
-            padding="24px 16px"
-            borderRadius={10}
-          >
+          <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
             <Text variant="heading4">Transaction summary</Text>
             <Box paddingX={2} mt={2}>
               <Stack gap={1}>

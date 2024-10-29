@@ -25,6 +25,7 @@ import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { AssetSummary } from '../../../src/components/AssetSummary'
 import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
+import { Dec } from '../../../src/utils/Decimal'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -144,6 +145,16 @@ function Loan() {
   const isOracle = loan && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
   const loanStatus = loan && getLoanLabelStatus(loan)[1]
 
+  const sumRealizedProfitFifo = borrowerAssetTransactions?.reduce(
+    (sum, tx) => sum.add(tx.realizedProfitFifo?.toDecimal() ?? Dec(0)),
+    Dec(0)
+  )
+
+  const unrealizedProfitAtMarketPrice = borrowerAssetTransactions?.reduce(
+    (sum, tx) => sum.add(tx.unrealizedProfitAtMarketPrice?.toDecimal() ?? Dec(0)),
+    Dec(0)
+  )
+
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
       ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
@@ -174,6 +185,16 @@ function Loan() {
     return 0
   }
 
+  const getCurrentPrice = () => {
+    if (loan && 'currentPrice' in loan) return loan.currentPrice
+    return 0
+  }
+
+  const getValueProfit = () => {
+    if (loanStatus === 'Closed' || loanStatus === 'Repaid') return sumRealizedProfitFifo ?? 0
+    else return unrealizedProfitAtMarketPrice ?? 0
+  }
+
   if (metadataIsLoading) return
 
   return (
@@ -189,12 +210,35 @@ function Loan() {
       </Box>
 
       <AssetSummary
-        data={[
-          {
-            label: 'Current value',
-            value: `${formatBalance(getCurrentValue(), pool.currency.symbol, 2, 2)}`,
-          },
-        ]}
+        data={
+          isOracle
+            ? [
+                {
+                  label: `Asset Value (${pool.currency.symbol ?? 'USD'})`,
+                  value: `${formatBalance(getCurrentValue(), undefined, 2, 2)}`,
+                  heading: true,
+                },
+                {
+                  label: `Price (${pool.currency.symbol ?? 'USD'})`,
+                  value: `${formatBalance(getCurrentPrice(), undefined, 2, 2)}`,
+                  heading: false,
+                },
+                {
+                  label: `${loanStatus === 'Closed' || loanStatus === 'Repaid' ? 'Realized P&L' : 'Unrealized P&L'} (${
+                    pool.currency.symbol ?? 'USD'
+                  })`,
+                  value: `${formatBalance(getValueProfit(), undefined, 2, 2)}`,
+                  heading: false,
+                },
+              ]
+            : [
+                {
+                  label: `Current value (${pool.currency.symbol ?? 'USD'})`,
+                  value: `${formatBalance(getCurrentValue(), undefined, 2, 2)}`,
+                  heading: true,
+                },
+              ]
+        }
       >
         {loan && !isTinlakeLoan(loan) && <ActionButtons loan={loan} />}
       </AssetSummary>

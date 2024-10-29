@@ -35,7 +35,7 @@ const StyledButton = styled(Box)`
   font-family: Inter, sans-serif;
 `
 
-const LoanOption: React.FC<LoanOptionProps> = ({ loan }) => {
+const LoanOption = ({ loan }: LoanOptionProps) => {
   const navigate = useNavigate()
   const location = useLocation()
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, loan.poolId.startsWith('0x'))
