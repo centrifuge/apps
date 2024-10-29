@@ -4,6 +4,7 @@ import * as React from 'react'
 import { Outlet } from 'react-router'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
+import { LoadBoundary } from '../LoadBoundary'
 import { LogoLink } from '../LogoLink-deprecated'
 import { Menu } from '../Menu'
 import { BasePadding } from './BasePadding'
@@ -57,7 +58,9 @@ export function LayoutBase(): JSX.Element {
       )}
       {/* The ID functions so we can deactive scrolling in certain pages, example in the data page */}
       <ContentWrapper id="content-wrapper">
-        <Outlet />
+        <LoadBoundary>
+          <Outlet />
+        </LoadBoundary>
       </ContentWrapper>
     </Root>
   )
