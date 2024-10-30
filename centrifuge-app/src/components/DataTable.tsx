@@ -51,6 +51,7 @@ export type DataTableProps<T = any> = {
   pageSize?: number
   page?: number
   headerStyles?: React.CSSProperties
+  hideBorder?: boolean
 } & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
@@ -101,10 +102,21 @@ export const DataTable = <T extends Record<string, any>>({
   page = 1,
   headerStyles,
   scrollable = false,
+  hideBorder,
 }: DataTableProps<T>) => {
+  const tableRef = React.useRef<HTMLDivElement>(null)
+  const [offsetTop, setOffsetTop] = React.useState(0)
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
+
+  React.useEffect(() => {
+    if (tableRef.current) {
+      const rect = tableRef.current.getBoundingClientRect()
+      const offsetFromTopOfScreen = rect.top + window.scrollY
+      setOffsetTop(offsetFromTopOfScreen)
+    }
+  }, [])
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
 
@@ -125,11 +137,19 @@ export const DataTable = <T extends Record<string, any>>({
   const templateColumns = `[start] ${columns.map((col) => col.width ?? 'minmax(min-content, 1fr)').join(' ')} [end]`
 
   return (
-    <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0} scrollable={scrollable}>
+    <TableGrid
+      ref={tableRef}
+      gridTemplateColumns={templateColumns}
+      gridAutoRows="auto"
+      gap={0}
+      rowGap={0}
+      scrollable={scrollable}
+      offsetTop={offsetTop}
+    >
       {showHeader && (
-        <HeaderRow styles={headerStyles} scrollable={scrollable}>
+        <HeaderRow styles={headerStyles} scrollable={scrollable} hideBorder={hideBorder}>
           {columns.map((col, i) => (
-            <HeaderCol key={i} align={col?.align}>
+            <HeaderCol key={i} align={col?.align} isLabel={col.isLabel}>
               <Text variant="body3">
                 {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
                   ? React.cloneElement(col.header as React.ReactElement<any>, {
@@ -142,6 +162,7 @@ export const DataTable = <T extends Record<string, any>>({
           ))}
         </HeaderRow>
       )}
+
       {pinnedData?.map((row, i) => (
         <DataRow
           hoverable={hoverable}
@@ -150,6 +171,7 @@ export const DataTable = <T extends Record<string, any>>({
           to={onRowClicked ? onRowClicked(row) : undefined}
           key={keyField ? row[keyField] : i}
           tabIndex={onRowClicked ? 0 : undefined}
+          hideBorder={hideBorder}
         >
           {columns.map((col, index) => (
             <DataCol variant="body2" align={col?.align} key={index} isLabel={col.isLabel}>
@@ -167,6 +189,7 @@ export const DataTable = <T extends Record<string, any>>({
             to={onRowClicked ? onRowClicked(row) : undefined}
             key={keyField ? row[keyField] : i}
             tabIndex={onRowClicked ? 0 : undefined}
+            hideBorder={hideBorder}
           >
             {columns.map((col, index) => (
               <DataCol
@@ -184,7 +207,7 @@ export const DataTable = <T extends Record<string, any>>({
       })}
       {/* summary row is not included in sorting */}
       {summary && (
-        <DataRow data-testId={`row-summary-${groupIndex ?? 0}`}>
+        <DataRow data-testId={`row-summary-${groupIndex ?? 0}`} hideBorder={hideBorder}>
           {columns.map((col, i) => (
             <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
               {col.cell(summary, i)}
@@ -202,11 +225,12 @@ export const DataTable = <T extends Record<string, any>>({
   )
 }
 
-const TableGrid = styled(Grid)<{ scrollable?: boolean }>`
-  ${({ scrollable }) =>
+const TableGrid = styled(Grid)<{ scrollable?: boolean; offsetTop?: number }>`
+  ${({ scrollable, offsetTop }) =>
     scrollable &&
     css({
-      maxHeight: 'calc(100vh - 180px)',
+      maxHeight: `calc(100vh - ${offsetTop}px)`,
+      paddingBottom: 20,
       overflowY: 'auto',
       overflowX: 'auto',
     })}
@@ -216,31 +240,37 @@ const Row = styled('div')`
   display: grid;
   grid-template-columns: subgrid;
   grid-column: start / end;
-  box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderPrimary}, 1px 0 0 0 ${theme.colors.borderPrimary}`};
 `
 
-const HeaderRow = styled(Row)<{ styles?: any; scrollable?: boolean }>(({ styles, scrollable }) =>
-  css({
-    backgroundColor: 'backgroundSecondary',
-    borderStyle: 'solid',
-    borderWidth: '1px 0',
-    borderColor: 'borderPrimary',
-    position: scrollable ? 'sticky' : 'static',
-    top: scrollable ? 0 : 'auto',
-    zIndex: scrollable ? 10 : 'auto',
-    borderTopLeftRadius: '8px',
-    borderTopRightRadius: '8px',
-    ...styles,
-  })
+const HeaderRow = styled(Row)<{ styles?: any; scrollable?: boolean; hideBorder?: boolean }>(
+  ({ styles, scrollable, hideBorder }) =>
+    css({
+      backgroundColor: 'backgroundSecondary',
+      borderStyle: 'solid',
+      borderWidth: hideBorder ? 0 : 1,
+      borderColor: hideBorder ? 'transparent' : 'borderPrimary',
+      position: scrollable ? 'sticky' : 'static',
+      top: scrollable ? 0 : 'auto',
+      zIndex: scrollable ? 10 : 'auto',
+      borderTopLeftRadius: hideBorder ? 0 : '8px',
+      borderTopRightRadius: hideBorder ? 0 : '8px',
+      ...styles,
+    })
 )
 
 export const DataRow = styled(Row)<any>`
-  ${({ hoverable, as: comp }) =>
+  ${({ hoverable, as: comp, hideBorder }) =>
     css({
       width: '100%',
       borderBottomStyle: 'solid',
-      borderBottomWidth: '1px',
-      borderBottomColor: 'borderPrimary',
+      borderBottomWidth: hideBorder ? 0 : '1px',
+      borderBottomColor: hideBorder ? 'transparent' : 'borderPrimary',
+      borderLeftStyle: 'solid',
+      borderLeftWidth: hideBorder ? 0 : '1px',
+      borderLeftColor: hideBorder ? 'transparent' : 'borderPrimary',
+      borderRightStyle: 'solid',
+      borderRightWidth: hideBorder ? 0 : '1px',
+      borderRightColor: hideBorder ? 'transparent' : 'borderPrimary',
       backgroundColor: 'transparent',
       // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':
@@ -275,6 +305,13 @@ export const DataCol = styled(Text)<{ align: Column['align']; isLabel?: boolean 
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
+  ${({ isLabel }) =>
+    isLabel &&
+    css({
+      position: 'sticky',
+      left: 0,
+      zIndex: 1,
+    })}
 
   ${({ align }) => {
     switch (align) {
@@ -296,9 +333,18 @@ export const DataCol = styled(Text)<{ align: Column['align']; isLabel?: boolean 
   }}
 `
 
-const HeaderCol = styled(DataCol)`
+const HeaderCol = styled(DataCol)<{ isLabel?: boolean }>`
   height: 32px;
   align-items: center;
+
+  ${({ isLabel }) =>
+    isLabel &&
+    css({
+      position: 'sticky',
+      left: 0,
+      zIndex: 2,
+      backgroundColor: 'backgroundSecondary',
+    })}
 
   &:has(:focus-visible) {
     box-shadow: inset 0 0 0 3px var(--fabric-focus);

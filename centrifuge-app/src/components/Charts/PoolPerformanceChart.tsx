@@ -276,11 +276,7 @@ function PoolPerformanceChart() {
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                 yAxisId="right"
                 orientation="right"
-                domain={
-                  selectedTabIndex === 0
-                    ? ['auto', 'auto']
-                    : [(dataMin: number) => [Math.round(dataMin)], (dataMax: number) => [Math.round(dataMax)]]
-                }
+                domain={selectedTabIndex === 0 ? ['auto', 'auto'] : ['dataMin', 'dataMax']}
               />
               <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
@@ -290,11 +286,13 @@ function PoolPerformanceChart() {
                       <TooltipContainer>
                         <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
                         {payload.map(({ name, value }, index) => {
+                          const hasSeniorTranche = payload.length >= 3
+
                           const labelMap: Record<string, string> = {
                             nav: 'NAV',
-                            juniorTokenPrice: 'Junior Token Price',
+                            juniorTokenPrice: hasSeniorTranche ? 'Junior Token Price' : 'Token Price',
                             seniorTokenPrice: 'Senior Token Price',
-                            juniorAPY: 'Junior APY',
+                            juniorAPY: hasSeniorTranche ? 'Junior APY' : 'APY',
                             seniorAPY: 'Senior APY',
                             default: 'Cash',
                           }

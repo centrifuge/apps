@@ -97,12 +97,11 @@ export const StyledButton = styled.span<StyledProps>(
       borderRadius: 'button',
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
-      boxShadow: variant !== 'tertiary' && !$disabled ? shadow : 'none',
 
       '&:hover': {
         color: fgHover,
         backgroundColor: isTertiaryIcon ? undefined : bgHover,
-        borderColor: isTertiaryIcon ? undefined : borderHover,
+        boxShadow: variant !== 'tertiary' && !$disabled ? shadow : 'none',
       },
       '&:active': {
         color: fgPressed,

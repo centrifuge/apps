@@ -31,9 +31,9 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     cardInteractive: '1px 3px 6px rgba(0, 0, 0, 0.15)',
     cardActive: ' 0 0 0 1px var(--fabric-focus), 0 1px 5px rgba(0, 0, 0, 0.2)',
     cardOverlay: '4px 8px 24px rgba(0, 0, 0, 0.2)',
-    buttonPrimary: `1px 2px 7px var(--fabric-shadowButtonPrimary)`,
-    buttonSecondary: `1px 2px 1px var(--fabric-shadowButtonSecondary)`,
-    buttonInverted: `1px 2px 7px var(--fabric-shadowButtonInverted)`,
+    buttonPrimary: `0px 0px 0px 3px var(--fabric-shadowButtonPrimary)`,
+    buttonSecondary: `0px 0px 0px 3px var(--fabric-shadowButtonSecondary)`,
+    buttonInverted: `0px 0px 0px 3px var(--fabric-shadowButtonInverted)`,
   },
   zIndices: {
     sticky: 10,

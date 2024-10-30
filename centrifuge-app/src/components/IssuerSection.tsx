@@ -3,6 +3,7 @@ import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
+  Grid,
   IconBalanceSheet,
   IconCashflow,
   IconChevronRight,
@@ -27,6 +28,10 @@ type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
 }
 
+const ButtonSections = styled(RouterTextLink)`
+  text-decoration: unset;
+`
+
 const StyledBox = styled(Box)`
   padding: 24px;
   &:hover {
@@ -35,7 +40,10 @@ const StyledBox = styled(Box)`
   }
 `
 
-const HoverBox = styled(StyledBox)`
+const StyledRouterTextLink = styled(RouterTextLink)`
+  color: white;
+  text-decoration: unset;
+  font-size: 14px;
   padding: 8px 22px;
   background-color: ${SUBTLE_GRAY};
   border: 3px solid transparent;
@@ -44,12 +52,6 @@ const HoverBox = styled(StyledBox)`
     border-radius: 4px;
     border-color: #91969b1a;
   }
-`
-
-const StyledRouterTextLink = styled(RouterTextLink)`
-  color: white;
-  text-decoration: unset;
-  font-size: 14px;
   :active {
     color: white;
   }
@@ -97,14 +99,12 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
         <Text color="white" variant="heading4">
           Reports
         </Text>
-        <HoverBox backgroundColor={SUBTLE_GRAY}>
-          <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
-        </HoverBox>
+        <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
       </Box>
 
       <Box marginY={2} backgroundColor={SUBTLE_GRAY} borderRadius={10}>
         {reportLinks.map((link, i) => (
-          <StyledRouterTextLink to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
+          <ButtonSections to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
             <StyledBox
               borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
               display="flex"
@@ -119,7 +119,7 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
               </Box>
               <IconChevronRight color="white" />
             </StyledBox>
-          </StyledRouterTextLink>
+          </ButtonSections>
         ))}
       </Box>
 
@@ -174,15 +174,15 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         )}
         <Links links={links} />
       </Shelf>
-      <Box pt={4} display="flex" justifyContent="space-between">
-        <Box width={metadata?.pool?.issuer?.categories?.length ? '50%' : '100%'} marginRight={3}>
+      <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr 1fr']} gap={[2, 2]}>
+        <Box marginRight={3}>
           <Text variant="heading2">{metadata?.pool?.issuer.name}</Text>
           <Text variant="body2" style={{ marginTop: '12px', lineHeight: '22px', letterSpacing: '-0.14px' }}>
             {metadata?.pool?.issuer.description}
           </Text>
         </Box>
         {metadata?.pool?.issuer?.categories?.length ? (
-          <Box width="50%" bg="white" padding={2} borderRadius={10} ml={1} height="min-content" alignSelf="center">
+          <Box bg="white" padding={2} borderRadius={10} ml={1} height="min-content" alignSelf="center">
             {metadata?.pool?.issuer?.categories.map((category) => (
               <Box display="flex" justifyContent="space-between" padding={1}>
                 <Text color="textSecondary" variant="body3" style={{ minWidth: 120, textTransform: 'capitalize' }}>
@@ -195,7 +195,7 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
             ))}
           </Box>
         ) : null}
-      </Box>
+      </Grid>
       <ExecutiveSummaryDialog
         issuerName={metadata?.pool?.issuer.name ?? ''}
         href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri ?? '')}

@@ -1,6 +1,6 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
@@ -9,7 +9,7 @@ import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
-import { MetaData, PoolCard, PoolCardProps } from './PoolCard'
+import { PoolCard, PoolCardProps } from './PoolCard'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
 import { filterPools } from './PoolFilter/utils'
 
@@ -44,7 +44,6 @@ export function PoolList() {
   const [listedPools, , metadataIsLoading] = useListedPools()
   const isLarge = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
-  const isExtraLarge = useIsAboveBreakpoint('XL')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -82,31 +81,26 @@ export function PoolList() {
     <Stack>
       <Stack>
         <Box overflow="auto">
-          <Box as="ul" role="list" display="flex" flexWrap="wrap">
+          <Grid columns={[1, 2, 2, 3]} as="ul" role="list" gap={3}>
             {metadataIsLoading
               ? Array(6)
                   .fill(true)
                   .map((_, index) => (
-                    <Box as="li" key={index} width={isLarge ? '33%' : isMedium ? '48%' : '100%'}>
+                    <Box as="li" key={index}>
                       <PoolCard />
                     </Box>
                   ))
               : filteredPools.map((pool) => (
-                  <PoolCardBox
-                    as="li"
-                    key={pool.poolId}
-                    status={pool.status}
-                    width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
-                  >
+                  <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
                     <PoolCard {...pool} />
                   </PoolCardBox>
                 ))}
-          </Box>
+          </Grid>
         </Box>
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
         <>
-          <StyledBox display="flex" alignItems="center" marginBottom={1} as="button">
+          <StyledBox display="flex" alignItems="center" marginTop={2} marginBottom={2} as="button">
             <Text
               style={{ cursor: 'pointer' }}
               color="textSecondary"
@@ -125,23 +119,15 @@ export function PoolList() {
 }
 
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
-  const isMedium = useIsAboveBreakpoint('M')
-  const isLarge = useIsAboveBreakpoint('L')
-  const isExtraLarge = useIsAboveBreakpoint('XL')
   return (
     <Stack gap={1} overflow="auto">
-      <Box as="ul" role="list" display="flex" flexWrap="wrap">
+      <Grid columns={[1, 2, 2, 3]} as="ul" role="list" gap={3}>
         {pools.map((pool) => (
-          <PoolCardBox
-            as="li"
-            key={pool.poolId}
-            status={pool.status}
-            width={isLarge ? '33%' : isMedium ? '48%' : '100%'}
-          >
-            <PoolCard {...pool} />
+          <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
+            <PoolCard {...pool} isArchive />
           </PoolCardBox>
         ))}
-      </Box>
+      </Grid>
     </Stack>
   )
 }
@@ -162,7 +148,7 @@ export function poolsToPoolCardProps(
       status: getPoolStatus(pool),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
       tranches: pool.tranches,
-      metaData: metaData as MetaData,
+      metaData: metaData as PoolMetadata,
       createdAt: pool.createdAt ?? '',
     }
   })

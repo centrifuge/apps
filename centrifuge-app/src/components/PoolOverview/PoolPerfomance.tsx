@@ -4,8 +4,8 @@ import PoolPerformanceChart from '../Charts/PoolPerformanceChart'
 import { Spinner } from '../Spinner'
 
 export const PoolPerformance = () => (
-  <React.Suspense fallback={<Spinner style={{ height: 400 }} />}>
-    <Card height={400}>
+  <React.Suspense fallback={<Spinner style={{ height: 420 }} />}>
+    <Card height={420}>
       <Stack gap={2}>
         <PoolPerformanceChart />
       </Stack>

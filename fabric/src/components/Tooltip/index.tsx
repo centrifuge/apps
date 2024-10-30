@@ -15,6 +15,7 @@ export type TooltipProps = TextProps & {
   delay?: number
   bodyWidth?: string | number
   bodyPadding?: string | number
+  triggerStyle?: React.CSSProperties
 }
 
 const StyledTrigger = styled(Text)`
@@ -79,6 +80,7 @@ export function Tooltip({
   delay = 1000,
   bodyWidth,
   bodyPadding,
+  triggerStyle,
   ...textProps
 }: TooltipProps) {
   const triggerRef = React.useRef<HTMLButtonElement>(null)
@@ -92,7 +94,7 @@ export function Tooltip({
 
   return (
     <>
-      <StyledTrigger ref={triggerRef} {...triggerProps} tabIndex={0} {...textProps}>
+      <StyledTrigger ref={triggerRef} {...triggerProps} tabIndex={0} {...textProps} style={triggerStyle}>
         {children}
       </StyledTrigger>
       {state.isOpen && (
