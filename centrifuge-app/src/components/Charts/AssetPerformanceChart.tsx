@@ -30,8 +30,8 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
   const chartColor = theme.colors.accentPrimary
   const asset = useLoan(poolId, loanId)
   const assetSnapshots = useAssetSnapshots(poolId, loanId)
-
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0)
+  const isNonCash = asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
+  const [selectedTabIndex, setSelectedTabIndex] = React.useState(isNonCash ? 0 : 1)
 
   const data: ChartData[] = React.useMemo(() => {
     if (!asset || !assetSnapshots) return []
@@ -147,13 +147,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       <Stack gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box display="flex">
-            <Text variant="heading4">
-              {asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
-                ? 'Asset performance'
-                : 'Cash balance'}
-            </Text>
+            <Text variant="heading4">{isNonCash ? 'Asset performance' : 'Cash balance'}</Text>
             <Text variant="body2" style={{ marginLeft: 4 }}>
-              ({pool.currency.symbol ?? 'USD'})
+              ({isNonCash ? pool.currency.symbol ?? 'USD' : 'USD'})
             </Text>
           </Box>
           {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
@@ -233,9 +229,17 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                 <Text variant="body3">{'Value'}</Text>
                                 <Text variant="body3">
                                   {payload[0].payload.historicPV
-                                    ? formatBalance(payload[0].payload.historicPV, pool.currency.symbol, 2)
+                                    ? formatBalance(
+                                        payload[0].payload.historicPV,
+                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        2
+                                      )
                                     : payload[0].payload.futurePV
-                                    ? `~${formatBalance(payload[0].payload.futurePV, pool.currency.symbol, 2)}`
+                                    ? `~${formatBalance(
+                                        payload[0].payload.futurePV,
+                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        2
+                                      )}`
                                     : '-'}
                                 </Text>
                               </Shelf>
@@ -243,9 +247,17 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                 <Text variant="body3">Price</Text>
                                 <Text variant="body3">
                                   {payload[0].payload.historicPrice
-                                    ? formatBalance(payload[0].payload.historicPrice, pool.currency.symbol, 6)
+                                    ? formatBalance(
+                                        payload[0].payload.historicPrice,
+                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        6
+                                      )
                                     : payload[0].payload.futurePrice
-                                    ? `~${formatBalance(payload[0].payload.futurePrice, pool.currency.symbol, 6)}`
+                                    ? `~${formatBalance(
+                                        payload[0].payload.futurePrice,
+                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        6
+                                      )}`
                                     : '-'}
                                 </Text>
                               </Shelf>

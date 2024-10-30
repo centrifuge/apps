@@ -233,7 +233,7 @@ function Loan() {
               ]
             : [
                 {
-                  label: `Current value (${pool.currency.symbol ?? 'USD'})`,
+                  label: `Current value (USD)`,
                   value: `${formatBalance(getCurrentValue(), undefined, 2, 2)}`,
                   heading: true,
                 },
@@ -283,7 +283,7 @@ function Loan() {
               </React.Suspense>
             )}
 
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' && (
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
               <React.Suspense fallback={<Spinner />}>
                 <PricingValues loan={loan} pool={pool} />
               </React.Suspense>

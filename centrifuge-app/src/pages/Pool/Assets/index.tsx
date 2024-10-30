@@ -1,5 +1,5 @@
 import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
-import { Box, Button, IconChevronRight, IconDownload, IconPlus, Shelf, Text } from '@centrifuge/fabric'
+import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useNavigate, useParams } from 'react-router'
 import styled from 'styled-components'
@@ -49,6 +49,8 @@ export function PoolDetailAssets() {
     (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash'
   )
 
+  console.log(pool)
+
   if (!pool) return null
 
   if (!loans?.length) {
@@ -96,13 +98,6 @@ export function PoolDetailAssets() {
     Dec(0)
   )
 
-  const totalPresentValue = loans.reduce((sum, loan) => {
-    if (hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash') {
-      return sum.add(loan.pricing.presentValue?.toDecimal() || Dec(0))
-    }
-    return sum
-  }, Dec(0))
-
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
       label: `Total NAV (${pool.currency.symbol})`,
@@ -140,30 +135,7 @@ export function PoolDetailAssets() {
       <PageSummary data={pageSummaryData}>
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
-      <Box
-        paddingX={1}
-        paddingLeft={3}
-        paddingRight={3}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Text variant="heading4">Assets</Text>
-        <Box display="flex">
-          <Button
-            variant="inverted"
-            style={{ marginRight: 12 }}
-            small
-            onClick={() => navigate(`${basePath}/${poolId}/data/asset-tx`)}
-          >
-            View asset transactions
-          </Button>
-          <Button variant="inverted" icon={<IconDownload size={20} />} small>
-            Download
-          </Button>
-        </Box>
-      </Box>
-      <Box padding={3}>
+      <Box paddingX={3}>
         <LoanList loans={loans} />
       </Box>
     </>

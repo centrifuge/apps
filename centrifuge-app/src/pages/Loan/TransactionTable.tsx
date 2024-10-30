@@ -213,7 +213,7 @@ export const TransactionTable = ({
       : [
           {
             align: 'left',
-            header: `Amount (${currency})`,
+            header: `Quantity (${currency})`,
             cell: (row: Row) => (row.amount ? `${formatBalance(row.amount, undefined, 2, 2)}` : '-'),
           },
           {

@@ -250,7 +250,7 @@ export const TransactionHistoryTable = ({
         )
       },
       sortKey: 'transaction',
-      width: '60%',
+      width: '50%',
     },
     {
       align: 'left',
@@ -279,7 +279,6 @@ export const TransactionHistoryTable = ({
           </Stack>
         )
       },
-      width: '100px',
     },
   ]
 
