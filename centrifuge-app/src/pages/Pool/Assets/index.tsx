@@ -60,9 +60,31 @@ export function PoolDetailAssets() {
     )
   }
 
-  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string; presentValue: CurrencyBalance } {
+  const hasValuationMethod = (pricing: any): pricing is { valuationMethod: string; presentValue: CurrencyBalance } => {
     return pricing && typeof pricing.valuationMethod === 'string'
   }
+
+  const getAmount = (loan: Loan) => {
+    switch (loan.status) {
+      case 'Closed':
+        return loan.totalRepaid
+
+      case 'Active':
+        return loan.presentValue ?? (loan.outstandingDebt.isZero() ? loan.totalRepaid : loan.outstandingDebt)
+
+      case 'Created':
+        return 0
+
+      default:
+        return pool.reserve.total
+    }
+  }
+
+  const totalAssets = loans.reduce((sum, loan) => {
+    const amount = new CurrencyBalance(getAmount(loan as Loan), pool.currency.decimals).toDecimal()
+
+    return sum.add(amount)
+  }, Dec(0))
 
   const offchainAssets = !isTinlakePool
     ? loans.filter(
@@ -83,15 +105,15 @@ export function PoolDetailAssets() {
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
-      label: 'Total NAV',
-      value: formatBalance(pool.nav.total.toDecimal(), pool.currency.symbol),
+      label: `Total NAV (${pool.currency.symbol})`,
+      value: formatBalance(pool.nav.total.toDecimal()),
       heading: true,
     },
     {
-      label: <Tooltips type="onchainReserve" />,
+      label: <Tooltips label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
       value: (
         <StyledRouterTextLink to={`${basePath}/${pool.id}/assets/0`}>
-          <Text>{formatBalance(pool.reserve.total || 0, pool.currency.symbol)}</Text>
+          <Text>{formatBalance(pool.reserve.total || 0)}</Text>
           <IconChevronRight size={20} />
         </StyledRouterTextLink>
       ),
@@ -100,13 +122,13 @@ export function PoolDetailAssets() {
     ...(!isTinlakePool && cashLoans.length
       ? [
           {
-            label: <Tooltips type="offchainCash" />,
-            value: <OffchainMenu value={formatBalance(offchainReserve, pool.currency.symbol)} loans={cashLoans} />,
+            label: <Tooltips label={`Offchain cash (${pool.currency.symbol})`} type="offchainCash" />,
+            value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
             heading: false,
           },
           {
-            label: 'Total assets',
-            value: formatBalance(totalPresentValue, pool.currency.symbol),
+            label: `Total Assets (${pool.currency.symbol})`,
+            value: formatBalance(totalAssets),
             heading: false,
           },
         ]
