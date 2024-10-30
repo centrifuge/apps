@@ -1,5 +1,5 @@
 import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconDownload, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -279,7 +279,7 @@ export const TransactionHistoryTable = ({
           </Stack>
         )
       },
-      width: '110px',
+      width: '100px',
     },
   ]
 
@@ -308,7 +308,9 @@ export const TransactionHistoryTable = ({
           )}
         </Shelf>
       </Shelf>
-      <DataTable data={tableData} columns={columns} />
+      <Box overflow="auto">
+        <DataTable data={tableData} columns={columns} />
+      </Box>
     </Stack>
   )
 }
