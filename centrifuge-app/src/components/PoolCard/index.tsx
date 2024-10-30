@@ -292,7 +292,7 @@ export function PoolCard({
             </Text>
             <Shelf gap={1}>
               {ratings.map((rating) => {
-                return <RatingPill {...rating} />
+                return <RatingPill key={rating.agency} {...rating} />
               })}
             </Shelf>
           </Box>

@@ -1,4 +1,4 @@
-import { CurrencyBalance, DailyTrancheState, Price } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, DailyTrancheState, PoolMetadata, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -46,12 +46,7 @@ type Tranche = Pick<DailyTrancheState, 'id'> & {
 
 type TinlakeDataKey = keyof typeof tinlakeData
 
-export type RatingType = {
-  agency?: string
-  reportUrl?: string
-  reportFile?: any
-  value?: string
-}
+type RatingProps = Partial<NonNullable<PoolMetadata['pool']['poolRatings']>[number]>
 
 const ratingIcons: { [key: string]: JSX.Element } = {
   "Moody's": <IconMoody size={16} />,
@@ -195,8 +190,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
             metric: 'Rating',
             value: (
               <Shelf gap={1}>
-                {metadata?.pool?.poolRatings.map((rating: RatingType) => (
-                  <RatingPill {...rating} />
+                {metadata.pool.poolRatings.map((rating) => (
+                  <RatingPill key={rating.agency} {...(rating as RatingProps)} />
                 ))}
               </Shelf>
             ),
@@ -332,7 +327,7 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
   )
 }
 
-export const RatingPill = ({ agency, reportUrl, reportFile, value }: RatingType) => {
+export const RatingPill = ({ agency, reportUrl, reportFile, value }: RatingProps) => {
   const theme = useTheme()
   const cent = useCentrifuge()
   return (
