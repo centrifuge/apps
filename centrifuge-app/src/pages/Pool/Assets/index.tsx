@@ -81,7 +81,7 @@ export function PoolDetailAssets() {
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
-      label: `Total NAV (${pool.currency.symbol})`,
+      label: <Tooltips label={`Total NAV (${pool.currency.symbol})`} type="totalNavMinus" />,
       value: formatBalance(pool.nav.total.toDecimal()),
       heading: true,
     },
