@@ -1,12 +1,12 @@
 import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
 import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { RouterTextLink } from '../../../../src/components/TextLink'
 import { useBasePath } from '../../../../src/utils/useBasePath'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { LoanList } from '../../../components/LoanList'
+import { LoanList, getAmount } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { Tooltips } from '../../../components/Tooltips'
@@ -37,7 +37,6 @@ export function PoolDetailAssetsTab() {
 
 export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const navigate = useNavigate()
 
   if (!poolId) throw new Error('Pool not found')
 
@@ -48,8 +47,6 @@ export function PoolDetailAssets() {
   const cashLoans = (loans ?? []).filter(
     (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash'
   )
-
-  console.log(pool)
 
   if (!pool) return null
 
@@ -66,24 +63,8 @@ export function PoolDetailAssets() {
     return pricing && typeof pricing.valuationMethod === 'string'
   }
 
-  const getAmount = (loan: Loan) => {
-    switch (loan.status) {
-      case 'Closed':
-        return loan.totalRepaid
-
-      case 'Active':
-        return loan.presentValue ?? (loan.outstandingDebt.isZero() ? loan.totalRepaid : loan.outstandingDebt)
-
-      case 'Created':
-        return 0
-
-      default:
-        return pool.reserve.total
-    }
-  }
-
   const totalAssets = loans.reduce((sum, loan) => {
-    const amount = new CurrencyBalance(getAmount(loan as Loan), pool.currency.decimals).toDecimal()
+    const amount = new CurrencyBalance(getAmount(loan as any), pool.currency.decimals).toDecimal()
 
     return sum.add(amount)
   }, Dec(0))
@@ -117,7 +98,7 @@ export function PoolDetailAssets() {
     ...(!isTinlakePool && cashLoans.length
       ? [
           {
-            label: <Tooltips label={`Offchain cash (${pool.currency.symbol})`} type="offchainCash" />,
+            label: <Tooltips label={`Offchain cash (USD)`} type="offchainCash" />,
             value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
             heading: false,
           },

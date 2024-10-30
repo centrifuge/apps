@@ -68,8 +68,9 @@ export function LoanList({ loans }: Props) {
       const attr = templateMetadata.attributes![key]
       return {
         align: 'left',
-        header: attr.label,
+        header: <SortableTableHeader label={attr.label} />,
         cell: (l: Row) => <AssetMetadataField name={key} attribute={attr} loan={l} />,
+        sortKey: attr.label,
       }
     }) || []
 
@@ -232,7 +233,7 @@ export function LoanList({ loans }: Props) {
       : [
           {
             align: 'left',
-            header: <SortableTableHeader label="Portfolio" />,
+            header: <SortableTableHeader label="Portfolio %" />,
             cell: (l: Row) => formatPercentage(l.portfolioPercentage ?? 0, true, undefined, 1),
             sortKey: 'portfolioSortKey',
           },
@@ -364,8 +365,7 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
     </Shelf>
   )
 }
-
-function getAmount(l: Row, format?: boolean) {
+export function getAmount(l: Row, format?: boolean) {
   const pool = usePool(l.poolId)
   switch (l.status) {
     case 'Closed':

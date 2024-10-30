@@ -226,18 +226,18 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                           {payload.map(({ value }, index) => (
                             <>
                               <Shelf justifyContent="space-between" pl="4px" key={index}>
-                                <Text variant="body3">{'Value'}</Text>
+                                <Text variant="body3">Value</Text>
                                 <Text variant="body3">
                                   {payload[0].payload.historicPV
                                     ? formatBalance(
                                         payload[0].payload.historicPV,
-                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        isNonCash ? pool.currency.symbol : 'USD',
                                         2
                                       )
                                     : payload[0].payload.futurePV
                                     ? `~${formatBalance(
                                         payload[0].payload.futurePV,
-                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        isNonCash ? pool.currency.symbol : 'USD',
                                         2
                                       )}`
                                     : '-'}
@@ -249,13 +249,13 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                                   {payload[0].payload.historicPrice
                                     ? formatBalance(
                                         payload[0].payload.historicPrice,
-                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        isNonCash ? pool.currency.symbol : 'USD',
                                         6
                                       )
                                     : payload[0].payload.futurePrice
                                     ? `~${formatBalance(
                                         payload[0].payload.futurePrice,
-                                        isNonCash ? 'USD' : pool.currency.symbol,
+                                        isNonCash ? pool.currency.symbol : 'USD',
                                         6
                                       )}`
                                     : '-'}
