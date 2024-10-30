@@ -161,19 +161,6 @@ export function PoolCard({
     )
   }
 
-  const calculateApy = (tranche: TrancheWithCurrency) => {
-    const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
-    if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[DYF_POOL_ID][0]
-    if (poolId === NS3_POOL_ID && tranche.seniority === 0) return centrifugeTargetAPYs[NS3_POOL_ID][0]
-    if (poolId === NS3_POOL_ID && tranche.seniority === 1) return centrifugeTargetAPYs[NS3_POOL_ID][1]
-    if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
-      return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
-    if (tranche.interestRatePerSec) {
-      return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
-    }
-    return '-'
-  }
-
   const tranchesData = useMemo(() => {
     return tranches
       ?.map((tranche: TrancheWithCurrency) => {
@@ -184,6 +171,19 @@ export function PoolCard({
           metadata?.minInitialInvestment ?? 0,
           tranche.currency.decimals
         ).toDecimal()
+
+        const calculateApy = (tranche: TrancheWithCurrency) => {
+          const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
+          if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[DYF_POOL_ID][0]
+          if (poolId === NS3_POOL_ID && tranche.seniority === 0) return centrifugeTargetAPYs[NS3_POOL_ID][0]
+          if (poolId === NS3_POOL_ID && tranche.seniority === 1) return centrifugeTargetAPYs[NS3_POOL_ID][1]
+          if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
+            return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
+          if (tranche.interestRatePerSec) {
+            return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
+          }
+          return '-'
+        }
 
         return {
           seniority: tranche.seniority,
@@ -199,7 +199,7 @@ export function PoolCard({
         }
       })
       .reverse()
-  }, [calculateApy, isTinlakePool, metaData?.tranches, tinlakeKey, tranches])
+  }, [isTinlakePool, metaData?.tranches, tinlakeKey, tranches])
 
   return (
     <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>

@@ -64,7 +64,7 @@ export function PoolDetailAssets() {
   }
 
   const totalAssets = loans.reduce((sum, loan) => {
-    const amount = new CurrencyBalance(getAmount(loan as any), pool.currency.decimals).toDecimal()
+    const amount = new CurrencyBalance(getAmount(loan as any, pool), pool.currency.decimals).toDecimal()
 
     return sum.add(amount)
   }, Dec(0))

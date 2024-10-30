@@ -74,7 +74,7 @@ export function InvestRedeemDrawer({
     )
 
     return { sumRealizedProfitFifoByPeriod, sumUnrealizedProfitAtMarketPrice }
-  }, [dailyPoolStates])
+  }, [dailyPoolStates, pool.currency.decimals])
 
   return (
     <Drawer isOpen={open} onClose={onClose}>

@@ -1,5 +1,5 @@
 import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
-import { CurrencyBalance, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -16,6 +16,7 @@ import {
 import get from 'lodash/get'
 import * as React from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { TinlakePool } from 'src/utils/tinlake/useTinlakePools'
 import { formatNftAttribute } from '../../src/pages/Loan/utils'
 import { LoanTemplate, LoanTemplateAttribute } from '../../src/types'
 import { getCSVDownloadUrl } from '../../src/utils/getCSVDownloadUrl'
@@ -97,7 +98,7 @@ export function LoanList({ loans }: Props) {
 
       return aId.localeCompare(bId)
     })
-  }, [isTinlakePool, loansData])
+  }, [loansData])
 
   const filters = useFilters({
     data: loansWithLabelStatus as Loan[],
@@ -245,17 +246,21 @@ export function LoanList({ loans }: Props) {
   const csvData = React.useMemo(() => {
     if (!rows.length) return undefined
 
-    return rows.map((loan) => ({
-      'Asset ID': loan.id,
-      'Maturity Date': loan.maturityDate ? loan.maturityDate : '-',
-      Quantity: `${getAmount(loan) ?? '-'}`,
-      'Market Price': loan.marketPrice ? loan.marketPrice : '-',
-      'Market Value': loan.marketValue ? loan.marketValue : '-',
-      'Unrealized P&L': loan.unrealizedPL ? loan.unrealizedPL : '-',
-      'Realized P&L': loan.realizedPL ? loan.realizedPL : '-',
-      'Portfolio %': loan.portfolioPercentage ? loan.portfolioPercentage : '-',
-    }))
-  }, [rows, pool.currency])
+    return rows.map((loan) => {
+      const quantity = getAmount(loan, pool)
+
+      return {
+        'Asset ID': loan.id,
+        'Maturity Date': loan.maturityDate ? loan.maturityDate : '-',
+        Quantity: `${quantity ?? '-'}`,
+        'Market Price': loan.marketPrice ? loan.marketPrice : '-',
+        'Market Value': loan.marketValue ? loan.marketValue : '-',
+        'Unrealized P&L': loan.unrealizedPL ? loan.unrealizedPL : '-',
+        'Realized P&L': loan.realizedPL ? loan.realizedPL : '-',
+        'Portfolio %': loan.portfolioPercentage ? loan.portfolioPercentage : '-',
+      }
+    })
+  }, [rows])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
 
@@ -365,8 +370,7 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
     </Shelf>
   )
 }
-export function getAmount(l: Row, format?: boolean) {
-  const pool = usePool(l.poolId)
+export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
@@ -392,5 +396,6 @@ export function getAmount(l: Row, format?: boolean) {
 }
 
 function Amount({ loan }: { loan: Row }) {
-  return <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{getAmount(loan, true)}</Text>
+  const pool = usePool(loan.poolId)
+  return <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{getAmount(loan, pool, true)}</Text>
 }

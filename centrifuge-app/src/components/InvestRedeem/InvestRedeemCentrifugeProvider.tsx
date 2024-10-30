@@ -97,7 +97,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [isDataLoading])
+  }, [isDataLoading, connectedType])
 
   const state: InvestRedeemState = {
     poolId,
