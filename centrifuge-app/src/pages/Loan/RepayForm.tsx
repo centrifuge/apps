@@ -14,7 +14,18 @@ import {
   useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  IconCheckCircle,
+  IconClock,
+  InlineFeedback,
+  Select,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -36,6 +47,7 @@ import {
 } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ErrorMessage } from './ErrorMessage'
+import { StyledSuccessButton } from './ExternalFinanceForm'
 import { ExternalRepayForm } from './ExternalRepayForm'
 import { SourceSelect } from './SourceSelect'
 import { isCashLoan, isExternalLoan } from './utils'
@@ -92,6 +104,7 @@ function InternalRepayForm({
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
   const utils = useCentrifugeUtils()
+  const [transactionSuccess, setTransactionSuccess] = React.useState(false)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     isCashLoan(loan) ? 'Withdraw funds' : 'Repay asset',
@@ -137,7 +150,7 @@ function InternalRepayForm({
       },
     {
       onSuccess: () => {
-        repayForm.resetForm()
+        setTransactionSuccess(true)
       },
     }
   )
@@ -409,18 +422,22 @@ function InternalRepayForm({
           </Stack>
 
           <Stack gap={1}>
-            <Button
-              type="submit"
-              disabled={
-                !poolFees.isValid(repayForm) ||
-                !repayForm.isValid ||
-                maxAvailable.eq(0) ||
-                (destination === 'reserve' && balance.lt(totalRepay))
-              }
-              loading={isRepayLoading}
-            >
-              {isCashLoan(loan) ? 'Withdraw' : 'Repay'}
-            </Button>
+            {transactionSuccess ? (
+              <StyledSuccessButton icon={<IconCheckCircle size={24} />}>Transaction successful</StyledSuccessButton>
+            ) : (
+              <Button
+                type="submit"
+                disabled={
+                  !poolFees.isValid(repayForm) ||
+                  !repayForm.isValid ||
+                  maxAvailable.eq(0) ||
+                  (destination === 'reserve' && balance.lt(totalRepay))
+                }
+                icon={isRepayLoading ? <IconClock size={24} /> : undefined}
+              >
+                {isRepayLoading ? 'Transaction Pending' : isCashLoan(loan) ? 'Withdraw' : 'Repay'}
+              </Button>
+            )}
           </Stack>
         </Stack>
       </FormikProvider>

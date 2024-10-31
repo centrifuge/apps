@@ -46,7 +46,7 @@ export type FinanceValues = {
   fees: { id: string; amount: '' | number | Decimal }[]
 }
 
-const StyledSuccessButton = styled(Button)`
+export const StyledSuccessButton = styled(Button)`
   span {
     color: ${({ theme }) => theme.colors.textPrimary};
     background-color: ${({ theme }) => theme.colors.statusOkBg};

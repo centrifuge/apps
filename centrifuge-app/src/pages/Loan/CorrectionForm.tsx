@@ -1,6 +1,16 @@
 import { ActiveLoan, CurrencyBalance, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  IconCheckCircle,
+  IconClock,
+  Shelf,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -15,6 +25,7 @@ import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, max, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
+import { StyledSuccessButton } from './ExternalFinanceForm'
 import { isCashLoan, isExternalLoan, isInternalLoan } from './utils'
 
 export type CorrectionValues = {
@@ -30,6 +41,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const [transactionSuccess, setTransactionSuccess] = React.useState(false)
   const { initial: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const api = useCentrifugeApi()
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
@@ -82,8 +94,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
     },
     {
       onSuccess: () => {
-        correctionForm.setFieldValue('fees', [], false)
-        correctionForm.setFieldValue('reason', '', false)
+        setTransactionSuccess(true)
       },
     }
   )
@@ -235,15 +246,18 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
           </Stack>
           {poolFees.renderSummary()}
         </Stack>
-
         <Stack>
-          <Button
-            type="submit"
-            loading={isFinanceLoading}
-            disabled={!poolFees.isValid(correctionForm) || !correctionForm.isValid}
-          >
-            Adjust
-          </Button>
+          {transactionSuccess ? (
+            <StyledSuccessButton icon={<IconCheckCircle size={24} />}>Transaction successful</StyledSuccessButton>
+          ) : (
+            <Button
+              type="submit"
+              disabled={!poolFees.isValid(correctionForm) || !correctionForm.isValid}
+              icon={isFinanceLoading ? <IconClock size={24} /> : undefined}
+            >
+              {isFinanceLoading ? 'Transaction Pending' : 'Adjust'}
+            </Button>
+          )}
         </Stack>
       </Stack>
     </FormikProvider>
