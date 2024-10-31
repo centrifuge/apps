@@ -24,6 +24,7 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { AssetSummary } from '../../../src/components/AssetSummary'
+import { SimpleLineChart } from '../../../src/components/Charts/SimpleLineChart'
 import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
 import { Dec } from '../../../src/utils/Decimal'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
@@ -79,6 +80,8 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
     }
   }
 `
+
+const positiveNetflows = ['DEPOSIT_FROM_INVESTMENTS', 'INCREASE_DEBT']
 
 function ActionButtons({ loan }: { loan: LoanType }) {
   const canBorrow = useCanBorrowAsset(loan.poolId, loan.id)
@@ -144,6 +147,20 @@ function Loan() {
   const borrowerAssetTransactions = useBorrowerAssetTransactions(`${poolId}`, `${loanId}`)
   const isOracle = loan && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
   const loanStatus = loan && getLoanLabelStatus(loan)[1]
+
+  const getNetflow = (value: Number, type: string) => {
+    if (positiveNetflows.includes(type)) return value
+    else return -value
+  }
+
+  const onchainReserveChart = React.useMemo(() => {
+    return borrowerAssetTransactions?.map((transaction) => {
+      return {
+        name: transaction.timestamp.toString(),
+        yAxis: getNetflow(transaction.amount?.toNumber() ?? 0, transaction.type),
+      }
+    })
+  }, [borrowerAssetTransactions])
 
   const sumRealizedProfitFifo = borrowerAssetTransactions?.reduce(
     (sum, tx) => sum.add(tx.realizedProfitFifo?.toDecimal() ?? Dec(0)),
@@ -244,14 +261,21 @@ function Loan() {
       </AssetSummary>
 
       {loanId === '0' && (
-        <PageSection>
-          <TransactionHistoryTable
-            transactions={borrowerAssetTransactions ?? []}
-            poolId={poolId}
-            preview={false}
-            activeAssetId={loanId}
-          />
-        </PageSection>
+        <>
+          <PageSection>
+            <Box mt={2}>
+              <SimpleLineChart data={onchainReserveChart ?? []} currency={pool.currency} />
+            </Box>
+          </PageSection>
+          <PageSection>
+            <TransactionHistoryTable
+              transactions={borrowerAssetTransactions ?? []}
+              poolId={poolId}
+              preview={false}
+              activeAssetId={loanId}
+            />
+          </PageSection>
+        </>
       )}
       {loan && pool && (
         <LayoutSection pt={2} pb={4} flex={1}>
