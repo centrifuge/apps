@@ -64,7 +64,10 @@ export function PoolDetailAssets() {
   }
 
   const totalAssets = loans.reduce((sum, loan) => {
-    const amount = new CurrencyBalance(getAmount(loan as any, pool), pool.currency.decimals).toDecimal()
+    const amount =
+      hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash'
+        ? new CurrencyBalance(getAmount(loan as any, pool), pool.currency.decimals).toDecimal()
+        : 0
 
     return sum.add(amount)
   }, Dec(0))
@@ -79,14 +82,17 @@ export function PoolDetailAssets() {
     Dec(0)
   )
 
+  const total = isTinlakePool ? pool.nav.total : pool.reserve.total.toDecimal().add(offchainReserve).add(totalAssets)
+  const totalNAV = isTinlakePool ? pool.nav.total : Dec(total).sub(pool.fees.totalPaid.toDecimal())
+
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
-      label: <Tooltips label={`Total NAV (${pool.currency.symbol})`} type="totalNavMinus" />,
-      value: formatBalance(pool.nav.total.toDecimal()),
+      label: `Total NAV (${pool.currency.symbol})`,
+      value: formatBalance(totalNAV),
       heading: true,
     },
     {
-      label: <Tooltips label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
+      label: <Tooltips hoverable label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
       value: (
         <StyledRouterTextLink to={`${basePath}/${pool.id}/assets/0`}>
           <Text>{formatBalance(pool.reserve.total || 0)}</Text>
@@ -98,13 +104,18 @@ export function PoolDetailAssets() {
     ...(!isTinlakePool && cashLoans.length
       ? [
           {
-            label: <Tooltips label={`Offchain cash (USD)`} type="offchainCash" />,
+            label: <Tooltips hoverable label="Offchain cash (USD" type="offchainCash" />,
             value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
             heading: false,
           },
           {
             label: `Total Assets (${pool.currency.symbol})`,
             value: formatBalance(totalAssets),
+            heading: false,
+          },
+          {
+            label: `Accrued fees (${pool.currency.symbol})`,
+            value: `-${formatBalance(pool.fees.totalPaid)}`,
             heading: false,
           },
         ]

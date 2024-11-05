@@ -22,7 +22,6 @@ export type WalletButtonProps = Omit<
 
 const StyledButton = styled.button`
   display: inline-block;
-  width: 100%;
   padding: 0;
   border: none;
   appearance: none;

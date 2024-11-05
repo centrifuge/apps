@@ -69,12 +69,15 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
   padding: 0px;
   width: fit-content;
   margin-left: 30px;
+  border: 4px solid transparent;
 
   > span {
     width: 34px;
+    border: 4px solid transparent;
   }
   &:hover {
-    background-color: ${({ theme }) => theme.colors.backgroundTertiary};
+    background-color: ${({ theme }) => theme.colors.backgroundSecondary};
+    border: ${({ theme }) => `4px solid ${theme.colors.backgroundTertiary}`};
     span {
       color: ${({ theme }) => theme.colors.textPrimary};
     }
@@ -279,7 +282,7 @@ function Loan() {
       )}
       {loan && pool && (
         <LayoutSection pt={2} pb={4} flex={1}>
-          <Grid height="fit-content" gridTemplateColumns={isOracle ? ['1fr', '66fr 34fr'] : ['1fr']} gap={[2, 2]}>
+          <Grid height="fit-content" gridTemplateColumns={isOracle ? ['1fr', '67fr 34fr'] : ['1fr']} gap={[2, 2]}>
             <React.Suspense fallback={<Spinner />}>
               <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
             </React.Suspense>
