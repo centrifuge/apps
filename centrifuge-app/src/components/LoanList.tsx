@@ -267,7 +267,7 @@ export function LoanList({ loans }: Props) {
   return (
     <>
       <Box pt={1} pb={2} paddingX={1} display="flex" justifyContent="space-between" alignItems="center">
-        <Text variant="heading4">Assets</Text>
+        <Text variant="heading4">{filters.data.map((loan) => loan.status === 'Active').length} ongoing assets</Text>
         <Box display="flex">
           <Button
             variant="inverted"
