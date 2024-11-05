@@ -22,6 +22,9 @@ const StyledRouterTextLink = styled(RouterTextLink)`
   text-decoration: unset;
   display: flex;
   align-items: center;
+  &:hover {
+    text-decoration: underline;
+  }
 `
 
 export function PoolDetailAssetsTab() {
@@ -92,7 +95,7 @@ export function PoolDetailAssets() {
       heading: true,
     },
     {
-      label: <Tooltips hoverable label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
+      label: <Tooltips label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
       value: (
         <StyledRouterTextLink to={`${basePath}/${pool.id}/assets/0`}>
           <Text>{formatBalance(pool.reserve.total || 0)}</Text>
@@ -104,7 +107,7 @@ export function PoolDetailAssets() {
     ...(!isTinlakePool && cashLoans.length
       ? [
           {
-            label: <Tooltips hoverable label="Offchain cash (USD" type="offchainCash" />,
+            label: <Tooltips label="Offchain cash (USD" type="offchainCash" />,
             value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
             heading: false,
           },

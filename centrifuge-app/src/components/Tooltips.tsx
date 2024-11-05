@@ -1,18 +1,8 @@
 import { Tooltip as FabricTooltip, Text, TextProps } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import styled from 'styled-components'
 import { usePool } from '../utils/usePools'
 
-const StyledText = styled(Text)<{ hoverable?: boolean }>`
-  ${({ hoverable }) =>
-    hoverable &&
-    `
-    &:hover {
-     text-decoration: underline
-    }
-  `}
-`
 function ValueLockedTooltipBody({ poolId }: { poolId?: string }) {
   const { pid: poolIdParam } = useParams<{ pid: string }>()
   const pool = usePool(poolId || poolIdParam || '', false)
@@ -364,31 +354,21 @@ export type TooltipsProps = {
   props?: any
   size?: 'med' | 'sm' | 'xs'
   color?: string
-  hoverable?: boolean
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export function Tooltips({
-  type,
-  label: labelOverride,
-  size = 'sm',
-  props,
-  color,
-  hoverable = false,
-  ...textProps
-}: TooltipsProps) {
+export function Tooltips({ type, label: labelOverride, size = 'sm', props, color, ...textProps }: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   return (
     <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
       {typeof label === 'string' ? (
-        <StyledText
+        <Text
           textAlign="left"
           variant={size === 'sm' ? 'label2' : size === 'xs' ? 'body4' : 'label1'}
           color={size === 'sm' && !color ? 'textPrimary' : 'textSecondary'}
           fontWeight={size === 'sm' ? 'inherit' : 400}
-          hoverable={hoverable}
         >
           {labelOverride || label}
-        </StyledText>
+        </Text>
       ) : (
         label
       )}

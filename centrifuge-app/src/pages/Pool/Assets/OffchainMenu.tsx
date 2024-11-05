@@ -33,6 +33,10 @@ const StyledButton = styled(Box)`
   display: flex;
   align-items: center;
   font-family: Inter, sans-serif;
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
 `
 
 const LoanOption = ({ loan }: LoanOptionProps) => {
