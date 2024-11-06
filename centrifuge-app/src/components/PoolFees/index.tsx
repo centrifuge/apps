@@ -290,7 +290,7 @@ export function PoolFees() {
           <Text color="textSecondary" variant="body2">
             Find a full overview of all pending and executed fee transactions.
           </Text>
-          <RouterLinkButton to={`${basePath}/reporting/fee-tx`}>View all transactions</RouterLinkButton>
+          <RouterLinkButton to={`${basePath}/data/fee-tx`}>View all transactions</RouterLinkButton>
         </Stack>
       </PageSection>
       <PageSection

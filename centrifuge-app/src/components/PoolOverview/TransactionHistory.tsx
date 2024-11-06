@@ -1,5 +1,5 @@
 import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconDownload, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -225,6 +225,7 @@ export const TransactionHistoryTable = ({
         </Text>
       ),
       sortKey: 'transactionDate',
+      width: '200px',
     },
     {
       align: 'left',
@@ -249,19 +250,21 @@ export const TransactionHistoryTable = ({
         )
       },
       sortKey: 'transaction',
+      width: '50%',
     },
     {
-      align: 'right',
-      header: <SortableTableHeader label="Amount" />,
+      align: 'left',
+      header: <SortableTableHeader label="Quantity" />,
       cell: ({ amount, netFlow }: Row) => (
         <Text as="span" variant="body3">
           {amount ? `${activeAssetId && netFlow === 'negative' ? '-' : ''}${formatBalance(amount, 'USD', 2, 2)}` : ''}
         </Text>
       ),
-      sortKey: 'amount',
+      sortKey: 'quantity',
+      width: '250px',
     },
     {
-      align: 'right',
+      align: 'center',
       header: 'View transaction',
       cell: ({ hash }: Row) => {
         return (
@@ -282,9 +285,7 @@ export const TransactionHistoryTable = ({
   return (
     <Stack gap={2}>
       <Shelf justifyContent="space-between">
-        <Text fontSize="18px" fontWeight="500">
-          Transaction history
-        </Text>
+        <Text variant="heading4">Transaction history</Text>
         <Shelf>
           {transactions?.length! > 8 && preview && (
             <AnchorButton href={`#/pools/${poolId}/transactions`} small variant="inverted">
@@ -306,7 +307,9 @@ export const TransactionHistoryTable = ({
           )}
         </Shelf>
       </Shelf>
-      <DataTable data={tableData} columns={columns} />
+      <Box overflow="auto">
+        <DataTable data={tableData} columns={columns} />
+      </Box>
     </Stack>
   )
 }

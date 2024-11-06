@@ -13,7 +13,6 @@ import {
   usePagination,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -44,7 +43,6 @@ type Row = {
 
 export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId }: TransactionsProps) {
   const explorer = useGetExplorerUrl()
-  const theme = useTheme()
   const columns = [
     {
       align: 'left',

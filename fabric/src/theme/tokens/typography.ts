@@ -1,6 +1,12 @@
 import { ThemeTypography } from '../types'
 
 const typography: ThemeTypography = {
+  heading: {
+    fontSize: 36,
+    lineHeight: 1.4,
+    fontWeight: 500,
+    color: 'textPrimary',
+  },
   heading1: {
     fontSize: [20, 24],
     lineHeight: 1.4,

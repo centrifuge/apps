@@ -60,10 +60,18 @@ const placements: {
 const Container = styled(Stack)<{ pointer: PlacementAxis }>`
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
   filter: ${({ theme }) => `drop-shadow(${theme.shadows.cardInteractive})`};
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  will-change: opacity, transform;
+
+  &.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
   &::before {
     --size: 5px;
-
     content: '';
     position: absolute;
     ${({ pointer }) => placements[pointer!]}
@@ -77,7 +85,7 @@ export function Tooltip({
   body,
   children,
   disabled,
-  delay = 1000,
+  delay = 200,
   bodyWidth,
   bodyPadding,
   triggerStyle,
@@ -108,6 +116,7 @@ export function Tooltip({
               {...tooltipElementProps}
               {...rest}
               ref={overlayRef}
+              className={state.isOpen ? 'show' : ''}
               backgroundColor="backgroundPrimary"
               p={bodyPadding ?? 1}
               borderRadius="tooltip"
@@ -116,7 +125,7 @@ export function Tooltip({
               pointer={pointer}
             >
               {!!title && (
-                <Text variant="body3" fontWeight={600}>
+                <Text variant="body3" fontWeight={600} color="white">
                   {title}
                 </Text>
               )}

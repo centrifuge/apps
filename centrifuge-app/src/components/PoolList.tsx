@@ -6,7 +6,6 @@ import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
-import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { PoolCard, PoolCardProps } from './PoolCard'
@@ -42,8 +41,6 @@ export function PoolList() {
   const { search } = useLocation()
   const [showArchived, setShowArchived] = React.useState(false)
   const [listedPools, , metadataIsLoading] = useListedPools()
-  const isLarge = useIsAboveBreakpoint('L')
-  const isMedium = useIsAboveBreakpoint('M')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(

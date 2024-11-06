@@ -42,7 +42,7 @@ export function InputUnit({ id, label, secondaryLabel, errorMessage, inputElemen
           {inputElement}
         </Text>
         {secondaryLabel && (
-          <Text variant="body3" color={disabled ? 'textDisabled' : 'textPrimary'}>
+          <Text variant="body3" color={disabled ? 'textDisabled' : 'textPrimary'} style={{ textAlign: 'right' }}>
             {secondaryLabel}
           </Text>
         )}
@@ -63,7 +63,7 @@ export function InputLabel({
 }) {
   return (
     <Text
-      variant={row ? 'heading3' : 'label2'}
+      variant={row ? 'heading3' : 'heading4'}
       color={disabled ? 'textDisabled' : 'textPrimary'}
       as="label"
       htmlFor={useContextId()}

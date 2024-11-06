@@ -6,7 +6,7 @@ type Props = WalletButtonProps & {
   label?: string
 }
 
-export function ConnectButton({ label = 'Connect', ...rest }: Props) {
+export function ConnectButton({ label = 'Connect wallet', ...rest }: Props) {
   const { showNetworks, pendingConnect } = useWallet()
 
   return (

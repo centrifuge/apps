@@ -26,7 +26,7 @@ export function InlineFeedback({ status = 'default', children }: InlineFeedbackP
     <Text variant="body3">
       <Shelf alignItems="baseline" gap="4px">
         <StyledIconWrapper minWidth="iconSmall" height="iconSmall" flex="0 0 auto">
-          <StyledIcon as={icons[status]} size="iconSmall" color={`status${capitalizeFirstLetter(status)}`} />
+          <StyledIcon as={icons[status]} size="iconMedium" color={`status${capitalizeFirstLetter(status)}`} />
         </StyledIconWrapper>
         <TextWrapper>{children}</TextWrapper>
       </Shelf>

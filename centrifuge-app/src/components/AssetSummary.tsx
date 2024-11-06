@@ -1,41 +1,33 @@
-import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
-import { LoanLabel } from './LoanLabel'
 
 type Props = {
   data?: {
     label: React.ReactNode
     value: React.ReactNode
+    heading: boolean
   }[]
   children?: React.ReactNode
-  loan?: Loan | TinlakeLoan
 }
 
-export function AssetSummary({ data, children, loan }: Props) {
+export function AssetSummary({ data, children }: Props) {
   const theme = useTheme()
   return (
-    <Stack bg={theme.colors.backgroundSecondary} pl={3}>
-      <Box paddingTop={3}>
-        <Shelf gap="2">
-          <Text variant="heading2">Details</Text>
-          {loan && <LoanLabel loan={loan} />}
-        </Shelf>
-      </Box>
-      <Shelf
-        gap="6"
-        py="3"
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderPrimary}`,
-        }}
-      >
-        {data?.map(({ label, value }, index) => (
-          <Stack gap="4px" key={`${value}-${label}-${index}`}>
-            <Text variant="body3" style={{ fontWeight: 500 }}>
+    <Stack
+      bg={theme.colors.backgroundSecondary}
+      border={`1px solid ${theme.colors.borderSecondary}`}
+      borderRadius={10}
+      padding={2}
+      mx={[2, 2, 2, 2, 5]}
+    >
+      <Shelf gap={2}>
+        {data?.map(({ label, value, heading }, index) => (
+          <Stack key={`${value}-${label}-${index}`}>
+            <Text variant={heading ? 'body2' : 'body3'} color="textSecondary" style={{ margin: 0, padding: 0 }}>
               {label}
             </Text>
-            <Text variant="body2">{value}</Text>
+            <Text variant={heading ? 'heading' : 'heading2'}>{value}</Text>
           </Stack>
         ))}
         {children}
