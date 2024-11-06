@@ -2334,7 +2334,8 @@ export function getPoolsModule(inst: Centrifuge) {
         orderBy: BLOCK_NUMBER_ASC,
         filter: {
           poolId: { equalTo: $poolId },
-          timestamp: { greaterThan: $from, lessThan: $to }
+          timestamp: { greaterThan: $from, lessThan: $to },
+          epochExists: false
         }
         after: $poolCursor
       ) {
@@ -2717,7 +2718,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     }>(
       `query {
-        poolSnapshots(first: 1000, orderBy: PERIOD_ID_ASC) {
+        poolSnapshots(first: 1000, orderBy: PERIOD_ID_ASC, epochExists: false) {
           nodes {
             netAssetValue
             periodId
