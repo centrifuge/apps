@@ -65,13 +65,13 @@ export function LoanList({ loans }: Props) {
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
   const additionalColumns: Column[] =
-    templateMetadata?.keyAttributes?.map((key) => {
+    templateMetadata?.keyAttributes?.map((key, index) => {
       const attr = templateMetadata.attributes![key]
       return {
         align: 'left',
         header: <SortableTableHeader label={attr.label} />,
         cell: (l: Row) => <AssetMetadataField name={key} attribute={attr} loan={l} />,
-        sortKey: attr.label,
+        sortKey: attr.label.toLowerCase(),
       }
     }) || []
 
@@ -141,10 +141,10 @@ export function LoanList({ loans }: Props) {
       align: 'left',
       header: <SortableTableHeader label={isTinlakePool ? 'NFT ID' : 'Asset'} />,
       cell: (l: Row) => <AssetName loan={l} />,
-      sortKey: 'idSortKey',
+      sortKey: 'id',
     },
     ...(additionalColumns?.length
-      ? additionalColumns.filter((attr) => attr.header !== 'Term')
+      ? additionalColumns.filter((attr) => attr.sortKey !== 'term')
       : [
           {
             align: 'left',
@@ -157,7 +157,7 @@ export function LoanList({ loans }: Props) {
                 ? formatDate(l.originationDate)
                 : '-'
             },
-            sortKey: 'originationDateSortKey',
+            sortKey: 'originationDate',
           },
         ]),
     ...(hasMaturityDate
@@ -184,7 +184,7 @@ export function LoanList({ loans }: Props) {
             align: 'left',
             header: <SortableTableHeader label="Quantity" />,
             cell: (l: Row) => <Amount loan={l} />,
-            sortKey: 'outstandingDebtSortKey',
+            sortKey: 'outstandingDebt',
           },
         ]),
     ...(isTinlakePool
@@ -193,8 +193,8 @@ export function LoanList({ loans }: Props) {
           {
             align: 'left',
             header: <SortableTableHeader label="Market price" />,
-            cell: (l: Row) => formatBalance(l.marketPrice ?? '', pool.currency, 2, 0),
-            sortKey: 'marketPriceSortKey',
+            cell: (l: Row) => formatBalance(l.marketPrice ?? 0, pool.currency, 2, 0),
+            sortKey: 'marketPrice',
           },
         ]),
     ...(isTinlakePool
@@ -204,7 +204,7 @@ export function LoanList({ loans }: Props) {
             align: 'left',
             header: <SortableTableHeader label="Market value" />,
             cell: (l: Row) => formatBalance(l.marketValue ?? 0, pool.currency, 2, 0),
-            sortKey: 'marketValueSortKey',
+            sortKey: 'marketValue',
           },
         ]),
     ...(isTinlakePool
@@ -213,8 +213,8 @@ export function LoanList({ loans }: Props) {
           {
             align: 'left',
             header: <SortableTableHeader label="Unrealized P&L" />,
-            cell: (l: Row) => formatBalance(l.unrealizedPL ?? '', pool.currency, 2, 0),
-            sortKey: 'unrealizedPLSortKey',
+            cell: (l: Row) => formatBalance(l.unrealizedPL ?? 0, pool.currency, 2, 0),
+            sortKey: 'unrealizedPL',
             width: '140px',
           },
         ]),
@@ -224,8 +224,8 @@ export function LoanList({ loans }: Props) {
           {
             align: 'left',
             header: <SortableTableHeader label="Realized P&L" />,
-            cell: (l: Row) => formatBalance(l.realizedPL ?? '', pool.currency, 2, 0),
-            sortKey: 'realizedPLSortKey',
+            cell: (l: Row) => formatBalance(l.realizedPL ?? 0, pool.currency, 2, 0),
+            sortKey: 'realizedPL',
             width: '140px',
           },
         ]),
@@ -236,7 +236,7 @@ export function LoanList({ loans }: Props) {
             align: 'left',
             header: <SortableTableHeader label="Portfolio %" />,
             cell: (l: Row) => formatPercentage(l.portfolioPercentage ?? 0, true, undefined, 1),
-            sortKey: 'portfolioSortKey',
+            sortKey: 'portfolioPercentage',
           },
         ]),
   ].filter(Boolean) as Column[]
@@ -260,7 +260,7 @@ export function LoanList({ loans }: Props) {
         'Portfolio %': loan.portfolioPercentage ? loan.portfolioPercentage : '-',
       }
     })
-  }, [rows])
+  }, [rows, pool])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
 

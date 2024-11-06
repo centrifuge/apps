@@ -342,7 +342,7 @@ export const tooltipText = {
     label: 'Expense ratio',
     body: 'The operating expenses of the fund as a percentage of the total NAV',
   },
-  totalNavMinus: {
+  totalNavMinusFees: {
     label: 'Total NAV',
     body: 'Total nav minus accrued fees',
   },
