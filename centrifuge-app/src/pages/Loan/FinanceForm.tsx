@@ -577,12 +577,11 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
         amount={amount}
       />
     ),
-    isValid: (_: { values: Pick<FinanceValues, 'withdraw'> }) => {
+    isValid: () => {
       const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
       return source === 'reserve' ? amount.lte(totalAvailable) && !!withdrawalAddresses.length : true
     },
-    getBatch: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
-      if (!values.withdraw) return of([])
+    getBatch: () => {
       const withdrawalAddresses = Object.values(selectedAddressIndexByCurrency).filter((index) => index !== -1)
       if (!withdrawalAddresses.length) return of([])
       return combineLatest(
