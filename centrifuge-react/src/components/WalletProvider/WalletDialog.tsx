@@ -126,7 +126,10 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
             <SelectButton
               key={1}
               logo={evmChains['1']?.iconUrl ? <Logo icon={evmChains['1'].iconUrl} /> : undefined}
-              onClick={() => showWallets(1)}
+              onClick={() => {
+                showWallets(1)
+                setStep(2)
+              }}
               active={selectedNetwork === 1}
               muted={isMuted(1)}
             >
@@ -135,7 +138,10 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
 
             <SelectButton
               logo={<Logo icon={centrifugeLogo} />}
-              onClick={() => showWallets('centrifuge')}
+              onClick={() => {
+                showWallets('centrifuge')
+                setStep(2)
+              }}
               active={isCentChainSelected}
               muted={isMuted('centrifuge')}
             >
@@ -154,7 +160,10 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                   <SelectButton
                     key={chainId}
                     logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
-                    onClick={() => showWallets(chainId)}
+                    onClick={() => {
+                      showWallets(chainId)
+                      setStep(2)
+                    }}
                     active={selectedNetwork === chainId}
                     muted={isMuted(chainId)}
                   >
@@ -185,6 +194,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                   onClick={() => {
                     showWallets(selectedNetwork, wallet)
                     connect(wallet)
+                    setStep(3)
                   }}
                   loading={isConnecting && wallet === pendingWallet}
                   active={selectedWallet === wallet}
