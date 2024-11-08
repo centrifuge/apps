@@ -1,5 +1,7 @@
 import {
   Box,
+  Button,
+  Card,
   IconAnchor,
   IconButton,
   IconCopy,
@@ -7,7 +9,6 @@ import {
   IconPower,
   IconSwitch,
   Menu,
-  MenuItem,
   MenuItemGroup,
   Popover,
   Shelf,
@@ -18,7 +19,6 @@ import {
 import { getAddress } from 'ethers'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
@@ -86,8 +86,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            address={address}
-            displayAddress={formattedAddress}
+            title={wallet?.title || ''}
             alias={
               connectedType === 'evm'
                 ? ensName ?? undefined
@@ -110,118 +109,119 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         </Stack>
       )}
       renderContent={(props, ref, state) => (
-        <Box {...props} ref={ref} width={220}>
-          <Menu backgroundColor="white">
+        <Box {...props} ref={ref} width={420}>
+          <Menu backgroundColor="white" padding={3}>
             <MenuItemGroup>
-              {!isEvmOnSubstrate && (
-                <Stack pt={2} pb={0} px={2} gap="4px" alignItems="center">
-                  <Shelf gap={1} justifyContent="space-between">
-                    <Shelf gap={1}>
-                      <Text variant="interactive1" fontWeight={400}>
-                        {truncateAddress(formattedAddress)}
-                      </Text>
-                    </Shelf>
-
-                    <Shelf gap="2px">
-                      <IconButton onClick={() => copyToClipboard(formattedAddress)} title="Copy address to clipboard">
-                        <IconCopy />
-                      </IconButton>
-                      {subScanUrl && (
-                        <IconAnchor
-                          href={subScanUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={`View account on ${subScanUrl}`}
-                        >
-                          <IconExternalLink />
-                        </IconAnchor>
-                      )}
-                    </Shelf>
+              <Stack py={2}>
+                <Shelf gap={1} justifyContent="space-between">
+                  <Shelf gap={1}>
+                    <Text variant="heading2">{truncateAddress(formattedAddress)}</Text>
                   </Shelf>
-                </Stack>
-              )}
 
-              <Stack gap={0} mt={1} px={2} pb={1}>
-                <Text variant="label2" textAlign="center" color="textPrimary">
+                  <Shelf gap="2px">
+                    <IconButton
+                      size="24px"
+                      onClick={() => copyToClipboard(formattedAddress)}
+                      title="Copy address to clipboard"
+                    >
+                      <IconCopy />
+                    </IconButton>
+                    {subScanUrl && (
+                      <IconAnchor
+                        href={subScanUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`View account on ${subScanUrl}`}
+                      >
+                        <IconExternalLink />
+                      </IconAnchor>
+                    )}
+                  </Shelf>
+                </Shelf>
+              </Stack>
+            </MenuItemGroup>
+            <MenuItemGroup>
+              <Stack gap={0} py={2}>
+                <Text variant="body3" color="textSecondary">
                   Balance
                 </Text>
-                <Link to={`/portfolio?send=${balances?.native.currency.symbol}`} onClick={() => state.close()}>
-                  <BalanceLink fontSize={22} fontWeight={500} textAlign="center">
-                    {balance && formatBalanceAbbreviated(balance, symbol)}
-                  </BalanceLink>
-                </Link>
+                <Box display="flex" alignItems="center">
+                  <Link to={`/portfolio?send=${balances?.native.currency.symbol}`} onClick={() => state.close()}>
+                    <Text variant="heading1">{balance && formatBalanceAbbreviated(balance)}</Text>
+                  </Link>
+                  <Text style={{ marginLeft: 4 }} variant="heading1" fontWeight={400}>
+                    {symbol}
+                  </Text>
+                </Box>
               </Stack>
             </MenuItemGroup>
 
             {!!menuItems?.length && menuItems.map((item, index) => <MenuItemGroup key={index}>{item}</MenuItemGroup>)}
 
-            <MenuItemGroup>
-              <Box px={2} py={1}>
-                <Text variant="label2" color="textPrimary">
-                  Network
-                </Text>
-                <Shelf gap={1}>
-                  <Logo icon={useNetworkIcon(connectedNetwork!)} size="iconSmall" />
-                  <Text variant="interactive1">{connectedNetworkName}</Text>
-                </Shelf>
-              </Box>
-            </MenuItemGroup>
-
-            <MenuItemGroup>
-              {wallet && (
-                <Box px={2} py={1}>
-                  <Text variant="label2" color="textPrimary">
-                    Wallet
+            <Card padding={2}>
+              <MenuItemGroup>
+                <Box py={2} display="flex" justifyContent="space-between">
+                  <Text variant="body2" color="textSecondary">
+                    Network
                   </Text>
                   <Shelf gap={1}>
-                    <Logo icon={wallet.logo.src} size="iconSmall" />
-                    <Text variant="interactive1">{wallet.title}</Text>
+                    <Logo icon={useNetworkIcon(connectedNetwork!)} size={24} />
+                    <Text variant="interactive1">{connectedNetworkName}</Text>
                   </Shelf>
                 </Box>
-              )}
-              {connectedType === 'substrate' || (evm.accounts && evm.accounts.length > 1) ? (
-                <MenuItem
-                  label="Switch account"
-                  icon={<IconSwitch size="iconSmall" />}
-                  minHeight={0}
-                  onClick={() => {
-                    state.close()
-                    showAccounts()
-                  }}
-                />
-              ) : (
-                <MenuItem
-                  label="Switch wallet"
-                  icon={<IconSwitch size="iconSmall" />}
-                  minHeight={0}
-                  onClick={() => {
-                    state.close()
-                    showWallets(connectedNetwork, wallet)
-                  }}
-                />
-              )}
-            </MenuItemGroup>
+              </MenuItemGroup>
 
-            <MenuItemGroup>
-              <MenuItem
-                label="Disconnect"
-                icon={<IconPower size="iconSmall" />}
-                minHeight={0}
-                onClick={() => {
-                  state.close()
-                  disconnect()
-                }}
-              />
-            </MenuItemGroup>
+              <MenuItemGroup>
+                {wallet && (
+                  <Box py={2} display="flex" justifyContent="space-between">
+                    <Text variant="body2" color="textSecondary">
+                      Wallet
+                    </Text>
+                    <Shelf gap={1}>
+                      <Logo icon={wallet.logo.src} size={24} />
+                      <Text variant="interactive1">{wallet.title}</Text>
+                    </Shelf>
+                  </Box>
+                )}
+              </MenuItemGroup>
+
+              <Stack gap={2} mt={2}>
+                <Button
+                  icon={<IconSwitch />}
+                  onClick={
+                    connectedType === 'substrate' || (evm.accounts && evm.accounts.length > 1)
+                      ? () => {
+                          state.close()
+                          showAccounts()
+                        }
+                      : () => {
+                          state.close()
+                          showWallets(connectedNetwork, wallet)
+                        }
+                  }
+                  variant="secondary"
+                  small
+                >
+                  {connectedType === 'substrate' || (evm.accounts && evm.accounts.length > 1)
+                    ? 'Switch account'
+                    : 'Switch wallet'}
+                </Button>
+                <Button
+                  icon={<IconPower />}
+                  onClick={() => {
+                    state.close()
+                    disconnect()
+                  }}
+                  variant="inverted"
+                  small
+                >
+                  Disconnect
+                </Button>
+              </Stack>
+            </Card>
           </Menu>
         </Box>
       )}
     />
   )
 }
-
-const BalanceLink = styled(Text)`
-  &:hover {
-    color: ${({ theme }) => theme.colors.textInteractive};
-  }
-`

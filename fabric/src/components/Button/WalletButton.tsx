@@ -18,6 +18,7 @@ export type WalletButtonProps = Omit<
   alias?: string
   balance?: string
   icon?: IconTheme | React.ReactElement
+  title: string
 }
 
 const StyledButton = styled.button`
@@ -50,6 +51,7 @@ export function WalletButton({
   displayAddress = address,
   alias,
   balance,
+  title,
   ...buttonProps
 }: WalletButtonProps) {
   return (
@@ -69,7 +71,7 @@ export function WalletButton({
         loadingMessage={loadingMessage}
         active={active}
       >
-        {address && alias ? (
+        {title && alias ? (
           <Box position="relative" flex="1 1 auto">
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
               <Text
@@ -92,10 +94,10 @@ export function WalletButton({
             fontWeight={500}
             style={{ margin: address ? 0 : 'auto' }}
           >
-            {displayAddress ? truncate(displayAddress) : connectLabel}
+            {title || connectLabel}
           </Text>
         )}
-        {address && balance && (
+        {title && balance && (
           <Text variant="body3" color="textInverted" style={{ marginLeft: 'auto' }}>
             {balance}
           </Text>
