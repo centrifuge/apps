@@ -1,31 +1,16 @@
 import { getSupportedBrowser } from '@centrifuge/centrifuge-app/src/utils/getSupportedBrowser'
-import {
-  Button,
-  Card,
-  Dialog,
-  Divider,
-  Grid,
-  IconAlertCircle,
-  IconDownload,
-  IconEdit,
-  IconExternalLink,
-  MenuItemGroup,
-  Shelf,
-  Stack,
-  Text,
-} from '@centrifuge/fabric'
+import { Box, Card, Dialog, Grid, IconAlertCircle, IconDownload, MenuItemGroup, Stack, Text } from '@centrifuge/fabric'
 import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
-import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
+import { useTheme } from 'styled-components'
 import { Network } from '.'
 import { AccountButton, AccountIcon, AccountName } from './AccountButton'
-import { Logo, NetworkIcon, SelectAnchor, SelectButton } from './SelectButton'
+import { Logo, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
-import { isSubWallet, isTalismanWallet } from './evm/utils'
 import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
 
 type Props = {
@@ -66,6 +51,7 @@ const getAdjustedInstallUrl = (wallet: WalletFn): string => {
 }
 
 export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets, showFinoa }: Props) {
+  const [step, setStep] = React.useState(1)
   const evmChains = Object.keys(allEvmChains)
     .filter((chainId) => (!showTestNets ? !(allEvmChains as any)[chainId].isTestnet : true))
     .reduce((obj, chainId) => {
@@ -79,12 +65,11 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
     walletDialog: { view, network: selectedNetwork, wallet: selectedWallet },
     dispatch,
-    showNetworks,
     showWallets,
     connect: doConnect,
     evm,
     scopedNetworks,
-    substrate: { evmChainId },
+    substrate: { evmChainId, selectedAddress },
   } = ctx
 
   const getNetworkName = useGetNetworkName()
@@ -126,29 +111,15 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
       title={view ? title[view] : undefined}
       isOpen={!!view}
       onClose={close}
-      subtitle={view === 'networks' ? 'Choose your network and wallet to connect with Centrifuge' : undefined}
+      subtitle="Choose your network and wallet to connect with Centrifuge"
     >
       <Stack gap={3}>
         <SelectionStep
-          step={1}
-          title="Choose network"
+          title="Step 1: Choose network"
           tooltip={scopedNetworks && <SelectionStepTooltip networks={scopedNetworks} />}
-          expanded={view === 'networks'}
-          titleElement={
-            selectedNetwork && (
-              <Shelf gap={1}>
-                <NetworkIcon size="iconSmall" network={selectedNetwork} />
-                <Text variant="body2">{getNetworkName(selectedNetwork)}</Text>
-              </Shelf>
-            )
-          }
-          rightElement={
-            view !== 'networks' && (
-              <Button variant="tertiary" small icon={IconEdit} onClick={() => showNetworks(selectedNetwork)}>
-                Change network
-              </Button>
-            )
-          }
+          done={!!selectedNetwork}
+          expanded={step === 1}
+          toggleExpanded={() => setStep(step === 1 ? 0 : 1)}
         >
           <Grid minColumnWidth={120} mt={3} gap={1}>
             {/* ethereum mainnet */}
@@ -194,107 +165,63 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
           </Grid>
         </SelectionStep>
 
-        {(!!selectedWallet || view === 'wallets' || view === 'accounts') && (
-          <>
-            <Divider />
-            <SelectionStep
-              step={2}
-              title="Choose wallet"
-              expanded={view === 'wallets'}
-              titleElement={
-                selectedWallet && (
-                  <Shelf gap={1}>
-                    <Logo icon={selectedWallet.logo.src} size="iconSmall" />
-                    <Text variant="body2">{selectedWallet.title}</Text>
-                  </Shelf>
-                )
-              }
-              rightElement={
-                view === 'accounts' && (
-                  <Button
-                    variant="tertiary"
-                    small
-                    icon={IconEdit}
-                    onClick={() => showWallets(selectedNetwork, selectedWallet)}
-                  >
-                    Change wallet
-                  </Button>
-                )
-              }
-            >
-              <Grid minColumnWidth={120} mt={3} gap={1}>
-                {shownWallets.map((wallet) => {
-                  return wallet.installed ? (
-                    <SelectButton
-                      key={wallet.title}
-                      logo={<Logo icon={wallet.logo.src} />}
-                      iconRight={
-                        selectedWallet && isConnectError && selectedWallet === wallet ? (
-                          <IconAlertCircle size="iconSmall" />
-                        ) : undefined
-                      }
-                      onClick={() => {
-                        showWallets(selectedNetwork, wallet)
-                        connect(wallet)
-                      }}
-                      loading={isConnecting && wallet === pendingWallet}
-                      active={selectedWallet === wallet}
-                      muted={isMuted(selectedNetwork!)}
-                    >
-                      {wallet.title}
-                    </SelectButton>
-                  ) : (
-                    <SelectAnchor
-                      key={wallet.title}
-                      href={getAdjustedInstallUrl(wallet)}
-                      logo={<Logo icon={wallet.logo.src} />}
-                      iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
-                      muted={isMuted(selectedNetwork!)}
-                    >
-                      {wallet.title}
-                    </SelectAnchor>
-                  )
-                })}
-              </Grid>
-            </SelectionStep>
-          </>
-        )}
+        <SelectionStep
+          title="Step 2: Choose wallet"
+          done={!!selectedWallet}
+          expanded={step === 2}
+          toggleExpanded={() => setStep(step === 2 ? 0 : 2)}
+        >
+          <Grid minColumnWidth={120} mt={3} gap={1} borderColor="transparent">
+            {shownWallets.map((wallet) => {
+              return wallet.installed ? (
+                <SelectButton
+                  key={wallet.title}
+                  logo={<Logo icon={wallet.logo.src} />}
+                  iconRight={
+                    selectedWallet && isConnectError && selectedWallet === wallet ? (
+                      <IconAlertCircle size="iconSmall" />
+                    ) : undefined
+                  }
+                  onClick={() => {
+                    showWallets(selectedNetwork, wallet)
+                    connect(wallet)
+                  }}
+                  loading={isConnecting && wallet === pendingWallet}
+                  active={selectedWallet === wallet}
+                  muted={isMuted(selectedNetwork!)}
+                >
+                  {wallet.title}
+                </SelectButton>
+              ) : (
+                <SelectAnchor
+                  key={wallet.title}
+                  href={getAdjustedInstallUrl(wallet)}
+                  logo={<Logo icon={wallet.logo.src} />}
+                  iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
+                  muted={isMuted(selectedNetwork!)}
+                >
+                  {wallet.title}
+                </SelectAnchor>
+              )
+            })}
+          </Grid>
+        </SelectionStep>
 
         {view === 'accounts' && (
-          <>
-            <Divider />
-            <SelectionStep
-              step={3}
-              title="Choose account"
-              tooltip={scopedNetworks && <SelectionStepTooltip networks={scopedNetworks} />}
-              rightElement={
-                selectedWallet &&
-                'extensionName' in selectedWallet &&
-                ((selectedWallet.extensionName === 'subwallet-js' && isSubWallet()) ||
-                  (selectedWallet.extensionName === 'talisman' && isTalismanWallet())) && (
-                  <Button
-                    variant="tertiary"
-                    small
-                    icon={IconExternalLink}
-                    onClick={() => {
-                      const wallet = evm.connectors.find((c) => c.connector instanceof MetaMask)!
-                      showWallets(selectedNetwork, wallet)
-                      connect(wallet)
-                    }}
-                  >
-                    Use EVM Account
-                  </Button>
-                )
-              }
-            >
-              {connectedType === 'substrate' ? (
-                <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
-              ) : null}
-            </SelectionStep>
-          </>
+          <SelectionStep
+            expanded={step === 3}
+            toggleExpanded={() => setStep(step === 3 ? 0 : 3)}
+            title="Step 3: Choose account"
+            tooltip={scopedNetworks && <SelectionStepTooltip networks={scopedNetworks} />}
+            done={!!selectedAddress}
+          >
+            {connectedType === 'substrate' ? (
+              <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
+            ) : null}
+          </SelectionStep>
         )}
 
-        <Text as="p" variant="body3" textAlign="center">
+        <Text as="p" variant="body2" textAlign="center" color="textSecondary" fontWeight={600}>
           Need help connecting a wallet?{' '}
           <Text
             as="a"
@@ -322,6 +249,7 @@ const PROXY_TYPE_LABELS = {
 }
 
 function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => void; showAdvancedAccounts?: boolean }) {
+  const theme = useTheme()
   const {
     substrate: { combinedAccounts, selectAccount, selectedCombinedAccount, selectedAddress },
   } = useWallet()
@@ -330,37 +258,39 @@ function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => v
 
   return (
     <>
-      <Card maxHeight="50vh" style={{ overflow: 'auto' }} mt={3}>
+      <Card maxHeight="50vh" style={{ overflow: 'auto', borderColor: 'transparent' }} mt={3}>
         {combinedAccounts
           .filter((acc) => showAdvancedAccounts || (!acc.proxies && !acc.multisig))
           .map((acc, index) => {
             const actingAddress = acc.proxies?.at(-1)?.delegator || acc.multisig?.address || acc.signingAccount.address
             return (
-              <MenuItemGroup key={`${acc.signingAccount.address}${index}`}>
-                <AccountButton
-                  address={actingAddress}
-                  icon={<AccountIcon id={actingAddress} />}
-                  label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
-                  onClick={() => {
-                    onClose()
-                    selectAccount(
-                      acc.signingAccount.address,
-                      acc.proxies?.map((p) => p.delegator),
-                      acc.multisig?.address
-                    )
-                  }}
-                  selected={
-                    acc === selectedCombinedAccount ||
-                    (!selectedCombinedAccount &&
-                      selectedAddress === acc.signingAccount.address &&
-                      !acc.multisig &&
-                      !acc.proxies)
-                  }
-                  proxyRights={acc.proxies?.[0].types
-                    .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
-                    .join(' / ')}
-                  multisig={acc.multisig}
-                />
+              <MenuItemGroup key={`${acc.signingAccount.address}${index}`} hideDivider>
+                <Box borderBottom={`0.5px solid ${theme.colors.borderSecondary}`}>
+                  <AccountButton
+                    address={actingAddress}
+                    icon={<AccountIcon id={actingAddress} />}
+                    label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
+                    onClick={() => {
+                      onClose()
+                      selectAccount(
+                        acc.signingAccount.address,
+                        acc.proxies?.map((p) => p.delegator),
+                        acc.multisig?.address
+                      )
+                    }}
+                    selected={
+                      acc === selectedCombinedAccount ||
+                      (!selectedCombinedAccount &&
+                        selectedAddress === acc.signingAccount.address &&
+                        !acc.multisig &&
+                        !acc.proxies)
+                    }
+                    proxyRights={acc.proxies?.[0].types
+                      .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
+                      .join(' / ')}
+                    multisig={acc.multisig}
+                  />
+                </Box>
               </MenuItemGroup>
             )
           })}

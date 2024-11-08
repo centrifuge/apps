@@ -18,7 +18,6 @@ export type WalletButtonProps = Omit<
   alias?: string
   balance?: string
   icon?: IconTheme | React.ReactElement
-  title: string
 }
 
 const StyledButton = styled.button`

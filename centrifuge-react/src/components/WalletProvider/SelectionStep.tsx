@@ -1,55 +1,56 @@
-import { Box, Flex, IconCheck, IconInfoFilled, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import {
+  Box,
+  IconButton,
+  IconCheckInCircle,
+  IconChevronDown,
+  IconChevronUp,
+  IconCrosschair,
+  IconInfoFilled,
+  Shelf,
+  Stack,
+  Text,
+  Tooltip,
+} from '@centrifuge/fabric'
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { Network } from './types'
 import { useGetNetworkName } from './utils'
 
 type SelectionStepProps = {
-  step: number
   title: string
-  expanded?: boolean
   children?: React.ReactNode
   tooltip?: React.ReactNode
-  titleElement?: React.ReactNode
-  rightElement?: React.ReactNode
+  done: boolean
+  expanded: boolean
+  toggleExpanded: () => void
 }
 
-const Marker = styled(Flex)<{ $done: boolean }>`
-  border-radius: 50%;
-  background-color: ${({ theme, $done }) => ($done ? theme.colors.accentPrimary : theme.colors.textPrimary)};
-`
-
-export function SelectionStep({
-  step,
-  title,
-  titleElement,
-  expanded = true,
-  children,
-  tooltip,
-  rightElement,
-}: SelectionStepProps) {
+export function SelectionStep({ title, children, tooltip, done, toggleExpanded, expanded }: SelectionStepProps) {
+  const theme = useTheme()
   return (
-    <Stack>
+    <Stack
+      border={`1px solid ${theme.colors.borderPrimary}`}
+      padding={2}
+      borderRadius={10}
+      minHeight={68}
+      justifyContent="center"
+      pt={expanded ? 4 : 2}
+    >
       <Shelf justifyContent="space-between">
         <Shelf gap={2}>
-          <Marker width="iconMedium" height="iconMedium" $done={!expanded} justifyContent="center" alignItems="center">
-            {expanded ? (
-              <Text variant="interactive1" color="textInverted" textAlign="center">
-                {step}
-              </Text>
-            ) : (
-              <IconCheck size="iconSmall" color="textInverted" />
-            )}
-          </Marker>
-          <Stack bleedY={2} gap="4px">
-            <Text as="h3" variant={titleElement && !expanded ? 'label2' : 'heading4'} color="textPrimary">
+          <Box bleedY={2} display="flex" justifyContent="space-between" alignItems="center">
+            {done ? <IconCheckInCircle color="statusOk" /> : <IconCrosschair color="statusOkBg" />}
+            <Text as="h3" variant="heading3" style={{ marginLeft: 8, fontWeight: 700 }}>
               {title}
               {tooltip}
             </Text>
-            {!expanded && titleElement}
-          </Stack>
+          </Box>
         </Shelf>
-        <Box bleedY={2}>{rightElement}</Box>
+        <Box bleedY={2}>
+          <IconButton size="24px" onClick={toggleExpanded}>
+            {expanded ? <IconChevronUp /> : <IconChevronDown />}
+          </IconButton>
+        </Box>
       </Shelf>
 
       {expanded && children}

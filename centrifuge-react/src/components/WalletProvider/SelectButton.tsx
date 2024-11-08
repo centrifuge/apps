@@ -16,13 +16,16 @@ type SelectButtonProps = {
   iconRight?: React.ReactNode
 }
 
-const Root = styled(Box)<{ disabled: boolean; muted?: boolean }>`
+const Root = styled(Box)<{ disabled: boolean; muted?: boolean; active?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   appearance: none;
   outline: none;
+  padding: 12px 8px;
+  height: 86px;
+  border: ${({ theme, active }) => `1px solid ${active ? theme.colors.textPrimary : theme.colors.borderPrimary}`};
 
   opacity: ${({ disabled, muted }) => (disabled || muted ? 0.2 : 1)};
   cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
@@ -35,6 +38,10 @@ const Root = styled(Box)<{ disabled: boolean; muted?: boolean }>`
 
   &:focus-visible:not(:disabled) {
     outline: ${({ theme }) => `solid ${theme.colors.borderSelected}`};
+  }
+
+  & > span {
+    font-weight: ${({ active }) => `${active ? 700 : 500}`};
   }
 `
 
@@ -58,6 +65,7 @@ export function SelectButton({
       backgroundColor={active ? 'backgroundSecondary' : 'backgroundPrimary'}
       muted={muted}
       position="relative"
+      active={active}
     >
       <Content {...restProps} />
     </Root>

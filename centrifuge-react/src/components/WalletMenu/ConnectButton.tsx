@@ -1,12 +1,8 @@
-import { WalletButton, WalletButtonProps } from '@centrifuge/fabric'
+import { WalletButton } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useWallet } from '../WalletProvider'
 
-type Props = WalletButtonProps & {
-  label?: string
-}
-
-export function ConnectButton({ label = 'Connect wallet', ...rest }: Props) {
+export function ConnectButton({ label = 'Connect wallet', ...rest }) {
   const { showNetworks, pendingConnect } = useWallet()
 
   return (
