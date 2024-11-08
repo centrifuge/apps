@@ -94,6 +94,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                 ? substrate.selectedAccount?.name
                 : undefined
             }
+            address={address}
             balance={balance ? formatBalanceAbbreviated(balance, symbol) : undefined}
             icon={
               avatar ? (
