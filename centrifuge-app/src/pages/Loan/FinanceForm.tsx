@@ -83,7 +83,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
 
   return (
     <Stack gap={2} p={1}>
-      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Financier'}</Text>
+      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
       <InternalFinanceForm loan={loan} source={source} onChange={setSource} />
     </Stack>
   )
