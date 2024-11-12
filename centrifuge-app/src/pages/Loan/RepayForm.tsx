@@ -368,9 +368,9 @@ function InternalRepayForm({
             </Stack>
           </Box>
 
-          <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
+          <Stack gap={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
             <Text variant="heading4">Transaction summary</Text>
-            <Box paddingX={2} mt={2}>
+            <Box mt={2}>
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Tooltips

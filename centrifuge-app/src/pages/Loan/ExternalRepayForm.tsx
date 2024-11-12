@@ -323,10 +323,10 @@ export function ExternalRepayForm({
           outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
         </ErrorMessage>
 
-        <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
+        <Stack gap={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
           <Stack gap={1} mb={2}>
             <Text variant="heading4">Transaction summary</Text>
-            <Box paddingX={2} mt={2}>
+            <Box mt={2}>
               <Shelf justifyContent="space-between">
                 <Tooltips
                   type={maxAvailable === UNLIMITED ? 'repayFormAvailableBalanceUnlimited' : 'repayFormAvailableBalance'}
@@ -350,7 +350,7 @@ export function ExternalRepayForm({
             </Box>
           </Stack>
 
-          <Box paddingX={2}>
+          <Box>
             {destination === 'reserve' ? (
               <InlineFeedback status="default">
                 <Text variant="body2" color="statusDefault">

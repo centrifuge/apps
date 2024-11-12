@@ -122,7 +122,7 @@ function ActionButtons({ loan }: { loan: LoanType }) {
           </Button>
         ) : null}
         {loan.outstandingDebt.gtn(0) && (
-          <Button onClick={() => setRepayShown(true)} small variant="inverted">
+          <Button onClick={() => setRepayShown(true)} small variant="secondary">
             {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
           </Button>
         )}

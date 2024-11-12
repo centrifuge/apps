@@ -118,7 +118,7 @@ export function PoolDetailAssets() {
           },
           {
             label: `Accrued fees (${pool.currency.symbol})`,
-            value: `-${formatBalance(pool.fees.totalPaid)}`,
+            value: `${pool.fees.totalPaid.isZero() ? '' : '-'}${formatBalance(pool.fees.totalPaid)}`,
             heading: false,
           },
         ]

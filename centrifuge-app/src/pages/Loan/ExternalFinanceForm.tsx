@@ -248,7 +248,7 @@ export function ExternalFinanceForm({
               <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
             </ErrorMessage>
 
-            <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
+            <Stack gap={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
               <Text variant="heading4">Transaction summary</Text>
               <Box padding={2}>
                 <Stack gap={1} mb={3}>
