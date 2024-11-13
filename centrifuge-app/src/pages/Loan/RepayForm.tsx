@@ -99,7 +99,7 @@ function InternalRepayForm({
   const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
-  const loans = useLoans(loan.poolId)
+  const { data: loans } = useLoans(loan.poolId)
   const api = useCentrifugeApi()
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'

@@ -78,7 +78,7 @@ export function ExternalFinanceForm({
   const account = useBorrower(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  const loans = useLoans(loan.poolId)
+  const { data: loans } = useLoans(loan.poolId)
   const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
   const [transactionSuccess, setTransactionSuccess] = React.useState(false)

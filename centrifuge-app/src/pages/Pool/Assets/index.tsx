@@ -3,6 +3,7 @@ import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
+import { LoanListSkeleton } from '../../../../src/components/Skeletons/LoanListSkeleton'
 import { RouterTextLink } from '../../../../src/components/TextLink'
 import { useBasePath } from '../../../../src/utils/useBasePath'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -14,7 +15,7 @@ import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { usePool } from '../../../utils/usePools'
+import { useAllPoolAssetSnapshots, usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { OffchainMenu } from './OffchainMenu'
 
@@ -44,7 +45,8 @@ export function PoolDetailAssets() {
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId)
-  const loans = useLoans(poolId)
+  const { data: loans, isLoading } = useLoans(poolId)
+  const { isLoading: isLoadingSnapshots, data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toString())
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(
@@ -107,7 +109,7 @@ export function PoolDetailAssets() {
     ...(!isTinlakePool && cashLoans.length
       ? [
           {
-            label: <Tooltips label="Offchain cash (USD" type="offchainCash" />,
+            label: <Tooltips label="Offchain cash (USD)" type="offchainCash" />,
             value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
             heading: false,
           },
@@ -125,13 +127,15 @@ export function PoolDetailAssets() {
       : []),
   ]
 
+  if (isLoading || isLoadingSnapshots) return <LoanListSkeleton />
+
   return (
     <>
       <PageSummary data={pageSummaryData}>
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
       <Box paddingX={3}>
-        <LoanList loans={loans} />
+        <LoanList loans={loans} snapshots={snapshots} />
       </Box>
     </>
   )

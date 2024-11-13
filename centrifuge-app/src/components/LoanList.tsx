@@ -1,5 +1,5 @@
 import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
-import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { AssetSnapshot, CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -26,7 +26,7 @@ import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
-import { useAllPoolAssetSnapshots, usePool, usePoolMetadata } from '../utils/usePools'
+import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
 import { prefetchRoute } from './Root'
@@ -45,9 +45,10 @@ type Row = (Loan | TinlakeLoan) & {
 
 type Props = {
   loans: Loan[] | TinlakeLoan[]
+  snapshots: AssetSnapshot[]
 }
 
-export function LoanList({ loans }: Props) {
+export function LoanList({ loans, snapshots }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
   if (!poolId) throw new Error('Pool not found')
 
@@ -55,7 +56,6 @@ export function LoanList({ loans }: Props) {
   const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()
-  const snapshots = useAllPoolAssetSnapshots(pool.id, new Date().toString())
   const loansData = isTinlakePool
     ? loans
     : (loans ?? []).filter((loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash')

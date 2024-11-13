@@ -5,7 +5,7 @@ import { formatAge } from './date'
 import { useLoans } from './useLoans'
 
 export const useAverageMaturity = (poolId: string) => {
-  const loans = useLoans(poolId)
+  const { data: loans } = useLoans(poolId)
 
   const avgMaturity = React.useMemo(() => {
     const assets = (loans && [...loans].filter((asset) => asset.status === 'Active')) as ActiveLoan[]

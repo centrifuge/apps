@@ -2,12 +2,12 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import * as React from 'react'
 import { useQuery, useQueryClient } from 'react-query'
 import {
-  catchError,
-  firstValueFrom,
   MonoTypeOperatorFunction,
   Observable,
-  of,
   ReplaySubject,
+  catchError,
+  firstValueFrom,
+  of,
   retry,
   share,
   timer,
@@ -25,7 +25,7 @@ export function useCentrifugeQuery<T = any>(
   key: readonly unknown[],
   queryCallback: (cent: Centrifuge) => Observable<T>,
   options?: CentrifugeQueryOptions
-): [T | null | undefined, Observable<T | null> | undefined] {
+): [T | null | undefined, boolean] {
   const { suspense, enabled = true } = options || {}
   const cent = useCentrifuge()
   const centKey = useCentrifugeKey()
@@ -42,7 +42,7 @@ export function useCentrifugeQuery<T = any>(
     }
   )
 
-  const { data: queryData } = useQuery(
+  const { data: queryData, isLoading } = useQuery(
     ['queryData', centKey, ...key, !!$source],
     () => ($source ? firstValueFrom($source) : null),
     {
@@ -73,7 +73,7 @@ export function useCentrifugeQuery<T = any>(
     }
   }, [$source])
 
-  return [queryData, $source]
+  return [queryData, isLoading]
 }
 
 export function getQuerySource<T>(

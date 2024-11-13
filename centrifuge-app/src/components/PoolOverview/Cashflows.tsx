@@ -14,7 +14,7 @@ export const Cashflows = () => {
 
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
-  const loans = useLoans(poolId)
+  const { data: loans } = useLoans(poolId)
 
   const firstOriginationDate = loans?.reduce((acc, cur) => {
     if ('originationDate' in cur) {

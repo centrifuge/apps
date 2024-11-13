@@ -4,18 +4,18 @@ import { useTinlakeLoans } from './tinlake/useTinlakePools'
 
 export function useLoans(poolId: string) {
   const isTinlakePool = poolId?.startsWith('0x')
-  const [centLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
+  const [centLoans, isLoading] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     suspense: true,
     enabled: !isTinlakePool,
   })
 
   const { data: tinlakeLoans } = useTinlakeLoans(poolId)
 
-  return isTinlakePool ? tinlakeLoans : centLoans
+  return { data: isTinlakePool ? tinlakeLoans : centLoans, isLoading }
 }
 
 export function useLoan(poolId: string, assetId: string | undefined) {
-  const loans = useLoans(poolId || '')
+  const { data: loans } = useLoans(poolId || '')
   return loans?.find((loan) => loan.id === assetId)
 }
 

@@ -87,13 +87,6 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
           <WalletButton
             active={state.isOpen}
             title={wallet?.title || ''}
-            alias={
-              connectedType === 'evm'
-                ? ensName ?? undefined
-                : !substrate.selectedProxies
-                ? substrate.selectedAccount?.name
-                : undefined
-            }
             address={address}
             balance={balance ? formatBalanceAbbreviated(balance, symbol) : undefined}
             icon={

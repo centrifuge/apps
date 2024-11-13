@@ -15,7 +15,6 @@ export type WalletButtonProps = Omit<
   connectLabel?: string
   address?: string
   displayAddress?: string
-  alias?: string
   balance?: string
   icon?: IconTheme | React.ReactElement
 }
@@ -48,7 +47,6 @@ export function WalletButton({
   connectLabel = 'Connect wallet',
   address,
   displayAddress = address,
-  alias,
   balance,
   title,
   ...buttonProps
@@ -70,7 +68,7 @@ export function WalletButton({
         loadingMessage={loadingMessage}
         active={active}
       >
-        {title && alias ? (
+        {title ? (
           <Box position="relative" flex="1 1 auto">
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
               <Text
@@ -82,7 +80,7 @@ export function WalletButton({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {alias}
+                {title}
               </Text>
             </Shelf>
           </Box>

@@ -1,4 +1,5 @@
 import { Loan } from '@centrifuge/centrifuge-js'
+import { formatBalance } from '@centrifuge/centrifuge-react'
 import {
   Box,
   IconChevronDown,
@@ -49,14 +50,18 @@ const LoanOption = ({ loan }: LoanOptionProps) => {
     navigate(`${location.pathname}/${id}`)
   }
 
+  const getLabel = () => {
+    return (
+      <Box display="flex" alignItems="center">
+        <Text variant="heading4">{formatBalance('presentValue' in loan ? loan.presentValue : 0)} (USD)</Text>
+        <IconChevronRight size={20} />
+      </Box>
+    )
+  }
+
   return (
     <MenuItemGroup key={loan.id}>
-      <MenuItem
-        minHeight={24}
-        label={data?.name}
-        iconRight={<IconChevronRight size={20} />}
-        onClick={() => handleNavigate(loan.id)}
-      />
+      <MenuItem minHeight={24} label={data?.name} iconRight={getLabel()} onClick={() => handleNavigate(loan.id)} />
     </MenuItemGroup>
   )
 }
@@ -74,7 +79,7 @@ export const OffchainMenu = ({ value, loans }: Props) => {
         </Box>
       )}
       renderContent={(props, ref) => (
-        <Box ref={ref} {...props} width={364}>
+        <Box ref={ref} {...props} width={420}>
           <Menu backgroundColor="white" marginLeft="100px">
             {loans.map((loan) => (
               <LoanOption loan={loan} />
