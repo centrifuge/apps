@@ -55,7 +55,6 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const {
     evm,
     connectedType,
-    substrate,
     disconnect,
     showWallets,
     showAccounts,
