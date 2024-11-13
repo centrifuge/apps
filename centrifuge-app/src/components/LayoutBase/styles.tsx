@@ -142,7 +142,7 @@ export const WalletInner = styled(Stack)`
   height: 80px;
   justify-content: center;
   pointer-events: auto;
-  width: 236px;
+  width: 250px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
