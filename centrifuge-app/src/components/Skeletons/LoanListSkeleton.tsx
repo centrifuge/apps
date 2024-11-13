@@ -38,7 +38,7 @@ export const LoanListSkeleton = () => {
         {Array(5)
           .fill(null)
           .map((item, index) => (
-            <ShimmerBlock key={`skeleton-loan-list-${index}`} margin={2} height={58} />
+            <ShimmerBlock key={`skeleton-loan-list-${index}`} margin={2} height={58} borderRadius={8} />
           ))}
         <Box
           alignSelf="center"
