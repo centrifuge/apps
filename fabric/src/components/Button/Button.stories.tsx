@@ -68,13 +68,13 @@ AnchorButton.args = {
 export const WalletButton: WalletButtonStory = (args) => (
   <Grid columns={3} gap={3} justifyItems="stretch" equalColumns>
     <WalletButtonComp {...args} />
-    <WalletButtonComp {...args} address="kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF" balance="100 kUSD" />
     <WalletButtonComp
       {...args}
       address="kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF"
-      alias="Alice"
       balance="100 kUSD"
+      alias="Alice"
     />
+    <WalletButtonComp {...args} address="kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF" balance="100 kUSD" />
   </Grid>
 )
 WalletButton.args = {

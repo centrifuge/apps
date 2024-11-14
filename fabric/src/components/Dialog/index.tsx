@@ -70,11 +70,21 @@ function DialogInner({ children, isOpen, onClose, width = 'dialog', icon: IconCo
             <Stack>
               <Shelf gap={2}>
                 {IconComp && (isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp)}
-                {typeof title === 'string' ? <Text variant="heading2">{title}</Text> : title}
+                {typeof title === 'string' ? (
+                  <Text variant="heading1" fontWeight={700}>
+                    {title}
+                  </Text>
+                ) : (
+                  title
+                )}
 
                 <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
               </Shelf>
-              {subtitle && <Text variant="body2">{subtitle}</Text>}
+              {subtitle && (
+                <Text variant="heading4" color="textSecondary">
+                  {subtitle}
+                </Text>
+              )}
             </Stack>
             {children}
           </Stack>

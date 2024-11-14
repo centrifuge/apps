@@ -14,7 +14,7 @@ import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { usePool } from '../../../utils/usePools'
+import { useAllPoolAssetSnapshots, usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { OffchainMenu } from './OffchainMenu'
 
@@ -44,7 +44,8 @@ export function PoolDetailAssets() {
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId)
-  const loans = useLoans(poolId)
+  const { data: loans, isLoading } = useLoans(poolId)
+  const { isLoading: isLoadingSnapshots, data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toString())
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(
@@ -107,7 +108,7 @@ export function PoolDetailAssets() {
     ...(!isTinlakePool && cashLoans.length
       ? [
           {
-            label: <Tooltips label="Offchain cash (USD" type="offchainCash" />,
+            label: <Tooltips label="Offchain cash (USD)" type="offchainCash" />,
             value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
             heading: false,
           },
@@ -118,7 +119,7 @@ export function PoolDetailAssets() {
           },
           {
             label: `Accrued fees (${pool.currency.symbol})`,
-            value: `-${formatBalance(pool.fees.totalPaid)}`,
+            value: `${pool.fees.totalPaid.isZero() ? '' : '-'}${formatBalance(pool.fees.totalPaid)}`,
             heading: false,
           },
         ]
@@ -131,7 +132,7 @@ export function PoolDetailAssets() {
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
       <Box paddingX={3}>
-        <LoanList loans={loans} />
+        <LoanList loans={loans} snapshots={snapshots} />
       </Box>
     </>
   )

@@ -181,7 +181,7 @@ export function AssetList({ pool }: { pool: Pool }) {
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { symbol } = pool.currency
   const poolCreditType = poolMetadata?.pool?.asset.class || 'privateCredit'
-  const snapshots = useAllPoolAssetSnapshots(pool.id, startDate)
+  const { data: snapshots } = useAllPoolAssetSnapshots(pool.id, startDate)
   const isPrivate = poolCreditType === 'Private credit' || poolCreditType === 'privateCredit'
   const columnConfig = getColumnConfig(isPrivate, symbol)
 

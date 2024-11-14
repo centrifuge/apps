@@ -78,7 +78,7 @@ export function ExternalFinanceForm({
   const account = useBorrower(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  const loans = useLoans(loan.poolId)
+  const { data: loans } = useLoans(loan.poolId)
   const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
   const [transactionSuccess, setTransactionSuccess] = React.useState(false)
@@ -248,7 +248,7 @@ export function ExternalFinanceForm({
               <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
             </ErrorMessage>
 
-            <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
+            <Stack gap={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
               <Text variant="heading4">Transaction summary</Text>
               <Box padding={2}>
                 <Stack gap={1} mb={3}>

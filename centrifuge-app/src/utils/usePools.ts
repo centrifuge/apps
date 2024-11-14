@@ -161,7 +161,7 @@ export function useAssetSnapshots(poolId: string, loanId: string, from?: Date, t
 }
 
 export function useAllPoolAssetSnapshots(poolId: string, date: string) {
-  const [result] = useCentrifugeQuery(
+  const [result, isLoading] = useCentrifugeQuery(
     ['allAssetSnapshots', poolId, date],
     (cent) => cent.pools.getAllPoolAssetSnapshots([poolId, new Date(date)]),
     {
@@ -169,7 +169,7 @@ export function useAllPoolAssetSnapshots(poolId: string, date: string) {
     }
   )
 
-  return result
+  return { data: result, isLoading }
 }
 
 export function usePoolFees(poolId: string) {
@@ -204,7 +204,7 @@ export function useOracleTransactions(from?: Date, to?: Date) {
 
 export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
-  const loans = useLoans(poolId)
+  const { data: loans } = useLoans(poolId)
 
   if (!loans?.length || !pool) return new BN(0)
 

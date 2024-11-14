@@ -99,7 +99,7 @@ function InternalRepayForm({
   const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
-  const loans = useLoans(loan.poolId)
+  const { data: loans } = useLoans(loan.poolId)
   const api = useCentrifugeApi()
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
@@ -368,9 +368,9 @@ function InternalRepayForm({
             </Stack>
           </Box>
 
-          <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
+          <Stack gap={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
             <Text variant="heading4">Transaction summary</Text>
-            <Box paddingX={2} mt={2}>
+            <Box mt={2}>
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Tooltips

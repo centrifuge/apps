@@ -106,7 +106,7 @@ function InternalFinanceForm({
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
-  const loans = useLoans(loan.poolId)
+  const { data: loans } = useLoans(loan.poolId)
   const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
@@ -281,10 +281,30 @@ function InternalFinanceForm({
               </Stack>
             </Box>
 
-            <Stack gap={2} mt={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
+            <Stack gap={2} border={`1px solid ${theme.colors.borderPrimary}`} px={3} py={2} borderRadius={10}>
               <Text variant="heading4">Transaction summary</Text>
-              <Box padding={2}>
+              <Box>
                 <Stack gap={1} mb={3}>
+                  <Shelf justifyContent="space-between">
+                    <Tooltip
+                      body={
+                        maxAvailable === UNLIMITED
+                          ? 'Unlimited because this is a virtual accounting process.'
+                          : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
+                      }
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      <Text variant="body2" color="textSecondary">
+                        Available balance
+                      </Text>
+                    </Tooltip>
+                    <Text variant="heading4">
+                      {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+                    </Text>
+                  </Shelf>
+                </Stack>
+
+                <Stack gap={1}>
                   <Shelf justifyContent="space-between">
                     <Tooltip
                       body={

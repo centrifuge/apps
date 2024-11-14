@@ -1,7 +1,11 @@
 import styled, { css } from 'styled-components'
+interface IconActionProps {
+  size?: string
+}
 
-export const iconActionStyles = css`
-  --size: 22px;
+export const iconActionStyles = css<IconActionProps>`
+  --size: ${({ size }) => size || '22px'};
+  --icon-size: calc(var(--size) - 4px);
 
   appearance: none;
   display: block;
@@ -16,18 +20,18 @@ export const iconActionStyles = css`
   cursor: pointer;
 
   svg {
-    display: block;
-    width: 100%;
-    height: 100%;
+    width: var(--icon-size);
+    height: var(--icon-size);
     stroke: currentColor;
   }
 
   &:focus-visible,
   &:hover {
-    background-color: ${({ theme }) => theme.colors.blueScale[100]};
-    color: ${({ theme }) => theme.colors.accentPrimary};
+    background-color: ${({ theme }) => theme.colors.yellowScale[50]};
+    color: ${({ theme }) => theme.colors.textPrimary};
   }
 `
+
 export const IconAnchor = styled.a`
   ${iconActionStyles}
 `
@@ -37,4 +41,5 @@ export const IconButton = styled.button`
 `
 IconButton.defaultProps = {
   type: 'button',
+  size: '22px',
 }
