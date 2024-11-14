@@ -3,7 +3,6 @@ import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
-import { LoanListSkeleton } from '../../../../src/components/Skeletons/LoanListSkeleton'
 import { RouterTextLink } from '../../../../src/components/TextLink'
 import { useBasePath } from '../../../../src/utils/useBasePath'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -126,8 +125,6 @@ export function PoolDetailAssets() {
         ]
       : []),
   ]
-
-  if (isLoading || isLoadingSnapshots) return <LoanListSkeleton />
 
   return (
     <>
