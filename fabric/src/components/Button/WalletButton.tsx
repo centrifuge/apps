@@ -12,6 +12,7 @@ export type WalletButtonProps = Omit<
   VisualButtonProps & React.ComponentPropsWithoutRef<'button'>,
   'variant' | 'iconRight' | 'type' | 'children' | 'icon'
 > & {
+  alias?: string
   connectLabel?: string
   address?: string
   displayAddress?: string
@@ -38,6 +39,7 @@ const IdenticonWrapper = styled(Flex)({
 })
 
 export function WalletButton({
+  alias,
   icon = 'polkadot',
   small = true,
   disabled,
@@ -48,7 +50,6 @@ export function WalletButton({
   address,
   displayAddress = address,
   balance,
-  title,
   ...buttonProps
 }: WalletButtonProps) {
   return (
@@ -68,7 +69,7 @@ export function WalletButton({
         loadingMessage={loadingMessage}
         active={active}
       >
-        {title ? (
+        {alias ? (
           <Box position="relative" flex="1 1 auto">
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
               <Text
@@ -80,7 +81,7 @@ export function WalletButton({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {title}
+                {alias}
               </Text>
             </Shelf>
           </Box>
@@ -91,10 +92,10 @@ export function WalletButton({
             fontWeight={500}
             style={{ margin: address ? 0 : 'auto' }}
           >
-            {title || connectLabel}
+            {alias || connectLabel}
           </Text>
         )}
-        {title && balance && (
+        {alias && balance && (
           <Text variant="body3" color="textInverted" style={{ marginLeft: 'auto' }}>
             {balance}
           </Text>

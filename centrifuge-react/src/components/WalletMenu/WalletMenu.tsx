@@ -55,6 +55,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const {
     evm,
     connectedType,
+    substrate,
     disconnect,
     showWallets,
     showAccounts,
@@ -85,7 +86,13 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            title={wallet?.title || ''}
+            alias={
+              connectedType === 'evm'
+                ? ensName ?? undefined
+                : !substrate.selectedProxies
+                ? substrate.selectedAccount?.name
+                : undefined
+            }
             address={address}
             balance={balance ? formatBalanceAbbreviated(balance, symbol) : undefined}
             icon={
