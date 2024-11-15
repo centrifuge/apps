@@ -193,7 +193,7 @@ export function LoanList({ loans, snapshots }: Props) {
           {
             align: 'left',
             header: <SortableTableHeader label="Market price" />,
-            cell: (l: Row) => formatBalance(l.marketPrice ?? 0, pool.currency, 2, 0),
+            cell: (l: Row) => formatBalance(l.marketPrice ?? 0, pool.currency, 4, 0),
             sortKey: 'marketPrice',
           },
         ]),
