@@ -287,7 +287,7 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
   const renderTooltipBody = (networkName: string, tranches: Tranche[], baseUrl: string) => {
     const links = tranches.map((tranche) => ({
       text: `View Transactions`,
-      url: `${baseUrl}/token/${tranche.id}`,
+      url: baseUrl,
     }))
 
     return <TooltipBody title={networkName} links={links} />
