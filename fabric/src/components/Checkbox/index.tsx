@@ -106,6 +106,29 @@ const StyledCheckbox = styled.input`
   align-self: center;
   margin: -20px 0;
   cursor: pointer;
+  appearance: none;
+  border: 2px solid ${({ theme }) => theme.colors.borderPrimary};
+  border-radius: 4px;
+  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:checked {
+    background-color: ${({ theme }) => theme.colors.textGold};
+    border-color: ${({ theme }) => theme.colors.textGold};
+  }
+
+  &:checked::after {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 10px;
+    border: solid ${({ theme }) => theme.colors.backgroundPrimary};
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 3px;
+    left: 6px;
+  }
 
   &:focus-visible + span {
     display: block;

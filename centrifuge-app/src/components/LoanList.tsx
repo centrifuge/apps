@@ -4,6 +4,7 @@ import {
   AnchorButton,
   Box,
   Button,
+  Checkbox,
   IconDownload,
   Pagination,
   PaginationContainer,
@@ -63,6 +64,7 @@ export function LoanList({ loans, snapshots }: Props) {
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+  const [showRepaid, setShowRepaid] = React.useState(false)
 
   const additionalColumns: Column[] =
     templateMetadata?.keyAttributes?.map((key, index) => {
@@ -268,7 +270,17 @@ export function LoanList({ loans, snapshots }: Props) {
     <>
       <Box pt={1} pb={2} paddingX={1} display="flex" justifyContent="space-between" alignItems="center">
         <Text variant="heading4">{rows.filter((row) => !row.marketValue?.isZero()).length} ongoing assets</Text>
-        <Box display="flex">
+        <Box display="flex" alignItems="center">
+          <Box mr={2}>
+            <Checkbox
+              label={
+                <Text color="textSecondary" variant="body2">
+                  Show repaid assets
+                </Text>
+              }
+              onChange={(e) => setShowRepaid(!showRepaid)}
+            />
+          </Box>
           <Button
             variant="inverted"
             style={{ marginRight: 12 }}
@@ -295,7 +307,7 @@ export function LoanList({ loans, snapshots }: Props) {
           <LoadBoundary>
             <Box overflow="auto">
               <DataTable
-                data={rows}
+                data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
                 columns={columns}
                 onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
                 pageSize={20}
