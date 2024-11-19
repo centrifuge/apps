@@ -69,7 +69,7 @@ export function WalletButton({
         loadingMessage={loadingMessage}
         active={active}
       >
-        {alias ? (
+        {alias && address ? (
           <Box position="relative" flex="1 1 auto">
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
               <Text
@@ -92,10 +92,10 @@ export function WalletButton({
             fontWeight={500}
             style={{ margin: address ? 0 : 'auto' }}
           >
-            {alias || connectLabel}
+            {displayAddress ? truncate(displayAddress) : connectLabel}
           </Text>
         )}
-        {alias && balance && (
+        {address && balance && (
           <Text variant="body3" color="textInverted" style={{ marginLeft: 'auto' }}>
             {balance}
           </Text>
