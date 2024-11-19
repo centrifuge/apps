@@ -285,15 +285,15 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
   const pool = usePool(poolId)
 
   const renderTooltipBody = (networkName: string, tranches: Tranche[], baseUrl: string) => {
-    const links = tranches.map((tranche, index) => {
-      const tokenAddress = activeDomains?.data?.find((domain) => domain.trancheTokens[tranche.id])?.trancheTokens[
-        tranche.id
-      ]
-      return {
+    const links = tranches
+      .map(
+        (tranche) => activeDomains?.data?.find((domain) => domain.trancheTokens[tranche.id])?.trancheTokens[tranche.id]
+      )
+      .filter(Boolean)
+      .map((tokenAddress) => ({
         text: `View Transactions`,
         url: `${baseUrl}token/${tokenAddress}`,
-      }
-    })
+      }))
 
     return <TooltipBody title={networkName} links={links} />
   }
