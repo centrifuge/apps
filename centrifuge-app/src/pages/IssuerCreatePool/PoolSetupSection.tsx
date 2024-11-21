@@ -299,6 +299,7 @@ export const PoolSetupSection = () => {
               value="centrifuge"
               id="centrifugeOnboarding"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+              styles={{ marginTop: 1 }}
             />
             <CheckboxOption
               height={44}
@@ -320,23 +321,28 @@ export const PoolSetupSection = () => {
           <Box>
             <Field name="subscriptionDocuments">
               {({ field, meta, form }: FieldProps) => (
-                <FileUpload
-                  name="subscriptionDocuments"
-                  file={field.value}
-                  onFileChange={async (file) => {
-                    form.setFieldTouched('poolIcon', true, false)
-                    form.setFieldValue('poolIcon', file)
-                  }}
-                  label="Click to upload"
-                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                  accept="application/pdf"
-                  small
-                />
+                <Box>
+                  <FileUpload
+                    name="subscriptionDocuments"
+                    file={field.value}
+                    onFileChange={async (file) => {
+                      form.setFieldTouched('poolIcon', true, false)
+                      form.setFieldValue('poolIcon', file)
+                    }}
+                    label="Click to upload"
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    accept="application/pdf"
+                    small
+                  />
+                </Box>
               )}
             </Field>
             <Box mt={8}>
               <Text variant="heading4">Tax document requirement</Text>
-              <Checkbox label="Require investors to upload tax documents before signing the subscription agreement." />
+              <Checkbox
+                label="Require investors to upload tax documents before signing the subscription agreement."
+                variant="square"
+              />
             </Box>
           </Box>
         </StyledGrid>
