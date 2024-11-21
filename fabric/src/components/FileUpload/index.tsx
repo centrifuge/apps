@@ -31,7 +31,7 @@ const FormField = styled.input`
 
 const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: boolean; small?: boolean }>`
   position: relative;
-  height: ${({ small }) => (small ? '44px' : '144px')};
+  height: ${({ small }) => (small ? '40px' : '144px')};
   background-color: #ffffff;
   border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
   border-radius: ${({ theme }) => theme.radii.input}px;
