@@ -203,15 +203,15 @@ export const PoolSetupSection = () => {
             {form.values.poolFees.map((_, index) => (
               <Box mt={4} mb={3} key={index}>
                 <StyledGrid mt={3} gap={1}>
-                  {/* Pool Fees Header with Trash Icon */}
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Text variant="heading3">Pool fees {index + 1}</Text>
-                    <IconButton onClick={() => remove(index)}>
-                      <IconTrash color="textSecondary" />
-                    </IconButton>
+                    {form.values.poolFees.length > 1 && (
+                      <IconButton onClick={() => remove(index)}>
+                        <IconTrash color="textSecondary" />
+                      </IconButton>
+                    )}
                   </Box>
                   <Line />
-                  {/* Fee Fields */}
                   <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
                     <FieldWithErrorMessage
                       as={TextInput}
