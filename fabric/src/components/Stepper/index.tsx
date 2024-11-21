@@ -1,7 +1,6 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { Box } from '../Box'
-import { Grid } from '../Grid'
 import { Text } from '../Text'
 
 type EnrichedStepProps = {
@@ -11,121 +10,98 @@ type EnrichedStepProps = {
   count?: number
   setActiveStep?: React.Dispatch<number> | null
   maxStep?: number
+  direction?: 'row' | 'column'
 }
 
 type StepProps = {
   label?: string
   empty?: boolean
+  isStepCompleted?: boolean
 }
 
 type StepperProps = {
   activeStep: number
   setActiveStep: React.Dispatch<number> | null
   children: React.ReactNode
+  direction?: 'row' | 'column'
 }
-
-const getStepColor = (isActive: boolean, empty: boolean) => {
-  if (isActive) {
-    return 'textPrimary'
-  }
-  if (empty) {
-    return 'borderPrimary'
-  }
-  return 'transparent'
-}
-
-const counterSize = 28
-const spaceDefault = 30
-const spaceActive = 80
 
 const List = styled(Box)`
   list-style: none;
   counter-reset: step-counter;
 `
 
-const ListItem = styled(Grid)<{ isActive?: boolean; empty?: boolean; isFinal?: boolean }>`
-  --duration: 0.15s;
-  counter-increment: step-counter;
-
-  position: relative;
-  place-content: center;
-  place-items: center;
-  justify-items: start;
-  transition: margin-bottom var(--duration);
-
-  &::before {
-    content: counter(step-counter);
-    width: ${counterSize}px;
-    height: ${counterSize}px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: ${({ empty, isActive, theme }) => (theme.colors as any)[getStepColor(!!isActive, !!empty)]};
-    border: 2px solid;
-    border-color: ${({ theme, isActive }) => (isActive ? theme.colors.textPrimary : theme.colors.borderPrimary)};
-    border-radius: 50%;
-    color: ${({ theme, isActive }) => (isActive ? theme.colors.backgroundPrimary : theme.colors.borderPrimary)};
-    transition: background-color var(--duration) linear, border-color var(--duration) linear,
-      color var(--duration) linear;
-  }
-
-  &::after {
-    content: '';
-    display: ${({ isFinal }) => (isFinal ? 'none' : 'block')};
-    position: absolute;
-    top: 100%;
-    left: ${counterSize * 0.5}px;
-    height: ${({ isActive, isFinal }) => (isActive && !isFinal ? spaceActive : spaceDefault)}px;
-    width: 2px;
-    background-color: ${({ theme, isActive }) => (isActive ? theme.colors.textPrimary : theme.colors.borderPrimary)};
-    transition: height var(--duration), background-color var(--duration) linear;
-  }
+const ListItem = styled(Box)<{ isActive?: boolean; empty?: boolean; isFinal?: boolean }>`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `
 
-const Hitearea = styled.button`
-  --offset: 10px;
-
-  position: absolute;
-  top: calc(var(--offset) * -1);
-  left: calc(var(--offset) * -1);
-  width: calc(100% + var(--offset) * 2);
-  height: calc(100% + var(--offset) * 2);
-  appearance: none;
-  background-color: transparent;
+const Hitearea = styled.button<{ direction?: string }>`
   border: none;
-  border-radius: ${({ theme }) => theme.radii.input}px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   cursor: pointer;
-
-  &:focus-visible {
-    outline: ${({ theme }) => `2px solid ${theme.colors.accentPrimary}`};
-  }
 `
+
+const Number = styled(Text)<{ isActive?: boolean; done: boolean }>`
+  background-color: ${({ theme, isActive, done }) =>
+    isActive && !done ? theme.colors.textGold : done ? theme.colors.statusOkBg : 'transparent'};
+  border: ${({ theme, isActive, done }) =>
+    isActive && !done
+      ? `1px solid ${theme.colors.textGold}`
+      : done
+      ? `1px solid ${theme.colors.statusOk}`
+      : `1.73px solid ${theme.colors.backgroundButtonPrimaryDisabled}`};
+  border-radius: 100%;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  padding-top: 8px;
+  font-weight: 500;
+`
+
+const Line = ({ direction }: { direction: 'row' | 'column' }) => {
+  const theme = useTheme()
+  return (
+    <Box
+      borderTop={direction === 'row' ? `2px dashed ${theme.colors.backgroundButtonPrimaryDisabled}` : 'none'}
+      borderLeft={direction === 'column' ? `2px dashed ${theme.colors.backgroundButtonPrimaryDisabled}` : 'none'}
+      width={direction === 'row' ? '140px' : 0}
+      height={direction === 'column' ? 80 : 0}
+      mt={direction === 'row' ? 2 : 3}
+      mb={direction === 'row' ? 0 : 3}
+    />
+  )
+}
 
 export const Step = (props: StepProps & EnrichedStepProps) => {
-  const { isActive, count, isFinal, activeStep, label, empty, setActiveStep, maxStep } = props
-  const isClickable = (count as number) + 1 < (activeStep as number) || (count as number) + 1 <= (maxStep as number)
+  const { isActive, count, label, empty, setActiveStep, direction } = props
 
   return (
-    <ListItem
-      forwardedAs="li"
-      gridTemplateColumns={`${counterSize}px 1fr`}
-      gap={2}
-      height={counterSize}
-      mb={isActive && !isFinal ? spaceActive : spaceDefault}
-      {...{ empty, isActive, isFinal }}
+    <Box
+      display="flex"
+      flexDirection={direction || 'column'}
+      alignItems={direction === 'row' ? 'flex-start' : 'center'}
     >
-      <Text as="h3" fontSize={18} lineHeight={1.2}>
-        {label}
-      </Text>
-      {!empty && isClickable && setActiveStep && (
+      <ListItem forwardedAs="li">
         <Hitearea
-          title={`Step ${(count as number) + 1}`}
+          direction={direction}
           onClick={() => {
-            setActiveStep((count as number) + 1)
+            !empty && setActiveStep && setActiveStep((count as number) + 1)
           }}
-        />
-      )}
-    </ListItem>
+        >
+          <Number variant="body3" isActive={isActive} done={props.isStepCompleted}>
+            {count ? count + 1 : 1}
+          </Number>
+          <Text as="h3" variant="heading4" style={{ marginTop: 8 }}>
+            {label}
+          </Text>
+        </Hitearea>
+      </ListItem>
+    </Box>
   )
 }
 
@@ -154,21 +130,25 @@ export const Stepper = (props: StepperProps) => {
 
   const stepItems = steps.map((step, index) => {
     if (React.isValidElement(step)) {
-      return React.cloneElement(step as React.ReactElement<EnrichedStepProps & StepProps>, {
-        key: index,
-        activeStep: props.activeStep,
-        isFinal: index === stepsCount - 1,
-        isActive: index === props.activeStep - 1,
-        count: index,
-        setActiveStep: props.setActiveStep,
-        maxStep: maxStep.current,
-      })
+      return (
+        <React.Fragment key={index}>
+          {React.cloneElement(step as React.ReactElement<EnrichedStepProps & StepProps>, {
+            activeStep: props.activeStep,
+            isActive: index === props.activeStep - 1,
+            count: index,
+            setActiveStep: props.setActiveStep,
+            maxStep: maxStep.current,
+            direction: props.direction,
+          })}
+          {index !== stepsCount - 1 && <Line direction={props.direction || 'column'} />}
+        </React.Fragment>
+      )
     }
     return step
   })
 
   return (
-    <List as="ol" role="list">
+    <List as="ol" role="list" display="flex" flexDirection={props.direction || 'column'} justifyContent="space-evenly">
       {stepItems}
     </List>
   )
