@@ -33,7 +33,7 @@ export function PoolLink({ pool, path = 'issuer' }: PoolLinkProps) {
     <Root
       forwardedAs={Link}
       to={to}
-      variant="interactive1"
+      variant="body2"
       isActive={match && pool.id === match.params.pid}
       onMouseOver={() => prefetchRoute(to)}
     >
