@@ -639,14 +639,6 @@ export type DailyPoolState = {
   sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
-interface TrancheFormValues {
-  tokenName: string
-  symbolName: string
-  interestRate: number | ''
-  minRiskBuffer: number | ''
-  minInvestment: number | ''
-  targetAPY?: string | ''
-}
 
 export type IssuerDetail = {
   title: string
@@ -663,28 +655,45 @@ export type PoolReport = {
   }
   uri: string
 }
+interface TrancheFormValues {
+  tokenName: string
+  symbolName: string
+  interestRate: number | ''
+  minRiskBuffer: number | ''
+  minInvestment: number | ''
+  apy: string | ''
+}
 
 export interface PoolMetadataInput {
-  // details
-  poolIcon: FileType | null
-  poolName: string
+  // pool structure
+  poolStructure: string
   assetClass: 'Public credit' | 'Private credit'
   subAssetClass: string
-  currency: string
+
+  // pool structure -> tranches
+  tranches: TrancheFormValues[]
+
+  // details
+  assetDenomination: string
+  investorType: string
+  poolIcon: FileType | null
   maxReserve: number | ''
+  issuerName: string
+  issuerLogo?: FileType | null
+  issuerRepName: string
+  issuerShortDescription: string
+  issuerDescription: string
+  issuerCategories: { type: string; value: string; customType?: string }[]
+  website: string
+  forum: string
+  email: string
+  executiveSummary: FileType | null
+  details?: IssuerDetail[]
+
+  currency: string
   epochHours: number | ''
   epochMinutes: number | ''
   listed?: boolean
-  investorType: string
-  poolStructure: string
-
-  // issuer
-  issuerName: string
-  issuerRepName: string
-  issuerLogo?: FileType | null
-  issuerDescription: string
-  issuerShortDescription: string
-  issuerCategories: { type: string; value: string; customType?: string }[]
 
   poolReport?: {
     authorName: string
@@ -698,15 +707,6 @@ export interface PoolMetadataInput {
     reportUrl?: string
     reportFile?: FileType | null
   }[]
-
-  executiveSummary: FileType | null
-  website: string
-  forum: string
-  email: string
-  details?: IssuerDetail[]
-
-  // tranche
-  tranches: TrancheFormValues[]
 
   adminMultisig?: {
     signers: string[]
