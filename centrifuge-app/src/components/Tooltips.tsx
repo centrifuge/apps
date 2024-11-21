@@ -346,6 +346,18 @@ export const tooltipText = {
     label: 'Total NAV',
     body: 'Total nav minus accrued fees',
   },
+  oneTranche: {
+    label: '',
+    body: 'This pool will only have one investment class where all investors share the same level of risk and return.',
+  },
+  twoTranches: {
+    label: '',
+    body: 'This pool will have two classes. Senior tranche which has priority in receiving returns. And Junior tranche which is the last to receive returns (after Senior tranche obligations are met) but receives higher yield as compensation for the higher risk.',
+  },
+  threeTranches: {
+    label: '',
+    body: 'This pool will have three classes. Senior tranche is the safest tranche with priority in repayment. Mezzanine tranche has intermediate risk and receives payment after Senior tranche obligations are met. Junior tranche which only receives returns after both Senior and Mezzanine tranches are paid.',
+  },
 }
 
 export type TooltipsProps = {
