@@ -61,7 +61,7 @@ export const CheckboxOption = ({
   name: string
   label: string
   sublabel?: string
-  value: string | number
+  value: string | number | boolean
   disabled?: boolean
   icon?: React.ReactNode
   id?: keyof typeof tooltipText
@@ -88,7 +88,7 @@ export const CheckboxOption = ({
             {...field}
             errorMessage={meta.touched && meta.error ? meta.error : undefined}
             label={label}
-            value={value}
+            value={value.toString()}
             disabled={disabled}
             onChange={(val) => form.setFieldValue(name, val.target.checked ? value : null)}
             onBlur={field.onBlur}

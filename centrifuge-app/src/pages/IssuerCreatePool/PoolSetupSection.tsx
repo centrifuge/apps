@@ -1,7 +1,6 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import {
   Box,
-  Button,
   Checkbox,
   FileUpload,
   Grid,
@@ -14,7 +13,7 @@ import {
   Text,
   TextInput,
 } from '@centrifuge/fabric'
-import { Field, FieldProps, useFormikContext } from 'formik'
+import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
@@ -39,14 +38,9 @@ export const PoolSetupSection = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Text variant="heading2" fontWeight={700}>
-          Management setup
-        </Text>
-        <Button small style={{ width: 163 }}>
-          Disable
-        </Button>
-      </Box>
+      <Text variant="heading2" fontWeight={700}>
+        Management setup
+      </Text>
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Pool managers*</Text>
@@ -57,29 +51,47 @@ export const PoolSetupSection = () => {
           <Box>
             <Text variant="body2">Security requirement</Text>
             <CheckboxOption
-              height={44}
-              name="securityRequirement"
+              height={40}
+              name="adminMultisigEnabled"
               label="Single"
-              value="single"
+              value={false}
+              id="singleMultisign"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
             <CheckboxOption
-              height={44}
-              name="securityRequirement"
+              height={40}
+              name="adminMultisigEnabled"
               label="Multi-sig"
-              value="multi"
+              value={true}
+              id="multiMultisign"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
           </Box>
-          <Grid gap={2}>
+          <Box>
             <Text variant="body2">Wallet addresses</Text>
-            <Field name="walletAddress">
-              {({ field, form }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
-            </Field>
-            <Field name="walletAddress">
-              {({ field, form }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
-            </Field>
-          </Grid>
+            <FieldArray name="adminMultisig.signers">
+              {({ push }) => (
+                <>
+                  {form.values.adminMultisig?.signers?.map((_, index) => (
+                    <Box key={index} mt={2}>
+                      <Field name={`adminMultisig.signers.${index}`}>
+                        {({ field }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
+                      </Field>
+                    </Box>
+                  ))}
+                  <Box display="flex" justifyContent="flex-end" mt={2}>
+                    <AddButton
+                      onClick={() => {
+                        if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                          push('')
+                        }
+                      }}
+                    />
+                  </Box>
+                </>
+              )}
+            </FieldArray>
+          </Box>
         </StyledGrid>
       </Box>
       <Box mt={2} mb={2}>
@@ -88,12 +100,18 @@ export const PoolSetupSection = () => {
             {({ field, meta, form }: FieldProps) => (
               <Select
                 name="subAssetClass"
-                label="Configuration change threshold (1 out of 2 managers)"
+                label={`Configuration change threshold (1 out of ${Math.max(
+                  values?.adminMultisig?.signers?.length ?? 0,
+                  1
+                )} managers)`}
                 onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
                 onBlur={field.onBlur}
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 value={field.value}
-                options={[{ value: '1', label: 1 }]}
+                options={form.values.adminMultisig.signers.map((_: string, i: number) => ({
+                  label: i + 1,
+                  value: i + 1,
+                }))}
                 placeholder="Select..."
               />
             )}
@@ -109,25 +127,35 @@ export const PoolSetupSection = () => {
       </Box>
 
       <Box mt={4} mb={3}>
-        <Text variant="heading2">Pool delegates</Text>
-        <Text variant="body2" color="textSecondary">
-          Pool managers can authorize additional addresses to perform designated pool actions.
-        </Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <Grid>
-            <Text color="textSecondary" variant="body3">
-              Add or remove addresses that can:
-            </Text>
-            <Field name="walletAddress">
-              {({ field, form }: FieldProps) => (
-                <TextInput label="Originate assets and invest in the pool*" placeholder="Type address..." {...field} />
-              )}
-            </Field>
-          </Grid>
-          <Box display="flex" alignItems="flex-end" justifyContent="flex-end">
-            <AddButton />
-          </Box>
-        </StyledGrid>
+        <FieldArray name="assetOriginators">
+          {({ push }) => (
+            <StyledGrid gridTemplateColumns={['3fr 1fr']} gap={2}>
+              <Box gridColumn="1 / span 1">
+                <Text color="textSecondary" variant="body3">
+                  Add or remove addresses that can:
+                </Text>
+                <Text variant="heading2">Originate assets and invest in the pool*</Text>
+                {form.values.assetOriginators?.map((_: string, index: number) => (
+                  <Box key={index} mt={2}>
+                    <Field name={`assetOriginators.${index}`}>
+                      {({ field }: FieldProps) => <TextInput placeholder="Type address..." {...field} />}
+                    </Field>
+                  </Box>
+                ))}
+              </Box>
+
+              <Box gridColumn="2 / span 1" alignSelf="end">
+                <AddButton
+                  onClick={() => {
+                    if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                      push('')
+                    }
+                  }}
+                />
+              </Box>
+            </StyledGrid>
+          )}
+        </FieldArray>
       </Box>
 
       <Box mt={4} mb={3}>
@@ -169,94 +197,95 @@ export const PoolSetupSection = () => {
         </StyledGrid>
       </Box>
 
-      {values.poolFees.map((s, index) => (
-        <Box mt={4} mb={3}>
-          <StyledGrid mt={3} gap={1}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Text variant="heading3">Pool fees {index + 1}</Text>
-              <IconButton>
-                <IconTrash color="textSecondary" />
-              </IconButton>
+      <FieldArray name="poolFees">
+        {({ push, remove }) => (
+          <>
+            {form.values.poolFees.map((_, index) => (
+              <Box mt={4} mb={3} key={index}>
+                <StyledGrid mt={3} gap={1}>
+                  {/* Pool Fees Header with Trash Icon */}
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Text variant="heading3">Pool fees {index + 1}</Text>
+                    <IconButton onClick={() => remove(index)}>
+                      <IconTrash color="textSecondary" />
+                    </IconButton>
+                  </Box>
+                  <Line />
+                  {/* Fee Fields */}
+                  <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
+                    <FieldWithErrorMessage
+                      as={TextInput}
+                      label="Name"
+                      maxLength={30}
+                      name={`poolFees.${index}.name`}
+                      placeholder="Type here..."
+                    />
+                    <Field name={`poolFees.${index}.category`}>
+                      {({ field, meta }: FieldProps) => (
+                        <Select
+                          name="category"
+                          label="Category"
+                          onChange={(event) => form.setFieldValue(`poolFees.${index}.category`, event.target.value)}
+                          onBlur={field.onBlur}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          value={field.value}
+                          options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                        />
+                      )}
+                    </Field>
+                    <Field name={`poolFees.${index}.feePosition`}>
+                      {({ field, meta }: FieldProps) => (
+                        <Select
+                          label="Fee position"
+                          name={`poolFees.${index}.feePosition`}
+                          onChange={(event) => form.setFieldValue(`poolFees.${index}.feePosition`, event.target.value)}
+                          onBlur={field.onBlur}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          value={field.value}
+                          options={FEE_POSISTIONS}
+                        />
+                      )}
+                    </Field>
+                    <Field name={`poolFees.${index}.feeType`}>
+                      {({ field, meta }: FieldProps) => (
+                        <Select
+                          label="Fee type"
+                          name={`poolFees.${index}.feeType`}
+                          onChange={(event) => form.setFieldValue(`poolFees.${index}.feeType`, event.target.value)}
+                          onBlur={field.onBlur}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          value={field.value}
+                          options={FEE_TYPES}
+                        />
+                      )}
+                    </Field>
+                    <FieldWithErrorMessage
+                      as={NumberInput}
+                      label="Max fees in % of NAV"
+                      symbol="%"
+                      name={`poolFees.${index}.percentOfNav`}
+                      placeholder="Type here..."
+                    />
+                    <FieldWithErrorMessage
+                      as={TextInput}
+                      label="Wallet address"
+                      name={`poolFees.${index}.walletAddress`}
+                      placeholder="Type here..."
+                    />
+                  </Grid>
+                </StyledGrid>
+              </Box>
+            ))}
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <AddButton
+                onClick={() =>
+                  push({ name: '', category: '', feePosition: '', feeType: '', percentOfNav: '', walletAddress: '' })
+                }
+              />
             </Box>
-            <Line />
-            <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
-              <FieldWithErrorMessage
-                as={TextInput}
-                label="Name"
-                maxLength={30}
-                name={`poolFees.${index}.name`}
-                key={index}
-                placeholder="Type here..."
-              />
-              <Field name={`poolFees.${index}.category`}>
-                {({ field, form, meta }: FieldProps) => (
-                  <Select
-                    name="category"
-                    label="Category"
-                    onChange={(event) => form.setFieldValue(`poolFees.${index}.category`, event.target.value)}
-                    onBlur={field.onBlur}
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    value={field.value}
-                    options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
-                  />
-                )}
-              </Field>
-              <Field name={`poolFees.${index}.feePosition`}>
-                {({ field, meta }: FieldProps) => {
-                  return (
-                    <Select
-                      label="Fee position"
-                      name={`poolFees.${index}.feePosition`}
-                      onChange={(event) => {
-                        form.setFieldValue(`poolFees.${index}.feePosition`, event.target.value)
-                      }}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={FEE_POSISTIONS}
-                    />
-                  )
-                }}
-              </Field>
-
-              <Field name={`poolFees.${index}.feeType`}>
-                {({ field, meta }: FieldProps) => {
-                  return (
-                    <Select
-                      label="Fee type"
-                      name={`poolFees.${index}.feeType`}
-                      onChange={(event) => {
-                        form.setFieldValue(`poolFees.${index}.feeType`, event.target.value)
-                      }}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={FEE_TYPES}
-                    />
-                  )
-                }}
-              </Field>
-              <FieldWithErrorMessage
-                as={NumberInput}
-                label="Max fees in % of NAV"
-                symbol="%"
-                name={`poolFees.${index}.percentOfNav`}
-                placeholder="Type here..."
-              />
-              <FieldWithErrorMessage
-                as={TextInput}
-                label="Wallet address"
-                name={`poolFees.${index}.walletAddress`}
-                placeholder="Type here..."
-              />
-            </Grid>
-          </StyledGrid>
-        </Box>
-      ))}
-
-      <Box alignSelf="flex-end" mt={3} mb={3} display="flex" justifyContent="flex-end">
-        <AddButton />
-      </Box>
+          </>
+        )}
+      </FieldArray>
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Investor onboarding</Text>
@@ -265,23 +294,26 @@ export const PoolSetupSection = () => {
             <Text variant="heading4">Onboarding experience</Text>
             <CheckboxOption
               height={44}
-              name="centrifuge"
+              name="onboardingExperience"
               label="Centrifuge onboarding"
               value="centrifuge"
+              id="centrifugeOnboarding"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
             <CheckboxOption
               height={44}
-              name="external"
+              name="onboardingExperience"
               label="External"
               value="external"
+              id="externalOnboarding"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
             <CheckboxOption
               height={44}
-              name="none"
+              name="onboardingExperience"
               label="None"
               value="none"
+              id="noneOnboarding"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
           </Box>
