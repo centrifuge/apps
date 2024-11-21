@@ -10,15 +10,22 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string | React.ReactElement
   errorMessage?: string
   extendedClickArea?: boolean
+  variant?: 'square' | 'round'
 }
 
-export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxProps }: CheckboxProps) {
+export function Checkbox({
+  label,
+  errorMessage,
+  extendedClickArea,
+  variant = 'round',
+  ...checkboxProps
+}: CheckboxProps) {
   return (
     <Box position="relative">
       <StyledLabel $extendedClickArea={!!extendedClickArea}>
         <Shelf as={Text} gap={1} alignItems="center" position="relative">
           <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
-            <StyledCheckbox type="checkbox" {...checkboxProps} />
+            <StyledCheckbox type="checkbox" $variant={variant} {...checkboxProps} />
             <StyledOutline />
           </StyledWrapper>
           {label && (
@@ -52,6 +59,8 @@ export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxPr
 const StyledLabel = styled.label<{ $extendedClickArea: boolean }>`
   cursor: pointer;
   user-select: none;
+  display: flex;
+  align-items: center;
 
   &:before {
     --offset: 10px;
@@ -74,6 +83,73 @@ const StyledLabel = styled.label<{ $extendedClickArea: boolean }>`
   }
 `
 
+const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
+  position: relative;
+  align-items: center;
+
+  &::before {
+    content: '.';
+    width: 0;
+    visibility: hidden;
+    align-self: center;
+  }
+`
+
+const StyledCheckbox = styled.input<{ $variant: 'square' | 'round' }>`
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  border-radius: ${({ $variant }) => ($variant === 'square' ? '2px' : '50%')};
+  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  ${({ $variant, theme }) =>
+    $variant === 'round' &&
+    `
+      &:checked {
+        border-color: ${theme.colors.textPrimary};
+      }
+
+      &:checked::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: ${theme.colors.textPrimary};
+      }
+    `}
+
+  ${({ $variant, theme }) =>
+    $variant === 'square' &&
+    `
+      &:checked {
+        border-color: ${theme.colors.borderSecondary};
+        background-color: ${theme.colors.textGold};
+      }
+
+      &:checked::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 5px;
+        width: 6px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    `}
+
+  &:focus-visible {
+    outline: none;
+  }
+`
+
 const StyledOutline = styled.span`
   display: none;
   pointer-events: none;
@@ -86,51 +162,5 @@ const StyledOutline = styled.span`
   height: auto;
   margin: auto;
   border: 2px solid var(--fabric-focus);
-  border-radius: 4px;
-`
-
-const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
-  position: relative;
-
-  &::before {
-    content: '.';
-    width: 0;
-    visibility: hidden;
-    align-self: center;
-  }
-`
-
-const StyledCheckbox = styled.input`
-  width: 18px;
-  height: 18px;
-  align-self: center;
-  margin: -20px 0;
-  cursor: pointer;
-  appearance: none;
-  border: 2px solid ${({ theme }) => theme.colors.borderPrimary};
-  border-radius: 4px;
-  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-
-  &:checked {
-    background-color: ${({ theme }) => theme.colors.textGold};
-    border-color: ${({ theme }) => theme.colors.textGold};
-  }
-
-  &:checked::after {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 10px;
-    border: solid ${({ theme }) => theme.colors.backgroundPrimary};
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    position: absolute;
-    top: 3px;
-    left: 6px;
-  }
-
-  &:focus-visible + span {
-    display: block;
-  }
+  border-radius: 100%;
 `
