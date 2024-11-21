@@ -12,10 +12,10 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
-import { createEmptyTranche } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
+import { createEmptyTranche } from './types'
 import { validate } from './validate'
 
 const MAX_TRANCHES = 3
