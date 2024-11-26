@@ -17,11 +17,9 @@ import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
-import { feeCategories, isTestEnv } from '../../../src/config'
+import { feeCategories } from '../../../src/config'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
-
-const MAX_FEES = 5
 
 const FEE_TYPES = [
   { label: 'Direct charge', value: 'chargedUpTo' },
@@ -34,7 +32,6 @@ export const PoolSetupSection = () => {
   const theme = useTheme()
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
-  const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 
   return (
     <Box>
