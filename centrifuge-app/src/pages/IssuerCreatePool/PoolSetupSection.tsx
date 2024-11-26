@@ -72,22 +72,32 @@ export const PoolSetupSection = () => {
             <FieldArray name="adminMultisig.signers">
               {({ push }) => (
                 <>
-                  {form.values.adminMultisig?.signers?.map((_, index) => (
-                    <Box key={index} mt={2}>
-                      <Field name={`adminMultisig.signers.${index}`}>
+                  {values.adminMultisigEnabled ? (
+                    values.adminMultisig?.signers?.map((_, index) => (
+                      <Box key={index} mt={2}>
+                        <Field name={`adminMultisig.signers.${index}`}>
+                          {({ field }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
+                        </Field>
+                      </Box>
+                    ))
+                  ) : (
+                    <Box mt={2}>
+                      <Field name={`adminMultisig.signers.0`}>
                         {({ field }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
                       </Field>
                     </Box>
-                  ))}
-                  <Box display="flex" justifyContent="flex-end" mt={2}>
-                    <AddButton
-                      onClick={() => {
-                        if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
-                          push('')
-                        }
-                      }}
-                    />
-                  </Box>
+                  )}
+                  {values.adminMultisigEnabled && (
+                    <Box display="flex" justifyContent="flex-end" mt={2}>
+                      <AddButton
+                        onClick={() => {
+                          if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                            push('')
+                          }
+                        }}
+                      />
+                    </Box>
+                  )}
                 </>
               )}
             </FieldArray>
