@@ -44,6 +44,9 @@ export type CreatePoolValues = Omit<
   // pool details
   poolType: 'open' | 'closed'
   issuerCategories: { type: string; value: string }[]
+  poolIcon: File
+  issuerLogo: File
+  executiveSummary: File
 
   reportAuthorName: string
   reportAuthorTitle: string

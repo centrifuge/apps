@@ -20,6 +20,7 @@ import {
   positiveNumber,
   required,
 } from '../../utils/validation'
+import { CreatePoolValues } from './types'
 
 export const MB = 1024 ** 2
 
@@ -83,7 +84,7 @@ export const validate = {
   penaltyInterest: combine(required(), nonNegativeNumber(), max(100)),
 }
 
-export const validateValues = (values) => {
+export const validateValues = (values: CreatePoolValues) => {
   let errors: FormikErrors<any> = {}
 
   const tokenNames = new Set<string>()
