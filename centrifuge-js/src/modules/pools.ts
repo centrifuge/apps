@@ -713,12 +713,11 @@ export interface PoolMetadataInput {
     signers: string[]
     threshold: number
   }
-
   poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
-
   poolType: 'open' | 'closed'
-
   adminMultisigEnabled: boolean
+  onboardingExperience: string
+  assetOriginators: string[]
 }
 
 export type WithdrawAddress = {

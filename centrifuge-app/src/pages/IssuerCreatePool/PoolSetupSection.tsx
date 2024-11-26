@@ -325,33 +325,35 @@ export const PoolSetupSection = () => {
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
           </Box>
-          <Box>
-            <Field name="subscriptionDocuments">
-              {({ field, meta, form }: FieldProps) => (
-                <Box>
-                  <FileUpload
-                    name="subscriptionDocuments"
-                    file={field.value}
-                    onFileChange={async (file) => {
-                      form.setFieldTouched('poolIcon', true, false)
-                      form.setFieldValue('poolIcon', file)
-                    }}
-                    label="Click to upload"
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    accept="application/pdf"
-                    small
-                  />
-                </Box>
-              )}
-            </Field>
-            <Box mt={8}>
-              <Text variant="heading4">Tax document requirement</Text>
-              <Checkbox
-                label="Require investors to upload tax documents before signing the subscription agreement."
-                variant="square"
-              />
+          {values.onboardingExperience === 'centrifuge' && (
+            <Box>
+              <Field name="subscriptionDocuments">
+                {({ field, meta, form }: FieldProps) => (
+                  <Box>
+                    <FileUpload
+                      name="subscriptionDocuments"
+                      file={field.value}
+                      onFileChange={async (file) => {
+                        form.setFieldTouched('poolIcon', true, false)
+                        form.setFieldValue('poolIcon', file)
+                      }}
+                      label="Click to upload"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      accept="application/pdf"
+                      small
+                    />
+                  </Box>
+                )}
+              </Field>
+              <Box mt={8}>
+                <Text variant="heading4">Tax document requirement</Text>
+                <Checkbox
+                  label="Require investors to upload tax documents before signing the subscription agreement."
+                  variant="square"
+                />
+              </Box>
             </Box>
-          </Box>
+          )}
         </StyledGrid>
       </Box>
     </Box>
