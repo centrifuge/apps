@@ -39,7 +39,7 @@ const IssuerCreatePoolPage = () => {
   const [stepCompleted, setStepCompleted] = useState({ 1: false, 2: false, 3: false })
 
   const form = useFormik({
-    initialValues: initialValues,
+    initialValues,
     validate: (values) => validateValues(values),
     validateOnMount: true,
     onSubmit: () => console.log('a'),

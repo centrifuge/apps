@@ -259,6 +259,11 @@ function CreatePoolForm() {
           cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
         ]).pipe(
           switchMap(([api, poolSubmittable]) => {
+            // BATCH https://polkadot.js.org/docs/kusama/extrinsics/#batchcalls-veccall
+            api.tx.utlity
+              .batch
+              // create pool current functionality + pure proxy functionality goes here
+              ()
             const adminProxyDelegates = multisigAddr
               ? [multisigAddr]
               : (adminMultisig && values.adminMultisig?.signers?.filter((addr) => addr !== address)) ?? []

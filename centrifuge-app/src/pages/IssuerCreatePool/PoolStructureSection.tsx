@@ -57,15 +57,17 @@ export const CheckboxOption = ({
   sublabel,
   id,
   height,
+  styles,
 }: {
   name: string
   label: string
   sublabel?: string
-  value: string | number
+  value: string | number | boolean
   disabled?: boolean
   icon?: React.ReactNode
   id?: keyof typeof tooltipText
   height?: number
+  styles?: React.CSSProperties
 }) => {
   const theme = useTheme()
 
@@ -81,6 +83,7 @@ export const CheckboxOption = ({
       justifyContent={icon ? 'space-between' : 'center'}
       height={height || 70}
       alignItems={icon ? 'center' : 'flex-start'}
+      {...styles}
     >
       <Field name={name} validate={validate[name as keyof typeof validate]}>
         {({ field, form, meta }: FieldProps) => (
@@ -88,7 +91,7 @@ export const CheckboxOption = ({
             {...field}
             errorMessage={meta.touched && meta.error ? meta.error : undefined}
             label={label}
-            value={value}
+            value={value.toString()}
             disabled={disabled}
             onChange={(val) => form.setFieldValue(name, val.target.checked ? value : null)}
             onBlur={field.onBlur}

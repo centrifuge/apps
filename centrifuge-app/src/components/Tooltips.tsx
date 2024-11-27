@@ -358,6 +358,26 @@ export const tooltipText = {
     label: '',
     body: 'This pool will have three classes. Senior tranche is the safest tranche with priority in repayment. Mezzanine tranche has intermediate risk and receives payment after Senior tranche obligations are met. Junior tranche which only receives returns after both Senior and Mezzanine tranches are paid.',
   },
+  singleMultisign: {
+    label: '',
+    body: 'Setup a wallet where only one private key is required to authorise changes to the pool configuration.',
+  },
+  multiMultisign: {
+    label: '',
+    body: 'Setup a wallet that requires multiple private keys to authorise changes to the pool configuration.',
+  },
+  centrifugeOnboarding: {
+    label: '',
+    body: 'Investors will go through the Centrifuge onboarding provider, Shuftipro, before they can invest in your pool.',
+  },
+  externalOnboarding: {
+    label: '',
+    body: 'You can select the provider you want to KYC/onboard your investors.',
+  },
+  noneOnboarding: {
+    label: '',
+    body: 'You can directly whitelist the addresses that can invest in the pool.',
+  },
 }
 
 export type TooltipsProps = {

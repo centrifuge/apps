@@ -16,13 +16,15 @@ const PROVIDERS = [
   { label: 'Other', value: 'other' },
 ]
 
-const LabelWithDeleteButton = ({ onDelete }: { onDelete: () => void }) => {
+const LabelWithDeleteButton = ({ onDelete, hideButton }: { onDelete: () => void; hideButton: boolean }) => {
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">
       <Text variant="heading4">Name of provider</Text>
-      <IconButton onClick={onDelete}>
-        <IconTrash color="textSecondary" />
-      </IconButton>
+      {!hideButton && (
+        <IconButton onClick={onDelete}>
+          <IconTrash color="textSecondary" />
+        </IconButton>
+      )}
     </Box>
   )
 }
@@ -56,7 +58,12 @@ export const IssuerCategoriesSection = () => {
                     {({ field, meta }: FieldProps) => (
                       <TextInput
                         {...field}
-                        label={<LabelWithDeleteButton onDelete={() => remove(index)} />}
+                        label={
+                          <LabelWithDeleteButton
+                            onDelete={() => remove(index)}
+                            hideButton={form.values.issuerCategories.length === 1}
+                          />
+                        }
                         placeholder="Type here..."
                         maxLength={100}
                       />
