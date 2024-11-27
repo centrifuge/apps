@@ -1,4 +1,4 @@
-import { FeeTypes, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import { isTestEnv } from '../../config'
 
 export interface Tranche {
@@ -19,7 +19,7 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
   tokenName: trancheName,
   symbolName: '',
   interestRate: 0,
-  minRiskBuffer: trancheName === 'Junior' ? '' : 0,
+  minRiskBuffer: trancheName === 'Junio' ? '' : 0,
   minInvestment: 1000,
   apy: '90d',
 })
@@ -33,54 +33,20 @@ export const createPoolFee = () => ({
   walletAddress: '',
 })
 
-export type CreatePoolValues = Omit<
-  PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport' | 'poolRatings'
-> & {
+export type CreatePoolValues = Omit<PoolMetadataInput, 'adminMultisig'> & {
   // pool structure
   assetDenomination: string
-  trancheStructure: 1 | 2 | 3
-
-  // pool details
-  poolType: 'open' | 'closed'
-  issuerCategories: { type: string; value: string }[]
-  poolIcon: File
-  issuerLogo: File
-  executiveSummary: File
-
-  reportAuthorName: string
-  reportAuthorTitle: string
-  reportAuthorAvatar: File | null
-  reportUrl: string
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
-  poolFees: {
-    id?: number
-    name: string
-    feeType: FeeTypes
-    percentOfNav: number | ''
-    walletAddress: string
-    feePosition: 'Top of waterfall'
-    category: string
-  }[]
-  poolRatings: {
-    agency?: string
-    value?: string
-    reportUrl?: string
-    reportFile?: File | null
-  }[]
 }
 
 export const initialValues: CreatePoolValues = {
   // pool structure
   poolStructure: 'revolving',
-  trancheStructure: 1,
   assetClass: 'Private credit',
   assetDenomination: '',
   subAssetClass: '',
-
-  // pool structure -> tranches
-  tranches: [createEmptyTranche('')],
+  tranches: [createEmptyTranche('Junior')],
 
   // pool details section
   poolName: '',

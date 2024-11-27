@@ -327,24 +327,32 @@ export const PoolSetupSection = () => {
           </Box>
           {values.onboardingExperience === 'centrifuge' && (
             <Box>
-              <Field name="subscriptionDocuments">
-                {({ field, meta, form }: FieldProps) => (
+              <FieldArray name="tranches">
+                {({ form }) => (
                   <Box>
-                    <FileUpload
-                      name="subscriptionDocuments"
-                      file={field.value}
-                      onFileChange={async (file) => {
-                        form.setFieldTouched('poolIcon', true, false)
-                        form.setFieldValue('poolIcon', file)
-                      }}
-                      label="Click to upload"
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      accept="application/pdf"
-                      small
-                    />
+                    {form.values.tranches.map((tranche, index) => (
+                      <Field key={index} name={`subscriptionDocuments[${index}]`}>
+                        {({ field, meta }: FieldProps) => (
+                          <Box mb={4}>
+                            <FileUpload
+                              name={`subscriptionDocuments[${index}]`}
+                              file={field.value}
+                              onFileChange={async (file) => {
+                                form.setFieldTouched(`subscriptionDocuments[${index}]`, true, false)
+                                form.setFieldValue(`subscriptionDocuments[${index}]`, file)
+                              }}
+                              label={`Subscription document for ${tranche.trancheName}`}
+                              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                              accept="application/pdf"
+                              small
+                            />
+                          </Box>
+                        )}
+                      </Field>
+                    ))}
                   </Box>
                 )}
-              </Field>
+              </FieldArray>
               <Box mt={8}>
                 <Text variant="heading4">Tax document requirement</Text>
                 <Checkbox

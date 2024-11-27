@@ -665,59 +665,55 @@ interface TrancheFormValues {
 }
 
 export interface PoolMetadataInput {
-  // pool structure
-  poolStructure: string
+  // structure
+  poolStructure: 'revolving'
   assetClass: 'Public credit' | 'Private credit'
   subAssetClass: string
-
-  // pool structure -> tranches
   tranches: TrancheFormValues[]
 
   // details
   poolName: string
-  assetDenomination: string
   investorType: string
   poolIcon: FileType | null
+  poolType: 'open' | 'closed'
   maxReserve: number | ''
   issuerName: string
+  issuerRepName?: string
   issuerLogo?: FileType | null
-  issuerRepName: string
   issuerShortDescription: string
   issuerDescription: string
-  issuerCategories: { type: string; value: string; customType?: string }[]
-  website: string
-  forum: string
-  email: string
-  executiveSummary: FileType | null
+  website?: string | ''
+  forum?: string | ''
+  email?: string | ''
+  executiveSummary?: FileType | null
   details?: IssuerDetail[]
-
-  currency: string
-  epochHours: number | ''
-  epochMinutes: number | ''
-  listed?: boolean
-
-  poolReport?: {
-    authorName: string
-    authorTitle: string
-    authorAvatar: FileType | null
-    url: string
-  }
+  issuerCategories: { type: string; value: string; description?: string }[]
   poolRatings: {
     agency?: string
     value?: string
     reportUrl?: string
     reportFile?: FileType | null
   }[]
+  poolReport?: {
+    authorName: string
+    authorTitle: string
+    authorAvatar: FileType | null
+    url: string
+  }
 
+  // setup
   adminMultisig?: {
     signers: string[]
     threshold: number
   }
   poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
-  poolType: 'open' | 'closed'
   adminMultisigEnabled: boolean
-  onboardingExperience: string
   assetOriginators: string[]
+  onboardingExperience: string
+  onboarding?: {
+    tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
+    taxInfoRequired?: boolean
+  }
 }
 
 export type WithdrawAddress = {

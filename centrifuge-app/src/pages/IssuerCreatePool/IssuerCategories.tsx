@@ -1,5 +1,5 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, IconButton, IconTrash, Select, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Grid, IconButton, IconTrash, Select, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
@@ -40,20 +40,28 @@ export const IssuerCategoriesSection = () => {
             <>
               {form.values.issuerCategories.map((_, index) => (
                 <>
-                  <Field name={`issuerCategories.${index}.type`}>
-                    {({ field, meta }: FieldProps) => (
-                      <Select
-                        name={field.name}
-                        label="Type"
-                        onChange={(event) => form.setFieldValue(field.name, event.target.value)}
-                        onBlur={field.onBlur}
-                        value={field.value}
-                        options={PROVIDERS}
-                        placeholder="Please select..."
-                      />
+                  <Grid gridTemplateColumns={['1fr', _.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
+                    <Field name={`issuerCategories.${index}.type`}>
+                      {({ field, meta }: FieldProps) => (
+                        <Select
+                          name={field.name}
+                          label="Type"
+                          onChange={(event) => form.setFieldValue(field.name, event.target.value)}
+                          onBlur={field.onBlur}
+                          value={field.value}
+                          options={PROVIDERS}
+                          placeholder="Please select..."
+                        />
+                      )}
+                    </Field>
+                    {_.type === 'other' && (
+                      <Field name={`issuerCategories.${index}.description`}>
+                        {({ field, meta }: FieldProps) => (
+                          <TextInput {...field} label="Description" placeholder="Type here..." maxLength={100} />
+                        )}
+                      </Field>
                     )}
-                  </Field>
-
+                  </Grid>
                   <Field name={`issuerCategories.${index}.value`}>
                     {({ field, meta }: FieldProps) => (
                       <TextInput

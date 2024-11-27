@@ -1,12 +1,8 @@
 import {
   AddFee,
-  CurrencyBalance,
   CurrencyKey,
-  FileType,
   isSameAddress,
-  Perquintill,
   PoolMetadataInput,
-  Rate,
   TrancheInput,
   TransactionOptions,
 } from '@centrifuge/centrifuge-js'
@@ -15,7 +11,7 @@ import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import { Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
-import { combineLatest, firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
+import { combineLatest, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import {
   useAddress,
@@ -26,7 +22,6 @@ import {
 } from '../../../../centrifuge-react'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { Dec } from '../../../src/utils/Decimal'
-import { getFileDataURI } from '../../../src/utils/getFileDataURI'
 import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
 import { usePoolCurrencies } from '../../../src/utils/useCurrencies'
 import { useIsAboveBreakpoint } from '../../../src/utils/useIsAboveBreakpoint'
@@ -140,10 +135,8 @@ const IssuerCreatePoolPage = () => {
         ]).pipe(
           switchMap(([api, poolSubmittable]) => {
             // BATCH https://polkadot.js.org/docs/kusama/extrinsics/#batchcalls-veccall
-            api.tx.utlity
-              .batch
-              // create pool current functionality + pure proxy functionality goes here
-              ()
+            api.tx.utlity.batch()
+
             const adminProxyDelegates = multisigAddr
               ? [multisigAddr]
               : (adminMultisig && values.adminMultisig?.signers?.filter((addr) => addr !== address)) ?? []
@@ -202,9 +195,13 @@ const IssuerCreatePoolPage = () => {
     validate: (values) => validateValues(values),
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
+      const poolId = await centrifuge.pools.getAvailablePoolId()
       if (!currencies || !address) return
 
       const metadataValues: PoolMetadataInput = { ...values } as any
+
+      // find the currency (asset denomination in UI)
+      const currency = currencies.find((c) => c.symbol === values.currency)!
 
       // Handle admin multisig
       metadataValues.adminMultisig =
@@ -215,133 +212,131 @@ const IssuerCreatePoolPage = () => {
             }
           : undefined
 
-      // Get the currency for the pool
-      const currency = currencies.find((c) => c.symbol === values.currency)!
+      // // Get the currency for the pool
 
-      // Pool ID and required assets
-      const poolId = await centrifuge.pools.getAvailablePoolId()
-      if (!values.poolIcon) {
-        return
-      }
+      // // Pool ID and required assets
+      // if (!values.poolIcon) {
+      //   return
+      // }
 
-      const pinFile = async (file: File): Promise<FileType> => {
-        const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(file)))
-        return { uri: pinned.uri, mime: file.type }
-      }
+      // const pinFile = async (file: File): Promise<FileType> => {
+      //   const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(file)))
+      //   return { uri: pinned.uri, mime: file.type }
+      // }
 
-      // Handle pinning files (pool icon, issuer logo, and executive summary)
-      const promises = [pinFile(values.poolIcon)]
+      // // Handle pinning files (pool icon, issuer logo, and executive summary)
+      // const promises = [pinFile(values.poolIcon)]
 
-      if (values.issuerLogo) {
-        promises.push(pinFile(values.issuerLogo))
-      }
+      // if (values.issuerLogo) {
+      //   promises.push(pinFile(values.issuerLogo))
+      // }
 
-      if (values.executiveSummary) {
-        promises.push(pinFile(values.executiveSummary))
-      }
+      // if (values.executiveSummary) {
+      //   promises.push(pinFile(values.executiveSummary))
+      // }
 
-      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
+      // const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
 
-      metadataValues.issuerLogo = pinnedIssuerLogo?.uri
-        ? { uri: pinnedIssuerLogo.uri, mime: values?.issuerLogo?.type || '' }
-        : null
+      // metadataValues.issuerLogo = pinnedIssuerLogo?.uri
+      //   ? { uri: pinnedIssuerLogo.uri, mime: values?.issuerLogo?.type || '' }
+      //   : null
 
-      metadataValues.executiveSummary = values.executiveSummary
-        ? { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
-        : null
+      // metadataValues.executiveSummary = values.executiveSummary
+      //   ? { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+      //   : null
 
-      metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
+      // metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
-      // Handle pool report if available
-      if (values.reportUrl) {
-        let avatar = null
-        if (values.reportAuthorAvatar) {
-          const pinned = await pinFile(values.reportAuthorAvatar)
-          avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
-        }
-        metadataValues.poolReport = {
-          authorAvatar: avatar,
-          authorName: values.reportAuthorName,
-          authorTitle: values.reportAuthorTitle,
-          url: values.reportUrl,
-        }
-      }
+      // // Handle pool report if available
+      // if (values.reportUrl) {
+      //   let avatar = null
+      //   if (values.reportAuthorAvatar) {
+      //     const pinned = await pinFile(values.reportAuthorAvatar)
+      //     avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
+      //   }
+      //   metadataValues.poolReport = {
+      //     authorAvatar: avatar,
+      //     authorName: values.reportAuthorName,
+      //     authorTitle: values.reportAuthorTitle,
+      //     url: values.reportUrl,
+      //   }
+      // }
 
-      // Handle pool ratings
-      if (values.poolRatings) {
-        const newRatingReportPromise = await Promise.all(
-          values.poolRatings.map((rating) => (rating.reportFile ? pinFile(rating.reportFile) : null))
-        )
-        const ratings = values.poolRatings.map((rating, index) => {
-          let reportFile: FileType | null = rating.reportFile
-            ? { uri: rating.reportFile.name, mime: rating.reportFile.type }
-            : null
-          if (rating.reportFile && newRatingReportPromise[index]?.uri) {
-            reportFile = newRatingReportPromise[index] ?? null
-          }
-          return {
-            agency: rating.agency ?? '',
-            value: rating.value ?? '',
-            reportUrl: rating.reportUrl ?? '',
-            reportFile: reportFile ?? null,
-          }
-        })
-        metadataValues.poolRatings = ratings
-      }
+      // // Handle pool ratings
+      // if (values.poolRatings) {
+      //   const newRatingReportPromise = await Promise.all(
+      //     values.poolRatings.map((rating) => (rating.reportFile ? pinFile(rating.reportFile) : null))
+      //   )
+      //   const ratings = values.poolRatings.map((rating, index) => {
+      //     let reportFile: FileType | null = rating.reportFile
+      //       ? { uri: rating.reportFile.name, mime: rating.reportFile.type }
+      //       : null
+      //     if (rating.reportFile && newRatingReportPromise[index]?.uri) {
+      //       reportFile = newRatingReportPromise[index] ?? null
+      //     }
+      //     return {
+      //       agency: rating.agency ?? '',
+      //       value: rating.value ?? '',
+      //       reportUrl: rating.reportUrl ?? '',
+      //       reportFile: reportFile ?? null,
+      //     }
+      //   })
+      //   metadataValues.poolRatings = ratings
+      // }
 
-      // Organize tranches
-      const nonJuniorTranches = metadataValues.tranches.slice(1)
-      const tranches = [
-        {},
-        ...nonJuniorTranches.map((tranche) => ({
-          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
-          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
-        })),
-      ]
+      // // Organize tranches
+      // const nonJuniorTranches = metadataValues.tranches.slice(1)
+      // const tranches = [
+      //   {},
+      //   ...nonJuniorTranches.map((tranche) => ({
+      //     interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
+      //     minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
+      //   })),
+      // ]
 
-      // Pool fees
-      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
-      const poolFees: AddFee['fee'][] = values.poolFees.map((fee, i) => {
-        return {
-          name: fee.name,
-          destination: fee.walletAddress,
-          amount: Rate.fromPercent(fee.percentOfNav),
-          feeType: fee.feeType,
-          limit: 'ShareOfPortfolioValuation',
-          account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
-          feePosition: fee.feePosition,
-        }
-      })
-      metadataValues.poolFees = poolFees.map((fee, i) => ({
-        name: fee.name,
-        id: feeId + i,
-        feePosition: fee.feePosition,
-        feeType: fee.feeType,
-      }))
+      // // Pool fees
+      // const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
+      // const poolFees: AddFee['fee'][] = values.poolFees.map((fee, i) => {
+      //   return {
+      //     name: fee.name,
+      //     destination: fee.walletAddress,
+      //     amount: Rate.fromPercent(fee.percentOfNav),
+      //     feeType: fee.feeType,
+      //     limit: 'ShareOfPortfolioValuation',
+      //     account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
+      //     feePosition: fee.feePosition,
+      //   }
+      // })
+      // metadataValues.poolFees = poolFees.map((fee, i) => ({
+      //   name: fee.name,
+      //   id: feeId + i,
+      //   feePosition: fee.feePosition,
+      //   feeType: fee.feeType,
+      // }))
 
-      if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
-        addMultisig(metadataValues.adminMultisig)
-      }
+      // if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
+      //   addMultisig(metadataValues.adminMultisig)
+      // }
 
-      createProxies([
-        (aoProxy, adminProxy) => {
-          createPoolTx(
-            [
-              values,
-              CurrencyBalance.fromFloat(createDeposit, chainDecimals),
-              aoProxy,
-              adminProxy,
-              poolId,
-              tranches,
-              currency.key,
-              CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
-              metadataValues,
-              poolFees,
-            ],
-            { createType }
-          )
-        },
-      ])
+      // createProxies([
+      //   (aoProxy, adminProxy) => {
+      //     createPoolTx(
+      //       [
+      //         values,
+      //         CurrencyBalance.fromFloat(createDeposit, chainDecimals),
+      //         aoProxy,
+      //         adminProxy,
+      //         poolId,
+      //         tranches,
+      //         currency.key,
+      //         CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
+      //         metadataValues,
+      //         poolFees,
+      //       ],
+      //       { createType }
+      //     )
+      //   },
+      // ])
     },
   })
 
