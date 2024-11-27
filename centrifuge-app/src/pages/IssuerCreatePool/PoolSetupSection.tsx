@@ -33,6 +33,8 @@ export const PoolSetupSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
 
+  console.log(values)
+
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -88,7 +90,7 @@ export const PoolSetupSection = () => {
                     <Box display="flex" justifyContent="flex-end" mt={2}>
                       <AddButton
                         onClick={() => {
-                          if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                          if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
                             push('')
                           }
                         }}
@@ -115,7 +117,7 @@ export const PoolSetupSection = () => {
                 onBlur={field.onBlur}
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 value={field.value}
-                options={form.values.adminMultisig.signers.map((_: string, i: number) => ({
+                options={values.adminMultisig.signers.map((_: string, i: number) => ({
                   label: i + 1,
                   value: i + 1,
                 }))}
@@ -142,7 +144,7 @@ export const PoolSetupSection = () => {
                   Add or remove addresses that can:
                 </Text>
                 <Text variant="heading2">Originate assets and invest in the pool*</Text>
-                {form.values.assetOriginators?.map((_: string, index: number) => (
+                {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
                     <Field name={`assetOriginators.${index}`}>
                       {({ field }: FieldProps) => <TextInput placeholder="Type address..." {...field} />}
@@ -154,7 +156,7 @@ export const PoolSetupSection = () => {
               <Box gridColumn="2 / span 1" alignSelf="end">
                 <AddButton
                   onClick={() => {
-                    if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                    if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
                       push('')
                     }
                   }}
@@ -207,12 +209,12 @@ export const PoolSetupSection = () => {
       <FieldArray name="poolFees">
         {({ push, remove }) => (
           <>
-            {form.values.poolFees.map((_, index) => (
+            {values.poolFees.map((_, index) => (
               <Box mt={4} mb={3} key={index}>
                 <StyledGrid mt={3} gap={1}>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Text variant="heading3">Pool fees {index + 1}</Text>
-                    {form.values.poolFees.length > 1 && (
+                    {values.poolFees.length > 1 && (
                       <IconButton onClick={() => remove(index)}>
                         <IconTrash color="textSecondary" />
                       </IconButton>
@@ -330,7 +332,7 @@ export const PoolSetupSection = () => {
               <FieldArray name="tranches">
                 {({ form }) => (
                   <Box>
-                    {form.values.tranches.map((tranche, index) => (
+                    {values.tranches.map((tranche, index) => (
                       <Field key={index} name={`subscriptionDocuments[${index}]`}>
                         {({ field, meta }: FieldProps) => (
                           <Box mb={4}>
@@ -341,7 +343,7 @@ export const PoolSetupSection = () => {
                                 form.setFieldTouched(`subscriptionDocuments[${index}]`, true, false)
                                 form.setFieldValue(`subscriptionDocuments[${index}]`, file)
                               }}
-                              label={`Subscription document for ${tranche.trancheName}`}
+                              label={`Subscription document for ${tranche.tokenName}`}
                               errorMessage={meta.touched && meta.error ? meta.error : undefined}
                               accept="application/pdf"
                               small
