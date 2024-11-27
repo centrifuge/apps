@@ -679,13 +679,13 @@ export interface PoolMetadataInput {
   maxReserve: number | ''
   issuerName: string
   issuerRepName: string
-  issuerLogo: FileType | null
+  issuerLogo: FileType
   issuerShortDescription: string
   issuerDescription: string
   website: string
   forum: string
   email: string
-  executiveSummary?: FileType | null
+  executiveSummary: FileType | null
   details?: IssuerDetail[]
   issuerCategories: { type: string; value: string; description?: string }[]
   poolRatings: {
@@ -714,6 +714,10 @@ export interface PoolMetadataInput {
     tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
     taxInfoRequired?: boolean
   }
+
+  listed?: boolean
+  epochHours: number | ''
+  epochMinutes: number | ''
 }
 
 export type WithdrawAddress = {
