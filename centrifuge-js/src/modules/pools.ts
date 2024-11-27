@@ -674,17 +674,17 @@ export interface PoolMetadataInput {
   // details
   poolName: string
   investorType: string
-  poolIcon: FileType | null
+  poolIcon: FileType
   poolType: 'open' | 'closed'
   maxReserve: number | ''
   issuerName: string
-  issuerRepName?: string
-  issuerLogo?: FileType | null
+  issuerRepName: string
+  issuerLogo: FileType | null
   issuerShortDescription: string
   issuerDescription: string
-  website?: string | ''
-  forum?: string | ''
-  email?: string | ''
+  website: string
+  forum: string
+  email: string
   executiveSummary?: FileType | null
   details?: IssuerDetail[]
   issuerCategories: { type: string; value: string; description?: string }[]

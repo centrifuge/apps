@@ -201,7 +201,7 @@ const IssuerCreatePoolPage = () => {
       const metadataValues: PoolMetadataInput = { ...values } as any
 
       // find the currency (asset denomination in UI)
-      const currency = currencies.find((c) => c.symbol === values.currency)!
+      const currency = currencies.find((c) => c.symbol === values.assetDenomination)!
 
       // Handle admin multisig
       metadataValues.adminMultisig =
@@ -390,6 +390,14 @@ const IssuerCreatePoolPage = () => {
               <Step label="Pool setup" />
             </Stepper>
           </Box>
+          {step === 1 && (
+            <Box px={2} py={2} display="flex" justifyContent="center" backgroundColor="statusInfoBg">
+              <Text variant="body3">
+                A deposit of <b>1100 CFG</b> is required to create this pool. Please make sure you have sufficient funds
+                in your wallet.
+              </Text>
+            </Box>
+          )}
           <StyledBox padding="48px 80px 0px 80px">
             {step === 1 && <PoolStructureSection />}
             {step === 2 && <PoolDetailsSection />}
