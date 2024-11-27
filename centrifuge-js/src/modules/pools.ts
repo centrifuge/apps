@@ -674,6 +674,7 @@ export interface PoolMetadataInput {
   tranches: TrancheFormValues[]
 
   // details
+  poolName: string
   assetDenomination: string
   investorType: string
   poolIcon: FileType | null
@@ -716,7 +717,10 @@ export interface PoolMetadataInput {
   poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
 
   poolType: 'open' | 'closed'
+
+  adminMultisigEnabled: boolean
 }
+
 export type WithdrawAddress = {
   name?: string
   address: string
@@ -776,7 +780,7 @@ export type PoolMetadata = {
     {
       icon?: FileType | null
       minInitialInvestment?: string
-      targetAPY?: string // only junior tranche (index: 0) has targetAPY
+      apy: string
     }
   >
   loanTemplates?: {
@@ -1118,7 +1122,7 @@ export function getPoolsModule(inst: Centrifuge) {
     metadata.tranches.forEach((tranche, index) => {
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
-        targetAPY: tranche.targetAPY,
+        apy: tranche.apy,
       }
     })
 

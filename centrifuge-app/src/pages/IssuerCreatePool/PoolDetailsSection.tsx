@@ -11,7 +11,6 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
-import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
@@ -27,7 +26,6 @@ export const AddButton = ({ onClick }: { onClick: () => void }) => (
 )
 
 export const PoolDetailsSection = () => {
-  const theme = useTheme()
   const form = useFormikContext<PoolMetadataInput>()
   const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 

@@ -102,8 +102,9 @@ export const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
+  assetOriginators: [''],
   adminMultisig: {
-    signers: [],
+    signers: ['', ''],
     threshold: 1,
   },
   adminMultisigEnabled: false,
