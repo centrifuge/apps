@@ -267,7 +267,8 @@ const IssuerCreatePoolPage = () => {
         return {
           trancheType,
           metadata: {
-            tokenName: tranche.tokenName,
+            tokenName:
+              metadataValues.tranches.length > 1 ? `${metadataValues.poolName} ${tranche.tokenName}` : 'Junior',
             tokenSymbol: tranche.symbolName,
           },
         }
@@ -312,6 +313,16 @@ const IssuerCreatePoolPage = () => {
       if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
         addMultisig(metadataValues.adminMultisig)
       }
+
+      // Onboarding
+      if (metadataValues.onboardingExperience === 'none') {
+        metadataValues.onboarding = {
+          taxInfoRequired: metadataValues.onboarding?.taxInfoRequired,
+          tranches: {},
+        }
+      }
+
+      console.log(metadataValues)
 
       // createProxies([
       //   (aoProxy, adminProxy) => {

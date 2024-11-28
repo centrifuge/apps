@@ -40,6 +40,10 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
       background-color: ${COLOR};
       color: white;
     }
+
+    &:active {
+      border-color: transparent;
+    }
   }
 `
 

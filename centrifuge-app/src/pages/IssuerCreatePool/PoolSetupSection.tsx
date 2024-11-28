@@ -28,6 +28,27 @@ const FEE_TYPES = [
 
 const FEE_POSISTIONS = [{ label: 'Top of waterfall', value: 'Top of waterfall' }]
 
+const TaxDocument = () => {
+  const form = useFormikContext<PoolMetadataInput>()
+
+  return (
+    <Box mt={2}>
+      <Text variant="heading4">Tax document requirement</Text>
+
+      <Field name="onboarding">
+        {({ field }: FieldProps) => (
+          <Checkbox
+            {...field}
+            label="Require investors to upload tax documents before signing the subscription agreement."
+            variant="square"
+            onChange={(val) => form.setFieldValue('onboarding.taxInfoRequired', val.target.checked ? true : false)}
+          />
+        )}
+      </Field>
+    </Box>
+  )
+}
+
 export const PoolSetupSection = () => {
   const theme = useTheme()
   const form = useFormikContext<PoolMetadataInput>()
@@ -327,39 +348,54 @@ export const PoolSetupSection = () => {
           </Box>
           {values.onboardingExperience === 'centrifuge' && (
             <Box>
-              <FieldArray name="tranches">
-                {({ form }) => (
-                  <Box>
-                    {values.tranches.map((tranche, index) => (
-                      <Field key={index} name={`subscriptionDocuments[${index}]`}>
-                        {({ field, meta }: FieldProps) => (
-                          <Box mb={4}>
-                            <FileUpload
-                              name={`subscriptionDocuments[${index}]`}
-                              file={field.value}
-                              onFileChange={async (file) => {
-                                form.setFieldTouched(`subscriptionDocuments[${index}]`, true, false)
-                                form.setFieldValue(`subscriptionDocuments[${index}]`, file)
-                              }}
-                              label={`Subscription document for ${tranche.tokenName}`}
-                              errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                              accept="application/pdf"
-                              small
-                            />
-                          </Box>
-                        )}
-                      </Field>
-                    ))}
-                  </Box>
-                )}
-              </FieldArray>
-              <Box mt={8}>
-                <Text variant="heading4">Tax document requirement</Text>
-                <Checkbox
-                  label="Require investors to upload tax documents before signing the subscription agreement."
-                  variant="square"
-                />
+              <Box>
+                {values.tranches.map((tranche, index) => (
+                  <Field key={index} name={`onboarding.tranches.${tranche.tokenName}`}>
+                    {({ field, meta }: FieldProps) => (
+                      <Box mb={4}>
+                        <FileUpload
+                          name={`onboarding.${tranche.tokenName}`}
+                          file={field.value}
+                          onFileChange={async (file) => {
+                            form.setFieldTouched(`onboarding.tranches.${tranche.tokenName}`, true, false)
+                            form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, file)
+                          }}
+                          label={`Subscription document for ${tranche.tokenName}`}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          accept="application/pdf"
+                          small
+                        />
+                      </Box>
+                    )}
+                  </Field>
+                ))}
               </Box>
+              <TaxDocument />
+            </Box>
+          )}
+          {values.onboardingExperience === 'external' && (
+            <Box>
+              {values.tranches.map((tranche, index) => (
+                <Field key={index} name={`onboarding.tranches.${tranche.tokenName}`}>
+                  {({ field, meta }: FieldProps) => (
+                    <Box mb={4}>
+                      <FieldWithErrorMessage
+                        {...field}
+                        as={TextInput}
+                        name={`onboarding.tranches.${tranche.tokenName}`}
+                        value={field.value}
+                        label={<Text variant="heading4">Onboarding URL {tranche.tokenName}</Text>}
+                        isUrl
+                        placeholder="www.example.com"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, e.target.value)
+                        }
+                      />
+                    </Box>
+                  )}
+                </Field>
+              ))}
+              <TaxDocument />
             </Box>
           )}
         </StyledGrid>
