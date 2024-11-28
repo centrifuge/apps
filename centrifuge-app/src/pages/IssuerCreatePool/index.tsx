@@ -32,7 +32,7 @@ import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
 import { Line, PoolStructureSection } from './PoolStructureSection'
-import { CreatePoolValues, initialValues } from './types'
+import { CreatePoolValues, initialValues, PoolFee } from './types'
 import { pinFileIfExists, pinFiles } from './utils'
 import { validateValues } from './validate'
 
@@ -252,36 +252,53 @@ const IssuerCreatePoolPage = () => {
         metadataValues.poolRatings = ratings
       }
 
-      // Organize tranches
-      const nonJuniorTranches = metadataValues.tranches.slice(1)
-      const tranches = [
-        {},
-        ...nonJuniorTranches.map((tranche) => ({
-          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
-          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
-        })),
-      ]
+      // Tranches
+      const tranches = metadataValues.tranches.map((tranche, index) => {
+        const trancheType =
+          index === 0
+            ? 'Residual'
+            : {
+                NonResidual: {
+                  interestRatePerSec: Rate.fromAprPercent(tranche.interestRate).toString(),
+                  minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer).toString(),
+                },
+              }
 
-      // Pool fees
-      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
-      const poolFees: AddFee['fee'][] = values.poolFees.map((fee, i) => {
         return {
-          name: fee.name,
-          destination: fee.walletAddress,
-          amount: Rate.fromPercent(fee.percentOfNav),
-          feeType: fee.feeType,
-          limit: 'ShareOfPortfolioValuation',
-          account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
-          feePosition: fee.feePosition,
+          trancheType,
+          metadata: {
+            tokenName: tranche.tokenName,
+            tokenSymbol: tranche.symbolName,
+          },
         }
       })
 
-      metadataValues.poolFees = poolFees.map((fee, i) => ({
-        name: fee.name,
-        id: feeId + i,
-        feePosition: fee.feePosition,
-        feeType: fee.feeType,
-      }))
+      // Pool fees
+      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
+      const metadataPoolFees: Pick<PoolFee, 'name' | 'id' | 'feePosition' | 'feeType'>[] = []
+      const feeInput: Array<[string, { destination: string; editor: any; feeType: any }]> = []
+
+      values.poolFees.forEach((fee, index) => {
+        metadataPoolFees.push({
+          name: fee.name,
+          id: feeId ? feeId + index : 0,
+          feePosition: fee.feePosition,
+          feeType: fee.feeType,
+        })
+
+        feeInput.push([
+          'Top',
+          {
+            destination: fee.walletAddress,
+            editor: fee.feeType === 'chargedUpTo' ? { account: fee.walletAddress } : 'Root',
+            feeType: {
+              [fee.feeType]: { limit: { ['ShareOfPortfolioValuation']: Rate.fromPercent(fee.percentOfNav) } },
+            },
+          },
+        ])
+      })
+
+      metadataValues.poolFees = metadataPoolFees
 
       // Multisign
       metadataValues.adminMultisig =

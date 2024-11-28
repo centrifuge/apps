@@ -191,7 +191,6 @@ export const PoolDetailsSection = () => {
                   placeholder="Type here..."
                   maxLength={1000}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                  // disabled={waitingForStoredIssuer}
                 />
               )}
             </Field>

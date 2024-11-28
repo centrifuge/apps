@@ -1040,31 +1040,6 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [admin, poolId, tranches, currency, maxReserve, metadata, fees] = args
-    const trancheInput = tranches.map((t, i) => ({
-      trancheType: t.interestRatePerSec
-        ? {
-            NonResidual: {
-              interestRatePerSec: t.interestRatePerSec.toString(),
-              minRiskBuffer: t.minRiskBuffer?.toString(),
-            },
-          }
-        : 'Residual',
-      metadata: {
-        tokenName: metadata.tranches[i].tokenName,
-        tokenSymbol: metadata.tranches[i].symbolName,
-      },
-    }))
-
-    const feeInput = fees.map((fee) => {
-      return [
-        'Top',
-        {
-          destination: fee.destination,
-          editor: fee?.account ? { account: fee.account } : 'Root',
-          feeType: { [fee.feeType]: { limit: { [fee.limit]: fee?.amount } } },
-        },
-      ]
-    })
 
     return inst.getApi().pipe(
       switchMap((api) =>
@@ -1078,12 +1053,12 @@ export function getPoolsModule(inst: Centrifuge) {
             const tx = api.tx.poolRegistry.register(
               admin,
               poolId,
-              trancheInput,
+              tranches,
               currency,
               maxReserve.toString(),
               pinnedMetadata.ipfsHash,
               [],
-              feeInput
+              fees
             )
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
