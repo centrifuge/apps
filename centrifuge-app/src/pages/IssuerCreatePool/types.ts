@@ -42,9 +42,9 @@ export type CreatePoolValues = Omit<
 
   // pool details
   issuerCategories: { type: string; value: string }[]
-  poolIcon: File
-  issuerLogo: File
-  executiveSummary: File
+  poolIcon: File | null
+  issuerLogo: File | null
+  executiveSummary: File | null
 
   reportAuthorName: string
   reportAuthorTitle: string
