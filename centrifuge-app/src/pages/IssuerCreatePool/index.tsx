@@ -1,5 +1,6 @@
 import {
   AddFee,
+  CurrencyBalance,
   CurrencyKey,
   FileType,
   isSameAddress,
@@ -130,7 +131,7 @@ const IssuerCreatePoolPage = () => {
         ],
         options
       ) => {
-        const [values, transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig }] = args
+        const [values, transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig, assetOriginators }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
         const poolArgs = args.slice(3) as any
         return combineLatest([
@@ -138,9 +139,6 @@ const IssuerCreatePoolPage = () => {
           cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
         ]).pipe(
           switchMap(([api, poolSubmittable]) => {
-            // BATCH https://polkadot.js.org/docs/kusama/extrinsics/#batchcalls-veccall
-            api.tx.utlity.batch()
-
             const adminProxyDelegates = multisigAddr
               ? [multisigAddr]
               : (adminMultisig && values.adminMultisig?.signers?.filter((addr) => addr !== address)) ?? []
@@ -152,7 +150,9 @@ const IssuerCreatePoolPage = () => {
                 api.tx.balances.transferKeepAlive(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
                 api.tx.balances.transferKeepAlive(
                   aoProxy,
-                  consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
+                  consts.proxy.proxyDepositFactor
+                    .add(consts.uniques.collectionDeposit)
+                    .add(consts.proxy.proxyDepositFactor.mul(new BN(assetOriginators.length * 4)))
                 ),
                 adminProxyDelegates.length > 0 &&
                   api.tx.proxy.proxy(
@@ -168,10 +168,18 @@ const IssuerCreatePoolPage = () => {
                 api.tx.proxy.proxy(
                   aoProxy,
                   undefined,
-                  api.tx.utility.batchAll([
-                    api.tx.proxy.addProxy(adminProxy, 'Any', 0),
-                    api.tx.proxy.removeProxy(address, 'Any', 0),
-                  ])
+                  api.tx.utility.batchAll(
+                    [
+                      api.tx.proxy.addProxy(adminProxy, 'Any', 0),
+                      ...assetOriginators.map((addr) => [
+                        api.tx.proxy.addProxy(addr, 'Borrow', 0),
+                        api.tx.proxy.addProxy(addr, 'Invest', 0),
+                        api.tx.proxy.addProxy(addr, 'Transfer', 0),
+                        api.tx.proxy.addProxy(addr, 'PodOperation', 0),
+                      ]),
+                      api.tx.proxy.removeProxy(address, 'Any', 0),
+                    ].flat()
+                  )
                 ),
                 multisigAddr
                   ? api.tx.multisig.asMulti(adminMultisig.threshold, otherMultisigSigners, null, proxiedPoolCreate, 0)
@@ -179,7 +187,7 @@ const IssuerCreatePoolPage = () => {
               ].filter(Boolean)
             )
             setMultisigData({ callData: proxiedPoolCreate.method.toHex(), hash: proxiedPoolCreate.method.hash.toHex() })
-            return cent.wrapSignAndSend(api, submittable, { ...options, multisig: undefined, proxies: undefined })
+            return cent.wrapSignAndSend(api, submittable, { ...options })
           })
         )
       },
@@ -206,7 +214,7 @@ const IssuerCreatePoolPage = () => {
       const metadataValues: PoolMetadataInput = { ...values } as any
 
       // Find the currency (asset denomination in UI)
-      const currency = currencies.find((c) => c.symbol.toLowerCase() === values.assetDenomination)!
+      const currency = currencies.find((c) => c.symbol.toLowerCase() === values.assetDenomination.toLowerCase())!
 
       // Handle pining files for ipfs
       if (!values.poolIcon) return
@@ -322,27 +330,25 @@ const IssuerCreatePoolPage = () => {
         }
       }
 
-      console.log(metadataValues)
-
-      // createProxies([
-      //   (aoProxy, adminProxy) => {
-      //     createPoolTx(
-      //       [
-      //         values,
-      //         CurrencyBalance.fromFloat(createDeposit, chainDecimals),
-      //         aoProxy,
-      //         adminProxy,
-      //         poolId,
-      //         tranches,
-      //         currency.key,
-      //         CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
-      //         metadataValues,
-      //         poolFees,
-      //       ],
-      //       { createType }
-      //     )
-      //   },
-      // ])
+      createProxies([
+        (aoProxy, adminProxy) => {
+          createPoolTx(
+            [
+              values,
+              CurrencyBalance.fromFloat(createDeposit, chainDecimals),
+              aoProxy,
+              adminProxy,
+              poolId,
+              tranches,
+              currency.key,
+              CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
+              metadataValues,
+              feeInput,
+            ],
+            { createType }
+          )
+        },
+      ])
     },
   })
 
@@ -424,7 +430,12 @@ const IssuerCreatePoolPage = () => {
                   Previous
                 </Button>
               )}
-              <Button style={{ width: 163 }} small onClick={handleNextStep}>
+              <Button
+                style={{ width: 163 }}
+                small
+                onClick={handleNextStep}
+                loading={createProxiesIsPending || transactionIsPending}
+              >
                 {step === 3 ? 'Create pool' : 'Next'}
               </Button>
             </Box>

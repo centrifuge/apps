@@ -104,10 +104,15 @@ export const initialValues: CreatePoolValues = {
 
   assetOriginators: [''],
   adminMultisig: {
-    signers: ['', ''],
+    signers: [''],
     threshold: 1,
   },
   adminMultisigEnabled: false,
   poolFees: [createPoolFee()],
   poolType: 'open',
+
+  onboarding: {
+    tranches: {},
+    taxInfoRequired: false,
+  },
 }

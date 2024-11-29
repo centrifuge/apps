@@ -1021,6 +1021,38 @@ export type AddFee = {
   poolId: string
 }
 
+export type PoolFeesCreatePool = Array<
+  [
+    string,
+    {
+      destination: string
+      editor: any
+      feeType: {
+        [key: string]: {
+          limit: {
+            ShareOfPortfolioValuation: Rate
+          }
+        }
+      }
+    }
+  ]
+>
+
+export type TrancheCreatePool = {
+  trancheType:
+    | 'Residual'
+    | {
+        NonResidual: {
+          interestRatePerSec: string
+          minRiskBuffer: string
+        }
+      }
+  metadata: {
+    tokenName: string
+    tokenSymbol: string
+  }
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -1031,11 +1063,11 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       admin: string,
       poolId: string,
-      tranches: TrancheInput[],
+      tranches: TrancheCreatePool[],
       currency: CurrencyKey,
       maxReserve: BN,
       metadata: PoolMetadataInput,
-      fees: AddFee['fee'][]
+      fees: PoolFeesCreatePool[]
     ],
     options?: TransactionOptions
   ) {

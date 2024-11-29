@@ -80,7 +80,7 @@ export function Toast({ status = 'info', label, sublabel, onDismiss, onStatusCha
         </Stack>
         <Shelf ml="auto">
           {action}
-          {onDismiss && <Button variant="tertiary" icon={IconX} onClick={onDismiss} />}
+          {onDismiss && <Button variant="tertiary" icon={<IconX color={statusColors[status]} />} onClick={onDismiss} />}
         </Shelf>
       </Shelf>
     </Card>

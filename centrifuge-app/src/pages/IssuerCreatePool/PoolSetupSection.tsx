@@ -1,4 +1,5 @@
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { addressToHex, evmToSubstrateAddress, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { useCentEvmChainId } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Checkbox,
@@ -18,6 +19,7 @@ import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { feeCategories } from '../../../src/config'
+import { isEvmAddress } from '../../../src/utils/address'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
 
@@ -51,8 +53,11 @@ const TaxDocument = () => {
 
 export const PoolSetupSection = () => {
   const theme = useTheme()
+  const chainId = useCentEvmChainId()
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
+
+  console.log(values)
 
   return (
     <Box>
@@ -94,7 +99,24 @@ export const PoolSetupSection = () => {
                     values.adminMultisig?.signers?.map((_, index) => (
                       <Box key={index} mt={2}>
                         <Field name={`adminMultisig.signers.${index}`}>
-                          {({ field }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
+                          {({ field, form }: FieldProps) => (
+                            <TextInput
+                              placeholder="Type address..."
+                              {...field}
+                              onChange={(val) => {
+                                form.setFieldValue(`adminMultisig.signers.${index}`, val.target.value)
+                              }}
+                              onBlur={() => {
+                                const value = form.values.adminMultisig.signers[index]
+                                if (value) {
+                                  const transformedValue = isEvmAddress(value)
+                                    ? evmToSubstrateAddress(value, chainId ?? 0)
+                                    : value
+                                  form.setFieldValue(`adminMultisig.signers.${index}`, transformedValue)
+                                }
+                              }}
+                            />
+                          )}
                         </Field>
                       </Box>
                     ))
@@ -124,19 +146,19 @@ export const PoolSetupSection = () => {
       </Box>
       <Box mt={2} mb={2}>
         <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <Field name="subAssetClass">
+          <Field name="adminMultisig.threshold">
             {({ field, meta, form }: FieldProps) => (
               <Select
-                name="subAssetClass"
+                name="adminMultisig.threshold"
                 label={`Configuration change threshold (1 out of ${Math.max(
                   values?.adminMultisig?.signers?.length ?? 0,
                   1
                 )} managers)`}
-                onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
+                onChange={(event) => form.setFieldValue('adminMultisig.threshold', event.target.value)}
                 onBlur={field.onBlur}
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 value={field.value}
-                options={values.adminMultisig.signers.map((_: string, i: number) => ({
+                options={values.adminMultisig?.signers.map((_: string, i: number) => ({
                   label: i + 1,
                   value: i + 1,
                 }))}
@@ -166,7 +188,24 @@ export const PoolSetupSection = () => {
                 {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
                     <Field name={`assetOriginators.${index}`}>
-                      {({ field }: FieldProps) => <TextInput placeholder="Type address..." {...field} />}
+                      {({ field, form }: FieldProps) => (
+                        <TextInput
+                          placeholder="Type address..."
+                          {...field}
+                          onChange={(val) => {
+                            form.setFieldValue(`assetOriginators.${index}`, val.target.value)
+                          }}
+                          onBlur={() => {
+                            const value = form.values.assetOriginators[index]
+                            if (value) {
+                              const transformedValue = isEvmAddress(value)
+                                ? evmToSubstrateAddress(value, chainId ?? 0)
+                                : addressToHex(value)
+                              form.setFieldValue(`assetOriginators.${index}`, transformedValue)
+                            }
+                          }}
+                        />
+                      )}
                     </Field>
                   </Box>
                 ))}
@@ -233,11 +272,9 @@ export const PoolSetupSection = () => {
                 <StyledGrid mt={3} gap={1}>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Text variant="heading3">Pool fees {index + 1}</Text>
-                    {values.poolFees.length > 1 && (
-                      <IconButton onClick={() => remove(index)}>
-                        <IconTrash color="textSecondary" />
-                      </IconButton>
-                    )}
+                    <IconButton onClick={() => remove(index)}>
+                      <IconTrash color="textSecondary" />
+                    </IconButton>
                   </Box>
                   <Line />
                   <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
