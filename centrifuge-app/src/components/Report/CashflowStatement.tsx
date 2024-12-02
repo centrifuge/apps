@@ -135,6 +135,14 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
               heading: false,
               formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
             },
+            {
+              name: 'Asset financings',
+              value:
+                data?.map((day) => (day.subtype === 'privateCredit' ? day?.assetFinancing?.toDecimal().neg() : 0)) ||
+                [],
+              heading: false,
+              formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+            },
           ]
         : []),
       {
@@ -143,12 +151,26 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
-      {
-        name: poolMetadata?.pool?.asset.class === 'Private credit' ? 'Asset financings' : 'Asset purchases',
-        value: data?.map((day) => day.assetAcquisitions.toDecimal().neg()) || [],
-        heading: false,
-        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
-      },
+      ...(poolMetadata?.pool?.asset.class === 'Public credit'
+        ? [
+            {
+              name: 'Asset financings',
+              value:
+                data?.map((day) => (day.subtype === 'publicCredit' ? day?.assetPurchases?.toDecimal().neg() : 0)) || [],
+              heading: false,
+              formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+            },
+          ]
+        : [
+            {
+              name: 'Asset purchases',
+              value:
+                data?.map((day) => (day.subtype === 'privateCredit' ? day?.assetFinancing?.toDecimal().neg() : 0)) ||
+                [],
+              heading: false,
+              formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+            },
+          ]),
       {
         name: 'Net cash flow from assets',
         value: data?.map((state) => state.netCashflowAsset.toDecimal()) || [],
