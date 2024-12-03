@@ -220,8 +220,9 @@ const IssuerCreatePoolPage = () => {
       },
     {
       onSuccess: (args, result) => {
-        const event = result.events.find(({ event }) => api.events.poolRegistry.Created.is(event))
-        if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) setIsMultisigDialogOpen(true)
+        if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) {
+          setIsMultisigDialogOpen(true)
+        }
         const [, , , , poolId] = args
         console.log(poolId, result)
         if (createType === 'immediate') {
