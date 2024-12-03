@@ -16,16 +16,18 @@ import BN from 'bn.js'
 import { Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { combineLatest, firstValueFrom, switchMap } from 'rxjs'
+import { combineLatest, firstValueFrom, switchMap, tap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import {
   useAddress,
   useCentrifuge,
+  useCentrifugeApi,
   useCentrifugeConsts,
   useCentrifugeTransaction,
   useWallet,
 } from '../../../../centrifuge-react'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
+import { PreimageHashDialog } from '../../../src/components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../../src/components/Dialogs/ShareMultisigDialog'
 import { Dec } from '../../../src/utils/Decimal'
 import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
@@ -75,6 +77,7 @@ const IssuerCreatePoolPage = () => {
   const navigate = useNavigate()
   const currencies = usePoolCurrencies()
   const centrifuge = useCentrifuge()
+  const api = useCentrifugeApi()
   const { poolCreationType } = useDebugFlags()
   const consts = useCentrifugeConsts()
   const { chainDecimals } = useCentrifugeConsts()
@@ -88,6 +91,27 @@ const IssuerCreatePoolPage = () => {
   const [multisigData, setMultisigData] = useState<{ hash: string; callData: string }>()
   const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(true)
   const [createdModal, setCreatedModal] = useState(false)
+  const [preimageHash, setPreimageHash] = useState('')
+  const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
+
+  useEffect(() => {
+    if (createType === 'notePreimage') {
+      const $events = centrifuge
+        .getEvents()
+        .pipe(
+          tap(({ api, events }) => {
+            const event = events.find(({ event }) => api.events.preimage.Noted.is(event))
+            const parsedEvent = event?.toJSON() as any
+            if (!parsedEvent) return false
+            console.info('Preimage hash: ', parsedEvent.event.data[0])
+            setPreimageHash(parsedEvent.event.data[0])
+            setIsPreimageDialogOpen(true)
+          })
+        )
+        .subscribe()
+      return () => $events.unsubscribe()
+    }
+  }, [centrifuge, createType])
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -195,9 +219,11 @@ const IssuerCreatePoolPage = () => {
         )
       },
     {
-      onSuccess: (args) => {
+      onSuccess: (args, result) => {
+        const event = result.events.find(({ event }) => api.events.poolRegistry.Created.is(event))
         if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) setIsMultisigDialogOpen(true)
         const [, , , , poolId] = args
+        console.log(poolId, result)
         if (createType === 'immediate') {
           navigate(`/pools/${poolId}`)
         } else {
@@ -396,6 +422,11 @@ const IssuerCreatePoolPage = () => {
 
   return (
     <>
+      <PreimageHashDialog
+        preimageHash={preimageHash}
+        open={isPreimageDialogOpen}
+        onClose={() => setIsPreimageDialogOpen(false)}
+      />
       {multisigData && (
         <ShareMultisigDialog
           hash={multisigData.hash}
