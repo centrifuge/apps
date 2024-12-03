@@ -33,6 +33,7 @@ import { Dec } from '../../../src/utils/Decimal'
 import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
 import { usePoolCurrencies } from '../../../src/utils/useCurrencies'
 import { useIsAboveBreakpoint } from '../../../src/utils/useIsAboveBreakpoint'
+import { usePools } from '../../../src/utils/usePools'
 import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
@@ -78,6 +79,7 @@ const IssuerCreatePoolPage = () => {
   const currencies = usePoolCurrencies()
   const centrifuge = useCentrifuge()
   const api = useCentrifugeApi()
+  const pools = usePools()
   const { poolCreationType } = useDebugFlags()
   const consts = useCentrifugeConsts()
   const { chainDecimals } = useCentrifugeConsts()
@@ -93,6 +95,7 @@ const IssuerCreatePoolPage = () => {
   const [createdModal, setCreatedModal] = useState(false)
   const [preimageHash, setPreimageHash] = useState('')
   const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
+  const [createdPoolId, setCreatedPoolId] = useState('')
 
   useEffect(() => {
     if (createType === 'notePreimage') {
@@ -103,7 +106,6 @@ const IssuerCreatePoolPage = () => {
             const event = events.find(({ event }) => api.events.preimage.Noted.is(event))
             const parsedEvent = event?.toJSON() as any
             if (!parsedEvent) return false
-            console.info('Preimage hash: ', parsedEvent.event.data[0])
             setPreimageHash(parsedEvent.event.data[0])
             setIsPreimageDialogOpen(true)
           })
@@ -112,6 +114,16 @@ const IssuerCreatePoolPage = () => {
       return () => $events.unsubscribe()
     }
   }, [centrifuge, createType])
+
+  useEffect(() => {
+    if (createdPoolId && pools?.find((p) => p.id === createdPoolId)) {
+      // Redirecting only when we find the newly created pool in the data from usePools
+      // Otherwise the Issue Overview page will throw an error when it can't find the pool
+      // It can take a second for the new data to come in after creating the pool
+      navigate(`/issuer/${createdPoolId}`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pools, createdPoolId])
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -226,7 +238,7 @@ const IssuerCreatePoolPage = () => {
         const [, , , , poolId] = args
         console.log(poolId, result)
         if (createType === 'immediate') {
-          navigate(`/pools/${poolId}`)
+          setCreatedPoolId(poolId)
         } else {
           setCreatedModal(true)
         }
