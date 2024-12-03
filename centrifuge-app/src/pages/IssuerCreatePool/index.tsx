@@ -10,11 +10,12 @@ import {
   TrancheCreatePool,
   TransactionOptions,
 } from '@centrifuge/centrifuge-js'
-import { Box, Button, Step, Stepper, Text } from '@centrifuge/fabric'
+import { Box, Button, Dialog, Step, Stepper, Text } from '@centrifuge/fabric'
 import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import { Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { combineLatest, firstValueFrom, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import {
@@ -25,6 +26,7 @@ import {
   useWallet,
 } from '../../../../centrifuge-react'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
+import { ShareMultisigDialog } from '../../../src/components/Dialogs/ShareMultisigDialog'
 import { Dec } from '../../../src/utils/Decimal'
 import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
 import { usePoolCurrencies } from '../../../src/utils/useCurrencies'
@@ -70,6 +72,7 @@ const IssuerCreatePoolPage = () => {
   const formRef = useRef<HTMLFormElement>(null)
   const isSmall = useIsAboveBreakpoint('S')
   const address = useAddress('substrate')
+  const navigate = useNavigate()
   const currencies = usePoolCurrencies()
   const centrifuge = useCentrifuge()
   const { poolCreationType } = useDebugFlags()
@@ -83,8 +86,8 @@ const IssuerCreatePoolPage = () => {
   const [step, setStep] = useState(1)
   const [stepCompleted, setStepCompleted] = useState({ 1: false, 2: false, 3: false })
   const [multisigData, setMultisigData] = useState<{ hash: string; callData: string }>()
-  const [createdPoolId, setCreatedPoolId] = useState('')
   const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(true)
+  const [createdModal, setCreatedModal] = useState(false)
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -196,7 +199,9 @@ const IssuerCreatePoolPage = () => {
         if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) setIsMultisigDialogOpen(true)
         const [, , , , poolId] = args
         if (createType === 'immediate') {
-          setCreatedPoolId(poolId)
+          navigate(`/pools/${poolId}`)
+        } else {
+          setCreatedModal(true)
         }
       },
     }
@@ -349,6 +354,8 @@ const IssuerCreatePoolPage = () => {
           )
         },
       ])
+
+      setSubmitting(false)
     },
   })
 
@@ -389,6 +396,15 @@ const IssuerCreatePoolPage = () => {
 
   return (
     <>
+      {multisigData && (
+        <ShareMultisigDialog
+          hash={multisigData.hash}
+          callData={multisigData.callData}
+          multisig={form.values.adminMultisig}
+          open={isMultisigDialogOpen}
+          onClose={() => setIsMultisigDialogOpen(false)}
+        />
+      )}
       <FormikProvider value={form}>
         <Form ref={formRef} noValidate>
           <Box padding={3}>
@@ -409,8 +425,8 @@ const IssuerCreatePoolPage = () => {
           {step === 1 && (
             <Box px={2} py={2} display="flex" justifyContent="center" backgroundColor="statusInfoBg">
               <Text variant="body3">
-                A deposit of <b>1100 CFG</b> is required to create this pool. Please make sure you have sufficient funds
-                in your wallet.
+                A deposit of <b>{deposit.toNumber()} CFG</b> is required to create this pool. Please make sure you have
+                sufficient funds in your wallet.
               </Text>
             </Box>
           )}
@@ -434,7 +450,7 @@ const IssuerCreatePoolPage = () => {
                 style={{ width: 163 }}
                 small
                 onClick={handleNextStep}
-                loading={createProxiesIsPending || transactionIsPending}
+                loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
               >
                 {step === 3 ? 'Create pool' : 'Next'}
               </Button>
@@ -442,6 +458,23 @@ const IssuerCreatePoolPage = () => {
           </StyledBox>
         </Form>
       </FormikProvider>
+      {createdModal && (
+        <Dialog isOpen={createdModal} onClose={() => setCreatedModal(false)} width={426} hideButton>
+          <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+            <Text variant="heading1">Your pool is almost ready!</Text>
+            <Text variant="body2" style={{ marginTop: 24 }}>
+              A governance proposal to launch this pool has been submitted on your behalf. Once the proposal is
+              approved, your pool will go live.
+            </Text>
+            <Box mt={2} display="flex" justifyContent="center">
+              <Button onClick={() => setCreatedModal(false)} variant="inverted" style={{ width: 140, marginRight: 16 }}>
+                Close
+              </Button>
+              <Button style={{ width: 160 }}>See proposal</Button>
+            </Box>
+          </Box>
+        </Dialog>
+      )}
     </>
   )
 }
