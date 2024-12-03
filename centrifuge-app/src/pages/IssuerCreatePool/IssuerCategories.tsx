@@ -38,9 +38,9 @@ export const IssuerCategoriesSection = () => {
         <FieldArray name="issuerCategories">
           {({ push, remove }) => (
             <>
-              {form.values.issuerCategories.map((_, index) => (
+              {form.values.issuerCategories.map((category, index) => (
                 <>
-                  <Grid gridTemplateColumns={['1fr', _.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
+                  <Grid gridTemplateColumns={['1fr', category.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
                     <Field name={`issuerCategories.${index}.type`}>
                       {({ field, meta }: FieldProps) => (
                         <Select
@@ -54,7 +54,7 @@ export const IssuerCategoriesSection = () => {
                         />
                       )}
                     </Field>
-                    {_.type === 'other' && (
+                    {category.type === 'other' && (
                       <Field name={`issuerCategories.${index}.description`}>
                         {({ field, meta }: FieldProps) => (
                           <TextInput {...field} label="Description" placeholder="Type here..." maxLength={100} />
@@ -63,7 +63,7 @@ export const IssuerCategoriesSection = () => {
                     )}
                   </Grid>
                   <Field name={`issuerCategories.${index}.value`}>
-                    {({ field, meta }: FieldProps) => (
+                    {({ field }: FieldProps) => (
                       <TextInput
                         {...field}
                         label={
