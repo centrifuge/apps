@@ -1,13 +1,13 @@
 import {
-  AddFee,
   CurrencyBalance,
   CurrencyKey,
   FileType,
   isSameAddress,
   Perquintill,
+  PoolFeesCreatePool,
   PoolMetadataInput,
   Rate,
-  TrancheInput,
+  TrancheCreatePool,
   TransactionOptions,
 } from '@centrifuge/centrifuge-js'
 import { Box, Button, Step, Stepper, Text } from '@centrifuge/fabric'
@@ -84,7 +84,7 @@ const IssuerCreatePoolPage = () => {
   const [stepCompleted, setStepCompleted] = useState({ 1: false, 2: false, 3: false })
   const [multisigData, setMultisigData] = useState<{ hash: string; callData: string }>()
   const [createdPoolId, setCreatedPoolId] = useState('')
-  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(false)
+  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(true)
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -123,11 +123,11 @@ const IssuerCreatePoolPage = () => {
           aoProxy: string,
           adminProxy: string,
           poolId: string,
-          tranches: TrancheInput[],
+          tranches: TrancheCreatePool[],
           currency: CurrencyKey,
           maxReserve: BN,
           metadata: PoolMetadataInput,
-          poolFees: AddFee['fee'][]
+          poolFees: PoolFeesCreatePool[]
         ],
         options
       ) => {
@@ -261,7 +261,7 @@ const IssuerCreatePoolPage = () => {
       }
 
       // Tranches
-      const tranches = metadataValues.tranches.map((tranche, index) => {
+      const tranches: TrancheCreatePool[] = metadataValues.tranches.map((tranche, index) => {
         const trancheType =
           index === 0
             ? 'Residual'
@@ -285,7 +285,7 @@ const IssuerCreatePoolPage = () => {
       // Pool fees
       const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
       const metadataPoolFees: Pick<PoolFee, 'name' | 'id' | 'feePosition' | 'feeType'>[] = []
-      const feeInput: Array<[string, { destination: string; editor: any; feeType: any }]> = []
+      const feeInput: PoolFeesCreatePool = []
 
       values.poolFees.forEach((fee, index) => {
         metadataPoolFees.push({

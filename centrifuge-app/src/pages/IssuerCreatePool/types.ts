@@ -115,4 +115,7 @@ export const initialValues: CreatePoolValues = {
     tranches: {},
     taxInfoRequired: false,
   },
+  onboardingExperience: 'none',
+  epochHours: 0,
+  epochMinutes: 0,
 }

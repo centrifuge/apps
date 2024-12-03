@@ -57,8 +57,6 @@ export const PoolSetupSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
 
-  console.log(values)
-
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
