@@ -108,7 +108,7 @@ export const initialValues: CreatePoolValues = {
     threshold: 1,
   },
   adminMultisigEnabled: false,
-  poolFees: [createPoolFee()],
+  poolFees: [],
   poolType: 'open',
 
   onboarding: {
