@@ -1,12 +1,45 @@
-import { Box, Button, Step, Stepper, Text } from '@centrifuge/fabric'
+import {
+  CurrencyBalance,
+  CurrencyKey,
+  FileType,
+  isSameAddress,
+  Perquintill,
+  PoolFeesCreatePool,
+  PoolMetadataInput,
+  Rate,
+  TrancheCreatePool,
+  TransactionOptions,
+} from '@centrifuge/centrifuge-js'
+import { Box, Button, Dialog, Step, Stepper, Text } from '@centrifuge/fabric'
+import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
+import BN from 'bn.js'
 import { Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
+import { combineLatest, firstValueFrom, switchMap, tap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
+import {
+  useAddress,
+  useCentrifuge,
+  useCentrifugeApi,
+  useCentrifugeConsts,
+  useCentrifugeTransaction,
+  useWallet,
+} from '../../../../centrifuge-react'
+import { useDebugFlags } from '../../../src/components/DebugFlags'
+import { PreimageHashDialog } from '../../../src/components/Dialogs/PreimageHashDialog'
+import { ShareMultisigDialog } from '../../../src/components/Dialogs/ShareMultisigDialog'
+import { Dec } from '../../../src/utils/Decimal'
+import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
+import { usePoolCurrencies } from '../../../src/utils/useCurrencies'
 import { useIsAboveBreakpoint } from '../../../src/utils/useIsAboveBreakpoint'
+import { usePools } from '../../../src/utils/usePools'
+import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
 import { Line, PoolStructureSection } from './PoolStructureSection'
-import { initialValues } from './types'
+import { CreatePoolValues, initialValues, PoolFee } from './types'
+import { pinFileIfExists, pinFiles } from './utils'
 import { validateValues } from './validate'
 
 const StyledBox = styled(Box)`
@@ -31,19 +64,347 @@ const stepFields: { [key: number]: string[] } = {
   3: ['investmentDetails', 'liquidityDetails'],
 }
 
+const txMessage = {
+  immediate: 'Create pool',
+  propose: 'Submit pool proposal',
+  notePreimage: 'Note preimage',
+}
+
 const IssuerCreatePoolPage = () => {
   const theme = useTheme()
   const formRef = useRef<HTMLFormElement>(null)
   const isSmall = useIsAboveBreakpoint('S')
+  const address = useAddress('substrate')
+  const navigate = useNavigate()
+  const currencies = usePoolCurrencies()
+  const centrifuge = useCentrifuge()
+  const api = useCentrifugeApi()
+  const pools = usePools()
+  const { poolCreationType } = useDebugFlags()
+  const consts = useCentrifugeConsts()
+  const { chainDecimals } = useCentrifugeConsts()
+  const createType = (poolCreationType as TransactionOptions['createType']) || config.poolCreationType || 'immediate'
+  const {
+    substrate: { addMultisig },
+  } = useWallet()
+
   const [step, setStep] = useState(1)
   const [stepCompleted, setStepCompleted] = useState({ 1: false, 2: false, 3: false })
+  const [multisigData, setMultisigData] = useState<{ hash: string; callData: string }>()
+  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(true)
+  const [createdModal, setCreatedModal] = useState(false)
+  const [preimageHash, setPreimageHash] = useState('')
+  const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
+  const [createdPoolId, setCreatedPoolId] = useState('')
+
+  useEffect(() => {
+    if (createType === 'notePreimage') {
+      const $events = centrifuge
+        .getEvents()
+        .pipe(
+          tap(({ api, events }) => {
+            const event = events.find(({ event }) => api.events.preimage.Noted.is(event))
+            const parsedEvent = event?.toJSON() as any
+            if (!parsedEvent) return false
+            setPreimageHash(parsedEvent.event.data[0])
+            setIsPreimageDialogOpen(true)
+          })
+        )
+        .subscribe()
+      return () => $events.unsubscribe()
+    }
+  }, [centrifuge, createType])
+
+  useEffect(() => {
+    if (createdPoolId && pools?.find((p) => p.id === createdPoolId)) {
+      // Redirecting only when we find the newly created pool in the data from usePools
+      // Otherwise the Issue Overview page will throw an error when it can't find the pool
+      // It can take a second for the new data to come in after creating the pool
+      navigate(`/issuer/${createdPoolId}`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pools, createdPoolId])
+
+  const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
+    `${txMessage[createType]} 1/2`,
+    (cent) => {
+      return (_: [nextTx: (adminProxy: string, aoProxy: string) => void], options) =>
+        cent.getApi().pipe(
+          switchMap((api) => {
+            const submittable = api.tx.utility.batchAll([
+              api.tx.proxy.createPure('Any', 0, 0),
+              api.tx.proxy.createPure('Any', 0, 1),
+            ])
+            return cent.wrapSignAndSend(api, submittable, options)
+          })
+        )
+    },
+    {
+      onSuccess: async ([nextTx], result) => {
+        const api = await centrifuge.getApiPromise()
+        const events = result.events.filter(({ event }) => api.events.proxy.PureCreated.is(event))
+        if (!events) return
+        const { pure } = (events[0].toHuman() as any).event.data
+        const { pure: pure2 } = (events[1].toHuman() as any).event.data
+
+        nextTx(pure, pure2)
+      },
+    }
+  )
+
+  const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
+    `${txMessage[createType]} 2/2`,
+    (cent) =>
+      (
+        args: [
+          values: CreatePoolValues,
+          transferToMultisig: BN,
+          aoProxy: string,
+          adminProxy: string,
+          poolId: string,
+          tranches: TrancheCreatePool[],
+          currency: CurrencyKey,
+          maxReserve: BN,
+          metadata: PoolMetadataInput,
+          poolFees: PoolFeesCreatePool[]
+        ],
+        options
+      ) => {
+        const [values, transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig, assetOriginators }] = args
+        const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
+        const poolArgs = args.slice(3) as any
+        return combineLatest([
+          cent.getApi(),
+          cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
+        ]).pipe(
+          switchMap(([api, poolSubmittable]) => {
+            const adminProxyDelegates = multisigAddr
+              ? [multisigAddr]
+              : (adminMultisig && values.adminMultisig?.signers?.filter((addr) => addr !== address)) ?? []
+            const otherMultisigSigners =
+              multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
+            const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
+            const submittable = api.tx.utility.batchAll(
+              [
+                api.tx.balances.transferKeepAlive(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
+                api.tx.balances.transferKeepAlive(
+                  aoProxy,
+                  consts.proxy.proxyDepositFactor
+                    .add(consts.uniques.collectionDeposit)
+                    .add(consts.proxy.proxyDepositFactor.mul(new BN(assetOriginators.length * 4)))
+                ),
+                adminProxyDelegates.length > 0 &&
+                  api.tx.proxy.proxy(
+                    adminProxy,
+                    undefined,
+                    api.tx.utility.batchAll(
+                      [
+                        ...adminProxyDelegates.map((addr) => api.tx.proxy.addProxy(addr, 'Any', 0)),
+                        multisigAddr ? api.tx.proxy.removeProxy(address, 'Any', 0) : null,
+                      ].filter(Boolean)
+                    )
+                  ),
+                api.tx.proxy.proxy(
+                  aoProxy,
+                  undefined,
+                  api.tx.utility.batchAll(
+                    [
+                      api.tx.proxy.addProxy(adminProxy, 'Any', 0),
+                      ...assetOriginators.map((addr) => [
+                        api.tx.proxy.addProxy(addr, 'Borrow', 0),
+                        api.tx.proxy.addProxy(addr, 'Invest', 0),
+                        api.tx.proxy.addProxy(addr, 'Transfer', 0),
+                        api.tx.proxy.addProxy(addr, 'PodOperation', 0),
+                      ]),
+                      api.tx.proxy.removeProxy(address, 'Any', 0),
+                    ].flat()
+                  )
+                ),
+                multisigAddr
+                  ? api.tx.multisig.asMulti(adminMultisig.threshold, otherMultisigSigners, null, proxiedPoolCreate, 0)
+                  : proxiedPoolCreate,
+              ].filter(Boolean)
+            )
+            setMultisigData({ callData: proxiedPoolCreate.method.toHex(), hash: proxiedPoolCreate.method.hash.toHex() })
+            return cent.wrapSignAndSend(api, submittable, { ...options })
+          })
+        )
+      },
+    {
+      onSuccess: (args, result) => {
+        if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) {
+          setIsMultisigDialogOpen(true)
+        }
+        const [, , , , poolId] = args
+        console.log(poolId, result)
+        if (createType === 'immediate') {
+          setCreatedPoolId(poolId)
+        } else {
+          setCreatedModal(true)
+        }
+      },
+    }
+  )
 
   const form = useFormik({
     initialValues,
     validate: (values) => validateValues(values),
     validateOnMount: true,
-    onSubmit: () => console.log('a'),
+    onSubmit: async (values, { setSubmitting }) => {
+      const poolId = await centrifuge.pools.getAvailablePoolId()
+
+      if (!currencies || !address) return
+
+      const metadataValues: PoolMetadataInput = { ...values } as any
+
+      // Find the currency (asset denomination in UI)
+      const currency = currencies.find((c) => c.symbol.toLowerCase() === values.assetDenomination.toLowerCase())!
+
+      // Handle pining files for ipfs
+      if (!values.poolIcon) return
+
+      const filesToPin = {
+        poolIcon: values.poolIcon,
+        issuerLogo: values.issuerLogo,
+        executiveSummary: values.executiveSummary,
+        authorAvatar: values.reportAuthorAvatar,
+      }
+
+      const pinnedFiles = await pinFiles(centrifuge, filesToPin)
+      if (pinnedFiles.poolIcon) metadataValues.poolIcon = pinnedFiles.poolIcon as FileType
+      if (pinnedFiles.issuerLogo) metadataValues.issuerLogo = pinnedFiles.issuerLogo as FileType
+      if (pinnedFiles.executiveSummary) metadataValues.executiveSummary = pinnedFiles.executiveSummary
+
+      // Pool report
+      if (values.reportUrl) {
+        metadataValues.poolReport = {
+          authorAvatar: pinnedFiles.authorAvatar,
+          authorName: values.reportAuthorName,
+          authorTitle: values.reportAuthorTitle,
+          url: values.reportUrl,
+        }
+      }
+
+      // Pool ratings
+      if (values.poolRatings) {
+        const newRatingReports = await Promise.all(
+          values.poolRatings.map((rating) => pinFileIfExists(centrifuge, rating.reportFile ?? null))
+        )
+
+        const ratings = values.poolRatings.map((rating, index) => {
+          const pinnedReport = newRatingReports[index]
+          return {
+            agency: rating.agency ?? '',
+            value: rating.value ?? '',
+            reportUrl: rating.reportUrl ?? '',
+            reportFile: pinnedReport ? { uri: pinnedReport.uri, mime: rating.reportFile?.type ?? '' } : null,
+          }
+        })
+
+        metadataValues.poolRatings = ratings
+      }
+
+      // Tranches
+      const tranches: TrancheCreatePool[] = metadataValues.tranches.map((tranche, index) => {
+        const trancheType =
+          index === 0
+            ? 'Residual'
+            : {
+                NonResidual: {
+                  interestRatePerSec: Rate.fromAprPercent(tranche.interestRate).toString(),
+                  minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer).toString(),
+                },
+              }
+
+        return {
+          trancheType,
+          metadata: {
+            tokenName:
+              metadataValues.tranches.length > 1 ? `${metadataValues.poolName} ${tranche.tokenName}` : 'Junior',
+            tokenSymbol: tranche.symbolName,
+          },
+        }
+      })
+
+      // Pool fees
+      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
+      const metadataPoolFees: Pick<PoolFee, 'name' | 'id' | 'feePosition' | 'feeType'>[] = []
+      const feeInput: PoolFeesCreatePool = []
+
+      values.poolFees.forEach((fee, index) => {
+        metadataPoolFees.push({
+          name: fee.name,
+          id: feeId ? feeId + index : 0,
+          feePosition: fee.feePosition,
+          feeType: fee.feeType,
+        })
+
+        feeInput.push([
+          'Top',
+          {
+            destination: fee.walletAddress,
+            editor: fee.feeType === 'chargedUpTo' ? { account: fee.walletAddress } : 'Root',
+            feeType: {
+              [fee.feeType]: { limit: { ['ShareOfPortfolioValuation']: Rate.fromPercent(fee.percentOfNav) } },
+            },
+          },
+        ])
+      })
+
+      metadataValues.poolFees = metadataPoolFees
+
+      // Multisign
+      metadataValues.adminMultisig =
+        values.adminMultisigEnabled && values.adminMultisig.threshold > 1
+          ? {
+              ...values.adminMultisig,
+              signers: sortAddresses(values.adminMultisig.signers),
+            }
+          : undefined
+
+      if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
+        addMultisig(metadataValues.adminMultisig)
+      }
+
+      // Onboarding
+      if (metadataValues.onboardingExperience === 'none') {
+        metadataValues.onboarding = {
+          taxInfoRequired: metadataValues.onboarding?.taxInfoRequired,
+          tranches: {},
+        }
+      }
+
+      createProxies([
+        (aoProxy, adminProxy) => {
+          createPoolTx(
+            [
+              values,
+              CurrencyBalance.fromFloat(createDeposit, chainDecimals),
+              aoProxy,
+              adminProxy,
+              poolId,
+              tranches,
+              currency.key,
+              CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
+              metadataValues,
+              feeInput,
+            ],
+            { createType }
+          )
+        },
+      ])
+
+      setSubmitting(false)
+    },
   })
+
+  const { proposeFee, poolDeposit, proxyDeposit, collectionDeposit } = useCreatePoolFee(form?.values)
+
+  const createDeposit = (proposeFee?.toDecimal() ?? Dec(0))
+    .add(poolDeposit.toDecimal())
+    .add(collectionDeposit.toDecimal())
+
+  const deposit = createDeposit.add(proxyDeposit.toDecimal())
 
   const { values, errors } = form
 
@@ -58,7 +419,11 @@ const IssuerCreatePoolPage = () => {
   }
 
   const handleNextStep = () => {
-    setStep((prevStep) => prevStep + 1)
+    if (step === 3) {
+      form.handleSubmit()
+    } else {
+      setStep((prevStep) => prevStep + 1)
+    }
   }
 
   useEffect(() => {
@@ -70,6 +435,20 @@ const IssuerCreatePoolPage = () => {
 
   return (
     <>
+      <PreimageHashDialog
+        preimageHash={preimageHash}
+        open={isPreimageDialogOpen}
+        onClose={() => setIsPreimageDialogOpen(false)}
+      />
+      {multisigData && (
+        <ShareMultisigDialog
+          hash={multisigData.hash}
+          callData={multisigData.callData}
+          multisig={form.values.adminMultisig}
+          open={isMultisigDialogOpen}
+          onClose={() => setIsMultisigDialogOpen(false)}
+        />
+      )}
       <FormikProvider value={form}>
         <Form ref={formRef} noValidate>
           <Box padding={3}>
@@ -87,6 +466,14 @@ const IssuerCreatePoolPage = () => {
               <Step label="Pool setup" />
             </Stepper>
           </Box>
+          {step === 1 && (
+            <Box px={2} py={2} display="flex" justifyContent="center" backgroundColor="statusInfoBg">
+              <Text variant="body3">
+                A deposit of <b>{deposit.toNumber()} CFG</b> is required to create this pool. Please make sure you have
+                sufficient funds in your wallet.
+              </Text>
+            </Box>
+          )}
           <StyledBox padding="48px 80px 0px 80px">
             {step === 1 && <PoolStructureSection />}
             {step === 2 && <PoolDetailsSection />}
@@ -103,13 +490,35 @@ const IssuerCreatePoolPage = () => {
                   Previous
                 </Button>
               )}
-              <Button style={{ width: 163 }} small onClick={handleNextStep}>
+              <Button
+                style={{ width: 163 }}
+                small
+                onClick={handleNextStep}
+                loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
+              >
                 {step === 3 ? 'Create pool' : 'Next'}
               </Button>
             </Box>
           </StyledBox>
         </Form>
       </FormikProvider>
+      {createdModal && (
+        <Dialog isOpen={createdModal} onClose={() => setCreatedModal(false)} width={426} hideButton>
+          <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+            <Text variant="heading1">Your pool is almost ready!</Text>
+            <Text variant="body2" style={{ marginTop: 24 }}>
+              A governance proposal to launch this pool has been submitted on your behalf. Once the proposal is
+              approved, your pool will go live.
+            </Text>
+            <Box mt={2} display="flex" justifyContent="center">
+              <Button onClick={() => setCreatedModal(false)} variant="inverted" style={{ width: 140, marginRight: 16 }}>
+                Close
+              </Button>
+              <Button style={{ width: 160 }}>See proposal</Button>
+            </Box>
+          </Box>
+        </Dialog>
+      )}
     </>
   )
 }

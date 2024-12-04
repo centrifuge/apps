@@ -9,6 +9,16 @@ export interface Tranche {
   apy: string
   interestRate: number | ''
 }
+
+export interface PoolFee {
+  id: number
+  name: string
+  feeType: FeeTypes
+  percentOfNav: string
+  walletAddress: string
+  feePosition: 'Top of waterfall'
+  category: string
+}
 export interface WriteOffGroupInput {
   days: number | ''
   writeOff: number | ''
@@ -24,11 +34,12 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
   apy: '90d',
 })
 
-export const createPoolFee = () => ({
+export const createPoolFee = (): PoolFee => ({
+  id: 0,
   name: '',
   category: '',
-  feePosition: '',
-  feeType: '',
+  feePosition: 'Top of waterfall',
+  feeType: '' as FeeTypes,
   percentOfNav: '',
   walletAddress: '',
 })
@@ -39,11 +50,12 @@ export type CreatePoolValues = Omit<
 > & {
   // pool structure
   assetDenomination: string
-  trancheStructure: 1 | 2 | 3
 
   // pool details
-  poolType: 'open' | 'closed'
   issuerCategories: { type: string; value: string }[]
+  poolIcon: File | null
+  issuerLogo: File | null
+  executiveSummary: File | null
 
   reportAuthorName: string
   reportAuthorTitle: string
@@ -51,15 +63,7 @@ export type CreatePoolValues = Omit<
   reportUrl: string
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
-  poolFees: {
-    id?: number
-    name: string
-    feeType: FeeTypes
-    percentOfNav: number | ''
-    walletAddress: string
-    feePosition: 'Top of waterfall'
-    category: string
-  }[]
+  poolFees: PoolFee[]
   poolRatings: {
     agency?: string
     value?: string
@@ -71,18 +75,14 @@ export type CreatePoolValues = Omit<
 export const initialValues: CreatePoolValues = {
   // pool structure
   poolStructure: 'revolving',
-  trancheStructure: 1,
   assetClass: 'Private credit',
-  assetDenomination: '',
+  assetDenomination: isTestEnv ? 'USDC' : 'Native USDC',
   subAssetClass: '',
-
-  // pool structure -> tranches
-  tranches: [createEmptyTranche('')],
+  tranches: [createEmptyTranche('Junior')],
 
   // pool details section
   poolName: '',
   poolIcon: null,
-  currency: isTestEnv ? 'USDC' : 'Native USDC',
   maxReserve: 1000000,
   investorType: '',
   issuerName: '',
@@ -104,10 +104,18 @@ export const initialValues: CreatePoolValues = {
 
   assetOriginators: [''],
   adminMultisig: {
-    signers: ['', ''],
+    signers: [''],
     threshold: 1,
   },
   adminMultisigEnabled: false,
-  poolFees: [createPoolFee()],
+  poolFees: [],
   poolType: 'open',
+
+  onboarding: {
+    tranches: {},
+    taxInfoRequired: false,
+  },
+  onboardingExperience: 'none',
+  epochHours: 0,
+  epochMinutes: 0,
 }

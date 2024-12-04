@@ -1,4 +1,5 @@
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { addressToHex, evmToSubstrateAddress, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { useCentEvmChainId } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Checkbox,
@@ -18,6 +19,7 @@ import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { feeCategories } from '../../../src/config'
+import { isEvmAddress } from '../../../src/utils/address'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
 
@@ -28,8 +30,30 @@ const FEE_TYPES = [
 
 const FEE_POSISTIONS = [{ label: 'Top of waterfall', value: 'Top of waterfall' }]
 
+const TaxDocument = () => {
+  const form = useFormikContext<PoolMetadataInput>()
+
+  return (
+    <Box mt={2}>
+      <Text variant="heading4">Tax document requirement</Text>
+
+      <Field name="onboarding">
+        {({ field }: FieldProps) => (
+          <Checkbox
+            {...field}
+            label="Require investors to upload tax documents before signing the subscription agreement."
+            variant="square"
+            onChange={(val) => form.setFieldValue('onboarding.taxInfoRequired', val.target.checked ? true : false)}
+          />
+        )}
+      </Field>
+    </Box>
+  )
+}
+
 export const PoolSetupSection = () => {
   const theme = useTheme()
+  const chainId = useCentEvmChainId()
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
 
@@ -73,7 +97,24 @@ export const PoolSetupSection = () => {
                     values.adminMultisig?.signers?.map((_, index) => (
                       <Box key={index} mt={2}>
                         <Field name={`adminMultisig.signers.${index}`}>
-                          {({ field }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
+                          {({ field, form }: FieldProps) => (
+                            <TextInput
+                              placeholder="Type address..."
+                              {...field}
+                              onChange={(val) => {
+                                form.setFieldValue(`adminMultisig.signers.${index}`, val.target.value)
+                              }}
+                              onBlur={() => {
+                                const value = form.values.adminMultisig.signers[index]
+                                if (value) {
+                                  const transformedValue = isEvmAddress(value)
+                                    ? evmToSubstrateAddress(value, chainId ?? 0)
+                                    : value
+                                  form.setFieldValue(`adminMultisig.signers.${index}`, transformedValue)
+                                }
+                              }}
+                            />
+                          )}
                         </Field>
                       </Box>
                     ))
@@ -88,7 +129,7 @@ export const PoolSetupSection = () => {
                     <Box display="flex" justifyContent="flex-end" mt={2}>
                       <AddButton
                         onClick={() => {
-                          if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                          if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
                             push('')
                           }
                         }}
@@ -103,19 +144,19 @@ export const PoolSetupSection = () => {
       </Box>
       <Box mt={2} mb={2}>
         <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <Field name="subAssetClass">
+          <Field name="adminMultisig.threshold">
             {({ field, meta, form }: FieldProps) => (
               <Select
-                name="subAssetClass"
+                name="adminMultisig.threshold"
                 label={`Configuration change threshold (1 out of ${Math.max(
                   values?.adminMultisig?.signers?.length ?? 0,
                   1
                 )} managers)`}
-                onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
+                onChange={(event) => form.setFieldValue('adminMultisig.threshold', event.target.value)}
                 onBlur={field.onBlur}
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 value={field.value}
-                options={form.values.adminMultisig.signers.map((_: string, i: number) => ({
+                options={values.adminMultisig?.signers.map((_: string, i: number) => ({
                   label: i + 1,
                   value: i + 1,
                 }))}
@@ -142,10 +183,27 @@ export const PoolSetupSection = () => {
                   Add or remove addresses that can:
                 </Text>
                 <Text variant="heading2">Originate assets and invest in the pool*</Text>
-                {form.values.assetOriginators?.map((_: string, index: number) => (
+                {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
                     <Field name={`assetOriginators.${index}`}>
-                      {({ field }: FieldProps) => <TextInput placeholder="Type address..." {...field} />}
+                      {({ field, form }: FieldProps) => (
+                        <TextInput
+                          placeholder="Type address..."
+                          {...field}
+                          onChange={(val) => {
+                            form.setFieldValue(`assetOriginators.${index}`, val.target.value)
+                          }}
+                          onBlur={() => {
+                            const value = form.values.assetOriginators[index]
+                            if (value) {
+                              const transformedValue = isEvmAddress(value)
+                                ? evmToSubstrateAddress(value, chainId ?? 0)
+                                : addressToHex(value)
+                              form.setFieldValue(`assetOriginators.${index}`, transformedValue)
+                            }
+                          }}
+                        />
+                      )}
                     </Field>
                   </Box>
                 ))}
@@ -154,7 +212,7 @@ export const PoolSetupSection = () => {
               <Box gridColumn="2 / span 1" alignSelf="end">
                 <AddButton
                   onClick={() => {
-                    if (form.values.adminMultisig && form.values.adminMultisig.signers?.length <= 10) {
+                    if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
                       push('')
                     }
                   }}
@@ -207,16 +265,14 @@ export const PoolSetupSection = () => {
       <FieldArray name="poolFees">
         {({ push, remove }) => (
           <>
-            {form.values.poolFees.map((_, index) => (
+            {values.poolFees.map((_, index) => (
               <Box mt={4} mb={3} key={index}>
                 <StyledGrid mt={3} gap={1}>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Text variant="heading3">Pool fees {index + 1}</Text>
-                    {form.values.poolFees.length > 1 && (
-                      <IconButton onClick={() => remove(index)}>
-                        <IconTrash color="textSecondary" />
-                      </IconButton>
-                    )}
+                    <IconButton onClick={() => remove(index)}>
+                      <IconTrash color="textSecondary" />
+                    </IconButton>
                   </Box>
                   <Line />
                   <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
@@ -325,33 +381,58 @@ export const PoolSetupSection = () => {
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
             />
           </Box>
-          <Box>
-            <Field name="subscriptionDocuments">
-              {({ field, meta, form }: FieldProps) => (
-                <Box>
-                  <FileUpload
-                    name="subscriptionDocuments"
-                    file={field.value}
-                    onFileChange={async (file) => {
-                      form.setFieldTouched('poolIcon', true, false)
-                      form.setFieldValue('poolIcon', file)
-                    }}
-                    label="Click to upload"
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    accept="application/pdf"
-                    small
-                  />
-                </Box>
-              )}
-            </Field>
-            <Box mt={8}>
-              <Text variant="heading4">Tax document requirement</Text>
-              <Checkbox
-                label="Require investors to upload tax documents before signing the subscription agreement."
-                variant="square"
-              />
+          {values.onboardingExperience === 'centrifuge' && (
+            <Box>
+              <Box>
+                {values.tranches.map((tranche, index) => (
+                  <Field key={index} name={`onboarding.tranches.${tranche.tokenName}`}>
+                    {({ field, meta }: FieldProps) => (
+                      <Box mb={4}>
+                        <FileUpload
+                          name={`onboarding.${tranche.tokenName}`}
+                          file={field.value}
+                          onFileChange={async (file) => {
+                            form.setFieldTouched(`onboarding.tranches.${tranche.tokenName}`, true, false)
+                            form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, file)
+                          }}
+                          label={`Subscription document for ${tranche.tokenName}`}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          accept="application/pdf"
+                          small
+                        />
+                      </Box>
+                    )}
+                  </Field>
+                ))}
+              </Box>
+              <TaxDocument />
             </Box>
-          </Box>
+          )}
+          {values.onboardingExperience === 'external' && (
+            <Box>
+              {values.tranches.map((tranche, index) => (
+                <Field key={index} name={`onboarding.tranches.${tranche.tokenName}`}>
+                  {({ field, meta }: FieldProps) => (
+                    <Box mb={4}>
+                      <FieldWithErrorMessage
+                        {...field}
+                        as={TextInput}
+                        name={`onboarding.tranches.${tranche.tokenName}`}
+                        value={field.value}
+                        label={<Text variant="heading4">Onboarding URL {tranche.tokenName}</Text>}
+                        isUrl
+                        placeholder="www.example.com"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, e.target.value)
+                        }
+                      />
+                    </Box>
+                  )}
+                </Field>
+              ))}
+              <TaxDocument />
+            </Box>
+          )}
         </StyledGrid>
       </Box>
     </Box>

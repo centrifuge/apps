@@ -29,8 +29,6 @@ export const PoolDetailsSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
   const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 
-  console.log(form.values)
-
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -193,7 +191,6 @@ export const PoolDetailsSection = () => {
                   placeholder="Type here..."
                   maxLength={1000}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                  // disabled={waitingForStoredIssuer}
                 />
               )}
             </Field>
@@ -299,9 +296,9 @@ export const PoolDetailsSection = () => {
                 onFileChange={(file) => {
                   form.setFieldValue('reportAuthorAvatar', file)
                 }}
-                accept="application/pdf"
                 label="Reviewer avatar"
                 placeholder="Choose file"
+                accept="image/*"
                 small
               />
             )}
