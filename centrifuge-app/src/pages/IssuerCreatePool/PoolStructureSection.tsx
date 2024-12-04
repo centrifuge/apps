@@ -16,6 +16,7 @@ import styled, { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips, tooltipText } from '../../../src/components/Tooltips'
 import { config } from '../../config'
+import { createEmptyTranche } from './types'
 import { validate } from './validate'
 
 const apyOptions = [
@@ -38,6 +39,12 @@ export const StyledGrid = styled(Grid)`
   }
 `
 
+const tranches: { [key: number]: { label: string; id: string; length: number } } = {
+  0: { label: 'Single tranche', id: 'oneTranche', length: 1 },
+  1: { label: 'Two tranches', id: 'twoTranches', length: 2 },
+  2: { label: 'Three tranches', id: 'threeTranches', length: 3 },
+}
+
 export const Line = () => {
   const theme = useTheme()
   return <Box border={`.5px solid ${theme.colors.borderPrimary}`} width="100%" />
@@ -58,16 +65,20 @@ export const CheckboxOption = ({
   id,
   height,
   styles,
+  onChange,
+  isChecked,
 }: {
   name: string
   label: string
   sublabel?: string
-  value: string | number | boolean
+  value?: string | number | boolean
   disabled?: boolean
   icon?: React.ReactNode
   id?: keyof typeof tooltipText
   height?: number
   styles?: React.CSSProperties
+  onChange?: () => void
+  isChecked?: boolean
 }) => {
   const theme = useTheme()
 
@@ -85,20 +96,24 @@ export const CheckboxOption = ({
       alignItems={icon ? 'center' : 'flex-start'}
       {...styles}
     >
-      <Field name={name} validate={validate[name as keyof typeof validate]}>
-        {({ field, form, meta }: FieldProps) => (
-          <Checkbox
-            {...field}
-            errorMessage={meta.touched && meta.error ? meta.error : undefined}
-            label={label}
-            value={value.toString()}
-            disabled={disabled}
-            onChange={(val) => form.setFieldValue(name, val.target.checked ? value : null)}
-            onBlur={field.onBlur}
-            checked={form.values[name] === value}
-          />
-        )}
-      </Field>
+      {onChange ? (
+        <Checkbox label={label} disabled={disabled} onChange={onChange} checked={isChecked} />
+      ) : (
+        <Field name={name} validate={validate[name as keyof typeof validate]}>
+          {({ field, form, meta }: FieldProps) => (
+            <Checkbox
+              {...field}
+              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+              label={label}
+              value={value?.toString() || ''}
+              disabled={disabled}
+              onChange={(val) => form.setFieldValue(name, val.target.checked ? value : null)}
+              onBlur={field.onBlur}
+              checked={form.values[name] === value}
+            />
+          )}
+        </Field>
+      )}
       {icon && <Tooltips type={id} label={<Box ml={3}>{icon}</Box>} />}
       {sublabel && (
         <Text variant="body2" color="textSecondary" style={{ marginLeft: 26, lineHeight: 'normal' }}>
@@ -125,7 +140,7 @@ export const PoolStructureSection = () => {
       case 0:
         return 'Junior'
       case 1:
-        return values.trancheStructure === 2 ? 'Senior' : 'Mezzanine'
+        return values.tranches.length === 2 ? 'Senior' : 'Mezzanine'
       case 2:
         return 'Senior'
       default:
@@ -138,6 +153,23 @@ export const PoolStructureSection = () => {
     const poolName = values.poolName
     const suffix = newValue.startsWith(poolName) ? newValue.substring(poolName.length).trim() : newValue
     form.setFieldValue(`tranches.${index}.tokenName`, `${poolName} ${suffix}`)
+  }
+
+  const handleTrancheCheckboxChange = (selectedValue: number) => {
+    if (selectedValue === 0) {
+      // Set to single tranche: Junior
+      form.setFieldValue('tranches', [createEmptyTranche('Junior')])
+    } else if (selectedValue === 1) {
+      // Set to two tranches: Junior, Senior
+      form.setFieldValue('tranches', [createEmptyTranche('Junior'), createEmptyTranche('Senior')])
+    } else if (selectedValue === 2) {
+      // Set to three tranches: Junior, Mezzanine, Senior
+      form.setFieldValue('tranches', [
+        createEmptyTranche('Junior'),
+        createEmptyTranche('Mezzanine'),
+        createEmptyTranche('Senior'),
+      ])
+    }
   }
 
   return (
@@ -166,27 +198,19 @@ export const PoolStructureSection = () => {
         </Box>
         <Box>
           <Text variant="body2">Define tranche structure *</Text>
-          <CheckboxOption
-            name="trancheStructure"
-            label="Single tranche"
-            id="oneTranche"
-            value={1}
-            icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-          />
-          <CheckboxOption
-            name="trancheStructure"
-            label="Two tranches"
-            id="oneTranche"
-            value={2}
-            icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-          />
-          <CheckboxOption
-            name="trancheStructure"
-            label="Three tranches"
-            id="oneTranche"
-            value={3}
-            icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-          />
+
+          {Array.from({ length: 3 }).map((_, index) => {
+            return (
+              <CheckboxOption
+                name="tranches"
+                label={tranches[index].label}
+                id={tranches[index].id}
+                icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                onChange={() => handleTrancheCheckboxChange(index)}
+                isChecked={values.tranches.length === tranches[index].length}
+              />
+            )
+          })}
         </Box>
       </StyledGrid>
       <Box mt={4} mb={3}>
@@ -259,7 +283,7 @@ export const PoolStructureSection = () => {
       </Box>
       <Box mt={4} mb={3}>
         <Text>Tranches</Text>
-        {Array.from({ length: values.trancheStructure }).map((_, index) => (
+        {values.tranches.map((_, index) => (
           <StyledGrid key={index} mt={3}>
             <Text variant="heading3">Tranche {index + 1}</Text>
             <Line />

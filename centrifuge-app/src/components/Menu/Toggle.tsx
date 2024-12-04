@@ -10,7 +10,7 @@ export const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   width: 100%;
   grid-template-columns: ${({ stacked, theme }) =>
     stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr ${theme.sizes.iconSmall}px`};
-  color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
+  color: ${({ theme }) => theme.colors.textInverted};
   border-radius: 4px;
   background-color: ${({ isActive }) => (isActive ? LIGHT_BACKGROUND : 'transparent')};
 

@@ -62,9 +62,9 @@ export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
         Issuer
         {isLarge &&
           (open ? (
-            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
+            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} color="white" />
           ) : (
-            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} />
+            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} color="white" />
           ))}
       </Toggle>
 
