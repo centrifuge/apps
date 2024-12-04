@@ -282,7 +282,9 @@ const IssuerCreatePoolPage = () => {
       }
 
       // Pool ratings
-      if (values.poolRatings && values.poolRatings[0].agency !== '') {
+      if (values.poolRatings[0].agency === '') {
+        metadataValues.poolRatings = []
+      } else {
         const newRatingReports = await Promise.all(
           values.poolRatings.map((rating) => pinFileIfExists(centrifuge, rating.reportFile ?? null))
         )
@@ -296,8 +298,6 @@ const IssuerCreatePoolPage = () => {
             reportFile: pinnedReport ? { uri: pinnedReport.uri, mime: rating.reportFile?.type ?? '' } : null,
           }
         })
-
-        metadataValues.poolRatings = ratings
       }
 
       // Tranches
