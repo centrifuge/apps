@@ -275,7 +275,7 @@ export function LoanList({ loans, snapshots }: Props) {
             <Checkbox
               label={
                 <Text color="textSecondary" variant="body2">
-                  Show repaid assets
+                  Show closed assets
                 </Text>
               }
               onChange={(e) => setShowRepaid(!showRepaid)}
