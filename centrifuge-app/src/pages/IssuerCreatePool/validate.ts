@@ -43,6 +43,7 @@ export const validate = {
   maxPriceVariation: combine(required(), min(0), max(10000)),
   maturityDate: combine(required(), maturityDate()),
   apy: required(),
+  apyPercentage: required(),
 
   // pool details
   poolName: combine(required(), maxLength(100)),
@@ -93,13 +94,14 @@ export const validateValues = (values: CreatePoolValues) => {
   let prevInterest = Infinity
   let prevRiskBuffer = 0
 
-  const juniorInterestRate = parseFloat(values.tranches[0].interestRate as string)
+  const juniorInterestRate =
+    values.tranches[0].apyPercentage !== null ? parseFloat(values.tranches[0].apyPercentage.toString()) : 0
 
   values.poolFees.forEach((fee, i) => {
     if (fee.name === '') {
       errors = setIn(errors, `poolFees.${i}.name`, 'Name is required')
     }
-    if (fee.percentOfNav === '' || fee.percentOfNav < 0.0001 || fee.percentOfNav > 10) {
+    if (fee.percentOfNav === 0 || fee.percentOfNav < 0.0001 || fee.percentOfNav > 10) {
       errors = setIn(errors, `poolFees.${i}.percentOfNav`, 'Percentage between 0.0001 and 10 is required')
     }
     if (fee.walletAddress === '') {
