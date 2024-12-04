@@ -33,7 +33,6 @@ import { Dec } from '../../../src/utils/Decimal'
 import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
 import { usePoolCurrencies } from '../../../src/utils/useCurrencies'
 import { useIsAboveBreakpoint } from '../../../src/utils/useIsAboveBreakpoint'
-import { usePools } from '../../../src/utils/usePools'
 import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
@@ -41,6 +40,8 @@ import { Line, PoolStructureSection } from './PoolStructureSection'
 import { CreatePoolValues, initialValues, PoolFee } from './types'
 import { pinFileIfExists, pinFiles } from './utils'
 import { validateValues } from './validate'
+
+const PROPOSAL_URL = 'https://centrifuge.subsquare.io/democracy/referenda'
 
 const StyledBox = styled(Box)`
   padding: 48px 80px 0px 80px;
@@ -61,7 +62,7 @@ const stepFields: { [key: number]: string[] } = {
     'issuerShortDescription',
     'issuerDescription',
   ],
-  3: ['investmentDetails', 'liquidityDetails'],
+  3: ['assetOriginators', 'adminMultisig'],
 }
 
 const txMessage = {
@@ -79,7 +80,6 @@ const IssuerCreatePoolPage = () => {
   const currencies = usePoolCurrencies()
   const centrifuge = useCentrifuge()
   const api = useCentrifugeApi()
-  const pools = usePools()
   const { poolCreationType } = useDebugFlags()
   const consts = useCentrifugeConsts()
   const { chainDecimals } = useCentrifugeConsts()
@@ -95,7 +95,7 @@ const IssuerCreatePoolPage = () => {
   const [createdModal, setCreatedModal] = useState(false)
   const [preimageHash, setPreimageHash] = useState('')
   const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
-  const [createdPoolId, setCreatedPoolId] = useState('')
+  const [proposalId, setProposalId] = useState(null)
 
   useEffect(() => {
     if (createType === 'notePreimage') {
@@ -106,6 +106,7 @@ const IssuerCreatePoolPage = () => {
             const event = events.find(({ event }) => api.events.preimage.Noted.is(event))
             const parsedEvent = event?.toJSON() as any
             if (!parsedEvent) return false
+            console.info('Preimage hash: ', parsedEvent.event.data[0])
             setPreimageHash(parsedEvent.event.data[0])
             setIsPreimageDialogOpen(true)
           })
@@ -114,16 +115,6 @@ const IssuerCreatePoolPage = () => {
       return () => $events.unsubscribe()
     }
   }, [centrifuge, createType])
-
-  useEffect(() => {
-    if (createdPoolId && pools?.find((p) => p.id === createdPoolId)) {
-      // Redirecting only when we find the newly created pool in the data from usePools
-      // Otherwise the Issue Overview page will throw an error when it can't find the pool
-      // It can take a second for the new data to come in after creating the pool
-      navigate(`/issuer/${createdPoolId}`)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pools, createdPoolId])
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -236,11 +227,16 @@ const IssuerCreatePoolPage = () => {
           setIsMultisigDialogOpen(true)
         }
         const [, , , , poolId] = args
-        console.log(poolId, result)
         if (createType === 'immediate') {
-          setCreatedPoolId(poolId)
+          navigate(`/pools/${poolId}`)
         } else {
-          setCreatedModal(true)
+          const event = result.events.find(({ event }) => api.events.democracy.Proposed.is(event))
+          if (event) {
+            const eventData = event.toHuman() as any
+            const proposalId = eventData.event.data.proposalIndex.replace(/\D/g, '')
+            setCreatedModal(true)
+            setProposalId(proposalId)
+          }
         }
       },
     }
@@ -286,7 +282,9 @@ const IssuerCreatePoolPage = () => {
       }
 
       // Pool ratings
-      if (values.poolRatings) {
+      if (values.poolRatings[0].agency === '') {
+        metadataValues.poolRatings = []
+      } else {
         const newRatingReports = await Promise.all(
           values.poolRatings.map((rating) => pinFileIfExists(centrifuge, rating.reportFile ?? null))
         )
@@ -300,8 +298,6 @@ const IssuerCreatePoolPage = () => {
             reportFile: pinnedReport ? { uri: pinnedReport.uri, mime: rating.reportFile?.type ?? '' } : null,
           }
         })
-
-        metadataValues.poolRatings = ratings
       }
 
       // Tranches
@@ -433,6 +429,12 @@ const IssuerCreatePoolPage = () => {
     }))
   }, [values, step])
 
+  const isCreatePoolEnabled =
+    values.assetOriginators.length > 0 &&
+    values.assetOriginators[0] !== '' &&
+    values.adminMultisig.signers.length > 0 &&
+    values.adminMultisig.signers[0] !== ''
+
   return (
     <>
       <PreimageHashDialog
@@ -495,6 +497,7 @@ const IssuerCreatePoolPage = () => {
                 small
                 onClick={handleNextStep}
                 loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
+                disabled={step === 3 && !isCreatePoolEnabled} // Disable the button if on step 3 and conditions aren't met
               >
                 {step === 3 ? 'Create pool' : 'Next'}
               </Button>
@@ -514,7 +517,9 @@ const IssuerCreatePoolPage = () => {
               <Button onClick={() => setCreatedModal(false)} variant="inverted" style={{ width: 140, marginRight: 16 }}>
                 Close
               </Button>
-              <Button style={{ width: 160 }}>See proposal</Button>
+              <Button style={{ width: 160 }} onClick={() => navigate(`${PROPOSAL_URL}/${proposalId}`)}>
+                See proposal
+              </Button>
             </Box>
           </Box>
         </Dialog>

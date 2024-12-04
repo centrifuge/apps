@@ -8,13 +8,14 @@ export interface Tranche {
   minInvestment: number | ''
   apy: string
   interestRate: number | ''
+  apyPercentage: number | null
 }
 
 export interface PoolFee {
   id: number
   name: string
   feeType: FeeTypes
-  percentOfNav: string
+  percentOfNav: number
   walletAddress: string
   feePosition: 'Top of waterfall'
   category: string
@@ -32,6 +33,7 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
   minRiskBuffer: trancheName === 'Junior' ? '' : 0,
   minInvestment: 1000,
   apy: '90d',
+  apyPercentage: null,
 })
 
 export const createPoolFee = (): PoolFee => ({
@@ -40,7 +42,7 @@ export const createPoolFee = (): PoolFee => ({
   category: '',
   feePosition: 'Top of waterfall',
   feeType: '' as FeeTypes,
-  percentOfNav: '',
+  percentOfNav: 0,
   walletAddress: '',
 })
 

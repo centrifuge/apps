@@ -662,10 +662,12 @@ interface TrancheFormValues {
   minRiskBuffer: number | ''
   minInvestment: number | ''
   apy: string | ''
+  apyPercentage: number | null
 }
 
 export interface PoolMetadataInput {
   // structure
+  assetDenomination: string
   poolStructure: 'revolving'
   assetClass: 'Public credit' | 'Private credit'
   subAssetClass: string
@@ -713,6 +715,7 @@ export interface PoolMetadataInput {
   onboarding?: {
     tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
     taxInfoRequired?: boolean
+    externalOnboardingUrl?: string
   }
 
   listed?: boolean
@@ -780,6 +783,7 @@ export type PoolMetadata = {
       icon?: FileType | null
       minInitialInvestment?: string
       apy: string
+      apyPercentage: number | null
     }
   >
   loanTemplates?: {
@@ -1129,6 +1133,7 @@ export function getPoolsModule(inst: Centrifuge) {
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
         apy: tranche.apy,
+        apyPercentage: tranche.apyPercentage,
       }
     })
 
@@ -1178,6 +1183,11 @@ export function getPoolsModule(inst: Centrifuge) {
       pod: {},
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
+      onboarding: {
+        tranches: metadata.onboarding?.tranches || {},
+        taxInfoRequired: metadata.onboarding?.taxInfoRequired,
+        externalOnboardingUrl: metadata.onboarding?.externalOnboardingUrl,
+      },
     }
 
     return inst.metadata.pinJson(formattedMetadata)

@@ -138,7 +138,7 @@ export const PoolDetailsSection = () => {
                 <FileUpload
                   file={field.value}
                   onFileChange={(file) => form.setFieldValue('issuerLogo', file)}
-                  accept="image/*"
+                  accept="image/png, image/jpeg, image/jpg"
                   fileTypeText="SVG, PNG, or JPG (max. 1MB; 480x480px)"
                   label="Issuer logo"
                 />
@@ -164,7 +164,7 @@ export const PoolDetailsSection = () => {
                 />
               )}
             </Field>
-            <Field name="issuerShortDescription" validate={!isTestEnv && validate.issuerShortDescription}>
+            <Field name="issuerShortDescription" validate={validate.issuerShortDescription}>
               {({ field, meta, form }: FieldProps) => (
                 <FieldWithErrorMessage
                   name="issuerShortDescription"
@@ -181,10 +181,10 @@ export const PoolDetailsSection = () => {
             </Field>
           </Grid>
           <Box gridColumn="span 2">
-            <Field name="issuerDescription" validate={!isTestEnv && validate.issuerDescription}>
+            <Field name="issuerDescription" validate={validate.issuerDescription}>
               {({ field, meta, form }: FieldProps) => (
                 <FieldWithErrorMessage
-                  validate={!isTestEnv && validate.issuerDescription}
+                  validate={validate.issuerDescription}
                   name="issuerDescription"
                   as={TextAreaInput}
                   label="Overview page description (max. 3000 characters)*"
@@ -202,6 +202,7 @@ export const PoolDetailsSection = () => {
               label="Website URL"
               placeholder="www.example.com"
               isUrl
+              validate={validate.websiteNotRequired()}
             />
             <FieldWithErrorMessage
               name="forum"
@@ -209,6 +210,7 @@ export const PoolDetailsSection = () => {
               label="Governance forum"
               placeholder="www.example.com"
               isUrl
+              validate={validate.websiteNotRequired()}
             />
             <FieldWithErrorMessage
               name="email"
@@ -275,7 +277,14 @@ export const PoolDetailsSection = () => {
       <Box mt={4} mb={3}>
         <Text variant="heading2">Service analysis</Text>
         <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <FieldWithErrorMessage name="reportUrl" as={TextInput} label="Report URL" placeholder="Type here..." isUrl />
+          <FieldWithErrorMessage
+            name="reportUrl"
+            as={TextInput}
+            label="Report URL"
+            placeholder="Type here..."
+            isUrl
+            validate={validate.websiteNotRequired()}
+          />
           <FieldWithErrorMessage
             name="reportAuthorName"
             as={TextInput}
@@ -298,7 +307,7 @@ export const PoolDetailsSection = () => {
                 }}
                 label="Reviewer avatar"
                 placeholder="Choose file"
-                accept="image/*"
+                accept="image/png, image/jpeg, image/jpg"
                 small
               />
             )}

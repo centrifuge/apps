@@ -297,7 +297,7 @@ export const PoolStructureSection = () => {
                       placeholder={getTrancheName(index)}
                       maxLength={30}
                       name={`tranches.${index}.tokenName`}
-                      disabled={values.tranches.length === 1}
+                      disabled
                       value={getTrancheName(index)}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleTrancheNameChange(e, index, form)}
                     />
@@ -312,7 +312,7 @@ export const PoolStructureSection = () => {
                           <Tooltips type="minimumInvestment" label={<Text variant="heading4">Min. investment*</Text>} />
                         }
                         placeholder="0.00"
-                        currency={values.currency}
+                        currency={values.assetDenomination}
                         errorMessage={meta.touched ? meta.error : undefined}
                         onChange={(value) => form.setFieldValue(field.name, value)}
                         onBlur={() => form.setFieldTouched(field.name, true)}
@@ -358,8 +358,8 @@ export const PoolStructureSection = () => {
                           as={NumberInput}
                           placeholder="0.00"
                           symbol="%"
-                          name={`tranches.${index}.interestRate`}
-                          validate={validate.interestRate}
+                          name={`tranches.${index}.apyPercentage`}
+                          validate={validate.apyPercentage}
                         />
                       </Box>
                     </Grid>
@@ -392,7 +392,7 @@ export const PoolStructureSection = () => {
                             />
                           }
                           placeholder="0.00"
-                          currency={values.currency}
+                          currency={values.assetDenomination}
                           errorMessage={meta.touched ? meta.error : undefined}
                           onChange={(value) => form.setFieldValue(field.name, value)}
                           onBlur={() => form.setFieldTouched(field.name, true)}
@@ -402,7 +402,7 @@ export const PoolStructureSection = () => {
                   </Box>
                   <Box width="227px">
                     <Field name={`tranches.${index}.apy`}>
-                      {({ field, form }: FieldProps) => (
+                      {({ field }: FieldProps) => (
                         <TextInput
                           {...field}
                           label={

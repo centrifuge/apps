@@ -57,6 +57,8 @@ export const PoolSetupSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
 
+  console.log(values)
+
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -410,26 +412,7 @@ export const PoolSetupSection = () => {
           )}
           {values.onboardingExperience === 'external' && (
             <Box>
-              {values.tranches.map((tranche, index) => (
-                <Field key={index} name={`onboarding.tranches.${tranche.tokenName}`}>
-                  {({ field, meta }: FieldProps) => (
-                    <Box mb={4}>
-                      <FieldWithErrorMessage
-                        {...field}
-                        as={TextInput}
-                        name={`onboarding.tranches.${tranche.tokenName}`}
-                        value={field.value}
-                        label={<Text variant="heading4">Onboarding URL {tranche.tokenName}</Text>}
-                        isUrl
-                        placeholder="www.example.com"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, e.target.value)
-                        }
-                      />
-                    </Box>
-                  )}
-                </Field>
-              ))}
+              <Field as={TextInput} name="onboarding.externalOnboardingUrl" label="External onboarding URL" />
               <TaxDocument />
             </Box>
           )}
