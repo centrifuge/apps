@@ -39,7 +39,7 @@ export const PoolRatingsSection = () => {
                   </Field>
 
                   <Field name={`poolRatings.${index}.reportUrl`}>
-                    {({ field, meta }: FieldProps) => (
+                    {({ field }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
                         as={TextInput}

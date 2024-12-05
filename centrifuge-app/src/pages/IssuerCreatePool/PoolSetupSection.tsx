@@ -1,4 +1,4 @@
-import { addressToHex, evmToSubstrateAddress, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { evmToSubstrateAddress, PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import { useCentEvmChainId } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -22,6 +22,7 @@ import { feeCategories } from '../../../src/config'
 import { isEvmAddress } from '../../../src/utils/address'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
+import { validate } from './validate'
 
 const FEE_TYPES = [
   { label: 'Direct charge', value: 'chargedUpTo' },
@@ -96,15 +97,16 @@ export const PoolSetupSection = () => {
                   {values.adminMultisigEnabled ? (
                     values.adminMultisig?.signers?.map((_, index) => (
                       <Box key={index} mt={2}>
-                        <Field name={`adminMultisig.signers.${index}`}>
-                          {({ field, form }: FieldProps) => (
-                            <TextInput
+                        <Field name={`adminMultisig.signers.${index}`} validate={validate.addressValidate}>
+                          {({ field, form, meta }: FieldProps) => (
+                            <FieldWithErrorMessage
                               placeholder="Type address..."
                               {...field}
-                              onChange={(val) => {
+                              onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
                                 form.setFieldValue(`adminMultisig.signers.${index}`, val.target.value)
                               }}
                               onBlur={() => {
+                                form.setFieldTouched(`adminMultisig.signers.${index}`, true)
                                 const value = form.values.adminMultisig.signers[index]
                                 if (value) {
                                   const transformedValue = isEvmAddress(value)
@@ -113,6 +115,8 @@ export const PoolSetupSection = () => {
                                   form.setFieldValue(`adminMultisig.signers.${index}`, transformedValue)
                                 }
                               }}
+                              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                              as={TextInput}
                             />
                           )}
                         </Field>
@@ -120,8 +124,15 @@ export const PoolSetupSection = () => {
                     ))
                   ) : (
                     <Box mt={2}>
-                      <Field name={`adminMultisig.signers.0`}>
-                        {({ field }: FieldProps) => <TextInput placeholder="Type address..." {...field} />}
+                      <Field name={`adminMultisig.signers.0`} validate={validate.addressValidate}>
+                        {({ field }: FieldProps) => (
+                          <FieldWithErrorMessage
+                            as={TextInput}
+                            placeholder="Type address..."
+                            {...field}
+                            onBlur={field.onBlur}
+                          />
+                        )}
                       </Field>
                     </Box>
                   )}
@@ -187,23 +198,17 @@ export const PoolSetupSection = () => {
                 <Text variant="heading2">Originate assets and invest in the pool*</Text>
                 {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
-                    <Field name={`assetOriginators.${index}`}>
-                      {({ field, form }: FieldProps) => (
-                        <TextInput
+                    <Field name={`assetOriginators.${index}`} validate={validate.addressValidate}>
+                      {({ field, form, meta }: FieldProps) => (
+                        <FieldWithErrorMessage
                           placeholder="Type address..."
                           {...field}
-                          onChange={(val) => {
+                          onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
                             form.setFieldValue(`assetOriginators.${index}`, val.target.value)
                           }}
-                          onBlur={() => {
-                            const value = form.values.assetOriginators[index]
-                            if (value) {
-                              const transformedValue = isEvmAddress(value)
-                                ? evmToSubstrateAddress(value, chainId ?? 0)
-                                : addressToHex(value)
-                              form.setFieldValue(`assetOriginators.${index}`, transformedValue)
-                            }
-                          }}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          as={TextInput}
+                          onBlur={field.onBlur}
                         />
                       )}
                     </Field>
@@ -385,34 +390,47 @@ export const PoolSetupSection = () => {
           </Box>
           {values.onboardingExperience === 'centrifuge' && (
             <Box>
-              <Box>
-                {values.tranches.map((tranche, index) => (
-                  <Field key={index} name={`onboarding.tranches.${tranche.tokenName}`}>
-                    {({ field, meta }: FieldProps) => (
-                      <Box mb={4}>
-                        <FileUpload
-                          name={`onboarding.${tranche.tokenName}`}
-                          file={field.value}
-                          onFileChange={async (file) => {
-                            form.setFieldTouched(`onboarding.tranches.${tranche.tokenName}`, true, false)
-                            form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, file)
-                          }}
-                          label={`Subscription document for ${tranche.tokenName}`}
-                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                          accept="application/pdf"
-                          small
-                        />
-                      </Box>
-                    )}
-                  </Field>
-                ))}
-              </Box>
+              {values.tranches.map((tranche, index) => (
+                <Field
+                  key={index}
+                  name={`onboarding.tranches.${tranche.tokenName}`}
+                  validate={validate.executiveSummary}
+                >
+                  {({ field, meta }: FieldProps) => (
+                    <Box mb={4}>
+                      <FileUpload
+                        name={`onboarding.${tranche.tokenName}`}
+                        file={field.value}
+                        onFileChange={async (file) => {
+                          form.setFieldTouched(`onboarding.tranches.${tranche.tokenName}`, true, false)
+                          form.setFieldValue(`onboarding.tranches.${tranche.tokenName}`, file)
+                        }}
+                        label={`Subscription document for ${tranche.tokenName}`}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        accept="application/pdf"
+                        small
+                        onBlur={field.onBlur}
+                      />
+                    </Box>
+                  )}
+                </Field>
+              ))}
               <TaxDocument />
             </Box>
           )}
           {values.onboardingExperience === 'external' && (
             <Box>
-              <Field as={TextInput} name="onboarding.externalOnboardingUrl" label="External onboarding URL" />
+              <Field name="onboarding.externalOnboardingUrl" validate={validate.externalOnboardingUrl}>
+                {({ field, meta }: FieldProps) => (
+                  <FieldWithErrorMessage
+                    {...field}
+                    onBlur={field.onBlur}
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    as={TextInput}
+                    label="External onboarding url"
+                  />
+                )}
+              </Field>
               <TaxDocument />
             </Box>
           )}
