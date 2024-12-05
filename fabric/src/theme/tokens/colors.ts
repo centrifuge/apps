@@ -9,7 +9,7 @@ export const grayScale = {
   500: '#91969B',
   600: '#667085',
   800: '#252B34',
-  900: '#0F1115',
+  900: '#6A7280',
 }
 
 export const yellowScale = {

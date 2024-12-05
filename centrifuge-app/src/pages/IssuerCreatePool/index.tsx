@@ -288,16 +288,16 @@ const IssuerCreatePoolPage = () => {
         const newRatingReports = await Promise.all(
           values.poolRatings.map((rating) => pinFileIfExists(centrifuge, rating.reportFile ?? null))
         )
-
         const ratings = values.poolRatings.map((rating, index) => {
           const pinnedReport = newRatingReports[index]
           return {
-            agency: rating.agency ?? '',
-            value: rating.value ?? '',
-            reportUrl: rating.reportUrl ?? '',
+            agency: rating.agency,
+            value: rating.value,
+            reportUrl: rating.reportUrl,
             reportFile: pinnedReport ? { uri: pinnedReport.uri, mime: rating.reportFile?.type ?? '' } : null,
           }
         })
+        metadataValues.poolRatings = ratings
       }
 
       // Tranches

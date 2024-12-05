@@ -57,8 +57,6 @@ export const PoolSetupSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
 
-  console.log(values)
-
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -123,7 +121,7 @@ export const PoolSetupSection = () => {
                   ) : (
                     <Box mt={2}>
                       <Field name={`adminMultisig.signers.0`}>
-                        {({ field }: FieldProps) => <TextInput placeholder="Type here..." {...field} />}
+                        {({ field }: FieldProps) => <TextInput placeholder="Type address..." {...field} />}
                       </Field>
                     </Box>
                   )}
@@ -144,37 +142,39 @@ export const PoolSetupSection = () => {
           </Box>
         </StyledGrid>
       </Box>
-      <Box mt={2} mb={2}>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <Field name="adminMultisig.threshold">
-            {({ field, meta, form }: FieldProps) => (
-              <Select
-                name="adminMultisig.threshold"
-                label={`Configuration change threshold (1 out of ${Math.max(
-                  values?.adminMultisig?.signers?.length ?? 0,
-                  1
-                )} managers)`}
-                onChange={(event) => form.setFieldValue('adminMultisig.threshold', event.target.value)}
-                onBlur={field.onBlur}
-                errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                value={field.value}
-                options={values.adminMultisig?.signers.map((_: string, i: number) => ({
-                  label: i + 1,
-                  value: i + 1,
-                }))}
-                placeholder="Select..."
-              />
-            )}
-          </Field>
-          <Grid display="flex" gap={1}>
-            <IconInfo size="iconSmall" color={theme.colors.textSecondary} />
-            <Text color="textSecondary" variant="body2">
-              For added security, changes to the pool configuration (e.g., tranche structure or write-off policy) may
-              require multiple signers and confirmation from the above.
-            </Text>
-          </Grid>
-        </StyledGrid>
-      </Box>
+      {values.adminMultisigEnabled && (
+        <Box mt={2} mb={2}>
+          <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
+            <Field name="adminMultisig.threshold">
+              {({ field, meta, form }: FieldProps) => (
+                <Select
+                  name="adminMultisig.threshold"
+                  label={`Configuration change threshold (1 out of ${Math.max(
+                    values?.adminMultisig?.signers?.length ?? 0,
+                    1
+                  )} managers)`}
+                  onChange={(event) => form.setFieldValue('adminMultisig.threshold', event.target.value)}
+                  onBlur={field.onBlur}
+                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                  value={field.value}
+                  options={values.adminMultisig?.signers.map((_: string, i: number) => ({
+                    label: i + 1,
+                    value: i + 1,
+                  }))}
+                  placeholder="Select..."
+                />
+              )}
+            </Field>
+            <Grid display="flex" gap={1}>
+              <IconInfo size="iconSmall" color={theme.colors.textSecondary} />
+              <Text color="textSecondary" variant="body2">
+                For added security, changes to the pool configuration (e.g., tranche structure or write-off policy) may
+                require multiple signers and confirmation from the above.
+              </Text>
+            </Grid>
+          </StyledGrid>
+        </Box>
+      )}
 
       <Box mt={4} mb={3}>
         <FieldArray name="assetOriginators">
