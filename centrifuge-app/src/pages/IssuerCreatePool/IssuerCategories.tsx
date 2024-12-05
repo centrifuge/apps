@@ -10,7 +10,7 @@ const PROVIDERS = [
   { label: 'Pricing oracle provider', value: 'pricingOracleProvider' },
   { label: 'Auditor', value: 'auditor' },
   { label: 'Custodian', value: 'custodian' },
-  { label: 'Investment manager', value: 'Investment manager' },
+  { label: 'Investment manager', value: 'investmentManager' },
   { label: 'Sub-advisor', value: 'subadvisor' },
   { label: 'Historical default rate', value: 'historicalDefaultRate' },
   { label: 'Other', value: 'other' },
