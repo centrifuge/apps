@@ -17,7 +17,7 @@ import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { CreatePoolValues } from '../../IssuerCreatePool'
+import { CreatePoolValues } from '../../IssuerCreatePool/types'
 import { validate } from '../../IssuerCreatePool/validate'
 
 type Values = Pick<

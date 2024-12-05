@@ -23,9 +23,19 @@ export type DialogProps = React.PropsWithChildren<{
   title?: string | React.ReactElement
   subtitle?: string | React.ReactElement
   icon?: React.ComponentType<IconProps> | React.ReactElement
+  hideButton?: boolean
 }>
 
-function DialogInner({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title, subtitle }: DialogProps) {
+function DialogInner({
+  children,
+  isOpen,
+  onClose,
+  width = 'dialog',
+  icon: IconComp,
+  title,
+  subtitle,
+  hideButton = false,
+}: DialogProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const { overlayProps, underlayProps } = useOverlay(
@@ -78,7 +88,9 @@ function DialogInner({ children, isOpen, onClose, width = 'dialog', icon: IconCo
                   title
                 )}
 
-                <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
+                {!hideButton && (
+                  <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
+                )}
               </Shelf>
               {subtitle && (
                 <Text variant="heading4" color="textSecondary">

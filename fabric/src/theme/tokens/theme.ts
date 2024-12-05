@@ -17,7 +17,7 @@ const statusPromoteBg = '#f8107114'
 const colors = {
   textPrimary: grayScale[800],
   textSecondary: grayScale[500],
-  textDisabled: grayScale[300],
+  textDisabled: grayScale[900],
   textInverted: 'white',
   textGold: gold,
 
