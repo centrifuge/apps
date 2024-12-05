@@ -1,7 +1,8 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { useGetExplorerUrl } from '@centrifuge/centrifuge-react'
 import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { formatBalance } from '../../../src/utils/formatting'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAssetTransactions } from '../../utils/usePools'
@@ -21,17 +22,23 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
 
   const columnConfig = [
     {
-      header: 'Asset ID',
-      align: 'center',
+      header: 'Transaction date',
+      align: 'left',
       csvOnly: false,
-      formatter: noop,
-      width: '80px',
+      formatter: formatDate,
     },
     {
-      header: 'Asset name',
+      header: 'Transaction',
       align: 'left',
       csvOnly: false,
       formatter: noop,
+      width: '38%',
+    },
+    {
+      header: 'Amount',
+      align: 'left',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },
     {
       header: 'Epoch',
@@ -40,34 +47,10 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       formatter: noop,
     },
     {
-      header: 'Date',
-      align: 'left',
-      csvOnly: false,
-      formatter: formatDate,
-    },
-    {
-      header: 'Transaction type',
-      align: 'left',
-      csvOnly: false,
-      formatter: noop,
-    },
-    {
-      header: 'Currency amount',
-      align: 'left',
-      csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
-    },
-    {
-      header: 'Currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
-    {
-      header: 'Transaction',
+      header: 'View transaction',
       align: 'center',
       csvOnly: false,
-      width: '80px',
+      width: '120px',
       formatter: (v: any) => (
         <IconAnchor
           href={explorer.tx(v)}
@@ -90,13 +73,10 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       ?.map((tx) => ({
         name: '',
         value: [
-          tx.asset.id.split('-').at(-1)!,
-          tx.asset.name || `Asset ${tx.asset.id.split('-').at(-1)!}`,
-          tx.epochId.split('-').at(-1)!,
           tx.timestamp.toISOString(),
           formatAssetTransactionType(tx.type),
           tx.amount?.toFloat() ?? '',
-          pool.currency.symbol,
+          tx.epochId.split('-').at(-1)!,
           tx.hash,
         ],
         heading: false,
