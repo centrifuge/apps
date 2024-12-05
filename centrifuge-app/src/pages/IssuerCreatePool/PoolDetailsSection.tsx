@@ -29,6 +29,8 @@ export const PoolDetailsSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
   const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 
+  console.log(form.values)
+
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>

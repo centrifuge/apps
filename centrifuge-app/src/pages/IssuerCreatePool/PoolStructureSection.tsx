@@ -5,6 +5,7 @@ import {
   CurrencyInput,
   Grid,
   IconHelpCircle,
+  InputErrorMessage,
   NumberInput,
   Select,
   Text,
@@ -290,7 +291,7 @@ export const PoolStructureSection = () => {
             <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
               <Box>
                 <Field name={`tranches.${index}.tokenName`}>
-                  {({ field, form }: FieldProps) => (
+                  {({ field, form, meta }: FieldProps) => (
                     <TextInput
                       {...field}
                       label="Token name"
@@ -305,19 +306,24 @@ export const PoolStructureSection = () => {
                 </Field>
                 <Box mt={3}>
                   <Field name={`tranches.${index}.minInvestment`} validate={validate.minInvestment}>
-                    {({ field, form, meta }: FieldProps) => (
-                      <CurrencyInput
-                        {...field}
-                        label={
-                          <Tooltips type="minimumInvestment" label={<Text variant="heading4">Min. investment*</Text>} />
-                        }
-                        placeholder="0.00"
-                        currency={values.assetDenomination}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        onChange={(value) => form.setFieldValue(field.name, value)}
-                        onBlur={() => form.setFieldTouched(field.name, true)}
-                      />
-                    )}
+                    {({ field, form, meta }: FieldProps) => {
+                      return (
+                        <CurrencyInput
+                          {...field}
+                          label={
+                            <Tooltips
+                              type="minimumInvestment"
+                              label={<Text variant="heading4">Min. investment*</Text>}
+                            />
+                          }
+                          placeholder="0.00"
+                          currency={values.assetDenomination}
+                          errorMessage={meta.touched ? meta.error : undefined}
+                          onChange={(value) => form.setFieldValue(field.name, value)}
+                          onBlur={() => form.setFieldTouched(field.name, true)}
+                        />
+                      )
+                    }}
                   </Field>
                 </Box>
               </Box>
@@ -325,15 +331,19 @@ export const PoolStructureSection = () => {
               <Box>
                 <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
                   {({ field, form, meta }: FieldProps) => (
-                    <TextInput
-                      {...field}
-                      onChange={(e) => form.setFieldValue(field.name, e.target.value)}
-                      errorMessage={meta.touched ? meta.error : undefined}
-                      label={<Tooltips type="tokenSymbol" label={<Text variant="heading4">Token symbol*</Text>} />}
-                      placeholder="4-12 characters"
-                      minLength={4}
-                      maxLength={12}
-                    />
+                    <Box position="relative">
+                      <TextInput
+                        {...field}
+                        onChange={(e) => form.setFieldValue(field.name, e.target.value)}
+                        label={<Tooltips type="tokenSymbol" label={<Text variant="heading4">Token symbol*</Text>} />}
+                        placeholder="4-12 characters"
+                        minLength={4}
+                        maxLength={12}
+                      />
+                      {meta.touched ? (
+                        <InputErrorMessage style={{ position: 'absolute' }}>{meta.error}</InputErrorMessage>
+                      ) : null}
+                    </Box>
                   )}
                 </Field>
 
@@ -378,7 +388,7 @@ export const PoolStructureSection = () => {
                 </Box>
               </Box>
 
-              {(index === 1 || index === 2) && (
+              {index !== 0 && (
                 <>
                   <Box>
                     <Field name={`tranches.${index}.interestRate`} validate={validate.interestRate}>

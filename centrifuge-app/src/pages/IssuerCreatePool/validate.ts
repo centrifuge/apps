@@ -83,6 +83,9 @@ export const validate = {
   days: combine(required(), integer(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   writeOff: combine(required(), positiveNumber(), max(100)),
   penaltyInterest: combine(required(), nonNegativeNumber(), max(100)),
+
+  addressValidate: required(),
+  externalOnboardingUrl: required(),
 }
 
 export const validateValues = (values: CreatePoolValues) => {
@@ -109,6 +112,18 @@ export const validateValues = (values: CreatePoolValues) => {
     }
     if (!isSubstrateAddress(fee?.walletAddress)) {
       errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Invalid address')
+    }
+  })
+
+  values.assetOriginators.forEach((asset, i) => {
+    if (!isSubstrateAddress(asset) && asset !== '') {
+      errors = setIn(errors, `assetOriginators.${i}`, 'Invalid address')
+    }
+  })
+
+  values.adminMultisig.signers.forEach((signer, i) => {
+    if (!isSubstrateAddress(signer) && signer !== '') {
+      errors = setIn(errors, `adminMultisig.signers.${i}`, 'Invalid address')
     }
   })
 

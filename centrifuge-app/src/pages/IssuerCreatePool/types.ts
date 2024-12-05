@@ -48,9 +48,19 @@ export const createPoolFee = (): PoolFee => ({
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport' | 'poolRatings'
+  | 'poolIcon'
+  | 'issuerLogo'
+  | 'executiveSummary'
+  | 'adminMultisig'
+  | 'poolFees'
+  | 'poolReport'
+  | 'poolRatings'
+  | 'issuerName'
+  | 'epochHours'
+  | 'epochMinutes'
 > & {
   // pool structure
+  issuerName: null | ''
   assetDenomination: string
 
   // pool details
@@ -87,7 +97,7 @@ export const initialValues: CreatePoolValues = {
   poolIcon: null,
   maxReserve: 1000000,
   investorType: '',
-  issuerName: '',
+  issuerName: null,
   issuerRepName: '',
   issuerLogo: null,
   issuerDescription: '',
@@ -118,6 +128,4 @@ export const initialValues: CreatePoolValues = {
     taxInfoRequired: false,
   },
   onboardingExperience: 'none',
-  epochHours: 0,
-  epochMinutes: 0,
 }
