@@ -256,7 +256,7 @@ export const PoolSetupSection = () => {
             <Field
               as={TextInput}
               name={`poolFees.${1}.walletAddress`}
-              value="Centrifuge treasury"
+              value={import.meta.env.REACT_APP_TREASURY}
               disabled
               label={<Text variant="heading4">Wallet address</Text>}
             />
