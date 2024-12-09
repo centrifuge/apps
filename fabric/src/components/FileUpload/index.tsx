@@ -188,7 +188,7 @@ export function FileUpload({
         >
           {small && (
             <Box display="flex" justifyContent="space-between" width="100%">
-              <Text color="textSecondary">
+              <Text color={curFile && typeof curFile !== 'string' && curFile.name ? 'textPrimary' : 'textSecondary'}>
                 {' '}
                 {(curFile && typeof curFile !== 'string' && curFile.name) || 'Click to upload'}
               </Text>

@@ -1,4 +1,5 @@
 import {
+  AddFee,
   CurrencyBalance,
   CurrencyKey,
   FileType,
@@ -37,7 +38,7 @@ import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
 import { Line, PoolStructureSection } from './PoolStructureSection'
-import { CreatePoolValues, initialValues, PoolFee } from './types'
+import { CreatePoolValues, initialValues } from './types'
 import { pinFileIfExists, pinFiles } from './utils'
 import { validateValues } from './validate'
 
@@ -324,30 +325,34 @@ const IssuerCreatePoolPage = () => {
 
       // Pool fees
       const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
-      const metadataPoolFees: Pick<PoolFee, 'name' | 'id' | 'feePosition' | 'feeType'>[] = []
-      const feeInput: PoolFeesCreatePool = []
-
-      values.poolFees.forEach((fee, index) => {
-        metadataPoolFees.push({
+      const poolFees: AddFee['fee'][] = values.poolFees.map((fee) => {
+        return {
           name: fee.name,
-          id: feeId ? feeId + index : 0,
-          feePosition: fee.feePosition,
+          destination: fee.walletAddress,
+          amount: Rate.fromPercent(fee.percentOfNav),
           feeType: fee.feeType,
-        })
+          limit: 'ShareOfPortfolioValuation',
+          account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
+          feePosition: fee.feePosition,
+        }
+      })
+      metadataValues.poolFees = poolFees.map((fee, i) => ({
+        name: fee.name,
+        id: feeId + i,
+        feePosition: fee.feePosition,
+        feeType: fee.feeType,
+      }))
 
-        feeInput.push([
+      const feeInput = poolFees.map((fee) => {
+        return [
           'Top',
           {
-            destination: fee.walletAddress,
-            editor: fee.feeType === 'chargedUpTo' ? { account: fee.walletAddress } : 'Root',
-            feeType: {
-              [fee.feeType]: { limit: { ['ShareOfPortfolioValuation']: Rate.fromPercent(fee.percentOfNav) } },
-            },
+            destination: fee.destination,
+            editor: fee?.account ? { account: fee.account } : 'Root',
+            feeType: { [fee.feeType]: { limit: { [fee.limit]: fee?.amount } } },
           },
-        ])
+        ]
       })
-
-      metadataValues.poolFees = metadataPoolFees
 
       // Multisign
       metadataValues.adminMultisig =
@@ -429,12 +434,6 @@ const IssuerCreatePoolPage = () => {
     }))
   }, [values, step])
 
-  const isCreatePoolEnabled =
-    values.assetOriginators.length > 0 &&
-    values.assetOriginators[0] !== '' &&
-    values.adminMultisig.signers.length > 0 &&
-    values.adminMultisig.signers[0] !== ''
-
   return (
     <>
       <PreimageHashDialog
@@ -497,7 +496,7 @@ const IssuerCreatePoolPage = () => {
                 small
                 onClick={handleNextStep}
                 loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
-                disabled={step === 3 && !isCreatePoolEnabled} // Disable the button if on step 3 and conditions aren't met
+                disabled={step === 3}
               >
                 {step === 3 ? 'Create pool' : 'Next'}
               </Button>

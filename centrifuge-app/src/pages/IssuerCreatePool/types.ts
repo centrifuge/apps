@@ -36,15 +36,17 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
   apyPercentage: null,
 })
 
-export const createPoolFee = (): PoolFee => ({
-  id: 0,
-  name: '',
-  category: '',
-  feePosition: 'Top of waterfall',
-  feeType: '' as FeeTypes,
-  percentOfNav: 0,
-  walletAddress: '',
-})
+export const createPoolFee = (): PoolFee => {
+  return {
+    id: 0,
+    name: '',
+    category: '',
+    feePosition: 'Top of waterfall',
+    feeType: 'Fixed' as FeeTypes,
+    percentOfNav: 0.4,
+    walletAddress: import.meta.env.REACT_APP_TREASURY,
+  }
+}
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
@@ -58,6 +60,7 @@ export type CreatePoolValues = Omit<
   | 'issuerName'
   | 'epochHours'
   | 'epochMinutes'
+  | 'poolFees'
 > & {
   // pool structure
   issuerName: null | ''
@@ -120,7 +123,7 @@ export const initialValues: CreatePoolValues = {
     threshold: 1,
   },
   adminMultisigEnabled: false,
-  poolFees: [],
+  poolFees: [createPoolFee()],
   poolType: 'open',
 
   onboarding: {
