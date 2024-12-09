@@ -1,5 +1,5 @@
 import { evmToSubstrateAddress, PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { useCentEvmChainId } from '@centrifuge/centrifuge-react'
+import { useCentEvmChainId, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Checkbox,
@@ -15,6 +15,7 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { useEffect } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
@@ -22,6 +23,7 @@ import { feeCategories } from '../../../src/config'
 import { isEvmAddress } from '../../../src/utils/address'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
+import { CreatePoolValues } from './types'
 import { validate } from './validate'
 
 const FEE_TYPES = [
@@ -55,8 +57,13 @@ const TaxDocument = () => {
 export const PoolSetupSection = () => {
   const theme = useTheme()
   const chainId = useCentEvmChainId()
-  const form = useFormikContext<PoolMetadataInput>()
+  const form = useFormikContext<CreatePoolValues>()
   const { values } = form
+  const { selectedAccount } = useWallet().substrate
+
+  useEffect(() => {
+    form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
+  }, [])
 
   return (
     <Box>
@@ -127,9 +134,9 @@ export const PoolSetupSection = () => {
                       <Field name={`adminMultisig.signers.0`} validate={validate.addressValidate}>
                         {({ field }: FieldProps) => (
                           <FieldWithErrorMessage
+                            {...field}
                             as={TextInput}
                             placeholder="Type address..."
-                            {...field}
                             onBlur={field.onBlur}
                           />
                         )}
@@ -168,7 +175,7 @@ export const PoolSetupSection = () => {
                   onBlur={field.onBlur}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
                   value={field.value}
-                  options={values.adminMultisig?.signers.map((_: string, i: number) => ({
+                  options={values.adminMultisig?.signers.map((_: string | number, i: any) => ({
                     label: i + 1,
                     value: i + 1,
                   }))}
@@ -238,15 +245,15 @@ export const PoolSetupSection = () => {
           <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
             <Field
               as={TextInput}
-              name={`poolFees.${1}.position`}
-              value="Top of waterfall"
+              name={`poolFees.${0}.position`}
+              value={values.poolFees[0].feePosition}
               disabled
               label={<Tooltips type="feePosition" label={<Text variant="heading4">Fee position</Text>} />}
             />
             <Field
               as={TextInput}
-              name={`poolFees.${1}.type`}
-              value="Fixed"
+              name={`poolFees.${0}.feeType`}
+              value={values.poolFees[0].feeType}
               disabled
               label={<Tooltips type="feeType" label={<Text variant="heading4">Fee type</Text>} />}
             />
@@ -255,13 +262,13 @@ export const PoolSetupSection = () => {
               label={<Text variant="heading4">Fees in % of NAV</Text>}
               symbol="%"
               name={`poolFees.${1}.percentOfNav`}
-              value="0.4"
+              value={values.poolFees[0].percentOfNav}
               disabled
             />
             <Field
               as={TextInput}
               name={`poolFees.${1}.walletAddress`}
-              value={import.meta.env.REACT_APP_TREASURY}
+              value={values.poolFees[0].walletAddress}
               disabled
               label={<Text variant="heading4">Wallet address</Text>}
             />
@@ -269,83 +276,89 @@ export const PoolSetupSection = () => {
         </StyledGrid>
       </Box>
 
+      {/* POOL FEES  */}
       <FieldArray name="poolFees">
         {({ push, remove }) => (
           <>
-            {values.poolFees.map((_, index) => (
-              <Box mt={4} mb={3} key={index}>
-                <StyledGrid mt={3} gap={1}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Text variant="heading3">Pool fees {index + 1}</Text>
-                    <IconButton onClick={() => remove(index)}>
-                      <IconTrash color="textSecondary" />
-                    </IconButton>
-                  </Box>
-                  <Line />
-                  <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
-                    <FieldWithErrorMessage
-                      as={TextInput}
-                      label="Name"
-                      maxLength={30}
-                      name={`poolFees.${index}.name`}
-                      placeholder="Type here..."
-                    />
-                    <Field name={`poolFees.${index}.category`}>
-                      {({ field, meta }: FieldProps) => (
-                        <Select
-                          name="category"
-                          label="Category"
-                          onChange={(event) => form.setFieldValue(`poolFees.${index}.category`, event.target.value)}
-                          onBlur={field.onBlur}
-                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                          value={field.value}
-                          options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
-                        />
-                      )}
-                    </Field>
-                    <Field name={`poolFees.${index}.feePosition`}>
-                      {({ field, meta }: FieldProps) => (
-                        <Select
-                          label="Fee position"
-                          name={`poolFees.${index}.feePosition`}
-                          onChange={(event) => form.setFieldValue(`poolFees.${index}.feePosition`, event.target.value)}
-                          onBlur={field.onBlur}
-                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                          value={field.value}
-                          options={FEE_POSISTIONS}
-                        />
-                      )}
-                    </Field>
-                    <Field name={`poolFees.${index}.feeType`}>
-                      {({ field, meta }: FieldProps) => (
-                        <Select
-                          label="Fee type"
-                          name={`poolFees.${index}.feeType`}
-                          onChange={(event) => form.setFieldValue(`poolFees.${index}.feeType`, event.target.value)}
-                          onBlur={field.onBlur}
-                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                          value={field.value}
-                          options={FEE_TYPES}
-                        />
-                      )}
-                    </Field>
-                    <FieldWithErrorMessage
-                      as={NumberInput}
-                      label="Max fees in % of NAV"
-                      symbol="%"
-                      name={`poolFees.${index}.percentOfNav`}
-                      placeholder="Type here..."
-                    />
-                    <FieldWithErrorMessage
-                      as={TextInput}
-                      label="Wallet address"
-                      name={`poolFees.${index}.walletAddress`}
-                      placeholder="Type here..."
-                    />
-                  </Grid>
-                </StyledGrid>
-              </Box>
-            ))}
+            {values.poolFees.map((_, index) => {
+              if (index === 0) return
+              return (
+                <Box mt={4} mb={3} key={index}>
+                  <StyledGrid mt={3} gap={1}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Text variant="heading3">Pool fees {index + 1}</Text>
+                      <IconButton onClick={() => remove(index)}>
+                        <IconTrash color="textSecondary" />
+                      </IconButton>
+                    </Box>
+                    <Line />
+                    <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
+                      <FieldWithErrorMessage
+                        as={TextInput}
+                        label="Name"
+                        maxLength={30}
+                        name={`poolFees.${index}.name`}
+                        placeholder="Type here..."
+                      />
+                      <Field name={`poolFees.${index}.category`}>
+                        {({ field, meta }: FieldProps) => (
+                          <Select
+                            name="category"
+                            label="Category"
+                            onChange={(event) => form.setFieldValue(`poolFees.${index}.category`, event.target.value)}
+                            onBlur={field.onBlur}
+                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                            value={field.value}
+                            options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                          />
+                        )}
+                      </Field>
+                      <Field name={`poolFees.${index}.feePosition`}>
+                        {({ field, meta }: FieldProps) => (
+                          <Select
+                            label="Fee position"
+                            name={`poolFees.${index}.feePosition`}
+                            onChange={(event) =>
+                              form.setFieldValue(`poolFees.${index}.feePosition`, event.target.value)
+                            }
+                            onBlur={field.onBlur}
+                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                            value={field.value}
+                            options={FEE_POSISTIONS}
+                          />
+                        )}
+                      </Field>
+                      <Field name={`poolFees.${index}.feeType`}>
+                        {({ field, meta }: FieldProps) => (
+                          <Select
+                            label="Fee type"
+                            name={`poolFees.${index}.feeType`}
+                            onChange={(event) => form.setFieldValue(`poolFees.${index}.feeType`, event.target.value)}
+                            onBlur={field.onBlur}
+                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                            value={field.value}
+                            options={FEE_TYPES}
+                          />
+                        )}
+                      </Field>
+                      <FieldWithErrorMessage
+                        as={NumberInput}
+                        label="Max fees in % of NAV"
+                        symbol="%"
+                        name={`poolFees.${index}.percentOfNav`}
+                        placeholder="Type here..."
+                      />
+                      <FieldWithErrorMessage
+                        as={TextInput}
+                        label="Wallet address"
+                        name={`poolFees.${index}.walletAddress`}
+                        placeholder="Type here..."
+                      />
+                    </Grid>
+                  </StyledGrid>
+                </Box>
+              )
+            })}
             <Box display="flex" justifyContent="flex-end" mt={2}>
               <AddButton
                 onClick={() =>
@@ -399,7 +412,7 @@ export const PoolSetupSection = () => {
                   {({ field, meta }: FieldProps) => (
                     <Box mb={4}>
                       <FileUpload
-                        name={`onboarding.${tranche.tokenName}`}
+                        name={`onboarding.tranches.${tranche.tokenName}`}
                         file={field.value}
                         onFileChange={async (file) => {
                           form.setFieldTouched(`onboarding.tranches.${tranche.tokenName}`, true, false)
@@ -409,7 +422,6 @@ export const PoolSetupSection = () => {
                         errorMessage={meta.touched && meta.error ? meta.error : undefined}
                         accept="application/pdf"
                         small
-                        onBlur={field.onBlur}
                       />
                     </Box>
                   )}

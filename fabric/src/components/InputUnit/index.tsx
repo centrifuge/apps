@@ -73,7 +73,7 @@ export function InputLabel({
   )
 }
 
-export function InputErrorMessage({ children, style }: { children: React.ReactNode; style: React.CSSProperties }) {
+export function InputErrorMessage({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <Text variant="label2" color="statusCritical" style={{ ...style }}>
       {children}

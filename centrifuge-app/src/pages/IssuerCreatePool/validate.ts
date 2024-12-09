@@ -101,7 +101,7 @@ export const validateValues = (values: CreatePoolValues) => {
     values.tranches[0].apyPercentage !== null ? parseFloat(values.tranches[0].apyPercentage.toString()) : 0
 
   values.poolFees.forEach((fee, i) => {
-    if (fee.name === '') {
+    if (fee.name === '' && i !== 0) {
       errors = setIn(errors, `poolFees.${i}.name`, 'Name is required')
     }
     if (fee.percentOfNav === 0 || fee.percentOfNav < 0.0001 || fee.percentOfNav > 10) {
