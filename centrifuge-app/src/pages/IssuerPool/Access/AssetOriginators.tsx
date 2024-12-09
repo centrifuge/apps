@@ -208,6 +208,7 @@ function AOForm({
           }),
           newMetadata ? cent.pools.setMetadata([poolId, newMetadata], { batch: true }) : of(null),
         ]).pipe(
+          // THIS IS WHERE PROXIES ARE BEING CREATED
           switchMap(([permissionTx, setMetadataTx]) => {
             const numProxyTypesPerHotWallet = 4
             const deposit = proxyDepositFactor
