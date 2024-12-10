@@ -10,22 +10,15 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string | React.ReactElement
   errorMessage?: string
   extendedClickArea?: boolean
-  variant?: 'square' | 'round'
 }
 
-export function Checkbox({
-  label,
-  errorMessage,
-  extendedClickArea,
-  variant = 'round',
-  ...checkboxProps
-}: CheckboxProps) {
+export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxProps }: CheckboxProps) {
   return (
     <Box position="relative">
       <StyledLabel $extendedClickArea={!!extendedClickArea}>
         <Shelf as={Text} gap={1} alignItems="center" position="relative">
           <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
-            <StyledCheckbox type="checkbox" $variant={variant} {...checkboxProps} />
+            <StyledCheckbox type="checkbox" {...checkboxProps} />
             <StyledOutline />
           </StyledWrapper>
           {label && (
@@ -95,38 +88,17 @@ const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
   }
 `
 
-const StyledCheckbox = styled.input<{ $variant: 'square' | 'round' }>`
+const StyledCheckbox = styled.input`
   width: 18px;
   height: 18px;
   appearance: none;
-  border-radius: ${({ $variant }) => ($variant === 'square' ? '2px' : '50%')};
+  border-radius: 2px;
   border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 
-  ${({ $variant, theme }) =>
-    $variant === 'round' &&
-    `
-      &:checked {
-        border-color: ${theme.colors.textPrimary};
-      }
-
-      &:checked::after {
-        content: '';
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: ${theme.colors.textPrimary};
-      }
-    `}
-
-  ${({ $variant, theme }) =>
-    $variant === 'square' &&
-    `
+  ${({ theme }) => `
       &:checked {
         border-color: ${theme.colors.borderSecondary};
         background-color: ${theme.colors.textGold};

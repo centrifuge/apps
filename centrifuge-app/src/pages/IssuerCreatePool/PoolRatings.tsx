@@ -1,5 +1,5 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, FileUpload, Text, TextInput } from '@centrifuge/fabric'
+import { Box, FileUpload, Text, TextInput, URLInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { AddButton } from './PoolDetailsSection'
@@ -42,10 +42,9 @@ export const PoolRatingsSection = () => {
                     {({ field }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
-                        as={TextInput}
                         label="Rating report URL"
                         placeholder="Type here..."
-                        isUrl
+                        as={URLInput}
                       />
                     )}
                   </Field>
