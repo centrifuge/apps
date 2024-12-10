@@ -29,8 +29,8 @@ import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
-import { LoadBoundary } from './LoadBoundary'
 import { prefetchRoute } from './Root'
+import { Spinner } from './Spinner'
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
@@ -47,9 +47,10 @@ type Row = (Loan | TinlakeLoan) & {
 type Props = {
   loans: Loan[] | TinlakeLoan[]
   snapshots: AssetSnapshot[]
+  isLoading: boolean
 }
 
-export function LoanList({ loans, snapshots }: Props) {
+export function LoanList({ loans, snapshots, isLoading }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
   if (!poolId) throw new Error('Pool not found')
 
@@ -266,6 +267,8 @@ export function LoanList({ loans, snapshots }: Props) {
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
 
+  if (isLoading) return <Spinner />
+
   return (
     <>
       <Box pt={1} pb={2} paddingX={1} display="flex" justifyContent="space-between" alignItems="center">
@@ -304,18 +307,16 @@ export function LoanList({ loans, snapshots }: Props) {
       </Box>
       <PaginationContainer pagination={pagination}>
         <Stack gap={2}>
-          <LoadBoundary>
-            <Box overflow="auto">
-              <DataTable
-                data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
-                columns={columns}
-                onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
-                pageSize={20}
-                page={pagination.page}
-                defaultSortKey="maturityDate"
-              />
-            </Box>
-          </LoadBoundary>
+          <Box overflow="auto">
+            <DataTable
+              data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
+              columns={columns}
+              onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+              pageSize={20}
+              page={pagination.page}
+              defaultSortKey="maturityDate"
+            />
+          </Box>
           {pagination.pageCount > 1 && (
             <Box alignSelf="center">
               <Pagination />
