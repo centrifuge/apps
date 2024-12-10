@@ -9,6 +9,7 @@ import {
   Text,
   TextAreaInput,
   TextInput,
+  URLInput,
 } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
@@ -198,18 +199,16 @@ export const PoolDetailsSection = () => {
           <Grid gap={2}>
             <FieldWithErrorMessage
               name="website"
-              as={TextInput}
               label="Website URL"
               placeholder="www.example.com"
-              isUrl
+              as={URLInput}
               validate={validate.websiteNotRequired()}
             />
             <FieldWithErrorMessage
               name="forum"
-              as={TextInput}
               label="Governance forum"
               placeholder="www.example.com"
-              isUrl
+              as={URLInput}
               validate={validate.websiteNotRequired()}
             />
             <FieldWithErrorMessage
@@ -279,11 +278,10 @@ export const PoolDetailsSection = () => {
         <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
           <FieldWithErrorMessage
             name="reportUrl"
-            as={TextInput}
             label="Report URL"
             placeholder="Type here..."
-            isUrl
             validate={validate.websiteNotRequired()}
+            as={URLInput}
           />
           <FieldWithErrorMessage
             name="reportAuthorName"

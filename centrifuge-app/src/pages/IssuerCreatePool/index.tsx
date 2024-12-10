@@ -34,6 +34,7 @@ import { Dec } from '../../../src/utils/Decimal'
 import { useCreatePoolFee } from '../../../src/utils/useCreatePoolFee'
 import { usePoolCurrencies } from '../../../src/utils/useCurrencies'
 import { useIsAboveBreakpoint } from '../../../src/utils/useIsAboveBreakpoint'
+import { usePools } from '../../../src/utils/usePools'
 import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
@@ -84,6 +85,7 @@ const IssuerCreatePoolPage = () => {
   const { poolCreationType } = useDebugFlags()
   const consts = useCentrifugeConsts()
   const { chainDecimals } = useCentrifugeConsts()
+  const pools = usePools()
   const createType = (poolCreationType as TransactionOptions['createType']) || config.poolCreationType || 'immediate'
   const {
     substrate: { addMultisig },
@@ -97,6 +99,7 @@ const IssuerCreatePoolPage = () => {
   const [preimageHash, setPreimageHash] = useState('')
   const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
   const [proposalId, setProposalId] = useState(null)
+  const [poolId, setPoolId] = useState(null)
 
   useEffect(() => {
     if (createType === 'notePreimage') {
@@ -116,6 +119,15 @@ const IssuerCreatePoolPage = () => {
       return () => $events.unsubscribe()
     }
   }, [centrifuge, createType])
+
+  useEffect(() => {
+    if (poolId && pools?.find((p) => p.id === poolId)) {
+      // Redirecting only when we find the newly created pool in the data from usePools
+      // Otherwise the Issue Overview page will throw an error when it can't find the pool
+      // It can take a second for the new data to come in after creating the pool
+      navigate(`/issuer/${poolId}`)
+    }
+  }, [poolId, pools])
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -229,7 +241,7 @@ const IssuerCreatePoolPage = () => {
         }
         const [, , , , poolId] = args
         if (createType === 'immediate') {
-          navigate(`/pools/${poolId}`)
+          setPoolId(poolId)
         } else {
           const event = result.events.find(({ event }) => api.events.democracy.Proposed.is(event))
           if (event) {

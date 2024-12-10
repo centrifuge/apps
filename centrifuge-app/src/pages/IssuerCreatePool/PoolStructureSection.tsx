@@ -1,12 +1,12 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import {
   Box,
-  Checkbox,
   CurrencyInput,
   Grid,
   IconHelpCircle,
   InputErrorMessage,
   NumberInput,
+  RadioButton,
   Select,
   Text,
   TextInput,
@@ -98,11 +98,11 @@ export const CheckboxOption = ({
       {...styles}
     >
       {onChange ? (
-        <Checkbox label={label} disabled={disabled} onChange={onChange} checked={isChecked} />
+        <RadioButton label={label} disabled={disabled} onChange={onChange} checked={isChecked} />
       ) : (
         <Field name={name} validate={validate[name as keyof typeof validate]}>
           {({ field, form, meta }: FieldProps) => (
-            <Checkbox
+            <RadioButton
               {...field}
               errorMessage={meta.touched && meta.error ? meta.error : undefined}
               label={label}
