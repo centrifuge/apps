@@ -9,6 +9,7 @@ import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { PoolCard, PoolCardProps } from './PoolCard'
+import { PoolListView } from './PoolCard/PoolListView'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
 import { filterPools } from './PoolFilter/utils'
 
@@ -118,10 +119,10 @@ export function PoolList() {
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
   return (
     <Stack gap={1} overflow="auto">
-      <Grid columns={[1, 2, 2, 3]} as="ul" role="list" gap={3}>
+      <Grid columns={[1]} as="ul" role="list" gap={1}>
         {pools.map((pool) => (
           <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
-            <PoolCard {...pool} isArchive />
+            <PoolListView {...pool} />
           </PoolCardBox>
         ))}
       </Grid>

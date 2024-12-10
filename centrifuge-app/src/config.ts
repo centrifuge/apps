@@ -104,7 +104,7 @@ export const ethConfig = {
   chainId: 1,
   poolRegistryAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmaMA1VYSKuuYhBcQCyf5Ek4VoiiEG6oLGp3iGbsQPGpkS', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmXJZjBMvW8Qgqt82zAbAKYSBV5u91JsC8uHfF2eR2uAZA', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
   network: ethNetwork,
   multicallContractAddress: '0xcA11bde05977b3631167028862bE2a173976CA11', // Same for all networks

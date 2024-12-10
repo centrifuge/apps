@@ -132,7 +132,7 @@ export function PoolDetailAssets() {
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
       <Box paddingX={3}>
-        <LoanList loans={loans} snapshots={snapshots} />
+        <LoanList loans={loans} snapshots={snapshots} isLoading={isLoadingSnapshots || isLoading} />
       </Box>
     </>
   )
