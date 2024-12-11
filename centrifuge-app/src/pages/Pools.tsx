@@ -1,33 +1,21 @@
-import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Box, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useListedPools } from '../../src/utils/useListedPools'
+import { Spinner } from '../../src/components/Spinner'
+import { useTotalAssetsFinanced } from '../../src/utils/useListedPools'
 import { LayoutSection } from '../components/LayoutBase/LayoutSection'
 import { PoolList } from '../components/PoolList'
 import { prefetchRoute } from '../components/Root'
 import { config } from '../config'
-import { Dec } from '../utils/Decimal'
 
 export default function PoolsPage() {
-  const [, listedTokens] = useListedPools()
-
-  const totalValueLocked = React.useMemo(() => {
-    return (
-      listedTokens
-        ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance
-            .toDecimal()
-            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
-            .toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
-    )
-  }, [listedTokens])
+  const { sumBorrowedAmount, isLoading } = useTotalAssetsFinanced()
 
   React.useEffect(() => {
     prefetchRoute('/pools/1')
     prefetchRoute('/pools/tokens')
   }, [])
+
+  if (isLoading) return <Spinner />
 
   return (
     <LayoutSection>
@@ -39,11 +27,11 @@ export default function PoolsPage() {
           <Box mt={40}>
             <Box display="flex">
               <Text color="#82888D" variant="body2" style={{ marginRight: 8 }}>
-                Total value locked (TVL)
+                Total assets finance
               </Text>
             </Box>
             <Text as="h1" variant="heading1" style={{ fontSize: 36 }}>
-              {formatBalance(totalValueLocked ?? 0, config.baseCurrency)}
+              {sumBorrowedAmount} {config.baseCurrency}
             </Text>
           </Box>
         </Stack>
