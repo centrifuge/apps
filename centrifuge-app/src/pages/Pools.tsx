@@ -27,7 +27,7 @@ export default function PoolsPage() {
           <Box mt={40}>
             <Box display="flex">
               <Text color="#82888D" variant="body2" style={{ marginRight: 8 }}>
-                Total assets finance
+                Total assets financed
               </Text>
             </Box>
             <Text as="h1" variant="heading1" style={{ fontSize: 36 }}>
