@@ -1132,7 +1132,7 @@ export function getPoolsModule(inst: Centrifuge) {
     metadata.tranches.forEach((tranche, index) => {
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
-        apy: tranche.apy,
+        apy: metadata.tranches[0].apy,
         apyPercentage: tranche.apyPercentage,
       }
     })

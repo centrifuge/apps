@@ -291,7 +291,7 @@ export const PoolStructureSection = () => {
             <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
               <Box>
                 <Field name={`tranches.${index}.tokenName`}>
-                  {({ field, form, meta }: FieldProps) => (
+                  {({ field, form }: FieldProps) => (
                     <TextInput
                       {...field}
                       label="Token name"
@@ -427,7 +427,7 @@ export const PoolStructureSection = () => {
                           }
                           name={`tranches.${index}.apy`}
                           disabled
-                          value="90 Day"
+                          value={apyOptions.find((option) => option.value === values.tranches[0].apy)?.label}
                         />
                       )}
                     </Field>
