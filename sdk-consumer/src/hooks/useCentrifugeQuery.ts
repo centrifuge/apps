@@ -1,32 +1,33 @@
-import { useEffect, useInsertionEffect, useLayoutEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import { catchError, finalize, of, share, timer, type Observable, type ObservedValueOf } from 'rxjs'
+import { useMemo, useReducer, useState, useSyncExternalStore } from 'react'
+import { catchError, of, share, timer, type Observable, type ObservedValueOf } from 'rxjs'
 import { map, tap } from 'rxjs/operators'
 
 export type CentrifugeQueryOptions = {}
 
-// type QueryReturn<T> = { data: T | undefined; error?: unknown; isLoading: boolean }
-
 export function useCentrifugeQuery<T = void>(observable?: Observable<T>, _options?: CentrifugeQueryOptions) {
-  const record = useObservable(observable)
+  const { snapshot, retry } = useObservable(observable)
 
   return {
-    data: record.data,
-    error: record.error,
-    isLoading: record.status === 'loading',
+    data: snapshot.data,
+    error: snapshot.error,
+    status: snapshot.status,
+    isLoading: snapshot.status === 'loading',
+    isSuccess: snapshot.status === 'success',
+    isError: snapshot.status === 'error',
+    retry,
   }
 }
 
-export function useCentrifugeQueryWithRefresh<T = void>(observable?: Observable<T>) {
-  const record = useObservable(observable)
-  const [visibleData, setVisibleData] = useState(record.data)
+export function useCentrifugeQueryWithRefresh<T = void>(observable?: Observable<T>, _options?: CentrifugeQueryOptions) {
+  const query = useCentrifugeQuery(observable, _options)
+  const [visibleData, setVisibleData] = useState(query.data)
 
   return {
+    ...query,
     data: visibleData,
-    error: record.error,
-    isLoading: record.status === 'loading',
-    hasFreshData: record.data !== visibleData,
+    hasFreshData: query.data !== visibleData,
     refresh: () => {
-      setVisibleData(record.data)
+      setVisibleData(query.data)
     },
   }
 }
@@ -44,9 +45,8 @@ type CacheRecord<T> = {
 
 const cache = new WeakMap<Observable<any>, CacheRecord<any>>()
 
-function useObservable<ObservableType extends Observable<any>>(
-  observable?: ObservableType
-): CacheRecord<ObservedValueOf<ObservableType>>['snapshot'] {
+function useObservable<ObservableType extends Observable<any>>(observable?: ObservableType) {
+  const [updateCount, forceUpdate] = useReducer((s) => s + 1, 0)
   const store = useMemo(() => {
     if (!observable) return
     if (!cache.has(observable)) {
@@ -66,16 +66,9 @@ function useObservable<ObservableType extends Observable<any>>(
             status: entry.didEmitData ? 'success' : 'error',
           }
         }),
-        // Ensure that the cache entry is deleted when the observable completes.
-        finalize(() => cache.delete(observable)),
         // Share the observable to prevent unsubscribing and resubscribing between the immediate subscription and the useSyncExternalStore subscription.
         share({
-          resetOnRefCountZero: () =>
-            timer(0).pipe(
-              tap(() => {
-                console.log('resetOnRefCountZero')
-              })
-            ),
+          resetOnRefCountZero: () => timer(0),
         })
       )
 
@@ -89,34 +82,40 @@ function useObservable<ObservableType extends Observable<any>>(
 
     return {
       subscribe: (onStoreChange: () => void) => {
-        console.log('subscribe')
         const subscription = instance.observable.subscribe(() => onStoreChange())
         return () => {
           subscription.unsubscribe()
         }
       },
       getSnapshot: () => {
-        console.log('get snapshot')
         return instance.snapshot
       },
     }
-  }, [observable])
+    // forceUpdate will cause the store to be recreated, and resubscribed to.
+    // Which, in case of an error, will restart the observable.
+  }, [observable, updateCount])
 
   const res = useSyncExternalStore(store?.subscribe || noopStore.subscribe, store?.getSnapshot || noopStore.getSnapshot)
-  console.log('after sync store')
 
-  useInsertionEffect(() => {
-    console.log('insertion effect')
-  })
+  function resetError() {
+    if (observable) {
+      const entry = cache.get(observable)
+      if (entry) {
+        entry.snapshot = {
+          ...entry.snapshot,
+          error: undefined,
+        }
+      }
+    }
+  }
 
-  useLayoutEffect(() => {
-    console.log('layout effect')
-  })
-
-  useEffect(() => {
-    console.log('effect')
-  })
-  return res
+  return {
+    snapshot: res as CacheRecord<ObservedValueOf<ObservableType>>['snapshot'],
+    retry: () => {
+      resetError()
+      forceUpdate()
+    },
+  }
 }
 
 const noopSnapshot = {
