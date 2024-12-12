@@ -1,6 +1,7 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import { Box, Grid, IconButton, IconTrash, Select, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
 
@@ -16,10 +17,18 @@ const PROVIDERS = [
   { label: 'Other', value: 'other' },
 ]
 
-const LabelWithDeleteButton = ({ onDelete, hideButton }: { onDelete: () => void; hideButton: boolean }) => {
+export const LabelWithDeleteButton = ({
+  onDelete,
+  hideButton,
+  label,
+}: {
+  onDelete: () => void
+  hideButton: boolean
+  label: string
+}) => {
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Text variant="heading4">Name of provider</Text>
+      <Text variant="heading4">{label}</Text>
       {!hideButton && (
         <IconButton onClick={onDelete}>
           <IconTrash color="textSecondary" />
@@ -51,29 +60,43 @@ export const IssuerCategoriesSection = () => {
                           value={field.value}
                           options={PROVIDERS}
                           placeholder="Please select..."
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          activePlaceholder
                         />
                       )}
                     </Field>
                     {category.type === 'other' && (
                       <Field name={`issuerCategories.${index}.description`}>
                         {({ field, meta }: FieldProps) => (
-                          <TextInput {...field} label="Description" placeholder="Type here..." maxLength={100} />
+                          <FieldWithErrorMessage
+                            {...field}
+                            label="Description"
+                            placeholder="Type here..."
+                            maxLength={100}
+                            as={TextInput}
+                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                            onBlur={field.onBlur}
+                          />
                         )}
                       </Field>
                     )}
                   </Grid>
                   <Field name={`issuerCategories.${index}.value`}>
-                    {({ field }: FieldProps) => (
-                      <TextInput
+                    {({ field, meta }: FieldProps) => (
+                      <FieldWithErrorMessage
                         {...field}
                         label={
                           <LabelWithDeleteButton
                             onDelete={() => remove(index)}
                             hideButton={form.values.issuerCategories.length === 1}
+                            label="Name of provider"
                           />
                         }
                         placeholder="Type here..."
                         maxLength={100}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        onBlur={field.onBlur}
+                        as={TextInput}
                       />
                     )}
                   </Field>

@@ -2,17 +2,19 @@ import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import { Box, FileUpload, Text, TextInput, URLInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
+import { LabelWithDeleteButton } from './IssuerCategories'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
 
 export const PoolRatingsSection = () => {
   const form = useFormikContext<PoolMetadataInput>()
+
   return (
     <Box mt={4} mb={3}>
       <Text variant="heading2">Pool rating</Text>
       <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} mt={3}>
         <FieldArray name="poolRatings">
-          {({ push }) => (
+          {({ push, remove }) => (
             <>
               {form.values.poolRatings.map((_, index) => (
                 <>
@@ -32,8 +34,14 @@ export const PoolRatingsSection = () => {
                       <FieldWithErrorMessage
                         {...field}
                         as={TextInput}
-                        label="Rating value"
                         placeholder="Type here..."
+                        label={
+                          <LabelWithDeleteButton
+                            onDelete={() => remove(index)}
+                            hideButton={form.values.poolRatings.length === 1}
+                            label="Rating value"
+                          />
+                        }
                       />
                     )}
                   </Field>
@@ -50,7 +58,7 @@ export const PoolRatingsSection = () => {
                   </Field>
 
                   <Field name={`poolRatings.${index}.reportFile`}>
-                    {({ field, form }: FieldProps) => (
+                    {({ field, form, meta }: FieldProps) => (
                       <FileUpload
                         file={field.value}
                         onFileChange={(file) => {
@@ -61,6 +69,8 @@ export const PoolRatingsSection = () => {
                         label="Executive summary PDF"
                         placeholder="Choose file"
                         small
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        onClear={() => form.setFieldValue(`poolRatings.${index}.reportFile`, null)}
                       />
                     )}
                   </Field>

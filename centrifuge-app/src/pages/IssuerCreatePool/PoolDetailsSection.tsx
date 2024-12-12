@@ -5,6 +5,7 @@ import {
   CurrencyInput,
   FileUpload,
   Grid,
+  InputErrorMessage,
   Select,
   Text,
   TextAreaInput,
@@ -59,6 +60,7 @@ export const PoolDetailsSection = () => {
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 accept="image/svg+xml"
                 fileTypeText="SVG (in square size)"
+                onClear={() => form.setFieldValue('poolIcon', null)}
               />
             )}
           </Field>
@@ -119,19 +121,23 @@ export const PoolDetailsSection = () => {
           <Grid gap={2}>
             <Field name="issuerName" validate={validate.issuerName}>
               {({ field, meta, form }: FieldProps) => (
-                <FieldWithErrorMessage
-                  name="issuerName"
-                  label={
-                    <Tooltips type="issuerName" label={<Text variant="heading4">Legal name of the issuer*</Text>} />
-                  }
-                  onChange={(event: any) => form.setFieldValue('issuerName', event.target.value)}
-                  onBlur={field.onBlur}
-                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                  value={field.value}
-                  as={TextInput}
-                  placeholder="Type here..."
-                  maxLength={100}
-                />
+                <Box position="relative">
+                  <Field
+                    name="issuerName"
+                    label={
+                      <Tooltips type="issuerName" label={<Text variant="heading4">Legal name of the issuer*</Text>} />
+                    }
+                    onChange={(event: any) => form.setFieldValue('issuerName', event.target.value)}
+                    onBlur={field.onBlur}
+                    value={field.value}
+                    as={TextInput}
+                    placeholder="Type here..."
+                    maxLength={100}
+                  />
+                  {meta.touched ? (
+                    <InputErrorMessage style={{ position: 'absolute' }}>{meta.error}</InputErrorMessage>
+                  ) : null}
+                </Box>
               )}
             </Field>
             <Field name="issuerLogo">
@@ -142,6 +148,7 @@ export const PoolDetailsSection = () => {
                   accept="image/png, image/jpeg, image/jpg"
                   fileTypeText="SVG, PNG, or JPG (max. 1MB; 480x480px)"
                   label="Issuer logo"
+                  onClear={() => form.setFieldValue('issuerLogo', null)}
                 />
               )}
             </Field>
@@ -169,7 +176,7 @@ export const PoolDetailsSection = () => {
               {({ field, meta, form }: FieldProps) => (
                 <FieldWithErrorMessage
                   name="issuerShortDescription"
-                  label="Landing page description (max 100 characters)*"
+                  label="Landing page description (50-100 characters)"
                   onChange={(event: any) => form.setFieldValue('issuerShortDescription', event.target.value)}
                   onBlur={field.onBlur}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -188,7 +195,7 @@ export const PoolDetailsSection = () => {
                   validate={validate.issuerDescription}
                   name="issuerDescription"
                   as={TextAreaInput}
-                  label="Overview page description (max. 3000 characters)*"
+                  label="Overview page description (100-3000 characters)*"
                   placeholder="Type here..."
                   maxLength={1000}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -228,6 +235,7 @@ export const PoolDetailsSection = () => {
                   accept="application/pdf"
                   label={createLabel('Executive summary PDF')}
                   placeholder="Choose file"
+                  onClear={() => form.setFieldValue(`executiveSummary`, null)}
                   small
                 />
               )}
@@ -274,7 +282,7 @@ export const PoolDetailsSection = () => {
       <PoolRatingsSection />
 
       <Box mt={4} mb={3}>
-        <Text variant="heading2">Service analysis</Text>
+        <Text variant="heading2">Pool analysis</Text>
         <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
           <FieldWithErrorMessage
             name="reportUrl"
@@ -306,6 +314,7 @@ export const PoolDetailsSection = () => {
                 label="Reviewer avatar"
                 placeholder="Choose file"
                 accept="image/png, image/jpeg, image/jpg"
+                onClear={() => form.setFieldValue('reportAuthorAvatar', null)}
                 small
               />
             )}

@@ -393,7 +393,7 @@ export const PoolStructureSection = () => {
                   <Box>
                     <Field name={`tranches.${index}.interestRate`} validate={validate.interestRate}>
                       {({ field, form, meta }: FieldProps) => (
-                        <CurrencyInput
+                        <FieldWithErrorMessage
                           {...field}
                           label={
                             <Tooltips
@@ -402,10 +402,10 @@ export const PoolStructureSection = () => {
                             />
                           }
                           placeholder="0.00"
-                          currency={values.assetDenomination}
                           errorMessage={meta.touched ? meta.error : undefined}
-                          onChange={(value) => form.setFieldValue(field.name, value)}
                           onBlur={() => form.setFieldTouched(field.name, true)}
+                          symbol="%"
+                          as={NumberInput}
                         />
                       )}
                     </Field>

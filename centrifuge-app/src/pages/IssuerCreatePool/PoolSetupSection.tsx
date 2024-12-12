@@ -35,17 +35,16 @@ const FEE_POSISTIONS = [{ label: 'Top of waterfall', value: 'Top of waterfall' }
 
 const TaxDocument = () => {
   const form = useFormikContext<PoolMetadataInput>()
-
   return (
-    <Box mt={2}>
-      <Text variant="heading4">Tax document requirement</Text>
-
+    <Box mt={3}>
+      <Text variant="heading4" style={{ marginBottom: 4 }}>
+        Tax document requirement
+      </Text>
       <Field name="onboarding">
         {({ field }: FieldProps) => (
           <Checkbox
             {...field}
             label="Require investors to upload tax documents before signing the subscription agreement."
-            variant="square"
             onChange={(val) => form.setFieldValue('onboarding.taxInfoRequired', val.target.checked ? true : false)}
           />
         )}
@@ -65,6 +64,8 @@ export const PoolSetupSection = () => {
     form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
   }, [])
 
+  console.log(values)
+
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -83,48 +84,60 @@ export const PoolSetupSection = () => {
               height={40}
               name="adminMultisigEnabled"
               label="Single"
-              value={false}
-              id="singleMultisign"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+              onChange={() => {
+                form.setFieldValue('adminMultisigEnabled', false)
+              }}
+              isChecked={!values.adminMultisigEnabled}
             />
             <CheckboxOption
               height={40}
               name="adminMultisigEnabled"
               label="Multi-sig"
-              value={true}
-              id="multiMultisign"
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+              onChange={() => {
+                form.setFieldValue('adminMultisigEnabled', true)
+                form.setFieldValue('adminMultisig.signers', [form.values.adminMultisig.signers[0], ''])
+              }}
+              isChecked={values.adminMultisigEnabled}
             />
           </Box>
           <Box>
             <Text variant="body2">Wallet addresses</Text>
             <FieldArray name="adminMultisig.signers">
-              {({ push }) => (
+              {({ push, remove }) => (
                 <>
                   {values.adminMultisigEnabled ? (
                     values.adminMultisig?.signers?.map((_, index) => (
                       <Box key={index} mt={2}>
                         <Field name={`adminMultisig.signers.${index}`} validate={validate.addressValidate}>
                           {({ field, form, meta }: FieldProps) => (
-                            <FieldWithErrorMessage
-                              placeholder="Type address..."
-                              {...field}
-                              onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
-                                form.setFieldValue(`adminMultisig.signers.${index}`, val.target.value)
-                              }}
-                              onBlur={() => {
-                                form.setFieldTouched(`adminMultisig.signers.${index}`, true)
-                                const value = form.values.adminMultisig.signers[index]
-                                if (value) {
-                                  const transformedValue = isEvmAddress(value)
-                                    ? evmToSubstrateAddress(value, chainId ?? 0)
-                                    : value
-                                  form.setFieldValue(`adminMultisig.signers.${index}`, transformedValue)
-                                }
-                              }}
-                              errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                              as={TextInput}
-                            />
+                            <Grid gridTemplateColumns={['1fr 24px']} alignItems="center">
+                              <FieldWithErrorMessage
+                                placeholder="Type address..."
+                                {...field}
+                                onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
+                                  form.setFieldValue(`adminMultisig.signers.${index}`, val.target.value)
+                                }}
+                                onBlur={() => {
+                                  form.setFieldTouched(`adminMultisig.signers.${index}`, true)
+                                  const value = form.values.adminMultisig.signers[index]
+                                  if (value) {
+                                    const transformedValue = isEvmAddress(value)
+                                      ? evmToSubstrateAddress(value, chainId ?? 0)
+                                      : value
+                                    form.setFieldValue(`adminMultisig.signers.${index}`, transformedValue)
+                                  }
+                                }}
+                                errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                                as={TextInput}
+                              />
+                              {values.adminMultisig.signers.length >= 3 && index >= 2 && (
+                                <IconButton onClick={() => remove(index)}>
+                                  <IconTrash color="textSecondary" />
+                                </IconButton>
+                              )}
+                            </Grid>
                           )}
                         </Field>
                       </Box>
@@ -167,7 +180,7 @@ export const PoolSetupSection = () => {
               {({ field, meta, form }: FieldProps) => (
                 <Select
                   name="adminMultisig.threshold"
-                  label={`Configuration change threshold (1 out of ${Math.max(
+                  label={`Configuration change threshold (${values?.adminMultisig?.threshold} out of ${Math.max(
                     values?.adminMultisig?.signers?.length ?? 0,
                     1
                   )} managers)`}
@@ -195,9 +208,13 @@ export const PoolSetupSection = () => {
       )}
 
       <Box mt={4} mb={3}>
+        <Text variant="heading2">Pool delegates</Text>
+        <Text variant="body2" color="textSecondary">
+          Pool managers can authorize additional addresses to perform designated pool actions.
+        </Text>
         <FieldArray name="assetOriginators">
           {({ push }) => (
-            <StyledGrid gridTemplateColumns={['3fr 1fr']} gap={2}>
+            <StyledGrid gridTemplateColumns={['3fr 1fr']} gap={2} mt={3}>
               <Box gridColumn="1 / span 1">
                 <Text color="textSecondary" variant="body3">
                   Add or remove addresses that can:
@@ -207,13 +224,12 @@ export const PoolSetupSection = () => {
                   <Box key={index} mt={2}>
                     <Field name={`assetOriginators.${index}`} validate={validate.addressValidate}>
                       {({ field, form, meta }: FieldProps) => (
-                        <FieldWithErrorMessage
+                        <Field
                           placeholder="Type address..."
                           {...field}
                           onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
                             form.setFieldValue(`assetOriginators.${index}`, val.target.value)
                           }}
-                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
                           as={TextInput}
                           onBlur={field.onBlur}
                         />
@@ -223,7 +239,7 @@ export const PoolSetupSection = () => {
                 ))}
               </Box>
 
-              <Box gridColumn="2 / span 1" alignSelf="end">
+              <Box gridColumn="2 / span 1" mt="54px">
                 <AddButton
                   onClick={() => {
                     if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
@@ -325,6 +341,8 @@ export const PoolSetupSection = () => {
                             errorMessage={meta.touched && meta.error ? meta.error : undefined}
                             value={field.value}
                             options={FEE_POSISTIONS}
+                            placeholder="Please select"
+                            activePlaceholder
                           />
                         )}
                       </Field>
@@ -338,6 +356,8 @@ export const PoolSetupSection = () => {
                             errorMessage={meta.touched && meta.error ? meta.error : undefined}
                             value={field.value}
                             options={FEE_TYPES}
+                            placeholder="Please select"
+                            activePlaceholder
                           />
                         )}
                       </Field>

@@ -53,7 +53,7 @@ const StyledBox = styled(Box)`
 `
 
 const stepFields: { [key: number]: string[] } = {
-  1: ['assetClass', 'assetDenomination', 'subAssetClass'],
+  1: ['assetClass', 'assetDenomination', 'subAssetClass', 'tranches'],
   2: [
     'poolName',
     'poolIcon',
@@ -444,7 +444,7 @@ const IssuerCreatePoolPage = () => {
       ...prev,
       [step]: checkStepCompletion(step),
     }))
-  }, [values, step])
+  }, [values, errors, step, stepFields])
 
   return (
     <>
@@ -474,8 +474,8 @@ const IssuerCreatePoolPage = () => {
             borderBottom={`1px solid ${theme.colors.borderPrimary}`}
           >
             <Stepper activeStep={step} setActiveStep={setStep} direction="row">
-              <Step label="Pool structure" isStepCompleted={stepCompleted[1]} />
-              <Step label="Pool details" isStepCompleted={stepCompleted[2]} />
+              <Step label="Pool structure" isStepCompleted={stepCompleted[1] && step !== 1} />
+              <Step label="Pool details" isStepCompleted={stepCompleted[2] && step !== 2} />
               <Step label="Pool setup" />
             </Stepper>
           </Box>
