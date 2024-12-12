@@ -94,7 +94,7 @@ const IssuerCreatePoolPage = () => {
   const [step, setStep] = useState(1)
   const [stepCompleted, setStepCompleted] = useState({ 1: false, 2: false, 3: false })
   const [multisigData, setMultisigData] = useState<{ hash: string; callData: string }>()
-  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(true)
+  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = useState(false)
   const [createdModal, setCreatedModal] = useState(false)
   const [preimageHash, setPreimageHash] = useState('')
   const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
@@ -387,6 +387,11 @@ const IssuerCreatePoolPage = () => {
         }
       }
 
+      // Issuer categories
+      if (values.issuerCategories[0].value === '') {
+        metadataValues.issuerCategories = []
+      }
+
       createProxies([
         (aoProxy, adminProxy) => {
           createPoolTx(
@@ -508,7 +513,7 @@ const IssuerCreatePoolPage = () => {
                 small
                 onClick={handleNextStep}
                 loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
-                disabled={step === 3}
+                disabled={step === 3 ? !(Object.keys(errors).length === 0) : false}
               >
                 {step === 3 ? 'Create pool' : 'Next'}
               </Button>

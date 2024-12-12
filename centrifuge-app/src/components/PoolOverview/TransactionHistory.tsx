@@ -292,7 +292,7 @@ export const TransactionHistoryTable = ({
               View all
             </AnchorButton>
           )}
-          {transactions?.length && (
+          {transactions?.length ? (
             <AnchorButton
               href={csvUrl}
               download={`pool-transaction-history-${poolId}.csv`}
@@ -304,7 +304,7 @@ export const TransactionHistoryTable = ({
             >
               Download
             </AnchorButton>
-          )}
+          ) : null}
         </Shelf>
       </Shelf>
       <Box overflow="auto">

@@ -64,8 +64,6 @@ export const PoolSetupSection = () => {
     form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
   }, [])
 
-  console.log(values)
-
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -89,6 +87,7 @@ export const PoolSetupSection = () => {
                 form.setFieldValue('adminMultisigEnabled', false)
               }}
               isChecked={!values.adminMultisigEnabled}
+              id="singleMultisign"
             />
             <CheckboxOption
               height={40}
@@ -100,6 +99,7 @@ export const PoolSetupSection = () => {
                 form.setFieldValue('adminMultisig.signers', [form.values.adminMultisig.signers[0], ''])
               }}
               isChecked={values.adminMultisigEnabled}
+              id="multiMultisign"
             />
           </Box>
           <Box>
@@ -223,7 +223,7 @@ export const PoolSetupSection = () => {
                 {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
                     <Field name={`assetOriginators.${index}`} validate={validate.addressValidate}>
-                      {({ field, form, meta }: FieldProps) => (
+                      {({ field, form }: FieldProps) => (
                         <Field
                           placeholder="Type address..."
                           {...field}
@@ -231,7 +231,16 @@ export const PoolSetupSection = () => {
                             form.setFieldValue(`assetOriginators.${index}`, val.target.value)
                           }}
                           as={TextInput}
-                          onBlur={field.onBlur}
+                          onBlur={() => {
+                            form.setFieldTouched(`assetOriginators.${index}`, true)
+                            const value = form.values.assetOriginators[index]
+                            if (value) {
+                              const transformedValue = isEvmAddress(value)
+                                ? evmToSubstrateAddress(value, chainId ?? 0)
+                                : value
+                              form.setFieldValue(`assetOriginators.${index}`, transformedValue)
+                            }
+                          }}
                         />
                       )}
                     </Field>
