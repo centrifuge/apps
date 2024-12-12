@@ -5,6 +5,7 @@ import {
   CurrencyInput,
   FileUpload,
   Grid,
+  ImageUpload,
   InputErrorMessage,
   Select,
   Text,
@@ -49,7 +50,7 @@ export const PoolDetailsSection = () => {
           />
           <Field name="poolIcon" validate={validate.poolIcon}>
             {({ field, meta, form }: FieldProps) => (
-              <FileUpload
+              <ImageUpload
                 name="poolIcon"
                 file={field.value}
                 onFileChange={async (file) => {
@@ -59,8 +60,9 @@ export const PoolDetailsSection = () => {
                 label="Pool icon*"
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 accept="image/svg+xml"
-                fileTypeText="SVG (in square size)"
-                onClear={() => form.setFieldValue('poolIcon', null)}
+                placeholder="SVG (in square size)"
+                id="poolIcon"
+                height={144}
               />
             )}
           </Field>
@@ -142,13 +144,14 @@ export const PoolDetailsSection = () => {
             </Field>
             <Field name="issuerLogo">
               {({ field, meta, form }: FieldProps) => (
-                <FileUpload
+                <ImageUpload
                   file={field.value}
                   onFileChange={(file) => form.setFieldValue('issuerLogo', file)}
                   accept="image/png, image/jpeg, image/jpg"
-                  fileTypeText="SVG, PNG, or JPG (max. 1MB; 480x480px)"
+                  placeholder="SVG, PNG, or JPG (max. 1MB; 480x480px)"
                   label="Issuer logo"
-                  onClear={() => form.setFieldValue('issuerLogo', null)}
+                  id="issuerLogo"
+                  height={144}
                 />
               )}
             </Field>

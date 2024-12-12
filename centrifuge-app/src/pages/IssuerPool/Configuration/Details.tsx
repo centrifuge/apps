@@ -174,10 +174,10 @@ export function Details() {
                       form.setFieldTouched('poolIcon', true, false)
                       form.setFieldValue('poolIcon', file)
                     }}
-                    requirements=""
                     label="Pool icon: SVG in square size*"
                     errorMessage={meta.touched ? meta.error : undefined}
                     accept="image/svg+xml"
+                    onClear={() => form.setFieldValue('poolIcon', null)}
                   />
                 )}
               </Field>
@@ -193,7 +193,7 @@ export function Details() {
                 {({ field, meta, form }: FieldProps) => (
                   <Select
                     name="assetClass"
-                    label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
+                    label={<Tooltips type="assetClass" label="Asset class*" />}
                     onChange={(event) => {
                       form.setFieldValue('assetClass', event.target.value)
                       form.setFieldValue('subAssetClass', '', false)

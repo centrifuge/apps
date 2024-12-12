@@ -46,6 +46,8 @@ const FormField = styled.input`
 `
 
 const Container = styled(Grid)<{ $disabled?: boolean; $active: boolean }>`
+  background-color: white;
+  border-radius: 8px;
   position: relative;
   &::before {
     content: '';
@@ -66,15 +68,13 @@ const Container = styled(Grid)<{ $disabled?: boolean; $active: boolean }>`
   }
   &:hover::before,
   &:has(:focus-visible)::before {
-    border: ${({ theme, $disabled }) => !$disabled && `1px solid ${theme.colors.accentPrimary}`};
+    border: ${({ theme, $disabled }) => !$disabled && `1px solid ${theme.colors.textPrimary}`};
   }
 `
 
 export type ImageUploadProps = Omit<FileUploadProps, 'file' | 'height'> & {
   file?: File | null
-  requirements?: string
   height?: ResponsiveValue<Size>
-  buttonLabel?: string
 }
 
 export function ImageUpload({
@@ -87,10 +87,8 @@ export function ImageUpload({
   disabled,
   label,
   secondaryLabel,
-  requirements,
   height,
-  placeholder = 'Drag a file here',
-  buttonLabel = 'Choose file',
+  placeholder = '',
   ...inputProps
 }: ImageUploadProps) {
   const defaultId = React.useId()
@@ -187,6 +185,7 @@ export function ImageUpload({
             disabled={disabled}
             tabIndex={-1}
             ref={inputRef}
+            accept={accept}
             {...inputProps}
           />
           <Container
@@ -217,13 +216,19 @@ export function ImageUpload({
               style={{ opacity: fileUrl ? 0 : 1 }}
             >
               <Stack gap={1} alignItems="center" justifyContent="center" width="max-content">
-                <IconUpload size="iconMedium" />
-                <Text variant="heading3">{placeholder}</Text>
-                {requirements && <Text variant="label2">{requirements}</Text>}
+                <IconUpload size={24} />
+                <Box textAlign="center">
+                  <Box>
+                    <Text variant="heading4">Click to upload </Text>
+                    <Text variant="body3" color="textSecondary">
+                      or drag and drop
+                    </Text>
+                  </Box>
+                  <Text variant="body3" color="textSecondary">
+                    {placeholder}
+                  </Text>
+                </Box>
               </Stack>
-              <Button onClick={handleUploadBtnClick} variant="secondary" style={{ zIndex: 3 }}>
-                {buttonLabel}
-              </Button>
             </Stack>
             <Stack p={2} gridArea="unit" justifySelf="stretch" style={{ visibility: fileUrl ? 'visible' : 'hidden' }}>
               <Shelf px={1} pb={1} justifyContent="space-between">

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Box, IconUpload, InputUnit, InputUnitProps, StyledTextInput, Text } from '../..'
+import { Box, IconButton, IconUpload, IconX, InputUnit, InputUnitProps, StyledTextInput, Text } from '../..'
 import { useControlledState } from '../../utils/useControlledState'
 import { Stack } from '../Stack'
 
@@ -40,7 +40,7 @@ const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: bool
   align-items: center;
   text-align: center;
   cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
-  padding: 16px;
+  padding: 8px;
   &::before {
     content: '';
     width: 100%;
@@ -187,12 +187,23 @@ export function FileUpload({
           small={small}
         >
           {small && (
-            <Box display="flex" justifyContent="space-between" width="100%">
+            <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
               <Text color={curFile && typeof curFile !== 'string' && curFile.name ? 'textPrimary' : 'textSecondary'}>
                 {' '}
                 {(curFile && typeof curFile !== 'string' && curFile.name) || 'Click to upload'}
               </Text>
-              <IconUpload size={20} />
+              {curFile && typeof curFile !== 'string' && curFile.name ? (
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleClear()
+                  }}
+                >
+                  <IconX size={20} />
+                </IconButton>
+              ) : (
+                <IconUpload size={20} />
+              )}
             </Box>
           )}
           {!small && (
