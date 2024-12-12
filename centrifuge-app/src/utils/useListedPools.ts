@@ -8,6 +8,7 @@ import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
 import { Dec } from './Decimal'
+import { formatBalanceAbbreviated } from './formatting'
 import { getPoolTVL } from './getPoolTVL'
 import { useTinlakePools } from './tinlake/useTinlakePools'
 import { useSubquery } from './useSubquery'
@@ -15,6 +16,13 @@ import { useSubquery } from './useSubquery'
 type FlattenedDataItem = {
   netAssetValue: string
   decimals: number
+}
+
+type Pool = {
+  sumBorrowedAmount: CurrencyBalance
+  currency: {
+    decimals: number
+  }
 }
 
 const sign = (n: BN) => (n.isZero() ? 0 : n.isNeg() ? -1 : 1)
@@ -128,4 +136,28 @@ export function useYearOverYearGrowth() {
   const totalYoyGrowth = lastYearNAV && currentYearNAV ? ((currentYearNAV - lastYearNAV) / lastYearNAV) * 100 : 0
 
   return { totalYoyGrowth, isLoading }
+}
+
+export function useTotalAssetsFinanced() {
+  const { data, isLoading } = useSubquery(
+    `query {
+      pools {
+        nodes {
+         sumBorrowedAmount
+         currency {
+          decimals
+         }
+        }
+      }
+    }`
+  )
+
+  const pools = data?.pools?.nodes
+
+  const sumBorrowedAmount = pools?.reduce((accumulator: Decimal, pool: Pool) => {
+    const total = new CurrencyBalance(pool.sumBorrowedAmount || 0, pool.currency.decimals)
+    return accumulator.add(total.toDecimal())
+  }, Dec(0))
+
+  return { sumBorrowedAmount: formatBalanceAbbreviated(sumBorrowedAmount || 0), isLoading }
 }
