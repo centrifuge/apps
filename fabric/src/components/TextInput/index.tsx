@@ -273,7 +273,7 @@ const StyledTextArea = styled.textarea`
   padding: ${({ theme }) => theme.space[1]}px;
 
   ::placeholder {
-    color: ${({ theme }) => theme.colors.textDisabled};
+    color: ${({ theme }) => theme.colors.textSecondary};
   }
 `
 
