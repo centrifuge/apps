@@ -6,6 +6,7 @@ import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
 
 const PROVIDERS = [
+  { label: 'Please select...', value: '' },
   { label: 'Fund admin', value: 'fundAdmin' },
   { label: 'Trustee', value: 'trustee' },
   { label: 'Pricing oracle provider', value: 'pricingOracleProvider' },
@@ -59,9 +60,7 @@ export const IssuerCategoriesSection = () => {
                           onBlur={field.onBlur}
                           value={field.value}
                           options={PROVIDERS}
-                          placeholder="Please select..."
                           errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                          activePlaceholder
                         />
                       )}
                     </Field>

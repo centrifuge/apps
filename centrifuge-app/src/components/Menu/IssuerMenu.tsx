@@ -62,7 +62,7 @@ export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
         Issuer
         {isLarge &&
           (open ? (
-            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} color="white" />
+            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} color="textInverted" />
           ) : (
             <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} color="white" />
           ))}

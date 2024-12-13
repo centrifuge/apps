@@ -282,7 +282,6 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
                 </Text>
               }
               onChange={(e) => setShowRepaid(!showRepaid)}
-              variant="square"
             />
           </Box>
           <Button

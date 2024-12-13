@@ -18,7 +18,6 @@ export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   errorMessage?: string
   small?: boolean
   hideBorder?: boolean
-  activePlaceholder?: boolean
 }
 
 const StyledSelect = styled.select`
@@ -46,7 +45,6 @@ export function SelectInner({
   disabled,
   small,
   hideBorder,
-  activePlaceholder,
   ...rest
 }: Omit<SelectProps, 'label' | 'errorMessage'>) {
   return (
@@ -66,7 +64,7 @@ export function SelectInner({
       />
       <StyledSelect disabled={disabled} {...rest}>
         {placeholder && (
-          <option value="" disabled={!activePlaceholder}>
+          <option value="" disabled>
             {placeholder}
           </option>
         )}

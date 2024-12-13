@@ -4,15 +4,6 @@ import { Box, IconButton, IconUpload, IconX, InputUnit, InputUnitProps, StyledTe
 import { useControlledState } from '../../utils/useControlledState'
 import { Stack } from '../Stack'
 
-// const rotate = keyframes`
-//   0% {
-//     transform: rotate(0);
-//   }
-//   100% {
-//     transform: rotate(1turn);
-//   }
-// `
-
 const FormField = styled.input`
   // Visually hidden
   border: 0;
@@ -24,10 +15,6 @@ const FormField = styled.input`
   position: absolute;
   width: 1px;
 `
-
-// const Spinner = styled(IconSpinner)`
-//   animation: ${rotate} 600ms linear infinite;
-// `
 
 const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: boolean; small?: boolean }>`
   position: relative;

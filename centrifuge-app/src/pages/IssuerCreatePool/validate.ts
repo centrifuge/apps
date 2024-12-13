@@ -202,6 +202,20 @@ export const validateValues = (values: CreatePoolValues) => {
       }
       prevRiskBuffer = t.minRiskBuffer
     }
+
+    if (values.assetOriginators.length >= 2) {
+      values.assetOriginators.some((val, idx) => {
+        const isDuplicated = values.assetOriginators.indexOf(val) !== idx
+        if (isDuplicated) errors = setIn(errors, `assetOriginators.${idx}`, 'Address already exists')
+      })
+    }
+
+    if (values.adminMultisig.signers.length >= 2) {
+      values.adminMultisig.signers.some((val, idx) => {
+        const isDuplicated = values.adminMultisig.signers.indexOf(val) !== idx
+        if (isDuplicated) errors = setIn(errors, `adminMultisig.signers.${idx}`, 'Address already exists')
+      })
+    }
   })
 
   return errors

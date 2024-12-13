@@ -1,4 +1,4 @@
-import { evmToSubstrateAddress, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
 import { useCentEvmChainId, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -20,18 +20,22 @@ import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { feeCategories } from '../../../src/config'
-import { isEvmAddress } from '../../../src/utils/address'
+import { FormAddressInput } from './FormAddressInput'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
 import { CreatePoolValues } from './types'
 import { validate } from './validate'
 
 const FEE_TYPES = [
+  { label: 'Please select...', value: '' },
   { label: 'Direct charge', value: 'chargedUpTo' },
   { label: 'Fixed %', value: 'fixed' },
 ]
 
-const FEE_POSISTIONS = [{ label: 'Top of waterfall', value: 'Top of waterfall' }]
+const FEE_POSISTIONS = [
+  { label: 'Please select...', value: '' },
+  { label: 'Top of waterfall', value: 'Top of waterfall' },
+]
 
 const TaxDocument = () => {
   const form = useFormikContext<PoolMetadataInput>()
@@ -111,26 +115,12 @@ export const PoolSetupSection = () => {
                     values.adminMultisig?.signers?.map((_, index) => (
                       <Box key={index} mt={2}>
                         <Field name={`adminMultisig.signers.${index}`} validate={validate.addressValidate}>
-                          {({ field, form, meta }: FieldProps) => (
+                          {() => (
                             <Grid gridTemplateColumns={['1fr 24px']} alignItems="center">
-                              <FieldWithErrorMessage
+                              <FormAddressInput
+                                name={`adminMultisig.signers.${index}`}
                                 placeholder="Type address..."
-                                {...field}
-                                onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
-                                  form.setFieldValue(`adminMultisig.signers.${index}`, val.target.value)
-                                }}
-                                onBlur={() => {
-                                  form.setFieldTouched(`adminMultisig.signers.${index}`, true)
-                                  const value = form.values.adminMultisig.signers[index]
-                                  if (value) {
-                                    const transformedValue = isEvmAddress(value)
-                                      ? evmToSubstrateAddress(value, chainId ?? 0)
-                                      : value
-                                    form.setFieldValue(`adminMultisig.signers.${index}`, transformedValue)
-                                  }
-                                }}
-                                errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                                as={TextInput}
+                                chainId={chainId}
                               />
                               {values.adminMultisig.signers.length >= 3 && index >= 2 && (
                                 <IconButton onClick={() => remove(index)}>
@@ -223,37 +213,21 @@ export const PoolSetupSection = () => {
                 {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
                     <Field name={`assetOriginators.${index}`} validate={validate.addressValidate}>
-                      {({ field, form }: FieldProps) => (
-                        <Field
+                      {() => (
+                        <FormAddressInput
+                          name={`assetOriginators.${index}`}
                           placeholder="Type address..."
-                          {...field}
-                          onChange={(val: React.ChangeEvent<HTMLInputElement>) => {
-                            form.setFieldValue(`assetOriginators.${index}`, val.target.value)
-                          }}
-                          as={TextInput}
-                          onBlur={() => {
-                            form.setFieldTouched(`assetOriginators.${index}`, true)
-                            const value = form.values.assetOriginators[index]
-                            if (value) {
-                              const transformedValue = isEvmAddress(value)
-                                ? evmToSubstrateAddress(value, chainId ?? 0)
-                                : value
-                              form.setFieldValue(`assetOriginators.${index}`, transformedValue)
-                            }
-                          }}
+                          chainId={chainId}
                         />
                       )}
                     </Field>
                   </Box>
                 ))}
               </Box>
-
               <Box gridColumn="2 / span 1" mt="54px">
                 <AddButton
                   onClick={() => {
-                    if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
-                      push('')
-                    }
+                    push('')
                   }}
                 />
               </Box>
@@ -351,7 +325,6 @@ export const PoolSetupSection = () => {
                             value={field.value}
                             options={FEE_POSISTIONS}
                             placeholder="Please select"
-                            activePlaceholder
                           />
                         )}
                       </Field>
@@ -366,7 +339,6 @@ export const PoolSetupSection = () => {
                             value={field.value}
                             options={FEE_TYPES}
                             placeholder="Please select"
-                            activePlaceholder
                           />
                         )}
                       </Field>
