@@ -67,7 +67,7 @@ export const PoolSetupSection = () => {
   useEffect(() => {
     form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
   }, [])
-
+  console.log(values)
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -209,10 +209,10 @@ export const PoolSetupSection = () => {
                 <Text color="textSecondary" variant="body3">
                   Add or remove addresses that can:
                 </Text>
-                <Text variant="heading2">Originate assets and invest in the pool*</Text>
+                <Text variant="heading2">Originate assets and invest in the pool</Text>
                 {values.assetOriginators?.map((_: string, index: number) => (
                   <Box key={index} mt={2}>
-                    <Field name={`assetOriginators.${index}`} validate={validate.addressValidate}>
+                    <Field name={`assetOriginators.${index}`}>
                       {() => (
                         <FormAddressInput
                           name={`assetOriginators.${index}`}

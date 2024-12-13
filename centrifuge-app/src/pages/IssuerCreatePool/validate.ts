@@ -102,7 +102,6 @@ export const validateValues = (values: CreatePoolValues) => {
 
   if (values.issuerCategories.length > 1) {
     values.issuerCategories.forEach((category, i) => {
-      console.log(category)
       if (category.type === '') {
         errors = setIn(errors, `issuerCategories.${i}.type`, 'Type is required')
       }
@@ -117,7 +116,6 @@ export const validateValues = (values: CreatePoolValues) => {
 
   if (values.poolRatings.length > 1) {
     values.poolRatings.forEach((rating, i) => {
-      console.log(rating)
       if (rating.agency === '') {
         errors = setIn(errors, `poolRatings.${i}.agency`, 'Field is required')
       }
@@ -129,14 +127,6 @@ export const validateValues = (values: CreatePoolValues) => {
       }
       if (rating.reportFile === null) {
         errors = setIn(errors, `poolRatings.${i}.reportFile`, 'Field is required')
-      }
-    })
-  }
-
-  if (values.adminMultisigEnabled) {
-    values.adminMultisig.signers.forEach((signer, i) => {
-      if (!isSubstrateAddress(signer) && signer !== '') {
-        errors = setIn(errors, `adminMultisig.signers.${i}`, 'Invalid address')
       }
     })
   }
@@ -153,12 +143,6 @@ export const validateValues = (values: CreatePoolValues) => {
     }
     if (!isSubstrateAddress(fee?.walletAddress)) {
       errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Invalid address')
-    }
-  })
-
-  values.assetOriginators.forEach((asset, i) => {
-    if (!isSubstrateAddress(asset) && asset !== '') {
-      errors = setIn(errors, `assetOriginators.${i}`, 'Invalid address')
     }
   })
 

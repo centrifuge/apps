@@ -1,5 +1,4 @@
 import { FeeTypes, PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { isTestEnv } from '../../config'
 
 export interface Tranche {
   tokenName: string
@@ -91,7 +90,7 @@ export const initialValues: CreatePoolValues = {
   // pool structure
   poolStructure: 'revolving',
   assetClass: 'Private credit',
-  assetDenomination: isTestEnv ? 'USDC' : 'Native USDC',
+  assetDenomination: 'USDC',
   subAssetClass: '',
   tranches: [createEmptyTranche('Junior')],
 

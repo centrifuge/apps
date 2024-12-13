@@ -157,7 +157,7 @@ export function TrancheInput({
                       {...field}
                       label={<Tooltips type="minimumInvestment" label="Min. investment*" />}
                       placeholder="0.00"
-                      currency={values.currency}
+                      currency={values.assetDenomination}
                       errorMessage={meta.touched ? meta.error : undefined}
                       onChange={(value) => form.setFieldValue(field.name, value)}
                       onBlur={() => form.setFieldTouched(field.name, true)}

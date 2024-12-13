@@ -179,7 +179,7 @@ export const PoolDetailsSection = () => {
               {({ field, meta, form }: FieldProps) => (
                 <FieldWithErrorMessage
                   name="issuerShortDescription"
-                  label="Landing page description (50-100 characters)"
+                  label="Landing page description (50-100 characters)*"
                   onChange={(event: any) => form.setFieldValue('issuerShortDescription', event.target.value)}
                   onBlur={field.onBlur}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
