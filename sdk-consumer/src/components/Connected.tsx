@@ -1,7 +1,7 @@
 import { useAccount, useDisconnect, useEnsName } from 'wagmi'
 import { useAccountBalance } from '../hooks/useAccount'
 
-export function Account() {
+export function Invest() {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address })

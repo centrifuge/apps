@@ -12,6 +12,15 @@ function usePools() {
   return pools
 }
 
+export function useActiveNetworks(poolId: string) {
+  const pool = usePools().find((p) => p.id === poolId)
+  const networks$ = useMemo(() => {
+    console.log('getActiveNetworks $$', pool)
+    return pool?.activeNetworks()
+  }, [pool])
+  return useCentrifugeQuery(networks$)
+}
+
 export function useVaults(poolId: string, trancheId: string, chainId: number) {
   const pool = usePools().find((p) => p.id === poolId)
   const vaults$ = useMemo(
@@ -20,3 +29,5 @@ export function useVaults(poolId: string, trancheId: string, chainId: number) {
   )
   return useCentrifugeQuery(vaults$)
 }
+
+export function useVaultInvestment() {}
