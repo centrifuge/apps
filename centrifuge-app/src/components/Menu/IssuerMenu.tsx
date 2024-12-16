@@ -64,7 +64,7 @@ export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
           (open ? (
             <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} color="textInverted" />
           ) : (
-            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} color="white" />
+            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} color="textInverted" />
           ))}
       </Toggle>
 
