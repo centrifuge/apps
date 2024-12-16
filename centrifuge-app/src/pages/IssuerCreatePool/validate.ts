@@ -188,7 +188,7 @@ export const validateValues = (values: CreatePoolValues) => {
     }
 
     if (values.assetOriginators.length >= 2) {
-      values.assetOriginators.some((val, idx) => {
+      values.assetOriginators.forEach((val, idx) => {
         const isDuplicated = values.assetOriginators.indexOf(val) !== idx
         if (isDuplicated) errors = setIn(errors, `assetOriginators.${idx}`, 'Address already exists')
       })
