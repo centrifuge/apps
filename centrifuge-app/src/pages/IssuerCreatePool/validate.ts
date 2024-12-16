@@ -195,7 +195,7 @@ export const validateValues = (values: CreatePoolValues) => {
     }
 
     if (values.adminMultisig.signers.length >= 2) {
-      values.adminMultisig.signers.some((val, idx) => {
+      values.adminMultisig.signers.forEach((val, idx) => {
         const isDuplicated = values.adminMultisig.signers.indexOf(val) !== idx
         if (isDuplicated) errors = setIn(errors, `adminMultisig.signers.${idx}`, 'Address already exists')
       })
