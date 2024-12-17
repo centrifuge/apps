@@ -185,6 +185,44 @@ export function getNftsModule(inst: Centrifuge) {
     )
   }
 
+  function getNfts(args: [collectionId: string, nftIds: string[]]) {
+    const [collectionId, nftIds] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) =>
+        api.queryMulti(
+          nftIds
+            .map((nftId) => [
+              [api.query.uniques.instanceMetadataOf, [collectionId, nftId]],
+              [api.query.uniques.asset, [collectionId, nftId]],
+            ])
+            .flat(1) as any
+        )
+      ),
+      map((data) => {
+        const nfts = nftIds
+          .map((nftId, i) => {
+            const [meta, nftData] = data.slice(i * 2, i * 2 + 2)
+            const nftValue = nftData.toJSON() as Item
+            if (!nftValue) {
+              console.warn(`NFT not found: collectionId: ${collectionId}, nftId: ${nftId}`)
+              return null as never
+            }
+            const nft: NFT = {
+              id: nftId,
+              collectionId,
+              owner: addressToHex(nftValue.owner),
+              metadataUri: (meta.toHuman() as any)?.data,
+            }
+            return nft
+          })
+          .filter(Boolean)
+        return nfts
+      })
+    )
+  }
+
   function getAccountNfts(args: [address: string]) {
     const [address] = args
 
@@ -373,6 +411,7 @@ export function getNftsModule(inst: Centrifuge) {
     getCollectionNfts,
     getAccountNfts,
     getNft,
+    getNfts,
     getAvailableCollectionId,
     getAvailableNftId,
     createCollection,

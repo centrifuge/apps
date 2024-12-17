@@ -171,7 +171,7 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
                   </React.Fragment>
                 ))}
                 {domain.trancheTokens[t.id] && (
-                  <a href={explorer.address(domain.trancheTokens[t.id])} target="_blank" rel="noopener noreferrer">
+                  <a href={explorer.address(domain.trancheTokens[t.id]!)} target="_blank" rel="noopener noreferrer">
                     <Button variant="secondary" small style={{ width: '100%' }}>
                       <Shelf gap={1}>
                         <span>View {t.currency.symbol} token</span>

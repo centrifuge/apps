@@ -573,7 +573,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const poolData = await multicall<{
       isActive: boolean
       canTrancheBeDeployed: Record<string, boolean>
-      trancheTokens: Record<string, string>
+      trancheTokens: Record<string, string | null>
       liquidityPools: Record<string, Record<string, string | null>>
       currencyNeedsAdding: Record<string, boolean>
     }>(

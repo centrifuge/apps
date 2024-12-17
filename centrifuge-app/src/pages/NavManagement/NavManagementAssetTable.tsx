@@ -1,5 +1,6 @@
 import {
   ActiveLoan,
+  addressToHex,
   CreatedLoan,
   CurrencyBalance,
   CurrencyKey,
@@ -8,6 +9,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import {
   useCentrifugeApi,
+  useCentrifugeKey,
   useCentrifugeQuery,
   useCentrifugeTransaction,
   useEvmProvider,
@@ -29,9 +31,11 @@ import {
 } from '@centrifuge/fabric'
 import { stringToHex } from '@polkadot/util'
 import { BN } from 'bn.js'
+import { keccak256, SigningKey, toUtf8Bytes } from 'ethers'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { Observable, catchError, combineLatest, from, map, of, switchMap } from 'rxjs'
+import { useQueryClient } from 'react-query'
+import { combineLatest, defer, firstValueFrom, switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
@@ -43,6 +47,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useLiquidity } from '../../utils/useLiquidity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
+import { metadataQueryFn } from '../../utils/useMetadata'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolAccountOrders, usePoolFees } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
@@ -51,17 +56,22 @@ import { isCashLoan, isExternalLoan } from '../Loan/utils'
 
 type Attestation = {
   portfolio: {
+    timestamp: number
     decimals: number
     assets: {
-      asset: string
+      assetId?: string
+      name: string
       quantity: string
       price: string
     }[]
     netAssetValue: string
-    netFeeValue: string
     tokenSupply: string[]
     tokenPrice: string[]
-    signature?: string
+    tokenAddresses: Record<string, string[]>
+    signature?: {
+      hash: string
+      publicKey: string
+    }
   }
 }
 
@@ -82,6 +92,8 @@ type Row = FormValues['feed'][0] | ActiveLoan | CreatedLoan
 const MAX_COLLECT = 100 // maximum number of transactions to collect in one batch
 
 export function NavManagementAssetTable({ poolId }: { poolId: string }) {
+  const queryClient = useQueryClient()
+  const centKey = useCentrifugeKey()
   const { data: domains } = useActiveDomains(poolId)
   const allowedPools = usePoolsForWhichAccountIsFeeder()
   const isFeeder = !!allowedPools?.find((p) => p.id === poolId)
@@ -97,14 +109,16 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { substrate } = useWallet()
   const poolFees = usePoolFees(poolId)
 
-  const externalLoans = React.useMemo(
+  const activeLoans = React.useMemo(
     () =>
-      (allLoans?.filter(
-        // Keep external loans, except ones that are fully repaid
-        (l) => isExternalLoan(l) && l.status !== 'Closed' && (!('presentValue' in l) || !l.presentValue.isZero())
-      ) as ExternalLoan[]) ?? [],
+      allLoans?.filter(
+        // Filter out loans that are closed or fully repaid
+        (l) => l.status !== 'Closed' && (!('presentValue' in l) || !l.presentValue.isZero())
+      ) ?? [],
     [allLoans]
   )
+
+  const externalLoans = React.useMemo(() => activeLoans.filter(isExternalLoan), [activeLoans])
 
   const cashLoans =
     (allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') as (CreatedLoan | ActiveLoan)[]) ?? []
@@ -127,58 +141,96 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
-      const attestation: Attestation = {
-        portfolio: {
-          decimals: pool.currency.decimals,
-          assets: externalLoans.map((l) => ({
-            asset: l.id,
-            quantity: l.pricing.outstandingQuantity.toString(),
-            price: (l as ActiveLoan).currentPrice?.toString() ?? '0',
-          })),
-          netAssetValue: pool.nav.total.toString(),
-          netFeeValue: pool.nav.fees.toString(),
-          tokenSupply: pool.tranches.map((t) => t.totalIssuance.toString()),
-          tokenPrice: pool.tranches.map((t) => t.tokenPrice?.toString() ?? '0'),
-        },
-      }
-
-      let $signMessage: Observable<string | null> = of(null)
-      if (provider) {
-        $signMessage = from(provider.getSigner()).pipe(
-          switchMap((signer) => from(signer.signMessage(JSON.stringify(attestation)))),
-          catchError((error) => {
-            console.error('EVM signing failed:', error)
-            return of(null)
+      const $attestationHash = defer(async () => {
+        const nftsByNftId = new Map(
+          (
+            await firstValueFrom(
+              cent.nfts.getNfts([allLoans![0].asset.collectionId, activeLoans.map((l) => l.asset.nftId)])
+            )
+          ).map((nft) => [nft.id, nft])
+        )
+        const nftMetas = await Promise.all(
+          activeLoans.map((l) => {
+            const nft = nftsByNftId.get(l.asset.nftId)
+            if (!nft?.metadataUri) return null
+            return queryClient.fetchQuery(['metadata', nft.metadataUri], () => metadataQueryFn(nft.metadataUri!, cent))
           })
         )
-      } else if (substrate?.selectedAccount?.address && substrate?.selectedWallet?.signer?.signRaw) {
-        $signMessage = from(
-          substrate.selectedWallet.signer.signRaw({
-            address: substrate.selectedAccount.address,
-            data: stringToHex(JSON.stringify(attestation)),
-            type: 'bytes',
-          })
-        ).pipe(
-          map(({ signature }) => signature),
-          catchError((error) => {
-            console.error('Substrate signing failed:', error)
-            return of(null)
-          })
-        )
-      }
+        const attestation: Attestation = {
+          portfolio: {
+            timestamp: Math.floor(Date.now() / 1000),
+            decimals: pool.currency.decimals,
+            assets: [
+              {
+                assetId: '0',
+                name: 'Onchain reserve',
+                quantity: pool.reserve.total.toString(),
+                price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
+              },
+              {
+                name: 'Accrued fees',
+                quantity: pool.nav.fees.toString(),
+                price: CurrencyBalance.fromFloat(-1, pool.currency.decimals).toString(),
+              },
+              ...activeLoans.map((l, i) =>
+                isExternalLoan(l)
+                  ? {
+                      assetId: l.id,
+                      name: nftMetas[i]?.name ?? '',
+                      quantity: CurrencyBalance.fromFloat(
+                        l.pricing.outstandingQuantity.toDecimal(),
+                        pool.currency.decimals
+                      ).toString(),
+                      price: (l as ActiveLoan).currentPrice?.toString() ?? '0',
+                    }
+                  : {
+                      assetId: l.id,
+                      name: nftMetas[i]?.name ?? '',
+                      quantity: (l as ActiveLoan).presentValue.toString(),
+                      price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
+                    }
+              ),
+            ],
+            netAssetValue: pool.nav.total.toString(),
+            tokenSupply: pool.tranches.map((t) => t.totalIssuance.toString()),
+            tokenPrice: pool.tranches.map((t) => t.tokenPrice?.toString() ?? '0'),
+            tokenAddresses: Object.fromEntries(
+              domains
+                ?.map((d) => [d.chainId, Object.values(d.trancheTokens) as string[]] as const)
+                .filter(([, tokens]) => !tokens.every((t) => t === null)) || []
+            ),
+          },
+        }
 
-      const $attestationHash = $signMessage.pipe(
-        switchMap((signature) => {
-          if (signature) {
-            attestation.portfolio.signature = signature
-            return cent.metadata.pinJson(attestation)
-          } else {
-            console.warn('No signature available')
-            return of(null)
+        let signature: { hash: string; publicKey: string } | null = null
+        try {
+          const message = JSON.stringify(attestation)
+          if (provider) {
+            const signer = await provider.getSigner()
+            const sig = await signer.signMessage(message)
+            const hash = keccak256(toUtf8Bytes(`\x19Ethereum Signed Message:\n${message.length}${message}`))
+            const recoveredPubKey = SigningKey.recoverPublicKey(hash, sig)
+            signature = { hash: sig, publicKey: recoveredPubKey }
+          } else if (substrate.selectedAccount?.address && substrate?.selectedWallet?.signer?.signRaw) {
+            const { address } = substrate.selectedAccount
+            const { signature: sig } = await substrate.selectedWallet.signer.signRaw({
+              address: address,
+              data: stringToHex(JSON.stringify(attestation)),
+              type: 'bytes',
+            })
+            signature = { hash: sig, publicKey: addressToHex(address) }
           }
-        }),
-        map((result) => (result ? result.ipfsHash : null))
-      )
+        } catch {}
+        if (!signature) return null
+
+        attestation.portfolio.signature = signature
+        try {
+          const result = await firstValueFrom(cent.metadata.pinJson(attestation))
+          return result.ipfsHash
+        } catch {
+          return null
+        }
+      })
 
       const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
       const updateTokenPrices = deployedDomains
