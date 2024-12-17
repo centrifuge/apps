@@ -44,8 +44,11 @@ export function PoolDetailAssets() {
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
-  const { data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toISOString().slice(0, 10))
+  const { data: loans, isLoading } = useLoans(poolId)
+  const { data: snapshots, isLoading: isLoadingSnapshots } = useAllPoolAssetSnapshots(
+    poolId,
+    new Date().toISOString().slice(0, 10)
+  )
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(
