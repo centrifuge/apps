@@ -1,30 +1,23 @@
 import { OperationConfirmedStatus, Transaction } from '@centrifuge/sdk'
-import * as React from 'react'
+import { useState } from 'react'
 import { lastValueFrom, tap } from 'rxjs'
+import { useConnectorClient } from 'wagmi'
+import { centrifuge } from '../centrifuge'
 import { useTransactions } from '../components/Transactions/TransactionsProvider'
-import { useVaults } from './usePool'
 
 export type CentrifugeTransactionOptions = {
   onSuccess?: (args: any[], result: OperationConfirmedStatus) => void
   onError?: (error: any) => void
 }
 
-function Comp() {
-  const { data: vaults } = useVaults('2779829532', '0xac6bffc5fd68f7772ceddec7b0a316ca', 11155111)
-  const { execute, isLoading } = useCentrifugeTransaction()
-
-  async function submit() {
-    const vault = vaults?.[0]!
-    execute(vault.increaseInvestOrder(100))
-  }
-}
-
 export function useCentrifugeTransaction() {
   const { updateTransaction, addTransaction } = useTransactions()
-  const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>()
+  const { data: client } = useConnectorClient()
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   async function execute(observable: Transaction) {
     setStatus('loading')
+    centrifuge.setSigner(client!)
     let lastId = ''
     try {
       const lastResult = await lastValueFrom(
@@ -53,14 +46,15 @@ export function useCentrifugeTransaction() {
           })
         )
       )
+      setStatus('success')
       return (lastResult as OperationConfirmedStatus).receipt
     } catch (e) {
+      setStatus('error')
       if (lastId) {
         updateTransaction(lastId, {
           status: 'failed',
           error: e,
         })
-        setStatus('error')
       }
       throw e
     }

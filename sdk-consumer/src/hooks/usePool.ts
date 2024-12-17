@@ -1,4 +1,4 @@
-import { Pool } from '@centrifuge/sdk'
+import { Pool, Vault } from '@centrifuge/sdk'
 import { useMemo, useState } from 'react'
 import { switchMap } from 'rxjs'
 import { centrifuge } from '../centrifuge'
@@ -30,4 +30,7 @@ export function useVaults(poolId: string, trancheId: string, chainId: number) {
   return useCentrifugeQuery(vaults$)
 }
 
-export function useVaultInvestment() {}
+export function useVaultInvestment(vault?: Vault, investor?: string) {
+  const investment$ = useMemo(() => (investor && vault ? vault.investment(investor) : undefined), [vault, investor])
+  return useCentrifugeQuery(investment$)
+}
