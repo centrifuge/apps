@@ -35,6 +35,8 @@ export function SelectionStep({ title, children, tooltip, done, toggleExpanded, 
       minHeight={68}
       justifyContent="center"
       pt={expanded ? 4 : 2}
+      onClick={toggleExpanded}
+      style={{ cursor: 'pointer' }}
     >
       <Shelf justifyContent="space-between">
         <Shelf gap={2}>
@@ -47,9 +49,7 @@ export function SelectionStep({ title, children, tooltip, done, toggleExpanded, 
           </Box>
         </Shelf>
         <Box bleedY={2}>
-          <IconButton size="24px" onClick={toggleExpanded}>
-            {expanded ? <IconChevronUp /> : <IconChevronDown />}
-          </IconButton>
+          <IconButton size="24px">{expanded ? <IconChevronUp /> : <IconChevronDown />}</IconButton>
         </Box>
       </Shelf>
 
