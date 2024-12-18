@@ -1,0 +1,36 @@
+import { Pool, Vault } from '@centrifuge/sdk'
+import { useMemo, useState } from 'react'
+import { switchMap } from 'rxjs'
+import { centrifuge } from '../centrifuge'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
+
+const poolId = '2779829532'
+const trancheId = '0xac6bffc5fd68f7772ceddec7b0a316ca'
+
+function usePools() {
+  const [pools] = useState(() => [new Pool(centrifuge, poolId)])
+  return pools
+}
+
+export function useActiveNetworks(poolId: string) {
+  const pool = usePools().find((p) => p.id === poolId)
+  const networks$ = useMemo(() => {
+    console.log('getActiveNetworks $$', pool)
+    return pool?.activeNetworks()
+  }, [pool])
+  return useCentrifugeQuery(networks$)
+}
+
+export function useVaults(poolId: string, trancheId: string, chainId: number) {
+  const pool = usePools().find((p) => p.id === poolId)
+  const vaults$ = useMemo(
+    () => pool?.network(chainId).pipe(switchMap((network) => network.vaults(trancheId))),
+    [pool, trancheId]
+  )
+  return useCentrifugeQuery(vaults$)
+}
+
+export function useVaultInvestment(vault?: Vault, investor?: string) {
+  const investment$ = useMemo(() => (investor && vault ? vault.investment(investor) : undefined), [vault, investor])
+  return useCentrifugeQuery(investment$)
+}
