@@ -293,7 +293,7 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
             View asset transactions
           </Button>
           <AnchorButton
-            href={csvUrl}
+            href={csvUrl ?? undefined}
             download={`pool-assets-${poolId}.csv`}
             variant="inverted"
             icon={IconDownload}
@@ -383,14 +383,15 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
     </Shelf>
   )
 }
+
 export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
 
     case 'Active':
-      if ('presentValue' in l) {
-        return format ? formatBalance(l.presentValue) : l.presentValue
+      if ('outstandingQuantity' in l.pricing) {
+        return format ? formatBalance(l.pricing.outstandingQuantity) : l.pricing.outstandingQuantity
       }
 
       if (l.outstandingDebt.isZero()) {
