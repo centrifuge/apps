@@ -42,7 +42,7 @@ import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormik
 import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
 import { useTheme } from 'styled-components'
-import { AnchorTextLink } from '../../components/TextLink'
+import { AnchorTextLink, RouterTextLink } from '../../components/TextLink'
 import { parachainIcons, parachainNames } from '../../config'
 import { Dec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
@@ -409,7 +409,7 @@ function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: With
       <ErrorMessage type="warning" condition={!withdrawAddresses.length}>
         <Stack gap={1}>
           To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
-          <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+          <RouterTextLink to={`/issuer/${poolId}/access`}>Add trusted addresses</RouterTextLink>
         </Stack>
       </ErrorMessage>
     )
@@ -452,7 +452,7 @@ function Mux({
         <ErrorMessage type="warning" condition={!withdrawAmounts.length}>
           <Stack gap={1}>
             To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
-            <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+            <RouterTextLink to={`/issuer/${poolId}/access`}>Add trusted addresses</RouterTextLink>
           </Stack>
         </ErrorMessage>
       ) : (

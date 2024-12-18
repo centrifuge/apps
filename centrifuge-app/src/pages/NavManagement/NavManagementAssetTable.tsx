@@ -9,7 +9,6 @@ import {
 } from '@centrifuge/centrifuge-js'
 import {
   useCentrifugeApi,
-  useCentrifugeKey,
   useCentrifugeQuery,
   useCentrifugeTransaction,
   useEvmProvider,
@@ -68,10 +67,10 @@ type Attestation = {
     tokenSupply: string[]
     tokenPrice: string[]
     tokenAddresses: Record<string, string[]>
-    signature?: {
-      hash: string
-      publicKey: string
-    }
+  }
+  signature?: {
+    hash: string
+    publicKey: string
   }
 }
 
@@ -93,14 +92,13 @@ const MAX_COLLECT = 100 // maximum number of transactions to collect in one batc
 
 export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const queryClient = useQueryClient()
-  const centKey = useCentrifugeKey()
   const { data: domains } = useActiveDomains(poolId)
   const allowedPools = usePoolsForWhichAccountIsFeeder()
   const isFeeder = !!allowedPools?.find((p) => p.id === poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const [isConfirming, setIsConfirming] = React.useState(false)
   const orders = usePoolAccountOrders(poolId)
-  const [liquidityAdminAccount] = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })
+  let [liquidityAdminAccount] = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })
   const pool = usePool(poolId)
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
@@ -204,7 +202,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
 
         let signature: { hash: string; publicKey: string } | null = null
         try {
-          const message = JSON.stringify(attestation)
+          const message = JSON.stringify(attestation.portfolio)
           if (provider) {
             const signer = await provider.getSigner()
             const sig = await signer.signMessage(message)
@@ -215,7 +213,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             const { address } = substrate.selectedAccount
             const { signature: sig } = await substrate.selectedWallet.signer.signRaw({
               address: address,
-              data: stringToHex(JSON.stringify(attestation)),
+              data: stringToHex(message),
               type: 'bytes',
             })
             signature = { hash: sig, publicKey: addressToHex(address) }
@@ -223,7 +221,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
         } catch {}
         if (!signature) return null
 
-        attestation.portfolio.signature = signature
+        attestation.signature = signature
         try {
           const result = await firstValueFrom(cent.metadata.pinJson(attestation))
           return result.ipfsHash
@@ -246,12 +244,8 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           )
         : []
 
-      return combineLatest([
-        $attestationHash,
-        cent.pools.closeEpoch([poolId, false], { batch: true }),
-        ...updateTokenPrices,
-      ]).pipe(
-        switchMap(([attestationHash, closeTx, ...updateTokenPricesTxs]) => {
+      return combineLatest([$attestationHash, ...updateTokenPrices]).pipe(
+        switchMap(([attestationHash, ...updateTokenPricesTxs]) => {
           if (!attestationHash) {
             throw new Error('Attestation signing failed')
           }
@@ -270,7 +264,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
 
           if (liquidityAdminAccount && orders?.length) {
             batch.push(
-              ...closeTx.method.args[0],
+              api.tx.poolSystem.closeEpoch(poolId),
               ...orders
                 .slice(0, ordersFullyExecutable ? MAX_COLLECT : 0)
                 .map((order) =>

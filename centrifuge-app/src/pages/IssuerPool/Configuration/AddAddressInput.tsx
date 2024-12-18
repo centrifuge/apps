@@ -24,27 +24,13 @@ export function AddAddressInput({
 
   const exists = !!truncated && existingAddresses.some((addr) => isSameAddress(addr, address))
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newAddress = e.target.value
-    setAddress(newAddress)
-  }
-
-  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
-    const address = e.target.value
-    if (truncated) {
-      onAdd(addressToHex(address))
-      setAddress('')
-    }
-  }
-
   return (
     <Grid columns={2} equalColumns gap={4} alignItems="center">
       <AddressInput
         clearIcon
         placeholder="Search to add address..."
         value={address}
-        onChange={handleChange}
-        onBlur={handleBlur}
+        onChange={(e) => setAddress(e.target.value)}
       />
       {address &&
         (truncated ? (
