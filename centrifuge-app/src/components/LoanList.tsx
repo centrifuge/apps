@@ -244,8 +244,6 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
         ]),
   ].filter(Boolean) as Column[]
 
-  const pagination = usePagination({ data: rows, pageSize: 20 })
-
   const csvData = React.useMemo(() => {
     if (!rows.length) return undefined
 
@@ -266,6 +264,8 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
   }, [rows, pool])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
+  const filteredData = isLoading ? [] : showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero())
+  const pagination = usePagination({ data: filteredData, pageSize: 20 })
 
   if (isLoading) return <Spinner />
 
@@ -293,7 +293,7 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
             View asset transactions
           </Button>
           <AnchorButton
-            href={csvUrl}
+            href={csvUrl ?? undefined}
             download={`pool-assets-${poolId}.csv`}
             variant="inverted"
             icon={IconDownload}
@@ -309,7 +309,7 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
         <Stack gap={2}>
           <Box overflow="auto">
             <DataTable
-              data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
+              data={filteredData}
               columns={columns}
               onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
@@ -383,13 +383,18 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
     </Shelf>
   )
 }
-export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean) {
+
+export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean, isPresentValue?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
 
     case 'Active':
-      if ('presentValue' in l) {
+      if ('outstandingQuantity' in l.pricing && !isPresentValue) {
+        return format ? formatBalance(l.pricing.outstandingQuantity) : l.pricing.outstandingQuantity
+      }
+
+      if ('presentValue' in l && isPresentValue) {
         return format ? formatBalance(l.presentValue) : l.presentValue
       }
 
