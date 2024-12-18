@@ -1,6 +1,5 @@
 import {
   Box,
-  IconButton,
   IconCheckInCircle,
   IconChevronDown,
   IconChevronUp,
@@ -51,10 +50,8 @@ export function SelectionStep({
       minHeight={68}
       justifyContent="center"
       pt={expanded ? 4 : 2}
-      onClick={() => toggle()}
-      style={{ cursor: 'pointer' }}
     >
-      <Shelf justifyContent="space-between">
+      <Shelf justifyContent="space-between" onClick={() => toggle()} style={{ cursor: 'pointer' }}>
         <Shelf gap={2}>
           <Box bleedY={2} display="flex" justifyContent="space-between" alignItems="center">
             {done ? <IconCheckInCircle color="statusOk" /> : <IconCrosschair color="statusOkBg" />}
@@ -64,9 +61,7 @@ export function SelectionStep({
             </Text>
           </Box>
         </Shelf>
-        <Box bleedY={2}>
-          <IconButton size="24px">{expanded ? <IconChevronUp /> : <IconChevronDown />}</IconButton>
-        </Box>
+        <Box bleedY={2}>{expanded ? <IconChevronUp /> : <IconChevronDown />}</Box>
       </Shelf>
 
       {expanded && children}
