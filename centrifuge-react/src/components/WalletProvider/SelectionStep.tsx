@@ -23,10 +23,26 @@ type SelectionStepProps = {
   done: boolean
   expanded: boolean
   toggleExpanded: () => void
+  disabled?: boolean
 }
 
-export function SelectionStep({ title, children, tooltip, done, toggleExpanded, expanded }: SelectionStepProps) {
+export function SelectionStep({
+  title,
+  children,
+  tooltip,
+  done,
+  toggleExpanded,
+  expanded,
+  disabled = false,
+}: SelectionStepProps) {
   const theme = useTheme()
+
+  const toggle = () => {
+    if (!disabled) {
+      toggleExpanded()
+    }
+  }
+
   return (
     <Stack
       border={`1px solid ${theme.colors.borderPrimary}`}
@@ -35,7 +51,7 @@ export function SelectionStep({ title, children, tooltip, done, toggleExpanded, 
       minHeight={68}
       justifyContent="center"
       pt={expanded ? 4 : 2}
-      onClick={toggleExpanded}
+      onClick={() => toggle()}
       style={{ cursor: 'pointer' }}
     >
       <Shelf justifyContent="space-between">
