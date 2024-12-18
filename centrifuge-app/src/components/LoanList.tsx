@@ -384,14 +384,18 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
   )
 }
 
-export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean) {
+export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean, isPresentValue?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
 
     case 'Active':
-      if ('outstandingQuantity' in l.pricing) {
+      if ('outstandingQuantity' in l.pricing && !isPresentValue) {
         return format ? formatBalance(l.pricing.outstandingQuantity) : l.pricing.outstandingQuantity
+      }
+
+      if ('presentValue' in l && isPresentValue) {
+        return format ? formatBalance(l.presentValue) : l.presentValue
       }
 
       if (l.outstandingDebt.isZero()) {
