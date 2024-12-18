@@ -639,14 +639,6 @@ export type DailyPoolState = {
   sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
-interface TrancheFormValues {
-  tokenName: string
-  symbolName: string
-  interestRate: number | ''
-  minRiskBuffer: number | ''
-  minInvestment: number | ''
-  targetAPY?: string | ''
-}
 
 export type IssuerDetail = {
   title: string
@@ -663,60 +655,74 @@ export type PoolReport = {
   }
   uri: string
 }
+interface TrancheFormValues {
+  tokenName: string
+  symbolName: string
+  interestRate: number | ''
+  minRiskBuffer: number | ''
+  minInvestment: number | ''
+  apy: string | ''
+  apyPercentage: number | null
+}
 
 export interface PoolMetadataInput {
-  // details
-  poolIcon: FileType | null
-  poolName: string
+  // structure
+  assetDenomination: string
+  poolStructure: 'revolving'
   assetClass: 'Public credit' | 'Private credit'
   subAssetClass: string
-  currency: string
-  maxReserve: number | ''
-  epochHours: number | ''
-  epochMinutes: number | ''
-  listed?: boolean
-  investorType: string
-  poolStructure: string
+  tranches: TrancheFormValues[]
 
-  // issuer
+  // details
+  poolName: string
+  investorType: string
+  poolIcon: FileType
+  poolType: 'open' | 'closed'
+  maxReserve: number | ''
   issuerName: string
   issuerRepName: string
-  issuerLogo?: FileType | null
-  issuerDescription: string
+  issuerLogo: FileType
   issuerShortDescription: string
-  issuerCategories: { type: string; value: string; customType?: string }[]
-
-  poolReport?: {
-    authorName: string
-    authorTitle: string
-    authorAvatar: FileType | null
-    url: string
-  }
+  issuerDescription: string
+  website: string
+  forum: string
+  email: string
+  executiveSummary: FileType | null
+  details?: IssuerDetail[]
+  issuerCategories: { type: string; value: string; description?: string }[]
   poolRatings: {
     agency?: string
     value?: string
     reportUrl?: string
     reportFile?: FileType | null
   }[]
+  poolReport?: {
+    authorName: string
+    authorTitle: string
+    authorAvatar: FileType | null
+    url: string
+  }
 
-  executiveSummary: FileType | null
-  website: string
-  forum: string
-  email: string
-  details?: IssuerDetail[]
-
-  // tranche
-  tranches: TrancheFormValues[]
-
+  // setup
   adminMultisig?: {
     signers: string[]
     threshold: number
   }
-
   poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
+  adminMultisigEnabled: boolean
+  assetOriginators: string[]
+  onboardingExperience: string
+  onboarding?: {
+    tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
+    taxInfoRequired?: boolean
+    externalOnboardingUrl?: string
+  }
 
-  poolType: 'open' | 'closed'
+  listed?: boolean
+  epochHours: number | ''
+  epochMinutes: number | ''
 }
+
 export type WithdrawAddress = {
   name?: string
   address: string
@@ -776,7 +782,8 @@ export type PoolMetadata = {
     {
       icon?: FileType | null
       minInitialInvestment?: string
-      targetAPY?: string // only junior tranche (index: 0) has targetAPY
+      apy: string
+      apyPercentage: number | null
     }
   >
   loanTemplates?: {
@@ -1018,6 +1025,38 @@ export type AddFee = {
   poolId: string
 }
 
+export type PoolFeesCreatePool = Array<
+  [
+    string,
+    {
+      destination: string
+      editor: any
+      feeType: {
+        [key: string]: {
+          limit: {
+            ShareOfPortfolioValuation: Rate
+          }
+        }
+      }
+    }
+  ]
+>
+
+export type TrancheCreatePool = {
+  trancheType:
+    | 'Residual'
+    | {
+        NonResidual: {
+          interestRatePerSec: string
+          minRiskBuffer: string
+        }
+      }
+  metadata: {
+    tokenName: string
+    tokenSymbol: string
+  }
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -1028,40 +1067,15 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       admin: string,
       poolId: string,
-      tranches: TrancheInput[],
+      tranches: TrancheCreatePool[],
       currency: CurrencyKey,
       maxReserve: BN,
       metadata: PoolMetadataInput,
-      fees: AddFee['fee'][]
+      fees: PoolFeesCreatePool[]
     ],
     options?: TransactionOptions
   ) {
     const [admin, poolId, tranches, currency, maxReserve, metadata, fees] = args
-    const trancheInput = tranches.map((t, i) => ({
-      trancheType: t.interestRatePerSec
-        ? {
-            NonResidual: {
-              interestRatePerSec: t.interestRatePerSec.toString(),
-              minRiskBuffer: t.minRiskBuffer?.toString(),
-            },
-          }
-        : 'Residual',
-      metadata: {
-        tokenName: metadata.tranches[i].tokenName,
-        tokenSymbol: metadata.tranches[i].symbolName,
-      },
-    }))
-
-    const feeInput = fees.map((fee) => {
-      return [
-        'Top',
-        {
-          destination: fee.destination,
-          editor: fee?.account ? { account: fee.account } : 'Root',
-          feeType: { [fee.feeType]: { limit: { [fee.limit]: fee?.amount } } },
-        },
-      ]
-    })
 
     return inst.getApi().pipe(
       switchMap((api) =>
@@ -1075,12 +1089,12 @@ export function getPoolsModule(inst: Centrifuge) {
             const tx = api.tx.poolRegistry.register(
               admin,
               poolId,
-              trancheInput,
+              tranches,
               currency,
               maxReserve.toString(),
               pinnedMetadata.ipfsHash,
               [],
-              feeInput
+              fees
             )
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
@@ -1118,7 +1132,8 @@ export function getPoolsModule(inst: Centrifuge) {
     metadata.tranches.forEach((tranche, index) => {
       tranchesById[computeTrancheId(index, poolId)] = {
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
-        targetAPY: tranche.targetAPY,
+        apy: metadata.tranches[0].apy,
+        apyPercentage: tranche.apyPercentage,
       }
     })
 
@@ -1168,6 +1183,11 @@ export function getPoolsModule(inst: Centrifuge) {
       pod: {},
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
+      onboarding: {
+        tranches: metadata.onboarding?.tranches || {},
+        taxInfoRequired: metadata.onboarding?.taxInfoRequired,
+        externalOnboardingUrl: metadata.onboarding?.externalOnboardingUrl,
+      },
     }
 
     return inst.metadata.pinJson(formattedMetadata)

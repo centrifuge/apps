@@ -2,7 +2,7 @@ import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
 import styled, { keyframes } from 'styled-components'
-import { Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
+import { Box, Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
 import { InputUnit, InputUnitProps, useContextId } from '../InputUnit'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
@@ -19,6 +19,10 @@ export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> 
     symbol?: React.ReactNode
   }
 
+export type URLInputProps = TextInputProps & {
+  prefix?: string
+}
+
 export const StyledTextInput = styled.input`
   width: 100%;
   flex: 1;
@@ -33,7 +37,9 @@ export const StyledTextInput = styled.input`
   -moz-appearance: textfield;
 
   ::placeholder {
-    color: ${({ theme }) => theme.colors.textDisabled};
+    color: ${({ theme }) => theme.colors.textSecondary};
+    font-weight: 400;
+    line-height: 24px;
   }
 
   // For number input
@@ -50,10 +56,10 @@ export const StyledTextInput = styled.input`
     margin: 0;
   }
 `
-export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean }>`
+export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean; disabled?: boolean }>`
   width: 100%;
   position: relative;
-  background: ${({ theme }) => theme.colors.backgroundPage};
+  background: ${({ theme, disabled }) => (disabled ? 'transparent' : theme.colors.backgroundPage)};
   border: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `1px solid ${theme.colors.borderPrimary}`)};
   border-radius: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `${theme.radii.input}px`)};
 
@@ -100,6 +106,48 @@ export const StyledInputAction = styled.button`
     opacity: 0.4;
   }
 `
+
+const StyledURLInputWrapper = styled(StyledInputBox)`
+  display: flex;
+  align-items: center;
+`
+const Prefix = styled(Box)`
+  padding: 0.5rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  background-color: transparent;
+  font-size: 16px;
+  pointer-events: none;
+  border-right: 1px solid ${({ theme }) => theme.colors.borderPrimary};
+`
+
+export function URLInput({
+  label,
+  secondaryLabel,
+  prefix = 'https://',
+  disabled,
+  errorMessage,
+  id,
+  ...inputProps
+}: URLInputProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
+  return (
+    <InputUnit
+      id={id}
+      label={label}
+      secondaryLabel={secondaryLabel}
+      disabled={disabled}
+      errorMessage={errorMessage}
+      inputElement={
+        <StyledURLInputWrapper hideBorder={!!inputProps.row} alignItems="stretch" height="input" disabled={disabled}>
+          <Prefix>{prefix}</Prefix>
+          <StyledTextInput {...inputProps} id={id} disabled={disabled} placeholder={inputProps.placeholder} />
+        </StyledURLInputWrapper>
+      }
+    />
+  )
+}
+
 export function InputAction({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <StyledInputAction type="button" {...props}>
@@ -119,7 +167,7 @@ export function TextInputBox(
 ) {
   const { error, disabled, action, symbol, inputRef, inputElement, row, ...inputProps } = props
   return (
-    <StyledInputBox hideBorder={!!row} alignItems="stretch" height="input">
+    <StyledInputBox hideBorder={!!row} alignItems="stretch" height="input" disabled={disabled}>
       {inputElement ?? <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />}
       {symbol && (
         <Flex alignSelf="center" pr={1}>
@@ -215,17 +263,17 @@ const StyledTextArea = styled.textarea`
   width: 100%;
   border: none;
   background: transparent;
-  min-height: 66px;
+  min-height: 140px;
   font-size: inherit;
   font-weight: inherit;
   font-family: inherit;
   line-height: inherit;
   color: inherit;
-  resize: vertical;
+  resize: none;
   padding: ${({ theme }) => theme.space[1]}px;
 
   ::placeholder {
-    color: ${({ theme }) => theme.colors.textDisabled};
+    color: ${({ theme }) => theme.colors.textSecondary};
   }
 `
 

@@ -62,6 +62,27 @@ const StyledRadioButton = styled.input`
   height: 18px;
   align-self: center;
   margin: -20px 0;
+  appearance: none;
+  border: 1px solid ${({ theme }) => theme.colors.textPrimary};
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+
+  &:checked {
+    border-color: ${({ theme }) => theme.colors.textPrimary};
+  }
+
+  &:checked::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: ${({ theme }) => theme.colors.textPrimary};
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 
   &:focus-visible + span {
     display: block;
