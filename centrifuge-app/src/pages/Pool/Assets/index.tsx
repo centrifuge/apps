@@ -45,7 +45,10 @@ export function PoolDetailAssets() {
 
   const pool = usePool(poolId)
   const { data: loans, isLoading } = useLoans(poolId)
-  const { isLoading: isLoadingSnapshots, data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toString())
+  const { data: snapshots, isLoading: isLoadingSnapshots } = useAllPoolAssetSnapshots(
+    poolId,
+    new Date().toISOString().slice(0, 10)
+  )
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(

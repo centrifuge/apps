@@ -16,7 +16,7 @@ export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxPr
   return (
     <Box position="relative">
       <StyledLabel $extendedClickArea={!!extendedClickArea}>
-        <Shelf as={Text} gap={1} alignItems="center" position="relative">
+        <Shelf as={Text} gap={1} alignItems="flex-start" position="relative">
           <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
             <StyledCheckbox type="checkbox" {...checkboxProps} />
             <StyledOutline />
@@ -52,6 +52,8 @@ export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxPr
 const StyledLabel = styled.label<{ $extendedClickArea: boolean }>`
   cursor: pointer;
   user-select: none;
+  display: flex;
+  align-items: center;
 
   &:before {
     --offset: 10px;
@@ -74,23 +76,9 @@ const StyledLabel = styled.label<{ $extendedClickArea: boolean }>`
   }
 `
 
-const StyledOutline = styled.span`
-  display: none;
-  pointer-events: none;
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  bottom: -4px;
-  left: -4px;
-  width: auto;
-  height: auto;
-  margin: auto;
-  border: 2px solid var(--fabric-focus);
-  border-radius: 4px;
-`
-
 const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
   position: relative;
+  align-items: center;
 
   &::before {
     content: '.';
@@ -103,34 +91,48 @@ const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
 const StyledCheckbox = styled.input`
   width: 18px;
   height: 18px;
-  align-self: center;
-  margin: -20px 0;
-  cursor: pointer;
   appearance: none;
-  border: 2px solid ${({ theme }) => theme.colors.borderPrimary};
-  border-radius: 4px;
-  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  border-radius: 2px;
+  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
 
-  &:checked {
-    background-color: ${({ theme }) => theme.colors.textGold};
-    border-color: ${({ theme }) => theme.colors.textGold};
-  }
+  ${({ theme }) => `
+      &:checked {
+        border-color: ${theme.colors.borderSecondary};
+        background-color: ${theme.colors.textGold};
+      }
 
-  &:checked::after {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 10px;
-    border: solid ${({ theme }) => theme.colors.backgroundPrimary};
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    position: absolute;
-    top: 3px;
-    left: 6px;
-  }
+      &:checked::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 5px;
+        width: 6px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    `}
 
-  &:focus-visible + span {
-    display: block;
+  &:focus-visible {
+    outline: none;
   }
+`
+
+const StyledOutline = styled.span`
+  display: none;
+  pointer-events: none;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  bottom: -4px;
+  left: -4px;
+  width: auto;
+  height: auto;
+  margin: auto;
+  border: 2px solid var(--fabric-focus);
+  border-radius: 100%;
 `
