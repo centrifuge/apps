@@ -1,5 +1,5 @@
 import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
-import { AssetSnapshot, CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -27,10 +27,9 @@ import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { useAllPoolAssetSnapshots, usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { prefetchRoute } from './Root'
-import { Spinner } from './Spinner'
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
@@ -46,15 +45,14 @@ type Row = (Loan | TinlakeLoan) & {
 
 type Props = {
   loans: Loan[] | TinlakeLoan[]
-  snapshots: AssetSnapshot[]
-  isLoading: boolean
 }
 
-export function LoanList({ loans, snapshots, isLoading }: Props) {
+export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
   if (!poolId) throw new Error('Pool not found')
 
   const navigate = useNavigate()
+  const { data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toISOString().slice(0, 10))
   const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()
@@ -267,8 +265,6 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
 
-  if (isLoading) return <Spinner />
-
   return (
     <>
       <Box pt={1} pb={2} paddingX={1} display="flex" justifyContent="space-between" alignItems="center">
@@ -293,7 +289,7 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
             View asset transactions
           </Button>
           <AnchorButton
-            href={csvUrl}
+            href={csvUrl ?? ''}
             download={`pool-assets-${poolId}.csv`}
             variant="inverted"
             icon={IconDownload}
