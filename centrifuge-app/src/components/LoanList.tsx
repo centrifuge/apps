@@ -244,8 +244,6 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
         ]),
   ].filter(Boolean) as Column[]
 
-  const pagination = usePagination({ data: rows, pageSize: 20 })
-
   const csvData = React.useMemo(() => {
     if (!rows.length) return undefined
 
@@ -266,6 +264,8 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
   }, [rows, pool])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
+  const filteredData = isLoading ? [] : showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero())
+  const pagination = usePagination({ data: filteredData, pageSize: 20 })
 
   if (isLoading) return <Spinner />
 
@@ -309,7 +309,7 @@ export function LoanList({ loans, snapshots, isLoading }: Props) {
         <Stack gap={2}>
           <Box overflow="auto">
             <DataTable
-              data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
+              data={filteredData}
               columns={columns}
               onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
