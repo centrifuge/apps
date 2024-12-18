@@ -69,7 +69,7 @@ export function PoolDetailAssets() {
   const totalAssets = loans.reduce((sum, loan) => {
     const amount =
       hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash'
-        ? new CurrencyBalance(getAmount(loan as any, pool), pool.currency.decimals).toDecimal()
+        ? new CurrencyBalance(getAmount(loan as any, pool, false, true), pool.currency.decimals).toDecimal()
         : 0
 
     return sum.add(amount)

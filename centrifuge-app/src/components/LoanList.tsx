@@ -242,8 +242,6 @@ export function LoanList({ loans }: Props) {
         ]),
   ].filter(Boolean) as Column[]
 
-  const pagination = usePagination({ data: rows, pageSize: 20 })
-
   const csvData = React.useMemo(() => {
     if (!rows.length) return undefined
 
@@ -264,6 +262,8 @@ export function LoanList({ loans }: Props) {
   }, [rows, pool])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
+  const filteredData = isLoading ? [] : showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero())
+  const pagination = usePagination({ data: filteredData, pageSize: 20 })
 
   return (
     <>
@@ -305,7 +305,7 @@ export function LoanList({ loans }: Props) {
         <Stack gap={2}>
           <Box overflow="auto">
             <DataTable
-              data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
+              data={filteredData}
               columns={columns}
               onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
@@ -379,13 +379,18 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
     </Shelf>
   )
 }
-export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean) {
+
+export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean, isPresentValue?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
 
     case 'Active':
-      if ('presentValue' in l) {
+      if ('outstandingQuantity' in l.pricing && !isPresentValue) {
+        return format ? formatBalance(l.pricing.outstandingQuantity) : l.pricing.outstandingQuantity
+      }
+
+      if ('presentValue' in l && isPresentValue) {
         return format ? formatBalance(l.presentValue) : l.presentValue
       }
 
