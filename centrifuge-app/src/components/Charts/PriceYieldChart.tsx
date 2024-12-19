@@ -28,7 +28,7 @@ function PriceYieldChart({
 
   if (!poolId) throw new Error('Pool not found')
 
-  const { trancheStates: tranches } = useDailyPoolStates(poolId, undefined, undefined, false) || {}
+  const { trancheStates: tranches } = useDailyPoolStates(poolId, undefined, undefined) || {}
   const trancheStates = tranches?.[trancheId]
   const pool = usePool(poolId)
 

@@ -227,12 +227,11 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
   )
 }
 
-export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspense = true) {
+export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
     ['dailyPoolStates', poolId, from, to],
     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
     {
-      suspense,
       enabled: !poolId.startsWith('0x'),
     }
   )
@@ -245,7 +244,6 @@ export function useDailyTranchesStates(trancheIds: string[]) {
     ['dailyTrancheStates', { trancheIds }],
     (cent) => cent.pools.getDailyTrancheStates([{ trancheIds }]),
     {
-      suspense: true,
       enabled: !!trancheIds?.length,
     }
   )

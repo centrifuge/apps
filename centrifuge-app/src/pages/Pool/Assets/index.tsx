@@ -14,7 +14,7 @@ import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { useAllPoolAssetSnapshots, usePool } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { OffchainMenu } from './OffchainMenu'
 
@@ -44,11 +44,7 @@ export function PoolDetailAssets() {
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId)
-  const { data: loans, isLoading } = useLoans(poolId)
-  const { data: snapshots, isLoading: isLoadingSnapshots } = useAllPoolAssetSnapshots(
-    poolId,
-    new Date().toISOString().slice(0, 10)
-  )
+  const { data: loans } = useLoans(poolId)
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(
@@ -90,7 +86,7 @@ export function PoolDetailAssets() {
   )
 
   const total = isTinlakePool ? pool.nav.total : pool.reserve.total.toDecimal().add(offchainReserve).add(totalAssets)
-  const totalNAV = isTinlakePool ? pool.nav.total : Dec(total).sub(pool.fees.totalPaid.toDecimal())
+  const totalNAV = isTinlakePool ? pool.nav.total : Dec(total as any).sub(pool.fees.totalPaid.toDecimal())
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
@@ -112,7 +108,7 @@ export function PoolDetailAssets() {
       ? [
           {
             label: <Tooltips label="Offchain cash (USD)" type="offchainCash" />,
-            value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans} />,
+            value: <OffchainMenu value={formatBalance(offchainReserve)} loans={cashLoans as Loan[]} />,
             heading: false,
           },
           {
@@ -135,7 +131,7 @@ export function PoolDetailAssets() {
         <CreateAssetButton poolId={poolId} />
       </PageSummary>
       <Box paddingX={3}>
-        <LoanList loans={loans} snapshots={snapshots} isLoading={isLoadingSnapshots || isLoading} />
+        <LoanList loans={loans} />
       </Box>
     </>
   )
