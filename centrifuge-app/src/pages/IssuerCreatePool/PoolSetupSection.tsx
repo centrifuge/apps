@@ -67,7 +67,6 @@ export const PoolSetupSection = () => {
   useEffect(() => {
     form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
   }, [])
-  console.log(values)
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -308,7 +307,10 @@ export const PoolSetupSection = () => {
                             onBlur={field.onBlur}
                             errorMessage={meta.touched && meta.error ? meta.error : undefined}
                             value={field.value}
-                            options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                            options={[
+                              { label: 'Please select', value: '' },
+                              ...feeCategories.map((cat) => ({ label: cat, value: cat })),
+                            ]}
                           />
                         )}
                       </Field>

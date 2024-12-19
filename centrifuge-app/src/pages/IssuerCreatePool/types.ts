@@ -31,7 +31,7 @@ export const createEmptyTranche = (trancheName: string): Tranche => ({
   interestRate: 0,
   minRiskBuffer: trancheName === 'Junior' ? '' : 0,
   minInvestment: 1000,
-  apy: '90d',
+  apy: 'target',
   apyPercentage: null,
 })
 
