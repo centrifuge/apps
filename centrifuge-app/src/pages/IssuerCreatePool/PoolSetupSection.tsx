@@ -307,7 +307,10 @@ export const PoolSetupSection = () => {
                             onBlur={field.onBlur}
                             errorMessage={meta.touched && meta.error ? meta.error : undefined}
                             value={field.value}
-                            options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                            options={[
+                              { label: 'Please select', value: '' },
+                              ...feeCategories.map((cat) => ({ label: cat, value: cat })),
+                            ]}
                           />
                         )}
                       </Field>
