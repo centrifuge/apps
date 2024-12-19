@@ -1,5 +1,5 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { useAddress, useCentEvmChainId, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentEvmChainId, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Checkbox,
@@ -14,7 +14,6 @@ import {
   Text,
   TextInput,
 } from '@centrifuge/fabric'
-import { getAddress } from 'ethers'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { useEffect } from 'react'
 import { useTheme } from 'styled-components'
@@ -61,16 +60,15 @@ const TaxDocument = () => {
 export const PoolSetupSection = () => {
   const theme = useTheme()
   const chainId = useCentEvmChainId()
-  const utils = useCentrifugeUtils()
-  const address = useAddress()!
   const form = useFormikContext<CreatePoolValues>()
   const { values } = form
-  const { connectedType, evm } = useWallet()
-  const formattedAddress = connectedType === 'evm' ? getAddress(evm.selectedAddress!) : utils.formatAddress(address)
+  const {
+    substrate: { selectedAddress },
+  } = useWallet()
 
   useEffect(() => {
-    form.setFieldValue('adminMultisig.signers[0]', formattedAddress)
-  }, [formattedAddress])
+    form.setFieldValue('adminMultisig.signers[0]', selectedAddress)
+  }, [])
 
   return (
     <Box>
@@ -93,6 +91,7 @@ export const PoolSetupSection = () => {
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
               onChange={() => {
                 form.setFieldValue('adminMultisigEnabled', false)
+                form.setFieldValue('adminMultisig.signers', [selectedAddress])
               }}
               isChecked={!values.adminMultisigEnabled}
               id="singleMultisign"
