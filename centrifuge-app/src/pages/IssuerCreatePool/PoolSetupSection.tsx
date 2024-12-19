@@ -62,12 +62,14 @@ export const PoolSetupSection = () => {
   const chainId = useCentEvmChainId()
   const form = useFormikContext<CreatePoolValues>()
   const { values } = form
-  const { selectedAccount } = useWallet().substrate
+  const {
+    substrate: { selectedAddress },
+  } = useWallet()
 
   useEffect(() => {
-    form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
+    form.setFieldValue('adminMultisig.signers[0]', selectedAddress)
   }, [])
-  console.log(values)
+
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
@@ -89,6 +91,7 @@ export const PoolSetupSection = () => {
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
               onChange={() => {
                 form.setFieldValue('adminMultisigEnabled', false)
+                form.setFieldValue('adminMultisig.signers', [selectedAddress])
               }}
               isChecked={!values.adminMultisigEnabled}
               id="singleMultisign"
@@ -308,7 +311,10 @@ export const PoolSetupSection = () => {
                             onBlur={field.onBlur}
                             errorMessage={meta.touched && meta.error ? meta.error : undefined}
                             value={field.value}
-                            options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                            options={[
+                              { label: 'Please select', value: '' },
+                              ...feeCategories.map((cat) => ({ label: cat, value: cat })),
+                            ]}
                           />
                         )}
                       </Field>
