@@ -51,17 +51,28 @@ export function SelectionStep({
       justifyContent="center"
       pt={expanded ? 4 : 2}
     >
-      <Shelf justifyContent="space-between" onClick={() => toggle()} style={{ cursor: 'pointer' }}>
+      <Shelf justifyContent="space-between" onClick={() => toggle()} style={{ cursor: disabled ? 'auto' : 'pointer' }}>
         <Shelf gap={2}>
           <Box bleedY={2} display="flex" justifyContent="space-between" alignItems="center">
-            {done ? <IconCheckInCircle color="statusOk" /> : <IconCrosschair color="statusOkBg" />}
-            <Text as="h3" variant="heading3" style={{ marginLeft: 8, fontWeight: 700 }}>
+            {done ? (
+              <IconCheckInCircle color="statusOk" />
+            ) : (
+              <IconCrosschair color={disabled ? 'textSecondary' : 'statusOkBg'} />
+            )}
+            <Text
+              as="h3"
+              variant="heading3"
+              color={disabled ? 'textSecondary' : 'textPrimary'}
+              style={{ marginLeft: 8, fontWeight: 700 }}
+            >
               {title}
               {tooltip}
             </Text>
           </Box>
         </Shelf>
-        <Box bleedY={2}>{expanded ? <IconChevronUp /> : <IconChevronDown />}</Box>
+        <Box bleedY={2}>
+          {expanded ? <IconChevronUp /> : <IconChevronDown color={disabled ? 'textSecondary' : 'textPrimary'} />}
+        </Box>
       </Shelf>
 
       {expanded && children}
