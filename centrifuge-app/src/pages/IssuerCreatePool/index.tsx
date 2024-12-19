@@ -76,6 +76,7 @@ const txMessage = {
 const IssuerCreatePoolPage = () => {
   const theme = useTheme()
   const formRef = useRef<HTMLFormElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const isSmall = useIsAboveBreakpoint('S')
   const address = useAddress('substrate')
   const navigate = useNavigate()
@@ -451,8 +452,14 @@ const IssuerCreatePoolPage = () => {
     }))
   }, [values, errors, step, stepFields])
 
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [step, containerRef])
+
   return (
-    <>
+    <div ref={containerRef} style={{ maxHeight: '100vh', overflowY: 'auto' }}>
       <PreimageHashDialog
         preimageHash={preimageHash}
         open={isPreimageDialogOpen}
@@ -540,7 +547,7 @@ const IssuerCreatePoolPage = () => {
           </Box>
         </Dialog>
       )}
-    </>
+    </div>
   )
 }
 

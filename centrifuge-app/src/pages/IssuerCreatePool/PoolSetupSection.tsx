@@ -67,7 +67,6 @@ export const PoolSetupSection = () => {
   useEffect(() => {
     form.setFieldValue('adminMultisig.signers[0]', selectedAccount?.address)
   }, [])
-  console.log(values)
   return (
     <Box>
       <Text variant="heading2" fontWeight={700}>
