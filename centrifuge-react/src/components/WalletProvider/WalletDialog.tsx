@@ -179,6 +179,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
           done={!!selectedWallet}
           expanded={step === 2}
           toggleExpanded={() => setStep(step === 2 ? 0 : 2)}
+          disabled={!shownWallets.length}
         >
           <Grid minColumnWidth={120} mt={3} gap={1} borderColor="transparent">
             {shownWallets.map((wallet) => {
