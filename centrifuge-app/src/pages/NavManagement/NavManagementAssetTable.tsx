@@ -222,7 +222,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
         if (!signature) return null
 
         attestation.signature = signature
-        console.log(attestation)
         try {
           const result = await firstValueFrom(cent.metadata.pinJson(attestation))
           return result.ipfsHash
