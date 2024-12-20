@@ -162,7 +162,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               {
                 assetId: '0',
                 name: 'Onchain reserve',
-                quantity: pool.nav.reserve.toString(),
+                quantity: pool.reserve.total.toString(),
                 price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
               },
               {
