@@ -200,7 +200,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           },
         }
 
-        let signature: { hash: string; publicKey: string } | null = null
+        let signature: { hash: string; publicKey: string; type: 'evm' | 'substrate' } | null = null
         try {
           const message = JSON.stringify(attestation.portfolio)
           if (provider) {
@@ -208,7 +208,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             const sig = await signer.signMessage(message)
             const hash = keccak256(toUtf8Bytes(`\x19Ethereum Signed Message:\n${message.length}${message}`))
             const recoveredPubKey = SigningKey.recoverPublicKey(hash, sig)
-            signature = { hash: sig, publicKey: recoveredPubKey }
+            signature = { hash: sig, publicKey: recoveredPubKey, type: 'evm' }
           } else if (substrate.selectedAccount?.address && substrate?.selectedWallet?.signer?.signRaw) {
             const { address } = substrate.selectedAccount
             const { signature: sig } = await substrate.selectedWallet.signer.signRaw({
@@ -216,12 +216,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               data: stringToHex(message),
               type: 'bytes',
             })
-            signature = { hash: sig, publicKey: addressToHex(address) }
+            signature = { hash: sig, publicKey: addressToHex(address), type: 'substrate' }
           }
         } catch {}
         if (!signature) return null
 
         attestation.signature = signature
+        console.log(attestation)
         try {
           const result = await firstValueFrom(cent.metadata.pinJson(attestation))
           return result.ipfsHash
