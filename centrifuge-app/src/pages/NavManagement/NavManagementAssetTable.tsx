@@ -258,7 +258,10 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
               }),
             api.tx.oraclePriceCollection.updateCollection(poolId),
-            api.tx.remarks.remark([{ Named: attestationHash }], api.tx.loans.updatePortfolioValuation(poolId)),
+            api.tx.remarks.remark(
+              [{ Named: `attestation:${poolId}:${attestationHash}` }],
+              api.tx.loans.updatePortfolioValuation(poolId)
+            ),
             api.tx.utility.batch(updateTokenPricesTxs),
           ]
 
