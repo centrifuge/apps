@@ -543,23 +543,9 @@ export class CentrifugeBase {
             // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
           }
 
-          console.log('🚀 ~ Transaction details:', {
-            weight,
-            gas,
-            method: submittable.method.method,
-            section: submittable.method.section,
-            data: tx.data,
-          })
-
           const txPromise = this.config.evmSigner!.sendTransaction(tx)
           return from(txPromise).pipe(
             catchError((error) => {
-              console.error('🚀 ~ EVM transaction failed:', {
-                error,
-                tx,
-                chainId: this.config.substrateEvmChainId,
-                signer: this.config.evmSigningAddress,
-              })
               throw error
             }),
             switchMap((response) => {
@@ -599,7 +585,6 @@ export class CentrifugeBase {
             })
           )
         } catch (error) {
-          console.error('🚀 ~ Transaction preparation failed:', error)
           return throwError(() => error)
         }
       })
