@@ -531,54 +531,77 @@ export class CentrifugeBase {
 
     return submittable.paymentInfo(address).pipe(
       switchMap((paymentInfo) => {
-        const weight = paymentInfo.weight.refTime.toPrimitive() as number
-        const gas = (Math.ceil(weight / WEIGHT_PER_GAS) + EVM_DISPATCH_OVERHEAD_GAS) * GAS_LIMIT_POV_SIZE_RATIO
-        const tx: TransactionRequest = {
-          // type: 2,
-          to: EVM_DISPATCH_PRECOMPILE,
-          data: submittable.method.toHex(),
-          gasLimit: gas,
-          // gas: 0 // TODO: How to estimate gas here?,
-          // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
-        }
-        const txPromise = this.config.evmSigner!.sendTransaction(tx)
-        return from(txPromise).pipe(
-          switchMap((response) => {
-            return from(response.wait()).pipe(
-              map((receipt) => [response, receipt] as const),
-              startWith([response, null] as const),
-              switchMap(([response, receipt]) => {
-                const $events = receipt?.blockNumber ? this.getEventsByBlockNumber(receipt.blockNumber) : of(null)
-                return combineLatest([of(response), of(receipt), $events])
-              }),
-              map(([response, receipt, events]) => {
-                const result: TransactionResult = {
-                  data: { response, receipt: receipt ?? undefined },
-                  events: (events as any) ?? [],
-                  status: receipt ? 'InBlock' : 'Broadcast',
-                  error: receipt?.status === 0 ? new Error('failed') : undefined,
-                  txHash: response.hash,
-                  blockNumber: receipt?.blockNumber,
-                }
-                return result
-              }),
-              catchError(() => {
-                const result: TransactionErrorResult = {
-                  data: { response, receipt: undefined },
-                  events: [],
-                  status: 'Invalid',
-                  error: new Error('failed'),
-                  txHash: response.hash,
-                  blockNumber: undefined,
-                }
-                return of(result)
-              }),
-              tap((result) => {
-                options?.onStatusChange?.(result)
-              })
-            )
+        try {
+          const weight = paymentInfo.weight.refTime.toPrimitive() as number
+          const gas = (Math.ceil(weight / WEIGHT_PER_GAS) + EVM_DISPATCH_OVERHEAD_GAS) * GAS_LIMIT_POV_SIZE_RATIO * 1.5
+          const tx: TransactionRequest = {
+            // type: 2,
+            to: EVM_DISPATCH_PRECOMPILE,
+            data: submittable.method.toHex(),
+            gasLimit: gas,
+            // gas: 0 // TODO: How to estimate gas here?,
+            // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
+          }
+
+          console.log('🚀 ~ Transaction details:', {
+            weight,
+            gas,
+            method: submittable.method.method,
+            section: submittable.method.section,
+            data: tx.data,
           })
-        )
+
+          const txPromise = this.config.evmSigner!.sendTransaction(tx)
+          return from(txPromise).pipe(
+            catchError((error) => {
+              console.error('🚀 ~ EVM transaction failed:', {
+                error,
+                tx,
+                chainId: this.config.substrateEvmChainId,
+                signer: this.config.evmSigningAddress,
+              })
+              throw error
+            }),
+            switchMap((response) => {
+              return from(response.wait()).pipe(
+                map((receipt) => [response, receipt] as const),
+                startWith([response, null] as const),
+                switchMap(([response, receipt]) => {
+                  const $events = receipt?.blockNumber ? this.getEventsByBlockNumber(receipt.blockNumber) : of(null)
+                  return combineLatest([of(response), of(receipt), $events])
+                }),
+                map(([response, receipt, events]) => {
+                  const result: TransactionResult = {
+                    data: { response, receipt: receipt ?? undefined },
+                    events: (events as any) ?? [],
+                    status: receipt ? 'InBlock' : 'Broadcast',
+                    error: receipt?.status === 0 ? new Error('failed') : undefined,
+                    txHash: response.hash,
+                    blockNumber: receipt?.blockNumber,
+                  }
+                  return result
+                }),
+                catchError(() => {
+                  const result: TransactionErrorResult = {
+                    data: { response, receipt: undefined },
+                    events: [],
+                    status: 'Invalid',
+                    error: new Error('failed'),
+                    txHash: response.hash,
+                    blockNumber: undefined,
+                  }
+                  return of(result)
+                }),
+                tap((result) => {
+                  options?.onStatusChange?.(result)
+                })
+              )
+            })
+          )
+        } catch (error) {
+          console.error('🚀 ~ Transaction preparation failed:', error)
+          return throwError(() => error)
+        }
       })
     )
   }
