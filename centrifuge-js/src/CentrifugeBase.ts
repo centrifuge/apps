@@ -39,7 +39,7 @@ type ProxyType = string
 
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
 const WEIGHT_PER_GAS = 25_000
-const GAS_LIMIT_POV_SIZE_RATIO = 4
+const GAS_LIMIT_POV_SIZE_RATIO = 10
 const EVM_DISPATCH_OVERHEAD_GAS = 1_000_000
 
 export type Config = {
@@ -533,7 +533,7 @@ export class CentrifugeBase {
       switchMap((paymentInfo) => {
         try {
           const weight = paymentInfo.weight.refTime.toPrimitive() as number
-          const gas = (Math.ceil(weight / WEIGHT_PER_GAS) + EVM_DISPATCH_OVERHEAD_GAS) * GAS_LIMIT_POV_SIZE_RATIO * 1.5
+          const gas = (Math.ceil(weight / WEIGHT_PER_GAS) + EVM_DISPATCH_OVERHEAD_GAS) * GAS_LIMIT_POV_SIZE_RATIO
           const tx: TransactionRequest = {
             // type: 2,
             to: EVM_DISPATCH_PRECOMPILE,
