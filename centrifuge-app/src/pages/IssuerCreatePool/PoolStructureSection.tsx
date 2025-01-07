@@ -269,7 +269,7 @@ export const PoolStructureSection = () => {
               {({ field, meta, form }: FieldProps) => (
                 <Select
                   name="subAssetClass"
-                  label="Secondary asset class"
+                  label="Secondary asset class*"
                   onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
                   onBlur={field.onBlur}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}

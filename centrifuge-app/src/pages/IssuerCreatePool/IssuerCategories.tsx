@@ -73,7 +73,6 @@ export const IssuerCategoriesSection = () => {
                             placeholder="Type here..."
                             maxLength={100}
                             as={TextInput}
-                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
                             onBlur={field.onBlur}
                           />
                         )}

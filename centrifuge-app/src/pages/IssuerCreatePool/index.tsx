@@ -429,20 +429,22 @@ const IssuerCreatePoolPage = () => {
 
   const checkStepCompletion = (stepNumber: number) => {
     const fields = stepFields[stepNumber]
-    return fields.every(
-      (field) =>
-        values[field as keyof typeof values] !== null &&
-        values[field as keyof typeof values] !== '' &&
-        !errors[field as keyof typeof errors]
-    )
-  }
 
-  const handleNextStep = () => {
-    if (step === 3) {
-      form.handleSubmit()
-    } else {
-      setStep((prevStep) => prevStep + 1)
+    let isValid = fields.every((field) => {
+      const value = values[field as keyof typeof values]
+      const error = errors[field as keyof typeof errors]
+      return value !== null && value !== '' && !error
+    })
+
+    if (values.issuerCategories.length > 1 && errors.issuerCategories) {
+      isValid = false
     }
+
+    if (values.poolRatings.length > 1 && errors.poolRatings) {
+      isValid = false
+    }
+
+    return isValid
   }
 
   useEffect(() => {
@@ -515,15 +517,20 @@ const IssuerCreatePoolPage = () => {
                   Previous
                 </Button>
               )}
-              <Button
-                style={{ width: 163 }}
-                small
-                onClick={handleNextStep}
-                loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
-                disabled={step === 3 ? !(Object.keys(errors).length === 0) : false}
-              >
-                {step === 3 ? 'Create pool' : 'Next'}
-              </Button>
+              {step === 3 ? (
+                <Button
+                  style={{ width: 163 }}
+                  small
+                  onClick={() => form.handleSubmit()}
+                  loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
+                >
+                  Create pool
+                </Button>
+              ) : (
+                <Button style={{ width: 163 }} small onClick={() => setStep((prevStep) => prevStep + 1)}>
+                  Next
+                </Button>
+              )}
             </Box>
           </StyledBox>
         </Form>
