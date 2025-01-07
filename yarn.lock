@@ -2158,9 +2158,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/sdk@npm:0.0.0-alpha.0":
-  version: 0.0.0-alpha.0
-  resolution: "@centrifuge/sdk@npm:0.0.0-alpha.0"
+"@centrifuge/sdk@npm:0.0.0-alpha.3":
+  version: 0.0.0-alpha.3
+  resolution: "@centrifuge/sdk@npm:0.0.0-alpha.3"
   dependencies:
     decimal.js-light: ^2.5.1
     eth-permit: ^0.2.3
@@ -2168,7 +2168,7 @@ __metadata:
     rxjs: ^7.8.1
   peerDependencies:
     viem: ^2
-  checksum: 7e440cf1ab6d77427b50429671a4ae1878f86e33c76e2eff2c32535ca494d2051f14d259c86eaf6a7dbe68c3cf6308f01e2a24eea9546b8acf2fdca5ded909e2
+  checksum: 6b76aa84eb49addb7e8a64e38cb5cc66659f4c844b7e967bbf9c8b0d8fa0c82a066f44de52dc8a1868e65950c2122b4230de388f08c4a28c37727b19d426f49e
   languageName: node
   linkType: hard
 
@@ -27107,7 +27107,7 @@ __metadata:
   resolution: "sdk-consumer@workspace:sdk-consumer"
   dependencies:
     "@centrifuge/fabric": "workspace:*"
-    "@centrifuge/sdk": 0.0.0-alpha.0
+    "@centrifuge/sdk": 0.0.0-alpha.3
     "@eslint/js": ^9.13.0
     "@talismn/wagmi-connector": ^0.3.1
     "@tanstack/react-query": ^5.59.16
