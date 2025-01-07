@@ -1,5 +1,5 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { useCentEvmChainId, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentEvmChainId, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Checkbox,
@@ -14,12 +14,14 @@ import {
   Text,
   TextInput,
 } from '@centrifuge/fabric'
+import { isAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { useEffect } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { feeCategories } from '../../../src/config'
+import { isEvmAddress } from '../../../src/utils/address'
 import { FormAddressInput } from './FormAddressInput'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
@@ -48,7 +50,11 @@ const TaxDocument = () => {
         {({ field }: FieldProps) => (
           <Checkbox
             {...field}
-            label="Require investors to upload tax documents before signing the subscription agreement."
+            label={
+              <Text variant="body2">
+                Require investors to upload tax documents before signing the subscription agreement.
+              </Text>
+            }
             onChange={(val) => form.setFieldValue('onboarding.taxInfoRequired', val.target.checked ? true : false)}
           />
         )}
@@ -62,13 +68,13 @@ export const PoolSetupSection = () => {
   const chainId = useCentEvmChainId()
   const form = useFormikContext<CreatePoolValues>()
   const { values } = form
-  const {
-    substrate: { selectedAddress },
-  } = useWallet()
+  const utils = useCentrifugeUtils()
+  const ctx = useWallet()
+  const { substrate, connectedType } = ctx
 
   useEffect(() => {
-    form.setFieldValue('adminMultisig.signers[0]', selectedAddress)
-  }, [])
+    form.setFieldValue('adminMultisig.signers[0]', substrate.selectedAddress)
+  }, [substrate])
 
   return (
     <Box>
@@ -91,7 +97,7 @@ export const PoolSetupSection = () => {
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
               onChange={() => {
                 form.setFieldValue('adminMultisigEnabled', false)
-                form.setFieldValue('adminMultisig.signers', [selectedAddress])
+                form.setFieldValue('adminMultisig.signers', [substrate.selectedAddress])
               }}
               isChecked={!values.adminMultisigEnabled}
               id="singleMultisign"
@@ -136,18 +142,22 @@ export const PoolSetupSection = () => {
                       </Box>
                     ))
                   ) : (
-                    <Box mt={2}>
-                      <Field name={`adminMultisig.signers.0`} validate={validate.addressValidate}>
-                        {({ field }: FieldProps) => (
+                    <Field name={`adminMultisig.signers.0`} validate={validate.addressValidate}>
+                      {({ field, form }: FieldProps) => {
+                        const isValidAddress =
+                          connectedType === 'evm' ? isEvmAddress(field.value) : isAddress(field.value)
+
+                        return (
                           <FieldWithErrorMessage
                             {...field}
                             as={TextInput}
                             placeholder="Type address..."
-                            onBlur={field.onBlur}
+                            value={isValidAddress ? utils.formatAddress(field.value) : field.value}
+                            onChange={(e) => form.setFieldValue(field.name, e.target.value)}
                           />
-                        )}
-                      </Field>
-                    </Box>
+                        )
+                      }}
+                    </Field>
                   )}
                   {values.adminMultisigEnabled && (
                     <Box display="flex" justifyContent="flex-end" mt={2}>
