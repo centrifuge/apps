@@ -148,13 +148,17 @@ export const PoolSetupSection = () => {
                           connectedType === 'evm' ? isEvmAddress(field.value) : isAddress(field.value)
 
                         return (
-                          <FieldWithErrorMessage
-                            {...field}
-                            as={TextInput}
-                            placeholder="Type address..."
-                            value={isValidAddress ? utils.formatAddress(field.value) : field.value}
-                            onChange={(e) => form.setFieldValue(field.name, e.target.value)}
-                          />
+                          <Box mt={2}>
+                            <FieldWithErrorMessage
+                              {...field}
+                              as={TextInput}
+                              placeholder="Type address..."
+                              value={isValidAddress ? utils.formatAddress(field.value) : field.value}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                form.setFieldValue(field.name, e.target.value)
+                              }
+                            />
+                          </Box>
                         )
                       }}
                     </Field>

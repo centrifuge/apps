@@ -523,6 +523,7 @@ const IssuerCreatePoolPage = () => {
                   small
                   onClick={() => form.handleSubmit()}
                   loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
+                  disabled={Object.keys(errors).length > 0}
                 >
                   Create pool
                 </Button>
