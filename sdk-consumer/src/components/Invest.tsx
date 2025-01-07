@@ -1,6 +1,6 @@
 import { Button, Card, CurrencyInput, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
-import { PoolNetwork, Vault } from '@centrifuge/sdk'
-import { useEffect, useRef, useState } from 'react'
+import { Vault } from '@centrifuge/sdk'
+import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useCentrifugeTransaction } from '../hooks/useCentrifugeTransaction'
 import { useActiveNetworks, useVaultInvestment, useVaults } from '../hooks/usePool'
@@ -11,12 +11,8 @@ const trancheId = '0xac6bffc5fd68f7772ceddec7b0a316ca'
 
 export function Invest() {
   const { data: networks, isLoading } = useActiveNetworks(poolId)
-  const ref = useRef<PoolNetwork[]>()
-  if ((networks?.length ?? 0) > (ref.current?.length ?? 0)) {
-    ref.current = networks
-  }
   return (
-    <Card maxWidth={400} mx="auto" p={2} backgroundColor="backgroundSecondary">
+    <Card alignSelf="center" p={2} backgroundColor="backgroundSecondary">
       <Stack gap={2}>
         {isLoading ? (
           <Shelf justifyContent="center">
@@ -25,7 +21,7 @@ export function Invest() {
         ) : (
           <>
             <Text variant="heading1">Invest</Text>
-            <ConnectionGuard networks={ref.current?.map((n) => n.chainId) || []}>
+            <ConnectionGuard networks={networks?.map((n) => n.chainId) || []}>
               <InvestInner />
             </ConnectionGuard>
           </>

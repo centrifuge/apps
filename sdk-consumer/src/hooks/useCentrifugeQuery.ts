@@ -65,6 +65,9 @@ function useObservable<ObservableType extends Observable<any>>(observable?: Obse
             ...result,
             status: entry.didEmitData ? 'success' : 'error',
           }
+          if (result.error) {
+            console.error(result.error)
+          }
         }),
         // Share the observable to prevent unsubscribing and resubscribing between the immediate subscription and the useSyncExternalStore subscription.
         share({

@@ -4,18 +4,25 @@ import { switchMap } from 'rxjs'
 import { centrifuge } from '../centrifuge'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 
-const poolId = '2779829532'
-const trancheId = '0xac6bffc5fd68f7772ceddec7b0a316ca'
+const poolIds = ['2779829532', '2853787339', '2118311035', '3783664923', '4139607887']
 
-function usePools() {
-  const [pools] = useState(() => [new Pool(centrifuge, poolId)])
+export function usePools() {
+  const [pools] = useState(() => poolIds.map((pid) => new Pool(centrifuge, pid)))
   return pools
+}
+
+export function usePool(poolId: string) {
+  const pools = usePools()
+  const pool = pools.find((p) => p.id === poolId)
+  if (!pool) {
+    throw new Error(`Pool with id ${poolId} not found`)
+  }
+  return pool
 }
 
 export function useActiveNetworks(poolId: string) {
   const pool = usePools().find((p) => p.id === poolId)
   const networks$ = useMemo(() => {
-    console.log('getActiveNetworks $$', pool)
     return pool?.activeNetworks()
   }, [pool])
   return useCentrifugeQuery(networks$)
