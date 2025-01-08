@@ -27,7 +27,8 @@ type BackgroundColorName = `background${
   | 'Thumbnail'
   | 'AccentPrimary'
   | 'AccentSecondary'
-  | 'Inverted'}`
+  | 'Inverted'
+  | 'Light'}`
 type ButtonColorName =
   | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary' | 'Inverted'}${
       | ''
