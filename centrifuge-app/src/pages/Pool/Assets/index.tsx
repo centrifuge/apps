@@ -86,7 +86,7 @@ export function PoolDetailAssets() {
   )
 
   const total = isTinlakePool ? pool.nav.total : pool.reserve.total.toDecimal().add(offchainReserve).add(totalAssets)
-  const totalNAV = isTinlakePool ? pool.nav.total : Dec(total as any).sub(pool.fees.totalPaid.toDecimal())
+  const totalNAV = isTinlakePool ? pool.nav.total : Dec(total as any).sub(pool.fees.totalPending.toDecimal())
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
@@ -117,7 +117,7 @@ export function PoolDetailAssets() {
             heading: false,
           },
           {
-            label: `Accrued fees (${pool.currency.symbol})`,
+            label: `Total pending fees (${pool.currency.symbol})`,
             value: `${pool.fees.totalPaid.isZero() ? '' : '-'}${formatBalance(pool.fees.totalPaid)}`,
             heading: false,
           },
