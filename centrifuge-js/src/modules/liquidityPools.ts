@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import type { TransactionRequest, TransactionResponse } from 'ethers'
 import { Contract, Interface, Provider, ethers, isAddress as isEvmAddress } from 'ethers'
 import set from 'lodash/set'
-import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
+import { combineLatestWith, firstValueFrom, from, map, of, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { addressToHex } from '../utils'
@@ -315,6 +315,22 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function enableRouter(args: [centrifugeRouter: string, estimate: BN], options: TransactionRequest = {}) {
+    const [centrifugeRouter, estimate] = args
+
+    const getIsRouterEnabled = from(contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).isEnabled())
+    return getIsRouterEnabled.pipe(
+      map((isRouterEnabled) => {
+        if (isRouterEnabled) {
+          return of(null)
+        }
+        return pending(
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).enable(centrifugeRouter, estimate, options)
+        )
+      })
+    )
+  }
+
   function increaseRedeemOrder(
     args: [lpAddress: string, order: BN, chainId: number],
     options: TransactionRequest = {}
@@ -323,19 +339,23 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const user = inst.getSignerAddress('evm')
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
-        return pending(
-          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).requestRedeem(
-            lpAddress,
-            order.toString(),
-            user,
-            user,
-            estimate,
-            {
-              ...options,
-              gasLimit: 300000,
-              value: estimate,
-            }
-          )
+        return enableRouter([centrifugeRouter, estimate], options).pipe(
+          switchMap(() => {
+            return pending(
+              contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).requestRedeem(
+                lpAddress,
+                order.toString(),
+                user,
+                user,
+                estimate,
+                {
+                  ...options,
+                  gasLimit: 300000,
+                  value: estimate,
+                }
+              )
+            )
+          })
         )
       })
     )
