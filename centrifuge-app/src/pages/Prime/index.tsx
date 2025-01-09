@@ -22,7 +22,7 @@ function Prime() {
   return (
     <>
       <LayoutSection alignItems="flex-start" pt={3} pb={3}>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" ml={2}>
           <Box
             backgroundColor="backgroundSecondary"
             borderRadius={28}

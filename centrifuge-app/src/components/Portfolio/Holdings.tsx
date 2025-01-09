@@ -1,10 +1,11 @@
-import { Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { NetworkIcon, formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { evmChains } from '../../../src/config'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
@@ -22,7 +23,6 @@ import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
 import { RouterLinkButton } from '../RouterLinkButton'
-import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
 import { usePortfolioTokens } from './usePortfolio'
 
@@ -35,7 +35,9 @@ export type Holding = {
   tokenPrice: Decimal
   showActions?: boolean
   address?: string
-  connectedNetwork?: string | null
+  connectedNetwork?: any
+  realizedProfit?: CurrencyBalance
+  unrealizedProfit?: CurrencyBalance
 }
 
 const columns: Column[] = [
@@ -45,9 +47,23 @@ const columns: Column[] = [
     cell: (token: Holding) => {
       return <TokenWithIcon {...token} />
     },
+    width: '300px',
   },
   {
-    header: <Tooltips type="cfgPrice" label="Token price" />,
+    align: 'left',
+    header: 'Network',
+    cell: ({ connectedNetwork }: Holding) => {
+      if (!connectedNetwork) return
+      return (
+        <Box display={'flex'}>
+          <NetworkIcon size="iconSmall" network={connectedNetwork || 'centrifuge'} />
+          <Text style={{ marginLeft: 4 }}> {(evmChains as any)[connectedNetwork]?.name || 'Centrifuge'}</Text>
+        </Box>
+      )
+    },
+  },
+  {
+    header: <SortableTableHeader label="Token price" />,
     cell: ({ tokenPrice }: Holding) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
@@ -79,6 +95,30 @@ const columns: Column[] = [
       )
     },
     sortKey: 'marketValue',
+    align: 'left',
+  },
+  {
+    header: <SortableTableHeader label="Realized P&L" />,
+    cell: ({ realizedProfit }: Holding) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(realizedProfit || 0, 'USD', 2)}
+        </Text>
+      )
+    },
+    sortKey: 'realizedProfit',
+    align: 'left',
+  },
+  {
+    header: <SortableTableHeader label="Unrealized P&L" />,
+    cell: ({ unrealizedProfit }: Holding) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(unrealizedProfit || 0, 'USD', 2)}
+        </Text>
+      )
+    },
+    sortKey: 'unrealizedProfit',
     align: 'left',
   },
   {
@@ -139,6 +179,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       showActions,
+      connectedNetwork: wallet.connectedNetwork,
     })),
     ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balancePending.isZero()) || []).map((balance) => {
       const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)
@@ -223,6 +264,7 @@ export function Holdings({
   address?: string
   chainId?: number
 }) {
+  const theme = useTheme()
   const { search, pathname } = useLocation()
   const navigate = useNavigate()
   const params = new URLSearchParams(search)
@@ -251,7 +293,17 @@ export function Holdings({
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
-      <DataTable columns={columns} data={tokens} defaultSortKey="position" />
+      <DataTable
+        headerStyles={{
+          backgroundColor: 'white',
+          border: 'transparent',
+          borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
+        }}
+        columns={columns}
+        data={tokens}
+        defaultSortKey="position"
+        hideBorder
+      />
     </>
   ) : (
     <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">

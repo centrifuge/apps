@@ -5,13 +5,12 @@ import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { AssetSummary } from '../../../src/components/AssetSummary'
 import { BackButton } from '../../../src/components/BackButton'
+import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../../src/components/Portfolio/CardPortfolioValue'
-import { useDailyPortfolioValue } from '../../../src/components/Portfolio/usePortfolio'
 import { config } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
-import { formatBalance, formatBalanceAbbreviated } from '../../../src/utils/formatting'
-import { useTransactionsByAddress } from '../../../src/utils/usePools'
-import { useHoldings } from '../../components/Portfolio/Holdings'
+import { formatBalance } from '../../../src/utils/formatting'
+import { Holdings, useHoldings } from '../../components/Portfolio/Holdings'
 import { useDAOConfig } from '../../utils/useDAOConfig'
 
 export default function PrimeDetailPage() {
@@ -32,29 +31,6 @@ const PrimeDetail = () => {
 
   const tokens = useHoldings(centAddress)
   const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
-  const transactions = useTransactionsByAddress(centAddress)
-  const dailyPortfolioValue = useDailyPortfolioValue(centAddress ?? '', 90)
-
-  const chartData = dailyPortfolioValue?.map((day) => ({
-    name: day.dateInMilliseconds,
-    yAxis: day.portfolioValue.toNumber(),
-  }))
-
-  const filters = {
-    type: 'default',
-    title: 'Overview',
-    legend: [
-      {
-        label: 'Portfolio value',
-        color: 'textGold',
-        value: '1,523.00',
-      },
-    ],
-  }
-
-  const valueFormatter = (value: any) => {
-    return { value: formatBalanceAbbreviated(value.yAxis, '', 2), label: 'Portfolio Value' }
-  }
 
   return !isLoading && dao && centAddress ? (
     <Stack mx={1} my={1}>
@@ -92,10 +68,11 @@ const PrimeDetail = () => {
         <CardPortfolioValue address={centAddress} />
       </Box>
 
-      {/* <LayoutSection title="Holdings" pt={12} pb={12}>
+      <LayoutSection mt={3} pt={0}>
+        <Text variant="heading4">Investment positions</Text>
         <Holdings address={centAddress} showActions={false} />
       </LayoutSection>
-      <LayoutSection title="Transaction history" pt={12} pb={12}>
+      {/* <LayoutSection title="Transaction history" pt={12} pb={12}>
         <Transactions onlyMostRecent address={centAddress} />
       </LayoutSection>
       <Resolutions dao={dao} /> */}
