@@ -1,20 +1,14 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { Box, Select, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { formatBalance } from '@centrifuge/centrifuge-react'
+import { Box, Select, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
-import { formatBalance } from '../../utils/formatting'
 import { useTransactionsByAddress } from '../../utils/usePools'
 import { LoadBoundary } from '../LoadBoundary'
 import { useHoldings } from './Holdings'
 import { PortfolioValue } from './PortfolioValue'
-
-const RangeFilterButton = styled(Stack)`
-  &:hover {
-    cursor: pointer;
-  }
-`
 
 const rangeFilters = [
   { value: '30d', label: '30 days' },
@@ -38,24 +32,15 @@ export function CardPortfolioValue({
 
   const { colors } = useTheme()
 
-  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
+  const [range, setRange] = React.useState('ytd')
 
   const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
-
-  const balanceProps = {
-    as: 'strong',
-    fontSize: [16, 18],
-  }
-  const headingProps = {
-    as: 'p',
-    variant: 'body3',
-  }
 
   return (
     <Box position="relative">
       <Box role="article" borderRadius="card" borderStyle="solid" borderWidth={1} borderColor="borderPrimary" p={2}>
         <Box>
-          <Text variant="heading3">Overview</Text>
+          <Text variant="heading4">Overview</Text>
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box alignContent="center" mb={2} mt={3}>
               <Box display="flex" alignItems="center">
@@ -64,18 +49,18 @@ export function CardPortfolioValue({
                   Portfolio value
                 </Text>
               </Box>
-              <TextWithPlaceholder {...balanceProps} isLoading={!currentPortfolioValue} variant="heading">
-                <Text variant="heading1">{formatBalance(currentPortfolioValue || 0)}</Text>
+              <TextWithPlaceholder isLoading={!currentPortfolioValue} variant="heading1">
+                {formatBalance(currentPortfolioValue || 0)}
               </TextWithPlaceholder>
             </Box>
-            <Select options={rangeFilters} onChange={setRange} hideBorder />
+            <Select options={rangeFilters} onChange={(e) => setRange(e.target.value)} hideBorder />
           </Box>
           {showGraph && centAddress && transactions?.investorTransactions.length ? (
             <>
               <Box width="100%" height="300px">
                 <LoadBoundary>
                   {transactions?.investorTransactions.length ? (
-                    <PortfolioValue rangeValue={range.value} address={centAddress} />
+                    <PortfolioValue rangeValue={range} address={centAddress} />
                   ) : (
                     <Box width="100%" height="100%" display="flex" alignItems="center" justifyContent="center">
                       <Text>No data available</Text>

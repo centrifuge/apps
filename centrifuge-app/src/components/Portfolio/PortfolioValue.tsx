@@ -1,13 +1,14 @@
-import { Card, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Stack, Text } from '@centrifuge/fabric'
 import { useMemo } from 'react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { CustomTick } from '../Charts/PoolPerformanceChart'
 import { getOneDayPerMonth, getRangeNumber } from '../Charts/utils'
 import { useDailyPortfolioValue } from './usePortfolio'
 
-const chartColor = '#006ef5'
+const chartColor = 'black'
 
 const TooltipInfo = ({ payload }: any) => {
   if (payload) {
@@ -15,12 +16,22 @@ const TooltipInfo = ({ payload }: any) => {
     const date = payload[0]?.payload.dateInMilliseconds
 
     return (
-      <Card p={1} minHeight="53px" minWidth="163px" style={{ borderRadius: '4px' }}>
+      <Card
+        p={1}
+        minHeight="53px"
+        width={300}
+        style={{ borderRadius: '4px', boxShadow: '1px 3px 6px 0px rgba(0, 0, 0, 0.15)' }}
+      >
         <Stack gap={1}>
           <Text variant="body3">
             <Text variant="emphasized">{formatDate(date)}</Text>
           </Text>
-          <Text variant="body3">{portfolioValue && formatBalance(portfolioValue, 'USD', 2, 2)}</Text>
+          {portfolioValue && (
+            <Box display="flex" justifyContent="space-between">
+              <Text variant="body3">Portfolio value</Text>
+              <Text variant="body3">{formatBalance(portfolioValue, 'USD', 2, 2)}</Text>
+            </Box>
+          )}
         </Stack>
       </Card>
     )
@@ -30,6 +41,7 @@ const TooltipInfo = ({ payload }: any) => {
 }
 
 export function PortfolioValue({ rangeValue, address }: { rangeValue: string; address: string }) {
+  const theme = useTheme()
   const rangeNumber = getRangeNumber(rangeValue)
   const dailyPortfolioValue = useDailyPortfolioValue(address, rangeNumber)
 
@@ -49,21 +61,22 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
 
   return (
     <ResponsiveContainer height={300} maxHeight={300} minHeight={300}>
-      <AreaChart
+      <LineChart
         margin={{
           top: 35,
           right: 20,
           bottom: 0,
+          left: -10,
         }}
         data={chartData?.reverse()}
       >
         <defs>
           <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor={chartColor} stopOpacity={0.3} />
-            <stop offset="90%" stopColor="#F2F2F2" stopOpacity={0.8} />
+            <stop offset="5%" stopColor={chartColor} stopOpacity={0.4} />
+            <stop offset="95%" stopColor={chartColor} stopOpacity={0.2} />
           </linearGradient>
         </defs>
-        <CartesianGrid vertical={false} />
+        <CartesianGrid vertical={false} stroke={theme.colors.backgroundTertiary} />
         <XAxis
           dataKey="dateInMilliseconds"
           tickLine={false}
@@ -88,26 +101,11 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
             fontSize: '10px',
           }}
           domain={yAxisDomain}
-          label={{
-            value: 'USD',
-            position: 'top',
-            offset: 15,
-            fontSize: '12px',
-          }}
         />
 
         <Tooltip content={<TooltipInfo />} />
-        <Area
-          type="monotone"
-          dataKey="portfolioValue"
-          strokeWidth={1}
-          fillOpacity={1}
-          fill="url(#colorPoolValue)"
-          name="Value"
-          stroke={`${chartColor}30`}
-          activeDot={{ fill: chartColor }}
-        />
-      </AreaChart>
+        <Line type="monotone" dataKey="portfolioValue" stroke={theme.colors.textGold} strokeWidth={2} dot={false} />
+      </LineChart>
     </ResponsiveContainer>
   )
 }
