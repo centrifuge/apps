@@ -8,6 +8,7 @@ import { BackButton } from '../../../src/components/BackButton'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../../src/components/Portfolio/CardPortfolioValue'
 import { Transactions } from '../../../src/components/Portfolio/Transactions'
+import { Resolutions } from '../../../src/components/Resolutions'
 import { config } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../../src/utils/formatting'
@@ -32,6 +33,16 @@ const PrimeDetail = () => {
 
   const tokens = useHoldings(centAddress)
   const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
+  const realizedProfit = tokens.reduce(
+    (sum, token) => sum.add(token.realizedProfit ? token.realizedProfit.toDecimal() : 0),
+    Dec(0)
+  )
+  const unrealizedProfit = tokens.reduce(
+    (sum, token) => sum.add(token.unrealizedProfit ? token.unrealizedProfit.toDecimal() : 0),
+    Dec(0)
+  )
+
+  console.log(tokens[0].realizedProfit?.toDecimal())
 
   return !isLoading && dao && centAddress ? (
     <Stack mx={1} my={1}>
@@ -55,12 +66,12 @@ const PrimeDetail = () => {
           },
           {
             label: 'Realized P&L',
-            value: formatBalance(0, config.baseCurrency),
+            value: formatBalance(realizedProfit, config.baseCurrency),
             heading: false,
           },
           {
             label: 'Unrealized P&L',
-            value: formatBalance(0, config.baseCurrency),
+            value: formatBalance(unrealizedProfit, config.baseCurrency),
             heading: false,
           },
         ]}
@@ -77,7 +88,10 @@ const PrimeDetail = () => {
         <Text variant="heading4">Transaction history</Text>
         <Transactions onlyMostRecent address={centAddress} />
       </LayoutSection>
-      {/* <Resolutions dao={dao} /> */}
+      <LayoutSection mt={1} pt={0}>
+        <Text variant="heading4">Resolutions</Text>
+        <Resolutions dao={dao} />
+      </LayoutSection>
     </Stack>
   ) : null
 }
