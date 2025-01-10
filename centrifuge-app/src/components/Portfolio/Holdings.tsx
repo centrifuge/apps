@@ -279,7 +279,7 @@ export function Holdings({
   const tokens = useHoldings(address, chainId, showActions)
 
   return address && tokens.length ? (
-    <>
+    <Box mt={2}>
       {investPoolId || redeemPoolId ? (
         <InvestRedeemDrawer
           poolId={investPoolId || redeemPoolId || ''}
@@ -304,7 +304,8 @@ export function Holdings({
         defaultSortKey="position"
         hideBorder
       />
-    </>
+      <Box borderBottom={`1px solid ${theme.colors.backgroundTertiary}`} />
+    </Box>
   ) : (
     <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
       <Text color="textSecondary" variant="body2">

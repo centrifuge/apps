@@ -3,8 +3,8 @@ import { Network, formatBalance, useGetExplorerUrl } from '@centrifuge/centrifug
 import {
   AnchorButton,
   Box,
+  Button,
   IconExternalLink,
-  IconEye,
   Pagination,
   PaginationProvider,
   Shelf,
@@ -13,12 +13,12 @@ import {
   usePagination,
 } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useNavigate } from 'react-router'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
-import { RouterLinkButton } from '../RouterLinkButton'
 
 type TransactionsProps = {
   onlyMostRecent?: boolean
@@ -42,6 +42,7 @@ type Row = {
 }
 
 export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId }: TransactionsProps) {
+  const navigate = useNavigate()
   const explorer = useGetExplorerUrl()
   const columns = [
     {
@@ -80,16 +81,16 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
       ),
     },
     {
-      align: 'right',
+      align: 'left',
       header: 'Token price',
-      cell: ({ tranche, tranchePrice, pool }: Row) => (
+      cell: ({ tranchePrice, pool }: Row) => (
         <Text as="span" variant="body3">
           {typeof tranchePrice === 'string' ? tranchePrice : formatBalance(tranchePrice, pool?.currency.symbol, 4)}
         </Text>
       ),
     },
     {
-      align: 'right',
+      align: 'left',
       header: 'Amount',
       cell: ({ amount, tranche, action, pool }: Row) => (
         <Text as="span" variant="body3">
@@ -118,6 +119,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
           </Stack>
         )
       },
+      width: '120px',
     },
   ].filter(Boolean) as Column[]
 
@@ -182,11 +184,9 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
           />
         </Box>
         {onlyMostRecent ? (
-          <Box display="inline-block">
-            <RouterLinkButton newTab to={`/history/${address}`} small variant="tertiary" icon={IconEye}>
-              View all
-            </RouterLinkButton>
-          </Box>
+          <Button onClick={() => navigate(`/history/${address}`)} variant="inverted" style={{ width: 100 }} small>
+            View all
+          </Button>
         ) : (
           <Shelf justifyContent="space-between">
             {pagination.pageCount > 1 && (

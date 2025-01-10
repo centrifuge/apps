@@ -7,6 +7,7 @@ import { AssetSummary } from '../../../src/components/AssetSummary'
 import { BackButton } from '../../../src/components/BackButton'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../../src/components/Portfolio/CardPortfolioValue'
+import { Transactions } from '../../../src/components/Portfolio/Transactions'
 import { config } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../../src/utils/formatting'
@@ -68,14 +69,15 @@ const PrimeDetail = () => {
         <CardPortfolioValue address={centAddress} />
       </Box>
 
-      <LayoutSection mt={3} pt={0}>
+      <LayoutSection mt={3} pt={0} gap={0}>
         <Text variant="heading4">Investment positions</Text>
         <Holdings address={centAddress} showActions={false} />
       </LayoutSection>
-      {/* <LayoutSection title="Transaction history" pt={12} pb={12}>
+      <LayoutSection mt={1} pt={0}>
+        <Text variant="heading4">Transaction history</Text>
         <Transactions onlyMostRecent address={centAddress} />
       </LayoutSection>
-      <Resolutions dao={dao} /> */}
+      {/* <Resolutions dao={dao} /> */}
     </Stack>
   ) : null
 }
