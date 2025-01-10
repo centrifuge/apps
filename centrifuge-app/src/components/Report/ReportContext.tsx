@@ -92,7 +92,12 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
       setStartDate(startDate || new Date().toISOString().slice(0, 10))
       setLoanStatus(loan || 'ongoing')
     } else {
-      setStartDate(startDate || new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10))
+      setStartDate(
+        startDate ||
+          new Date(Date.UTC(new Date().getUTCFullYear() - 1, new Date().getUTCMonth(), new Date().getUTCDate()))
+            .toISOString()
+            .slice(0, 10)
+      )
       setLoanStatus(loan || 'all')
     }
   }, [reportParam, setLoanStatus, setStartDate, searchParams])
