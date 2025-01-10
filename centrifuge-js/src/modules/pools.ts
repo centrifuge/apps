@@ -362,6 +362,7 @@ export type Pool = {
   }
   fees: {
     totalPaid: CurrencyBalance
+    totalPending: CurrencyBalance
   }
   parameters: {
     minEpochTime: number
@@ -2001,7 +2002,9 @@ export function getPoolsModule(inst: Centrifuge) {
     )
 
     const $query = inst.getSubqueryObservable<{
-      pools: { nodes: { id: string; createdAt: string; sumPoolFeesPaidAmount: string }[] }
+      pools: {
+        nodes: { id: string; createdAt: string; sumPoolFeesPaidAmount: string; sumPoolFeesPendingAmount: string }[]
+      }
     }>(
       `query {
           pools {
@@ -2009,6 +2012,7 @@ export function getPoolsModule(inst: Centrifuge) {
               id
               createdAt
               sumPoolFeesPaidAmount
+              sumPoolFeesPendingAmount
             }
           }
         }`,
@@ -2239,6 +2243,7 @@ export function getPoolsModule(inst: Centrifuge) {
             createdAt: gqlPool?.createdAt ?? null,
             fees: {
               totalPaid: new CurrencyBalance(gqlPool?.sumPoolFeesPaidAmount ?? 0, pool.currency.decimals),
+              totalPending: new CurrencyBalance(gqlPool?.sumPoolFeesPendingAmount ?? 0, pool.currency.decimals),
             },
           }
           return poolWithGqlData
