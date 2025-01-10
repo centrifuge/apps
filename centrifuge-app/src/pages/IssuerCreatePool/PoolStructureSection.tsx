@@ -196,6 +196,17 @@ export const PoolStructureSection = () => {
             disabled
             sublabel="Fixed pool of assets where funds remain locked. There are no continuous inflows or outflows during the investment period, and the pool has a defined maturity date."
           />
+          <Box mt={2}>
+            <FieldWithErrorMessage
+              name="poolName"
+              as={TextInput}
+              label="Pool name*"
+              placeholder="Type here..."
+              maxLength={100}
+              validate={validate.poolName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('poolName', e.target.value)}
+            />
+          </Box>
         </Box>
         <Box>
           <Text variant="body2">Define tranche structure *</Text>

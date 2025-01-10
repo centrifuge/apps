@@ -39,35 +39,6 @@ export const PoolDetailsSection = () => {
       </Text>
       <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={2}>
         <Grid gap={2}>
-          <FieldWithErrorMessage
-            name="poolName"
-            as={TextInput}
-            label="Pool name*"
-            placeholder="Type here..."
-            maxLength={100}
-            validate={validate.poolName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('poolName', e.target.value)}
-          />
-          <Field name="poolIcon" validate={validate.poolIcon}>
-            {({ field, meta, form }: FieldProps) => (
-              <ImageUpload
-                name="poolIcon"
-                file={field.value}
-                onFileChange={async (file) => {
-                  form.setFieldTouched('poolIcon', true, false)
-                  form.setFieldValue('poolIcon', file)
-                }}
-                label="Pool icon*"
-                errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                accept="image/svg+xml"
-                placeholder="SVG (in square size)"
-                id="poolIcon"
-                height={144}
-              />
-            )}
-          </Field>
-        </Grid>
-        <Grid gap={2}>
           <Field name="investorType" validate={validate.investorType}>
             {({ field, meta, form }: FieldProps) => (
               <FieldWithErrorMessage
@@ -115,6 +86,24 @@ export const PoolDetailsSection = () => {
             )}
           </Field>
         </Grid>
+        <Field name="poolIcon" validate={validate.poolIcon}>
+          {({ field, meta, form }: FieldProps) => (
+            <ImageUpload
+              name="poolIcon"
+              file={field.value}
+              onFileChange={async (file) => {
+                form.setFieldTouched('poolIcon', true, false)
+                form.setFieldValue('poolIcon', file)
+              }}
+              label="Pool icon*"
+              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+              accept="image/svg+xml"
+              placeholder="SVG (in square size)"
+              id="poolIcon"
+              height={144}
+            />
+          )}
+        </Field>
       </StyledGrid>
 
       <Box mt={4} mb={3}>
