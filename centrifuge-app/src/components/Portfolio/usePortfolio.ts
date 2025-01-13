@@ -2,6 +2,7 @@ import {
   CurrencyBalance,
   CurrencyMetadata,
   InvestorTransactionType,
+  Perquintill,
   Price,
   Token,
   TokenBalance,
@@ -170,6 +171,7 @@ export function usePortfolio(substrateAddress?: string) {
           timestamp
           trancheId
           tranche {
+            yieldSinceInception
             pool {
               sumUnrealizedProfitAtMarketPrice
               sumRealizedProfitFifoByPeriod
@@ -195,6 +197,7 @@ export function usePortfolio(substrateAddress?: string) {
         tokenPrice: Price
         unrealizedProfit: CurrencyBalance
         realizedProfit: CurrencyBalance
+        yieldSinceInception: Perquintill | null
       }
     > = {}
 
@@ -213,6 +216,7 @@ export function usePortfolio(substrateAddress?: string) {
           tokenPrice,
           realizedProfit: new CurrencyBalance(position.tranche.pool.sumRealizedProfitFifoByPeriod, decimals),
           unrealizedProfit: new CurrencyBalance(position.tranche.pool.sumUnrealizedProfitAtMarketPrice, decimals),
+          yieldSinceInception: new Perquintill(position.tranche.yieldSinceInception),
         }
       }
     })
@@ -231,6 +235,7 @@ type PortfolioToken = {
   currency: Token['currency']
   realizedProfit: CurrencyBalance
   unrealizedProfit: CurrencyBalance
+  yieldSinceInception: Perquintill
 }
 
 export function usePortfolioTokens(address?: string) {
@@ -246,6 +251,7 @@ export function usePortfolioTokens(address?: string) {
           poolId: tranche.poolId,
           realizedProfit: portfolioData[tranche.id]?.realizedProfit,
           unrealizedProfit: portfolioData[tranche.id]?.unrealizedProfit,
+          yieldSinceInception: portfolioData[tranche.id]?.yieldSinceInception,
         }
         return tranches
       }, tranches),
@@ -257,6 +263,7 @@ export function usePortfolioTokens(address?: string) {
         currency: CurrencyMetadata
         realizedProfit: CurrencyBalance
         unrealizedProfit: CurrencyBalance
+        yieldSinceInception: Perquintill | null
       }
     >
   )
@@ -276,6 +283,7 @@ export function usePortfolioTokens(address?: string) {
         currency: trancheTokenPrices[trancheId].currency,
         realizedProfit: trancheTokenPrices[trancheId].realizedProfit,
         unrealizedProfit: trancheTokenPrices[trancheId].unrealizedProfit,
+        yieldSinceInception: trancheTokenPrices[trancheId].yieldSinceInception,
       }
     }, [] as PortfolioToken[])
   }

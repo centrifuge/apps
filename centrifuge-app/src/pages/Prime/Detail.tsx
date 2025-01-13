@@ -11,7 +11,7 @@ import { Transactions } from '../../../src/components/Portfolio/Transactions'
 import { Resolutions } from '../../../src/components/Resolutions'
 import { config } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
-import { formatBalance } from '../../../src/utils/formatting'
+import { formatBalance, formatPercentage } from '../../../src/utils/formatting'
 import { Holdings, useHoldings } from '../../components/Portfolio/Holdings'
 import { useDAOConfig } from '../../utils/useDAOConfig'
 
@@ -42,7 +42,7 @@ const PrimeDetail = () => {
     Dec(0)
   )
 
-  console.log(tokens[0].realizedProfit?.toDecimal())
+  const yieldSinceInception = tokens.find((token) => token.yieldSinceInception)?.yieldSinceInception
 
   return !isLoading && dao && centAddress ? (
     <Stack mx={1} my={1}>
@@ -53,16 +53,16 @@ const PrimeDetail = () => {
             label: 'Portfolio Value',
             value: formatBalance(currentPortfolioValue || 0, ''),
             heading: false,
-            children: (
+            children: yieldSinceInception ? (
               <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4}>
                 <Text variant="body4" color="statusOk" style={{ fontWeight: 500 }}>
-                  +25
+                  +{formatPercentage(yieldSinceInception)}
                 </Text>
                 <Text variant="body4" color="statusOk">
                   Since inception
                 </Text>
               </Box>
-            ),
+            ) : null,
           },
           {
             label: 'Realized P&L',
