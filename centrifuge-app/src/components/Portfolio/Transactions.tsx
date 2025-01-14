@@ -175,12 +175,12 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
         )}
       </Box>
       <Box overflow="auto" width="100%">
-        <DataTable data={expandTable ? investorTransactions : investorTransactions.splice(0, 3)} columns={columns} />
+        <DataTable data={expandTable ? investorTransactions : investorTransactions.slice(0, 3)} columns={columns} />
       </Box>
 
-      {investorTransactions.length > 3 && !expandTable && (
-        <Button onClick={() => setExpandTable(true)} variant="inverted" style={{ width: 100 }} small>
-          View all
+      {investorTransactions.length > 3 && (
+        <Button onClick={() => setExpandTable(!expandTable)} variant="inverted" style={{ width: 120 }} small>
+          {expandTable ? 'Show less' : 'View all'}
         </Button>
       )}
     </Stack>
