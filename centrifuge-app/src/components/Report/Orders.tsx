@@ -27,7 +27,7 @@ const Orders = ({ pool }: { pool: Pool }) => {
       align: 'left',
       header: 'Date & Time',
       sortable: true,
-      formatter: (v: any) => formatDateAndTime(v),
+      formatter: (v: any) => (v ? formatDateAndTime(v) : '-'),
       width: '200px',
     },
     {
