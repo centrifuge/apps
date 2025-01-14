@@ -40,7 +40,7 @@ const Orders = ({ pool }: { pool: Pool }) => {
       align: 'left',
       header: 'Nav per share',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, undefined, 5, 5) : '-'),
     },
     {
       align: 'left',

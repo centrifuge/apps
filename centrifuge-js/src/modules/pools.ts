@@ -3995,7 +3995,7 @@ export function getPoolsModule(inst: Centrifuge) {
               ? new CurrencyBalance(order.sumPoolFeesPaidAmount, poolCurrency.decimals)
               : null,
             tokenPrice: order.epochStates.nodes[index].tokenPrice
-              ? new CurrencyBalance(order.epochStates.nodes[index].tokenPrice, poolCurrency.decimals)
+              ? new Price(order.epochStates.nodes[index].tokenPrice)
               : null,
             sumOutstandingInvestOrders: order.epochStates.nodes[index].sumOutstandingInvestOrders
               ? new CurrencyBalance(order.epochStates.nodes[index].sumOutstandingInvestOrders, poolCurrency.decimals)
