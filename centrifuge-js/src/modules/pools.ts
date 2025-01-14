@@ -3987,7 +3987,8 @@ export function getPoolsModule(inst: Centrifuge) {
       combineLatestWith(getPoolCurrency([poolId])),
       map(([data, poolCurrency]) => {
         return data?.epoches?.nodes.map((order) => {
-          const index = order.epochStates.nodes.length - 1
+          const index = order.epochStates.nodes.length > 1 ? order.epochStates.nodes.length - 1 : 0
+          const snapshotIndex = order.poolSnapshots.nodes.length > 1 ? order.poolSnapshots.nodes.length - 1 : 0
           return {
             epochId: order.id,
             closedAt: order.closedAt,
@@ -4010,10 +4011,7 @@ export function getPoolsModule(inst: Centrifuge) {
               ? new CurrencyBalance(order.epochStates.nodes[index].sumFulfilledRedeemOrders, poolCurrency.decimals)
               : null,
             netAssetValue: order.poolSnapshots.nodes.length
-              ? new CurrencyBalance(
-                  order.poolSnapshots.nodes[order.poolSnapshots.nodes.length - 1].netAssetValue,
-                  poolCurrency.decimals
-                )
+              ? new CurrencyBalance(order.poolSnapshots.nodes[snapshotIndex].netAssetValue, poolCurrency.decimals)
               : null,
           }
         })
