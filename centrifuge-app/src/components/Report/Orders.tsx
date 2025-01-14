@@ -13,8 +13,16 @@ import { convertCSV } from './utils'
 const noop = (v: any) => v
 
 const Orders = ({ pool }: { pool: Pool }) => {
-  const { setCsvData } = useContext(ReportContext)
+  const { setCsvData, setStartDate } = useContext(ReportContext)
   const orders = usePoolOrdersByPoolId(pool.id)
+
+  useEffect(() => {
+    if (!orders?.length) return
+    const dateStrings = orders?.map((order) => order.closedAt).filter(Boolean)
+    const oldestTimestamp = Math.min(...dateStrings.map((date) => new Date(date).getTime()))
+    const oldestDate = new Date(oldestTimestamp).toISOString().split('T')[0]
+    setStartDate(oldestDate)
+  }, [])
 
   const columnsConfig = [
     {
@@ -34,13 +42,13 @@ const Orders = ({ pool }: { pool: Pool }) => {
       align: 'left',
       header: 'NAV',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Nav per share',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, undefined, 5, 5) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 6, 6) : '-'),
     },
     {
       align: 'left',
