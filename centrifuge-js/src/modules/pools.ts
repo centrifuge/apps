@@ -2444,11 +2444,6 @@ export function getPoolsModule(inst: Centrifuge) {
             tranche {
               poolId
               trancheId
-              pool {
-                currency{
-                  decimals
-                }
-              }
             }
             timestamp
             tokenSupply
@@ -2507,14 +2502,13 @@ export function getPoolsModule(inst: Centrifuge) {
       map(({ trancheSnapshots }) => {
         const trancheStates: Record<
           string,
-          { timestamp: string; tokenPrice: Price; yield30DaysAnnualized: Perquintill; tokenSupply: TokenBalance }[]
+          { timestamp: string; tokenPrice: Price; yield30DaysAnnualized: Perquintill }[]
         > = {}
         trancheSnapshots?.forEach((state) => {
           const tid = state.tranche.trancheId
           const entry = {
             timestamp: state.timestamp,
             tokenPrice: new Price(state.tokenPrice),
-            tokenSupply: new TokenBalance(state.tokenSupply, state.tranche.pool.currency.decimals),
             pool: state.tranche.poolId,
             yield30DaysAnnualized: state.yield30DaysAnnualized
               ? new Perquintill(state.yield30DaysAnnualized)

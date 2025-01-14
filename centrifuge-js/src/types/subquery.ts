@@ -38,11 +38,6 @@ export type SubqueryTrancheSnapshot = {
   tranche: {
     poolId: string
     trancheId: string
-    pool: {
-      currency: {
-        decimals: number
-      }
-    }
   }
   tokenSupply: string
   sumOutstandingInvestOrdersByPeriod: string
