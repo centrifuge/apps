@@ -85,8 +85,7 @@ const PrimeDetail = () => {
         <Holdings address={centAddress} showActions={false} />
       </LayoutSection>
       <LayoutSection mt={1} pt={0}>
-        <Text variant="heading4">Transaction history</Text>
-        <Transactions onlyMostRecent address={centAddress} />
+        <Transactions address={centAddress} title="Transaction history" />
       </LayoutSection>
       <LayoutSection mt={1} pt={0}>
         <Text variant="heading4">Resolutions</Text>
