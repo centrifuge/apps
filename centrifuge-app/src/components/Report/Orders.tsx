@@ -1,15 +1,19 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Text } from '@centrifuge/fabric'
-import { useMemo } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { TableDataRow } from '.'
 import { formatDateAndTime } from '../../../src/utils/date'
 import { formatBalance } from '../../../src/utils/formatting'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { usePoolOrdersByPoolId } from '../../../src/utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
+import { ReportContext } from './ReportContext'
+import { convertCSV } from './utils'
 
 const noop = (v: any) => v
 
 const Orders = ({ pool }: { pool: Pool }) => {
+  const { setCsvData } = useContext(ReportContext)
   const orders = usePoolOrdersByPoolId(pool.id)
 
   const columnsConfig = [
@@ -30,13 +34,13 @@ const Orders = ({ pool }: { pool: Pool }) => {
       align: 'left',
       header: 'NAV',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, undefined, pool.currency.decimals) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v) : '-'),
     },
     {
       align: 'left',
       header: 'Nav per share',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, undefined, pool.currency.decimals) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v) : '-'),
     },
     {
       align: 'left',
@@ -100,6 +104,31 @@ const Orders = ({ pool }: { pool: Pool }) => {
       }))
     }
   }, [orders])
+
+  const dataUrl = useMemo(() => {
+    if (!data.length) {
+      return
+    }
+
+    const formatted = data.map(({ value: values }) => convertCSV(values, columnsConfig))
+
+    return getCSVDownloadUrl(formatted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
+
+  useEffect(() => {
+    setCsvData(
+      dataUrl
+        ? {
+            dataUrl,
+            fileName: `${pool.id}-orders.csv`,
+          }
+        : undefined
+    )
+
+    return () => setCsvData(undefined)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataUrl, pool.id])
 
   return (
     <Box paddingX={2}>
