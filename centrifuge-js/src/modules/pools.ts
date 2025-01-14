@@ -25,6 +25,7 @@ import {
   SubqueryPoolAssetSnapshot,
   SubqueryPoolFeeSnapshot,
   SubqueryPoolFeeTransaction,
+  SubqueryPoolOrdersById,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
   SubqueryTrancheSnapshot,
@@ -2443,6 +2444,11 @@ export function getPoolsModule(inst: Centrifuge) {
             tranche {
               poolId
               trancheId
+              pool {
+                currency{
+                  decimals
+                }
+              }
             }
             timestamp
             tokenSupply
@@ -2501,13 +2507,14 @@ export function getPoolsModule(inst: Centrifuge) {
       map(({ trancheSnapshots }) => {
         const trancheStates: Record<
           string,
-          { timestamp: string; tokenPrice: Price; yield30DaysAnnualized: Perquintill }[]
+          { timestamp: string; tokenPrice: Price; yield30DaysAnnualized: Perquintill; tokenSupply: TokenBalance }[]
         > = {}
         trancheSnapshots?.forEach((state) => {
           const tid = state.tranche.trancheId
           const entry = {
             timestamp: state.timestamp,
             tokenPrice: new Price(state.tokenPrice),
+            tokenSupply: new TokenBalance(state.tokenSupply, state.tranche.pool.currency.decimals),
             pool: state.tranche.poolId,
             yield30DaysAnnualized: state.yield30DaysAnnualized
               ? new Perquintill(state.yield30DaysAnnualized)
@@ -3941,6 +3948,85 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getPoolOrdersById(args: [poolId: string]) {
+    const [poolId] = args
+
+    const $query = inst.getSubqueryObservable<{
+      epoches: { nodes: SubqueryPoolOrdersById[] }
+    }>(
+      `query($poolId: String!) {
+        epoches(
+          filter: {
+            poolId: { equalTo: $poolId }
+          }
+        ) {
+          nodes {
+            poolId
+            id
+            sumPoolFeesPaidAmount
+            closedAt
+            epochStates{
+              nodes{
+                tokenPrice
+                sumOutstandingInvestOrders
+                sumFulfilledInvestOrders
+                sumOutstandingRedeemOrders
+                sumFulfilledRedeemOrders
+              }
+            }
+            poolSnapshots{
+              nodes{
+                netAssetValue
+              }
+            }
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+      },
+      false
+    )
+
+    return $query.pipe(
+      combineLatestWith(getPoolCurrency([poolId])),
+      map(([data, poolCurrency]) => {
+        return data?.epoches?.nodes.map((order) => {
+          const index = order.epochStates.nodes.length - 1
+          return {
+            epochId: order.id,
+            closedAt: order.closedAt,
+            paidFees: order.sumPoolFeesPaidAmount
+              ? new CurrencyBalance(order.sumPoolFeesPaidAmount, poolCurrency.decimals)
+              : null,
+            tokenPrice: order.epochStates.nodes[index].tokenPrice
+              ? new CurrencyBalance(order.epochStates.nodes[index].tokenPrice, poolCurrency.decimals)
+              : null,
+            sumOutstandingInvestOrders: order.epochStates.nodes[index].sumOutstandingInvestOrders
+              ? new CurrencyBalance(order.epochStates.nodes[index].sumOutstandingInvestOrders, poolCurrency.decimals)
+              : null,
+            sumFulfilledInvestOrders: order.epochStates.nodes[index].sumFulfilledInvestOrders
+              ? new CurrencyBalance(order.epochStates.nodes[index].sumFulfilledInvestOrders, poolCurrency.decimals)
+              : null,
+            sumOutstandingRedeemOrders: order.epochStates.nodes[index].sumOutstandingRedeemOrders
+              ? new CurrencyBalance(order.epochStates.nodes[index].sumOutstandingRedeemOrders, poolCurrency.decimals)
+              : null,
+            sumFulfilledRedeemOrders: order.epochStates.nodes[index].sumFulfilledRedeemOrders
+              ? new CurrencyBalance(order.epochStates.nodes[index].sumFulfilledRedeemOrders, poolCurrency.decimals)
+              : null,
+            netAssetValue: order.poolSnapshots.nodes.length
+              ? new CurrencyBalance(
+                  order.poolSnapshots.nodes[order.poolSnapshots.nodes.length - 1].netAssetValue,
+                  poolCurrency.decimals
+                )
+              : null,
+          }
+        })
+      })
+    )
+  }
+
   function getLoans(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
@@ -4631,6 +4717,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getBalances,
     getOrder,
     getPoolOrders,
+    getPoolOrdersById,
     getPoolAccountOrders,
     getPortfolio,
     getLoans,

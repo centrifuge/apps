@@ -60,6 +60,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
     { label: 'Investor list', value: 'investor-list' },
+    { label: 'Orders', value: 'orders' },
   ]
 
   return (
@@ -228,8 +229,12 @@ export function DataFilter({ poolId }: ReportFilterProps) {
           />
         )}
 
-        <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
-        <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
+        {report !== 'orders' && (
+          <>
+            <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
+            <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
+          </>
+        )}
       </Grid>
       <Box display="flex" alignItems="center" justifyContent="space-between" margin={2}>
         <Box display="flex" alignItems="center">

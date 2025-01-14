@@ -17,6 +17,7 @@ export type Report =
   | 'balance-sheet'
   | 'cash-flow-statement'
   | 'profit-and-loss'
+  | 'orders'
 
 export type ReportContextType = {
   csvData?: CsvDataProps

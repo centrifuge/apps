@@ -38,6 +38,11 @@ export type SubqueryTrancheSnapshot = {
   tranche: {
     poolId: string
     trancheId: string
+    pool: {
+      currency: {
+        decimals: number
+      }
+    }
   }
   tokenSupply: string
   sumOutstandingInvestOrdersByPeriod: string
@@ -190,6 +195,27 @@ export type SubqueryPoolAssetSnapshot = {
   totalRepaidPrincipal: string | undefined
   totalRepaidInterest: string | undefined
   totalRepaidUnscheduled: string | undefined
+}
+
+export type SubqueryPoolOrdersById = {
+  __typename?: 'Epoches'
+  id: string
+  sumPoolFeesPaidAmount: string
+  closedAt: string
+  epochStates: {
+    nodes: {
+      tokenPrice: string
+      sumOutstandingInvestOrders: string
+      sumFulfilledInvestOrders: string
+      sumOutstandingRedeemOrders: string
+      sumFulfilledRedeemOrders: string
+    }[]
+  }
+  poolSnapshots: {
+    nodes: {
+      netAssetValue: string
+    }[]
+  }
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
