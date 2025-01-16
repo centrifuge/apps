@@ -28,8 +28,8 @@ const Orders = ({ pool }: { pool: Pool }) => {
     {
       align: 'left',
       header: 'Epoch',
-      sortable: true,
       formatter: noop,
+      sortable: true,
     },
     {
       align: 'left',
@@ -95,21 +95,24 @@ const Orders = ({ pool }: { pool: Pool }) => {
   const data = useMemo(() => {
     if (!orders?.length) return []
     else {
-      return orders.map((order) => ({
-        name: '',
-        value: [
-          order.epochId,
-          order.closedAt,
-          order.netAssetValue,
-          order.tokenPrice,
-          order.sumOutstandingInvestOrders,
-          order.sumFulfilledInvestOrders,
-          order.sumOutstandingRedeemOrders,
-          order.sumFulfilledRedeemOrders,
-          order.paidFees,
-        ],
-        heading: false,
-      }))
+      return orders.map((order) => {
+        const epoch = order.epochId.split('-')
+        return {
+          name: '',
+          value: [
+            epoch[1],
+            order.closedAt,
+            order.netAssetValue,
+            order.tokenPrice,
+            order.sumOutstandingInvestOrders,
+            order.sumFulfilledInvestOrders,
+            order.sumOutstandingRedeemOrders,
+            order.sumFulfilledRedeemOrders,
+            order.paidFees,
+          ],
+          heading: false,
+        }
+      })
     }
   }, [orders])
 
@@ -140,7 +143,7 @@ const Orders = ({ pool }: { pool: Pool }) => {
 
   return (
     <Box paddingX={2}>
-      <DataTable data={data} columns={columns} scrollable />
+      <DataTable data={data} columns={columns} scrollable defaultSortKey="value[1]" defaultSortOrder="desc" />
     </Box>
   )
 }
