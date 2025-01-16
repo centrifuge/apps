@@ -66,7 +66,7 @@ export const PoolRatingsSection = () => {
                           form.setFieldValue(`poolRatings.${index}.reportFile`, file)
                         }}
                         accept="application/pdf"
-                        label="Executive summary PDF"
+                        label="Rating report PDF"
                         placeholder="Choose file"
                         small
                         errorMessage={meta.touched && meta.error ? meta.error : undefined}
