@@ -236,16 +236,22 @@ export function DataFilter({ poolId }: ReportFilterProps) {
           </>
         )}
       </Grid>
-      <Box display="flex" alignItems="center" justifyContent="space-between" margin={2}>
-        <Box display="flex" alignItems="center">
-          <Text variant="body3" style={{ marginRight: 4, fontWeight: 600 }}>
-            {formatDate(startDate)}
-          </Text>
-          <Text variant="body3">-</Text>
-          <Text variant="body3" style={{ marginLeft: 4, fontWeight: 600 }}>
-            {formatDate(endDate)}
-          </Text>
-        </Box>
+      <Grid
+        gridTemplateColumns={[report === 'orders' ? '130px' : '1fr 130px']}
+        margin={2}
+        justifyContent={report === 'orders' ? 'end' : 'space-between'}
+      >
+        {report !== 'orders' && (
+          <Box display="flex" alignItems="center" justifyContent="flex-start">
+            <Text variant="body3" style={{ marginRight: 4, fontWeight: 600 }}>
+              {formatDate(startDate)}
+            </Text>
+            <Text variant="body3">-</Text>
+            <Text variant="body3" style={{ marginLeft: 4, fontWeight: 600 }}>
+              {formatDate(endDate)}
+            </Text>
+          </Box>
+        )}
         <AnchorButton
           disabled={!csvData}
           download={csvData?.fileName}
@@ -256,7 +262,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
         >
           Download
         </AnchorButton>
-      </Box>
+      </Grid>
     </Stack>
   )
 }
