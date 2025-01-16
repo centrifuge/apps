@@ -11,6 +11,8 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
   const isPending =
     !!state.pendingTransaction && ['creating', 'unconfirmed', 'pending'].includes(state.pendingTransaction?.status)
   const isCollecting = state.pendingAction === 'collect' && isPending
+  const isPreAction = state.pendingAction === 'preAction' && isPending
+
   return (
     <Stack gap={2}>
       {state.collectType === 'invest' ? (
@@ -52,24 +54,30 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
       )}
       {state.needsToCollectBeforeOrder && <InlineFeedback>Claim tokens before placing another order</InlineFeedback>}
       <ButtonGroup>
-        <Button
-          onClick={actions.collect}
-          loading={isCollecting}
-          aria-label={`Claim ${formatBalanceAbbreviated(
-            state.collectAmount,
-            ['invest', 'cancelRedeem'].includes(state.collectType)
-              ? state.trancheCurrency?.symbol
-              : state.poolCurrency?.symbol
-          )}`}
-        >
-          Claim{' '}
-          {formatBalanceAbbreviated(
-            state.collectAmount,
-            ['invest', 'cancelRedeem'].includes(state.collectType)
-              ? state.trancheCurrency?.symbol
-              : state.poolCurrency?.symbol
-          )}
-        </Button>
+        {state.needsPreAction('collect') ? (
+          <Button onClick={() => actions.preAction('collect')} loading={isPreAction}>
+            {state.needsPreAction('collect')}
+          </Button>
+        ) : (
+          <Button
+            onClick={actions.collect}
+            loading={isCollecting}
+            aria-label={`Claim ${formatBalanceAbbreviated(
+              state.collectAmount,
+              ['invest', 'cancelRedeem'].includes(state.collectType)
+                ? state.trancheCurrency?.symbol
+                : state.poolCurrency?.symbol
+            )}`}
+          >
+            Claim{' '}
+            {formatBalanceAbbreviated(
+              state.collectAmount,
+              ['invest', 'cancelRedeem'].includes(state.collectType)
+                ? state.trancheCurrency?.symbol
+                : state.poolCurrency?.symbol
+            )}
+          </Button>
+        )}
         {!state.needsToCollectBeforeOrder && (
           <Button variant="secondary" onClick={onDismiss}>
             {type === 'invest' ? 'Invest more' : 'Redeem'}
