@@ -47,7 +47,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
       <Content>
         <ContentHeader
           title="Onboarding complete!"
-          body={<>You have succesfully completed the onboarding for {poolName}</>}
+          body={<>You have successfully completed the onboarding for {poolName}</>}
         />
         <Shelf gap="2">
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">

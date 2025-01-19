@@ -17,5 +17,5 @@ export const reportHttpError = (error: unknown) => {
     return error
   }
   console.log(`Unhandled error: ${JSON.stringify(error)}`)
-  return new HttpError(500, 'An unexpected error occured')
+  return new HttpError(500, 'An unexpected error occurred')
 }

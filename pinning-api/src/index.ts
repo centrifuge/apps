@@ -53,6 +53,6 @@ exports.pinningApi = async (req: Request, res: Response) => {
     return res.status(400).send('Bad request')
   } catch (error) {
     console.log(error)
-    return res.status(500).send('An error occured')
+    return res.status(500).send('An error occurred')
   }
 }

@@ -67,7 +67,7 @@ export default function UpdateInvestorStatus() {
             </>
           ) : (
             <>
-              <ContentHeader title="An error occured" body="Please contact info@centrifuge.io for more information." />
+              <ContentHeader title="An error occurred" body="Please contact info@centrifuge.io for more information." />
             </>
           )}
         </Content>

@@ -136,7 +136,7 @@ export const tooltipText = {
   },
   probabilityOfDefault: {
     label: 'Prob of default',
-    body: 'The probablility of default is the likelyhood of a default occuring for an asset in this risk group.',
+    body: 'The probablility of default is the likelihood of a default occuring for an asset in this risk group.',
   },
   lossGivenDefault: {
     label: 'Loss given default',

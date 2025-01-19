@@ -98,7 +98,7 @@ async function getTinlakeRewards(): Promise<RewardsData | null> {
     const { data } = await response.json()
     rewardDayTotals = data.rewardDayTotals
   } else {
-    throw new Error('Error occured while fetching total rewards')
+    throw new Error('Error occurred while fetching total rewards')
   }
 
   const data = rewardDayTotals[0]

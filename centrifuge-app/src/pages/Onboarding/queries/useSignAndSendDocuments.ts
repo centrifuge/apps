@@ -49,7 +49,7 @@ export const useSignAndSendDocuments = () => {
         id: txIdSendDocs,
         title: `Send documents to issuers`,
         status: 'failed',
-        args: ['An error occured uploading documents'],
+        args: ['An error occurred uploading documents'],
       })
       throw response.statusText
     },

@@ -256,7 +256,7 @@ export function EpochAndTranches() {
           }
           subtitle={`Changes require ${
             delay < 0.5 ? `${Math.ceil(delay / 24)} hour(s)` : `${Math.round(delay)} day(s)`
-          } and no oustanding redeem orders before they can be enabled`}
+          } and no outstanding redeem orders before they can be enabled`}
           headerRight={
             isEditing ? (
               <ButtonGroup variant="small">
