@@ -22,7 +22,7 @@ const Orders = ({ pool }: { pool: Pool }) => {
     const oldestTimestamp = Math.min(...dateStrings.map((date) => new Date(date).getTime()))
     const oldestDate = new Date(oldestTimestamp).toISOString().split('T')[0]
     setStartDate(oldestDate)
-  }, [])
+  }, [setStartDate, orders])
 
   const columnsConfig = [
     {
