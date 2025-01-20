@@ -180,7 +180,7 @@ export const PoolStructureSection = () => {
       </Text>
       <StyledGrid gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={3} mt={2}>
         <Box>
-          <Text variant="body2">Pool type *</Text>
+          <Text variant="body2">Pool structure *</Text>
           <CheckboxOption
             height={113}
             name="poolStructure"
