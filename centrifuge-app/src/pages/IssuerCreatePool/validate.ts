@@ -116,10 +116,10 @@ export const validateValues = (values: CreatePoolValues) => {
 
   if (values.issuerCategories.length > 1) {
     values.issuerCategories.forEach((category, i) => {
-      if (category.type == '') {
+      if (category.type === '') {
         errors = setIn(errors, `issuerCategories.${i}.type`, 'Field is required')
       }
-      if (category.value == '') {
+      if (category.value === '') {
         errors = setIn(errors, `issuerCategories.${i}.value`, 'Field is required')
       }
     })

@@ -15,7 +15,7 @@ import { Box, Button, Dialog, Step, Stepper, Text } from '@centrifuge/fabric'
 import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import { Form, FormikProvider, useFormik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { combineLatest, firstValueFrom, switchMap, tap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
@@ -128,7 +128,7 @@ const IssuerCreatePoolPage = () => {
       // It can take a second for the new data to come in after creating the pool
       navigate(`/issuer/${poolId}`)
     }
-  }, [poolId, pools])
+  }, [poolId, pools, navigate])
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -427,32 +427,35 @@ const IssuerCreatePoolPage = () => {
 
   const { values, errors } = form
 
-  const checkStepCompletion = (stepNumber: number) => {
-    const fields = stepFields[stepNumber]
+  const checkStepCompletion = useCallback(
+    (stepNumber: number) => {
+      const fields = stepFields[stepNumber]
 
-    let isValid = fields.every((field) => {
-      const value = values[field as keyof typeof values]
-      const error = errors[field as keyof typeof errors]
-      return value !== null && value !== '' && !error
-    })
+      let isValid = fields.every((field) => {
+        const value = values[field as keyof typeof values]
+        const error = errors[field as keyof typeof errors]
+        return value !== null && value !== '' && !error
+      })
 
-    if (values.issuerCategories.length > 1 && errors.issuerCategories) {
-      isValid = false
-    }
+      if (values.issuerCategories.length > 1 && errors.issuerCategories) {
+        isValid = false
+      }
 
-    if (values.poolRatings.length > 1 && errors.poolRatings) {
-      isValid = false
-    }
+      if (values.poolRatings.length > 1 && errors.poolRatings) {
+        isValid = false
+      }
 
-    return isValid
-  }
+      return isValid
+    },
+    [values, errors]
+  )
 
   useEffect(() => {
     setStepCompleted((prev) => ({
       ...prev,
       [step]: checkStepCompletion(step),
     }))
-  }, [values, errors, step, stepFields])
+  }, [values, errors, step, checkStepCompletion])
 
   useEffect(() => {
     if (containerRef.current) {

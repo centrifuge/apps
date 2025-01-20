@@ -74,7 +74,7 @@ export const PoolSetupSection = () => {
 
   useEffect(() => {
     form.setFieldValue('adminMultisig.signers[0]', substrate.selectedAddress)
-  }, [substrate])
+  }, [substrate, form])
 
   return (
     <Box>
@@ -297,7 +297,7 @@ export const PoolSetupSection = () => {
         {({ push, remove }) => (
           <>
             {values.poolFees.map((_, index) => {
-              if (index === 0) return
+              if (index === 0) return null
               return (
                 <Box mt={4} mb={3} key={index}>
                   <StyledGrid mt={3} gap={1}>
