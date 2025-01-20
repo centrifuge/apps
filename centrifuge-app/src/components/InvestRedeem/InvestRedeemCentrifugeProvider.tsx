@@ -60,6 +60,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     approveTrancheToken: undefined,
     cancelInvest,
     cancelRedeem,
+    preAction: undefined,
   }
   const pendingTransaction = pendingAction && txActions[pendingAction]?.lastCreatedTransaction
 
@@ -140,6 +141,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: () => false,
     needsTrancheTokenApproval: () => false,
+    needsPreAction: () => '',
     canChangeOrder: true,
     canCancelOrder: true,
     pendingAction,
@@ -156,6 +158,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
     cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
     selectPoolCurrency() {},
+    preAction() {},
   }
 
   const hooks = {
