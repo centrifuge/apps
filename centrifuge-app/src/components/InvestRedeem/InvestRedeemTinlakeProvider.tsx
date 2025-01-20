@@ -63,6 +63,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     approveTrancheToken,
     cancelInvest,
     cancelRedeem,
+    preAction: undefined,
   }
   const pendingTransaction = pendingAction && txActions[pendingAction]?.lastCreatedTransaction
 
@@ -133,6 +134,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     needsToCollectBeforeOrder: !collectAmount.isZero(),
     needsPoolCurrencyApproval: (amount) => Dec(amount).gt(trancheInvestment?.poolCurrencyAllowance ?? 0),
     needsTrancheTokenApproval: (amount) => Dec(amount).gt(trancheInvestment?.tokenAllowance ?? 0),
+    needsPreAction: () => '',
     canChangeOrder: true,
     canCancelOrder: true,
     pendingAction,
@@ -149,6 +151,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     cancelInvest: doAction('cancelInvest', () => [seniority, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [seniority, new BN(0)]),
     selectPoolCurrency() {},
+    preAction() {},
   }
 
   const hooks = {

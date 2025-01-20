@@ -81,6 +81,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const collectInvest = useEvmTransaction('Claim', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Withdraw', (cent) => cent.liquidityPools.withdraw)
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
+  const enableRouter = useEvmTransaction('Approve', (cent) => cent.liquidityPools.enableCentrifugeRouter)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelRedeemOrder)
   const collectCancelInvest = useEvmTransaction('Claim', (cent) => cent.liquidityPools.claimCancelDeposit)
@@ -104,6 +105,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     approveTrancheToken: approve,
     cancelInvest,
     cancelRedeem,
+    preAction: enableRouter,
   }
   const pendingAction = ['investWithPermit', 'decreaseInvest'].includes(pendingActionState!)
     ? 'invest'
@@ -205,6 +207,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       return lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false
     },
     needsTrancheTokenApproval: () => false,
+    needsPreAction: (action) => (lpInvest && !lpInvest.isRouterEnabled && action !== 'invest' ? 'Approve' : ''),
     canChangeOrder,
     canCancelOrder: !(lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest),
     pendingAction,
@@ -256,6 +259,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       chainId,
     ]),
     approveTrancheToken: () => {},
+    preAction: doAction('preAction', () => [lpInvest?.lpAddress, chainId]),
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId], undefined, { poolId, trancheId }),
     cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, chainId], undefined, { poolId, trancheId }),
     selectPoolCurrency(symbol) {
