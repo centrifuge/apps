@@ -3,6 +3,7 @@ import { useGetExplorerUrl } from '@centrifuge/centrifuge-react'
 import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../../../src/utils/formatting'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
 import { useAssetTransactions } from '../../utils/usePools'
@@ -129,40 +130,35 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       })
       .filter((row) => (!txType || txType === 'all' ? true : row.epochId === txType)) || []
 
-  // React.useEffect(() => {
-  //   if (!data.length) {
-  //     return
-  //   }
+  React.useEffect(() => {
+    if (transactions) {
+      const csvData = transactions.map((transaction) => {
+        const { amount } = getLabelAndAmount(transaction)
+        return {
+          'Transaction Date': `"${formatDate(transaction.timestamp, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            timeZoneName: 'short',
+          })}"`,
+          Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
+          Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
+          epoch: transaction.epochId,
+        }
+      })
 
-  //   const formatted = data.map(({ value: values }) =>
-  //     Object.fromEntries(columns.map((col, index) => [col.header, `"${values[index]}"`]))
-  //   )
-  //   const dataUrl = getCSVDownloadUrl(formatted)
-  //   if (!dataUrl) {
-  //     throw new Error('Failed to generate CSV')
-  //   }
-
-  //   setCsvData({
-  //     dataUrl,
-  //     fileName: `${pool.id}-asset-transactions-${formatDate(startDate, {
-  //       weekday: 'short',
-  //       month: 'short',
-  //       day: '2-digit',
-  //       year: 'numeric',
-  //     }).replaceAll(',', '')}-${formatDate(endDate, {
-  //       weekday: 'short',
-  //       month: 'short',
-  //       day: '2-digit',
-  //       year: 'numeric',
-  //     }).replaceAll(',', '')}.csv`,
-  //   })
-
-  //   return () => {
-  //     setCsvData(undefined)
-  //     URL.revokeObjectURL(dataUrl)
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [data])
+      const dataUrl = getCSVDownloadUrl(csvData)
+      if (dataUrl) {
+        setCsvData({
+          dataUrl,
+          fileName: 'asset-transactions.csv',
+        })
+      }
+    }
+  }, [transactions, setCsvData])
 
   if (!transactions) {
     return <Spinner mt={2} />
