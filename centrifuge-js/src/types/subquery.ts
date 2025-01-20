@@ -192,6 +192,27 @@ export type SubqueryPoolAssetSnapshot = {
   totalRepaidUnscheduled: string | undefined
 }
 
+export type SubqueryPoolOrdersById = {
+  __typename?: 'Epoches'
+  id: string
+  sumPoolFeesPaidAmount: string
+  closedAt: string
+  epochStates: {
+    nodes: {
+      tokenPrice: string
+      sumOutstandingInvestOrders: string
+      sumFulfilledInvestOrders: string
+      sumOutstandingRedeemOrders: string
+      sumFulfilledRedeemOrders: string
+    }[]
+  }
+  poolSnapshots: {
+    nodes: {
+      netAssetValue: string
+    }[]
+  }
+}
+
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
 
 export type SubqueryPoolFeeTransaction = {

@@ -265,6 +265,11 @@ export function usePoolOrders(poolId: string) {
   return result
 }
 
+export function usePoolOrdersByPoolId(poolId: string) {
+  const [result] = useCentrifugeQuery(['poolOrdersByPoolId', poolId], (cent) => cent.pools.getPoolOrdersById([poolId]))
+  return result
+}
+
 export function useOrder(poolId: string, trancheId: string, address?: string) {
   const [result] = useCentrifugeQuery(
     ['order', trancheId, address],
