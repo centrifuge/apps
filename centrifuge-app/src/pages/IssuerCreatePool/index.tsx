@@ -15,7 +15,7 @@ import { Box, Button, Dialog, Step, Stepper, Text } from '@centrifuge/fabric'
 import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import { Form, FormikProvider, useFormik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { combineLatest, firstValueFrom, switchMap, tap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
@@ -76,6 +76,7 @@ const txMessage = {
 const IssuerCreatePoolPage = () => {
   const theme = useTheme()
   const formRef = useRef<HTMLFormElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const isSmall = useIsAboveBreakpoint('S')
   const address = useAddress('substrate')
   const navigate = useNavigate()
@@ -127,7 +128,7 @@ const IssuerCreatePoolPage = () => {
       // It can take a second for the new data to come in after creating the pool
       navigate(`/issuer/${poolId}`)
     }
-  }, [poolId, pools])
+  }, [poolId, pools, navigate])
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
     `${txMessage[createType]} 1/2`,
@@ -426,33 +427,44 @@ const IssuerCreatePoolPage = () => {
 
   const { values, errors } = form
 
-  const checkStepCompletion = (stepNumber: number) => {
-    const fields = stepFields[stepNumber]
-    return fields.every(
-      (field) =>
-        values[field as keyof typeof values] !== null &&
-        values[field as keyof typeof values] !== '' &&
-        !errors[field as keyof typeof errors]
-    )
-  }
+  const checkStepCompletion = useCallback(
+    (stepNumber: number) => {
+      const fields = stepFields[stepNumber]
 
-  const handleNextStep = () => {
-    if (step === 3) {
-      form.handleSubmit()
-    } else {
-      setStep((prevStep) => prevStep + 1)
-    }
-  }
+      let isValid = fields.every((field) => {
+        const value = values[field as keyof typeof values]
+        const error = errors[field as keyof typeof errors]
+        return value !== null && value !== '' && !error
+      })
+
+      if (values.issuerCategories.length > 1 && errors.issuerCategories) {
+        isValid = false
+      }
+
+      if (values.poolRatings.length > 1 && errors.poolRatings) {
+        isValid = false
+      }
+
+      return isValid
+    },
+    [values, errors]
+  )
 
   useEffect(() => {
     setStepCompleted((prev) => ({
       ...prev,
       [step]: checkStepCompletion(step),
     }))
-  }, [values, errors, step, stepFields])
+  }, [values, errors, step, checkStepCompletion])
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [step, containerRef])
 
   return (
-    <>
+    <div ref={containerRef} style={{ maxHeight: '100vh', overflowY: 'auto' }}>
       <PreimageHashDialog
         preimageHash={preimageHash}
         open={isPreimageDialogOpen}
@@ -508,15 +520,21 @@ const IssuerCreatePoolPage = () => {
                   Previous
                 </Button>
               )}
-              <Button
-                style={{ width: 163 }}
-                small
-                onClick={handleNextStep}
-                loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
-                disabled={step === 3 ? !(Object.keys(errors).length === 0) : false}
-              >
-                {step === 3 ? 'Create pool' : 'Next'}
-              </Button>
+              {step === 3 ? (
+                <Button
+                  style={{ width: 163 }}
+                  small
+                  onClick={() => form.handleSubmit()}
+                  loading={createProxiesIsPending || transactionIsPending || form.isSubmitting}
+                  disabled={Object.keys(errors).length > 0}
+                >
+                  Create pool
+                </Button>
+              ) : (
+                <Button style={{ width: 163 }} small onClick={() => setStep((prevStep) => prevStep + 1)}>
+                  Next
+                </Button>
+              )}
             </Box>
           </StyledBox>
         </Form>
@@ -540,7 +558,7 @@ const IssuerCreatePoolPage = () => {
           </Box>
         </Dialog>
       )}
-    </>
+    </div>
   )
 }
 

@@ -1,6 +1,7 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { TextInput } from '@centrifuge/fabric'
+import { isAddress } from '@polkadot/util-crypto'
 import { useField } from 'formik'
 import React from 'react'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
@@ -43,6 +44,7 @@ export const FormAddressInput = ({ name, chainId, placeholder }: FormAddressInpu
       onBlur={handleBlur}
       errorMessage={meta.touched && meta.error ? meta.error : undefined}
       as={TextInput}
+      value={isEvmAddress(field.value) || isAddress(field.value) ? utils.formatAddress(field.value) : field.value}
     />
   )
 }
