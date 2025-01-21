@@ -52,7 +52,7 @@ export function Menu() {
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
   const { showSwaps } = useDebugFlags()
-  const transactions = useTransactionsByAddress(address)
+  const { data: transactions } = useTransactionsByAddress(address)
 
   return (
     <Shelf

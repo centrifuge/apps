@@ -109,7 +109,7 @@ export function useAggregatedPoolFeeStatesByGroup(
 }
 
 export function useTransactionsByAddress(address?: string) {
-  const [result] = useCentrifugeQuery(
+  const [result, isLoading] = useCentrifugeQuery(
     ['txByAddress', address],
     (cent) => cent.pools.getTransactionsByAddress([address!]),
     {
@@ -117,7 +117,7 @@ export function useTransactionsByAddress(address?: string) {
     }
   )
 
-  return result
+  return { data: result, isLoading }
 }
 
 export function useInvestorList(poolId: string, trancheId?: string) {

@@ -6,7 +6,7 @@ import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { useTransactionsByAddress } from '../../utils/usePools'
-import { LoadBoundary } from '../LoadBoundary'
+import { Spinner } from '../Spinner'
 import { useHoldings } from './Holdings'
 import { PortfolioValue } from './PortfolioValue'
 
@@ -19,18 +19,10 @@ const rangeFilters = [
 
 type RangeValue = (typeof rangeFilters)[number]['value']
 
-export function CardPortfolioValue({
-  address,
-  chainId,
-  showGraph = true,
-}: {
-  address?: string
-  chainId?: number
-  showGraph?: boolean
-}) {
+export function CardPortfolioValue({ address, chainId }: { address?: string; chainId?: number }) {
   const tokens = useHoldings(address, chainId)
   const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
-  const transactions = useTransactionsByAddress(showGraph ? centAddress : undefined)
+  const { data: transactions, isLoading } = useTransactionsByAddress(centAddress)
 
   const { colors } = useTheme()
 
@@ -57,21 +49,19 @@ export function CardPortfolioValue({
             </Box>
             <Select options={rangeFilters} onChange={(e) => setRange(e.target.value as RangeValue)} hideBorder />
           </Box>
-          {showGraph && centAddress && transactions?.investorTransactions.length ? (
-            <>
-              <Box width="100%" height="300px">
-                <LoadBoundary>
-                  {transactions?.investorTransactions.length ? (
-                    <PortfolioValue rangeValue={range} address={centAddress} />
-                  ) : (
-                    <Box width="100%" height="100%" display="flex" alignItems="center" justifyContent="center">
-                      <Text>No data available</Text>
-                    </Box>
-                  )}
-                </LoadBoundary>
+          <Box width="100%" height={300} minHeight={300} position="relative">
+            {isLoading && centAddress ? (
+              <Box width="100%" height={300} display="flex" alignItems="center" justifyContent="center">
+                <Spinner />
               </Box>
-            </>
-          ) : null}
+            ) : transactions?.investorTransactions.length ? (
+              <PortfolioValue rangeValue={range} address={centAddress} />
+            ) : (
+              <Box width="100%" height="100%" display="flex" alignItems="center" justifyContent="center">
+                <Text>No data available</Text>
+              </Box>
+            )}
+          </Box>
         </Box>
       </Box>
     </Box>

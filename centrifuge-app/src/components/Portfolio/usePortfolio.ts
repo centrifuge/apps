@@ -27,7 +27,7 @@ type InvestorTransaction = {
 }
 
 export function useDailyPortfolioValue(address: string, rangeValue?: number) {
-  const transactions = useTransactionsByAddress(address)
+  const { data: transactions } = useTransactionsByAddress(address)
 
   const transactionsByTrancheId = transactions?.investorTransactions.reduce(
     (tranches, tranche) => ({
