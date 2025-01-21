@@ -28,7 +28,7 @@ function Prime() {
             borderRadius={28}
             height={40}
             width={40}
-            border={`6px solid ${theme.colors.backgroundLight}`}
+            border={`6px solid ${theme.colors.borderTertiary}`}
             display="flex"
             justifyContent="center"
             alignItems="center"

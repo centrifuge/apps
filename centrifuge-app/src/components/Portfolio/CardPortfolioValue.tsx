@@ -15,7 +15,9 @@ const rangeFilters = [
   { value: '90d', label: '90 days' },
   { value: 'ytd', label: 'Year to date' },
   { value: 'all', label: 'All' },
-]
+] as const
+
+type RangeValue = (typeof rangeFilters)[number]['value']
 
 export function CardPortfolioValue({
   address,
@@ -32,7 +34,7 @@ export function CardPortfolioValue({
 
   const { colors } = useTheme()
 
-  const [range, setRange] = React.useState('ytd')
+  const [range, setRange] = React.useState<RangeValue>('ytd')
 
   const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
 
@@ -53,7 +55,7 @@ export function CardPortfolioValue({
                 {formatBalance(currentPortfolioValue || 0)}
               </TextWithPlaceholder>
             </Box>
-            <Select options={rangeFilters} onChange={(e) => setRange(e.target.value)} hideBorder />
+            <Select options={rangeFilters} onChange={(e) => setRange(e.target.value as RangeValue)} hideBorder />
           </Box>
           {showGraph && centAddress && transactions?.investorTransactions.length ? (
             <>

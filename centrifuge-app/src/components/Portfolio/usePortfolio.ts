@@ -143,6 +143,9 @@ export function usePortfolio(substrateAddress?: string) {
           sumClaimedTrancheTokens
           trancheId
           poolId
+          account {
+            chainId
+          }
           tranche {
             tokenPrice
           }
@@ -198,10 +201,14 @@ export function usePortfolio(substrateAddress?: string) {
         unrealizedProfit: CurrencyBalance
         realizedProfit: CurrencyBalance
         yieldSinceInception: Perquintill | null
+        chainId: number
       }
     > = {}
 
     subData?.account?.investorPositions.nodes.forEach((position: any) => {
+      const chainId = subData.account.trancheBalances.nodes.find(
+        (tranche: { trancheId: string }) => tranche.trancheId === position.trancheId
+      ).account.chainId
       const pool = pools?.find((p) => p.id === position.poolId)
       const trancheId = position.trancheId.split('-')[1]
       const decimals = pool?.currency.decimals ?? 18
@@ -217,6 +224,7 @@ export function usePortfolio(substrateAddress?: string) {
           realizedProfit: new CurrencyBalance(position.tranche.pool.sumRealizedProfitFifoByPeriod, decimals),
           unrealizedProfit: new CurrencyBalance(position.tranche.pool.sumUnrealizedProfitAtMarketPrice, decimals),
           yieldSinceInception: new Perquintill(position.tranche.yieldSinceInception),
+          chainId,
         }
       }
     })
@@ -236,6 +244,7 @@ type PortfolioToken = {
   realizedProfit: CurrencyBalance
   unrealizedProfit: CurrencyBalance
   yieldSinceInception: Perquintill
+  chainId: number
 }
 
 export function usePortfolioTokens(address?: string) {
@@ -284,6 +293,7 @@ export function usePortfolioTokens(address?: string) {
         realizedProfit: trancheTokenPrices[trancheId].realizedProfit,
         unrealizedProfit: trancheTokenPrices[trancheId].unrealizedProfit,
         yieldSinceInception: trancheTokenPrices[trancheId].yieldSinceInception,
+        chainId: portfolioData[trancheId]?.chainId,
       }
     }, [] as PortfolioToken[])
   }

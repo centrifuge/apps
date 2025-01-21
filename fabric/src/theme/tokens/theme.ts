@@ -30,10 +30,10 @@ const colors = {
   backgroundInput: 'white',
   backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[800],
-  backgroundLight: grayScale[10],
 
   borderPrimary: grayScale[100],
   borderSecondary: 'rgba(207, 207, 207, 0.50)',
+  borderTertiary: grayScale[10],
 
   statusDefault,
   statusInfo,

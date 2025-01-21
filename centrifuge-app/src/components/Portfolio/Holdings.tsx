@@ -180,7 +180,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       showActions,
-      connectedNetwork: wallet.connectedNetwork,
+      connectedNetwork: token.chainId,
     })),
     ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balancePending.isZero()) || []).map((balance) => {
       const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)
