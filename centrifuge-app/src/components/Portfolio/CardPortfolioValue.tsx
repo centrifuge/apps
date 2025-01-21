@@ -15,7 +15,7 @@ const rangeFilters = [
   { value: '90d', label: '90 days' },
   { value: 'ytd', label: 'Year to date' },
   { value: 'all', label: 'All' },
-] as const
+]
 
 type RangeValue = (typeof rangeFilters)[number]['value']
 

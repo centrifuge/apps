@@ -8,6 +8,11 @@ import { CustomTick } from '../Charts/PoolPerformanceChart'
 import { getOneDayPerMonth, getRangeNumber } from '../Charts/utils'
 import { useDailyPortfolioValue } from './usePortfolio'
 
+const interval: Record<30 | 90, number> = {
+  30: 2,
+  90: 4,
+}
+
 const chartColor = 'black'
 
 const TooltipInfo = ({ payload }: any) => {
@@ -66,7 +71,7 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
           top: 35,
           right: 20,
           bottom: 0,
-          left: -10,
+          left: -5,
         }}
         data={chartData?.reverse()}
       >
@@ -85,18 +90,17 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
             fontSize: '10px',
           }}
           dy={4}
-          interval={0}
-          minTickGap={100000}
+          interval={rangeNumber && (rangeNumber === 30 || rangeNumber === 90) ? interval[rangeNumber] : 0}
           type="category"
-          ticks={getOneDayPerMonth(chartData, 'dateInMilliseconds')}
-          tick={<CustomTick />}
+          ticks={rangeNumber && rangeNumber <= 90 ? undefined : getOneDayPerMonth(chartData, 'dateInMilliseconds')}
+          tick={(props) => <CustomTick filterValue={rangeNumber} {...props} />}
         />
         <YAxis
           dataKey="portfolioValue"
           tickCount={10}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => formatBalanceAbbreviated(value, '', 2)}
+          tickFormatter={(value) => formatBalanceAbbreviated(value, '', 3)}
           style={{
             fontSize: '10px',
           }}
