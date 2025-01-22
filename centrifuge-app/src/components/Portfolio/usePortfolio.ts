@@ -2,6 +2,7 @@ import {
   CurrencyBalance,
   CurrencyMetadata,
   InvestorTransactionType,
+  Perquintill,
   Price,
   Token,
   TokenBalance,
@@ -26,7 +27,7 @@ type InvestorTransaction = {
 }
 
 export function useDailyPortfolioValue(address: string, rangeValue?: number) {
-  const transactions = useTransactionsByAddress(address)
+  const { data: transactions } = useTransactionsByAddress(address)
 
   const transactionsByTrancheId = transactions?.investorTransactions.reduce(
     (tranches, tranche) => ({
@@ -126,11 +127,6 @@ const getPriceAtDate = (
 }
 
 export function usePortfolio(substrateAddress?: string) {
-  // const [result] = useCentrifugeQuery(['accountPortfolio', substrateAddress], (cent) => cent.pools.getPortfolio([substrateAddress!]), {
-  //   enabled: !!substrateAddress,
-  // })
-  // return result
-
   const pools = usePools()
   const { data: subData } = useSubquery(
     `query ($account: String!) {
@@ -147,6 +143,9 @@ export function usePortfolio(substrateAddress?: string) {
           sumClaimedTrancheTokens
           trancheId
           poolId
+          account {
+            chainId
+          }
           tranche {
             tokenPrice
           }
@@ -174,6 +173,13 @@ export function usePortfolio(substrateAddress?: string) {
           purchasePrice
           timestamp
           trancheId
+          tranche {
+            yieldSinceInception
+            pool {
+              sumUnrealizedProfitAtMarketPrice
+              sumRealizedProfitFifoByPeriod
+            }
+          }
         }
       }
     }
@@ -187,9 +193,22 @@ export function usePortfolio(substrateAddress?: string) {
   )
 
   const data = useMemo(() => {
-    const trancheBalances: Record<string, { totalTrancheTokens: TokenBalance; tokenPrice: Price }> = {}
+    const trancheBalances: Record<
+      string,
+      {
+        totalTrancheTokens: TokenBalance
+        tokenPrice: Price
+        unrealizedProfit: CurrencyBalance
+        realizedProfit: CurrencyBalance
+        yieldSinceInception: Perquintill | null
+        chainId: number
+      }
+    > = {}
 
     subData?.account?.investorPositions.nodes.forEach((position: any) => {
+      const chainId = subData.account.trancheBalances.nodes.find(
+        (tranche: { trancheId: string }) => tranche.trancheId === position.trancheId
+      ).account.chainId
       const pool = pools?.find((p) => p.id === position.poolId)
       const trancheId = position.trancheId.split('-')[1]
       const decimals = pool?.currency.decimals ?? 18
@@ -199,72 +218,16 @@ export function usePortfolio(substrateAddress?: string) {
       if (existing) {
         existing.totalTrancheTokens.iadd(balance)
       } else {
-        trancheBalances[trancheId] = { totalTrancheTokens: balance, tokenPrice }
+        trancheBalances[trancheId] = {
+          totalTrancheTokens: balance,
+          tokenPrice,
+          realizedProfit: new CurrencyBalance(position.tranche.pool.sumRealizedProfitFifoByPeriod, decimals),
+          unrealizedProfit: new CurrencyBalance(position.tranche.pool.sumUnrealizedProfitAtMarketPrice, decimals),
+          yieldSinceInception: new Perquintill(position.tranche.yieldSinceInception),
+          chainId,
+        }
       }
     })
-    // return (
-    //   (subData?.account as undefined | {}) &&
-    //   (Object.fromEntries(
-    //     subData.account.trancheBalances.nodes.map((tranche: any) => {
-    //       const decimals = tranche.pool.currency.decimals
-    //       const tokenPrice = new Price(tranche.tranche.tokenPrice)
-    //       let freeTrancheTokens = new CurrencyBalance(0, decimals)
-
-    //       const claimableCurrency = new CurrencyBalance(tranche.claimableCurrency, decimals)
-    //       const claimableTrancheTokens = new TokenBalance(tranche.claimableTrancheTokens, decimals)
-    //       const pendingInvestCurrency = new CurrencyBalance(tranche.pendingInvestCurrency, decimals)
-    //       const pendingRedeemTrancheTokens = new TokenBalance(tranche.pendingRedeemTrancheTokens, decimals)
-    //       const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
-    //       const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
-
-    //       const currencyAmounts = subData.account.currencyBalances.nodes.filter(
-    //         (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
-    //       )
-    //       if (currencyAmounts.length) {
-    //         freeTrancheTokens = new CurrencyBalance(
-    //           currencyAmounts.reduce((acc: BN, cur: any) => acc.add(new BN(cur.amount)), new BN(0)),
-    //           decimals
-    //         )
-    //       }
-
-    //       const totalTrancheTokens = new CurrencyBalance(
-    //         new BN(tranche.claimableTrancheTokens)
-    //           .add(new BN(tranche.pendingRedeemTrancheTokens))
-    //           .add(freeTrancheTokens),
-    //         decimals
-    //       )
-
-    //       return [
-    //         tranche.trancheId.split('-')[1],
-    //         {
-    //           claimableCurrency,
-    //           claimableTrancheTokens,
-    //           pendingInvestCurrency,
-    //           pendingRedeemTrancheTokens,
-    //           sumClaimedCurrency,
-    //           sumClaimedTrancheTokens,
-    //           totalTrancheTokens,
-    //           freeTrancheTokens,
-    //           tokenPrice,
-    //         },
-    //       ]
-    //     })
-    //   ) satisfies Record<
-    //     string,
-    //     {
-    //       claimableCurrency: CurrencyBalance
-    //       claimableTrancheTokens: TokenBalance
-    //       pendingInvestCurrency: CurrencyBalance
-    //       pendingRedeemTrancheTokens: TokenBalance
-    //       sumClaimedCurrency: CurrencyBalance
-    //       sumClaimedTrancheTokens: TokenBalance
-    //       totalTrancheTokens: TokenBalance
-    //       freeTrancheTokens: TokenBalance
-    //       tokenPrice: Price
-    //       // TODO: add reservedTrancheTokens
-    //     }
-    //   >)
-    // )
     return trancheBalances
   }, [subData, pools])
 
@@ -278,6 +241,10 @@ type PortfolioToken = {
   trancheId: string
   poolId: string
   currency: Token['currency']
+  realizedProfit: CurrencyBalance
+  unrealizedProfit: CurrencyBalance
+  yieldSinceInception: Perquintill
+  chainId: number
 }
 
 export function usePortfolioTokens(address?: string) {
@@ -291,10 +258,23 @@ export function usePortfolioTokens(address?: string) {
           currency: tranche.currency,
           tokenPrice: tranche.tokenPrice,
           poolId: tranche.poolId,
+          realizedProfit: portfolioData[tranche.id]?.realizedProfit,
+          unrealizedProfit: portfolioData[tranche.id]?.unrealizedProfit,
+          yieldSinceInception: portfolioData[tranche.id]?.yieldSinceInception,
         }
         return tranches
       }, tranches),
-    {} as Record<string, { tokenPrice: Price | null; poolId: string; currency: CurrencyMetadata }>
+    {} as Record<
+      string,
+      {
+        tokenPrice: Price | null
+        poolId: string
+        currency: CurrencyMetadata
+        realizedProfit: CurrencyBalance
+        unrealizedProfit: CurrencyBalance
+        yieldSinceInception: Perquintill | null
+      }
+    >
   )
 
   if (portfolioData && trancheTokenPrices) {
@@ -310,6 +290,10 @@ export function usePortfolioTokens(address?: string) {
         trancheId: trancheId,
         poolId: trancheTokenPrices[trancheId].poolId,
         currency: trancheTokenPrices[trancheId].currency,
+        realizedProfit: trancheTokenPrices[trancheId].realizedProfit,
+        unrealizedProfit: trancheTokenPrices[trancheId].unrealizedProfit,
+        yieldSinceInception: trancheTokenPrices[trancheId].yieldSinceInception,
+        chainId: portfolioData[trancheId]?.chainId,
       }
     }, [] as PortfolioToken[])
   }

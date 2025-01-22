@@ -7,25 +7,13 @@ import {
   PricingInfo,
   TinlakeLoan,
 } from '@centrifuge/centrifuge-js'
-import {
-  Box,
-  Button,
-  Card,
-  Drawer,
-  Grid,
-  IconArrowLeft,
-  Shelf,
-  Spinner,
-  Stack,
-  Text,
-  truncate,
-} from '@centrifuge/fabric'
+import { BackButton, Box, Button, Card, Drawer, Grid, Shelf, Spinner, Stack, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import styled from 'styled-components'
 import { AssetSummary } from '../../../src/components/AssetSummary'
 import { SimpleLineChart } from '../../../src/components/Charts/SimpleLineChart'
 import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
+import { RouterLinkButton } from '../../../src/components/RouterLinkButton'
 import { Dec } from '../../../src/utils/Decimal'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -33,7 +21,6 @@ import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../components/LoadBoundary'
 import { PageSection } from '../../components/PageSection'
 import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
-import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
@@ -61,28 +48,6 @@ export default function LoanPage() {
 function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
 }
-
-const StyledRouterLinkButton = styled(RouterLinkButton)`
-  margin-left: 14px;
-  border-radius: 50%;
-  margin: 0px;
-  padding: 0px;
-  width: fit-content;
-  margin-left: 30px;
-  border: 4px solid transparent;
-
-  > span {
-    width: 34px;
-    border: 4px solid transparent;
-  }
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.backgroundSecondary};
-    border: ${({ theme }) => `4px solid ${theme.colors.backgroundTertiary}`};
-    span {
-      color: ${({ theme }) => theme.colors.textPrimary};
-    }
-  }
-`
 
 const positiveNetflows = ['DEPOSIT_FROM_INVESTMENTS', 'INCREASE_DEBT']
 
@@ -219,14 +184,10 @@ function Loan() {
 
   return (
     <Stack>
-      <Box display="flex" alignItems="center" width="55%" justifyContent="space-between" mt={15} mb={24}>
-        <StyledRouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconArrowLeft} variant="tertiary" />
-        <Box display="flex" alignItems="center">
-          <Text variant="heading1" style={{ marginRight: 8 }}>
-            {name}
-          </Text>
+      <Box mt={2} mb={2} ml={2}>
+        <BackButton label={name} to={`${basePath}/${poolId}/assets`} as={RouterLinkButton}>
           {loan && <LoanLabel loan={loan} />}
-        </Box>
+        </BackButton>
       </Box>
 
       <AssetSummary

@@ -17,7 +17,7 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   const address = useAddress()
-  const transactions = useTransactionsByAddress(address)
+  const { data: transactions } = useTransactionsByAddress(address)
   const { showNetworks, connectedNetwork, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
   const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address

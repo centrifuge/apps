@@ -1,20 +1,26 @@
 import { addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { BackButton, Box, Stack, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
-import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
-import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
-import { Holdings } from '../../components/Portfolio/Holdings'
-import { Transactions } from '../../components/Portfolio/Transactions'
-import { Resolutions } from '../../components/Resolutions'
-import { RouterTextLink } from '../../components/TextLink'
+import { useTheme } from 'styled-components'
+import { AssetSummary } from '../../../src/components/AssetSummary'
+import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
+import { CardPortfolioValue } from '../../../src/components/Portfolio/CardPortfolioValue'
+import { Transactions } from '../../../src/components/Portfolio/Transactions'
+import { Resolutions } from '../../../src/components/Resolutions'
+import { RouterLinkButton } from '../../../src/components/RouterLinkButton'
+import { config } from '../../../src/config'
+import { Dec } from '../../../src/utils/Decimal'
+import { formatBalance, formatPercentage } from '../../../src/utils/formatting'
+import { Holdings, useHoldings } from '../../components/Portfolio/Holdings'
 import { useDAOConfig } from '../../utils/useDAOConfig'
 
 export default function PrimeDetailPage() {
   return <PrimeDetail />
 }
 
-function PrimeDetail() {
+const PrimeDetail = () => {
+  const theme = useTheme()
   const { dao: daoSlug } = useParams<{ dao: string }>()
   const { data: DAOs, isLoading } = useDAOConfig()
   const dao = DAOs?.find((d) => d.slug === daoSlug)
@@ -25,30 +31,68 @@ function PrimeDetail() {
       ? utils.evmToSubstrateAddress(dao.address, dao.network)
       : addressToHex(dao.address))
 
+  const tokens = useHoldings(centAddress)
+  const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
+  const realizedProfit = tokens.reduce(
+    (sum, token) => sum.add(token.realizedProfit ? token.realizedProfit.toDecimal() : 0),
+    Dec(0)
+  )
+  const unrealizedProfit = tokens.reduce(
+    (sum, token) => sum.add(token.unrealizedProfit ? token.unrealizedProfit.toDecimal() : 0),
+    Dec(0)
+  )
+
+  const yieldSinceInception = tokens.find((token) => token.yieldSinceInception)?.yieldSinceInception
+
   return !isLoading && dao && centAddress ? (
-    <>
-      <LayoutSection backgroundColor="backgroundSecondary" pt={12} pb={12}>
-        <Text variant="body3">
-          <Text color="textSecondary">
-            <RouterTextLink to="/prime" style={{ textDecoration: 'none' }}>
-              Prime
-            </RouterTextLink>
-          </Text>{' '}
-          / {dao.name} Investments
-        </Text>
-        <Shelf gap={2}>
-          <Box as="img" src={dao.logo} alt={dao.name} width="iconRegular" height="iconRegular" borderRadius="50%" />
-          <Text variant="heading1">{dao.name} Investments</Text>
-        </Shelf>
+    <Stack mx={1} my={1}>
+      <Box mt={2} mb={2} ml={2}>
+        <BackButton label={`${dao.name} Investements`} to="/prime" align="flex-start" as={RouterLinkButton} />
+      </Box>
+      <AssetSummary
+        data={[
+          {
+            label: 'Portfolio Value',
+            value: formatBalance(currentPortfolioValue || 0, ''),
+            heading: false,
+            children: yieldSinceInception ? (
+              <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4}>
+                <Text variant="body4" color="statusOk" style={{ fontWeight: 500 }}>
+                  +{formatPercentage(yieldSinceInception)}
+                </Text>
+                <Text variant="body4" color="statusOk">
+                  Since inception
+                </Text>
+              </Box>
+            ) : null,
+          },
+          {
+            label: 'Realized P&L',
+            value: formatBalance(realizedProfit, config.baseCurrency),
+            heading: false,
+          },
+          {
+            label: 'Unrealized P&L',
+            value: formatBalance(unrealizedProfit, config.baseCurrency),
+            heading: false,
+          },
+        ]}
+      />
+      <Box mt={3} mx={[2, 2, 2, 2, 5]}>
         <CardPortfolioValue address={centAddress} />
-      </LayoutSection>
-      <LayoutSection title="Holdings" pt={12} pb={12}>
+      </Box>
+
+      <LayoutSection mt={3} pt={0} gap={0}>
+        <Text variant="heading4">Investment positions</Text>
         <Holdings address={centAddress} showActions={false} />
       </LayoutSection>
-      <LayoutSection title="Transaction history" pt={12} pb={12}>
-        <Transactions onlyMostRecent address={centAddress} />
+      <LayoutSection mt={1} pt={0}>
+        <Transactions address={centAddress} title="Transaction history" />
       </LayoutSection>
-      <Resolutions dao={dao} />
-    </>
+      <LayoutSection mt={1} pt={0}>
+        <Text variant="heading4">Resolutions</Text>
+        <Resolutions dao={dao} />
+      </LayoutSection>
+    </Stack>
   ) : null
 }

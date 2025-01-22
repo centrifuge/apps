@@ -1,4 +1,4 @@
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 
@@ -7,6 +7,7 @@ type Props = {
     label: React.ReactNode
     value: React.ReactNode
     heading: boolean
+    children?: React.ReactNode
   }[]
   children?: React.ReactNode
 }
@@ -22,12 +23,17 @@ export function AssetSummary({ data, children }: Props) {
       mx={[2, 2, 2, 2, 5]}
     >
       <Shelf gap={2}>
-        {data?.map(({ label, value, heading }, index) => (
+        {data?.map(({ label, value, heading, children }, index) => (
           <Stack key={`${value}-${label}-${index}`}>
             <Text variant={heading ? 'body2' : 'body3'} color="textSecondary" style={{ margin: 0, padding: 0 }}>
               {label}
             </Text>
-            <Text variant={heading ? 'heading' : 'heading2'}>{value}</Text>
+            <Box display="flex" alignItems="center">
+              <Text variant={heading ? 'heading' : 'heading1'} style={{ marginRight: 8 }}>
+                {value}
+              </Text>
+              {children && children}
+            </Box>
           </Stack>
         ))}
         {children}

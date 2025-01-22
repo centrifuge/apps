@@ -20,7 +20,7 @@ import Decimal from 'decimal.js-light'
 import { getIn } from 'formik'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { FiltersState } from '../utils/useFilters'
 import { FilterButton } from './FilterButton'
 import { QuickAction } from './QuickAction'
@@ -50,7 +50,7 @@ export type DataTableProps<T = any> = {
   footer?: React.ReactNode
   pageSize?: number
   page?: number
-  headerStyles?: React.CSSProperties
+  hideHeader?: boolean
   hideBorder?: boolean
 } & GroupedProps
 
@@ -100,10 +100,11 @@ export const DataTable = <T extends Record<string, any>>({
   defaultSortOrder = 'desc',
   pageSize = Infinity,
   page = 1,
-  headerStyles,
+  hideHeader,
   scrollable = false,
   hideBorder,
 }: DataTableProps<T>) => {
+  const theme = useTheme()
   const tableRef = React.useRef<HTMLDivElement>(null)
   const [offsetTop, setOffsetTop] = React.useState(0)
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
@@ -147,7 +148,19 @@ export const DataTable = <T extends Record<string, any>>({
       offsetTop={offsetTop}
     >
       {showHeader && (
-        <HeaderRow styles={headerStyles} scrollable={scrollable} hideBorder={hideBorder}>
+        <HeaderRow
+          styles={
+            hideHeader
+              ? {
+                  backgroundColor: 'transparent',
+                  border: 'transparent',
+                  borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
+                }
+              : {}
+          }
+          scrollable={scrollable}
+          hideBorder={hideBorder}
+        >
           {columns.map((col, i) => (
             <HeaderCol key={i} align={col?.align} isLabel={col.isLabel}>
               <Text variant="body3">
