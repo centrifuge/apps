@@ -56,7 +56,7 @@ const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
 
   let textProps = props
   if (props.variant) {
-    textProps = { ...theme.typography[props.variant], ...props }
+    textProps = { ...theme.typography[props.variant as keyof typeof theme.typography], ...props }
   }
 
   const {
