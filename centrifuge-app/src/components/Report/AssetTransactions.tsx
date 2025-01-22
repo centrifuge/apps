@@ -34,7 +34,7 @@ type Row = {
 export function AssetTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData, txType, loan: loanId } = React.useContext(ReportContext)
   const transactions = useAssetTransactions(pool.id, new Date(startDate), new Date(endDate))
-  const explorer = useGetExplorerUrl('centrifuge')
+  const explorer = useGetExplorerUrl()
   const basePath = useBasePath()
 
   const columns = [
@@ -109,6 +109,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     transactions
       ?.map((transaction) => {
         const { label, sublabel } = getLabelAndAmount(transaction)
+
         return {
           transactionDate: transaction.timestamp.toISOString(),
           assetId: transaction.asset.id,
@@ -144,7 +145,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
             second: 'numeric',
             timeZoneName: 'short',
           })}"`,
-          Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
+          Transaction: explorer.tx(transaction.hash),
           Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
           epoch: transaction.epochId,
         }

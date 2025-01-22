@@ -2,7 +2,6 @@ import { AssetTransactionType, InvestorTransactionType, Pool, Token, TokenBalanc
 import { Network, formatBalance, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useNavigate } from 'react-router'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -32,7 +31,6 @@ type Row = {
 }
 
 export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId, title }: TransactionsProps) {
-  const navigate = useNavigate()
   const explorer = useGetExplorerUrl()
   const [expandTable, setExpandTable] = React.useState(false)
 
