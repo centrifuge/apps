@@ -1,11 +1,6 @@
 import { Box, Grid, Stack, Text } from '@centrifuge/fabric'
 import styled from 'styled-components'
-import resolution1 from '../assets/images/resolution_1.png'
-import resolution2 from '../assets/images/resolution_2.png'
-import resolution3 from '../assets/images/resolution_3.png'
 import { DAO } from '../utils/useDAOConfig'
-
-const images = [resolution1, resolution2, resolution3]
 
 export const Resolutions = ({ dao }: { dao: DAO }) => {
   return (
@@ -26,7 +21,7 @@ export const Resolutions = ({ dao }: { dao: DAO }) => {
             width="100%"
             height={180}
             style={{
-              backgroundImage: `url(${images[i % images.length]})`,
+              backgroundImage: `url(${blog.image})`,
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
