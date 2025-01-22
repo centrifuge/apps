@@ -48,7 +48,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
 
   const { data: domains } = useActiveDomains(pool.id)
   const getNetworkName = useGetNetworkName()
-  const { data: loans } = useLoans(pool.id) as Loan[] | undefined
+  const { data: loans } = useLoans(pool.id) as { data: Loan[] | undefined | null; isLoading: boolean }
 
   const { showOracleTx } = useDebugFlags()
 
@@ -160,7 +160,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
           />
         )}
 
-        {['investor-tx', 'asset-tx', 'fee-tx'].includes(report) && (
+        {['investor-tx', 'fee-tx'].includes(report) && (
           <Select
             name="txType"
             label="Transaction type"

@@ -59,7 +59,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
         return (
           <Text as="span" variant="body3">
             {label}{' '}
-            <RouterTextLink to={`${base}${isCashTransfer ? fromAssetId?.split('-')[1] : assetId.split('-')[1]}`}>
+            <RouterTextLink to={`${base}${isCashTransfer ? fromAssetId?.split('-')[1] : assetId}`}>
               {isCashTransfer ? fromAssetName : assetName}
             </RouterTextLink>{' '}
             {toAssetName ? (
@@ -105,31 +105,29 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     },
   ]
 
-  const data =
-    transactions
-      ?.map((transaction) => {
-        const { label, sublabel } = getLabelAndAmount(transaction)
+  const data = transactions
+    ?.map((transaction) => {
+      const { label, sublabel } = getLabelAndAmount(transaction)
 
-        return {
-          transactionDate: transaction.timestamp.toISOString(),
-          assetId: transaction.asset.id,
-          assetName: transaction.asset.name,
-          fromAssetId: transaction.fromAsset?.id,
-          fromAssetName: transaction.fromAsset?.name,
-          toAssetId: transaction.toAsset?.id,
-          toAssetName: transaction.toAsset?.name,
-          amount: transaction.amount?.toFloat() ?? '',
-          hash: transaction.hash,
-          label,
-          sublabel,
-          epochId: transaction.epochId.split('-').at(-1)!,
-        }
-      })
-      .filter((row) => {
-        if (!loanId || loanId === 'all') return true
-        return loanId === row.transactionDate
-      })
-      .filter((row) => (!txType || txType === 'all' ? true : row.epochId === txType)) || []
+      return {
+        transactionDate: transaction.timestamp.toISOString(),
+        assetId: transaction.asset.id.split('-')[1],
+        assetName: transaction.asset.name,
+        fromAssetId: transaction.fromAsset?.id,
+        fromAssetName: transaction.fromAsset?.name,
+        toAssetId: transaction.toAsset?.id,
+        toAssetName: transaction.toAsset?.name,
+        amount: transaction.amount?.toFloat() ?? '',
+        hash: transaction.hash,
+        label,
+        sublabel,
+        epochId: transaction.epochId.split('-').at(-1)!,
+      }
+    })
+    .filter((row) => {
+      if (!loanId || loanId === 'all') return true
+      return loanId === row.assetId
+    })
 
   React.useEffect(() => {
     if (transactions) {
