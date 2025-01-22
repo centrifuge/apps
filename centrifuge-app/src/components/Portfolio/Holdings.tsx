@@ -35,10 +35,11 @@ export type Holding = {
   tokenPrice: Decimal
   showActions?: boolean
   address?: string
-  connectedNetwork?: any
+  chainId?: number
   realizedProfit?: CurrencyBalance
   unrealizedProfit?: CurrencyBalance
   yieldSinceInception?: Perquintill | null
+  connectedNetwork?: any
 }
 
 const columns: Column[] = [
@@ -53,12 +54,12 @@ const columns: Column[] = [
   {
     align: 'left',
     header: 'Network',
-    cell: ({ connectedNetwork }: Holding) => {
-      if (!connectedNetwork) return
+    cell: ({ chainId }: Holding) => {
+      if (!chainId) return
       return (
         <Box display={'flex'}>
-          <NetworkIcon size="iconSmall" network={connectedNetwork || 'centrifuge'} />
-          <Text style={{ marginLeft: 4 }}> {(evmChains as any)[connectedNetwork]?.name || 'Centrifuge'}</Text>
+          <NetworkIcon size="iconSmall" network={chainId || 'centrifuge'} />
+          <Text style={{ marginLeft: 4 }}> {(evmChains as any)[chainId]?.name || 'Centrifuge'}</Text>
         </Box>
       )
     },
@@ -180,7 +181,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       showActions,
-      connectedNetwork: token.chainId,
+      chainId: token.chainId,
     })),
     ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balancePending.isZero()) || []).map((balance) => {
       const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)

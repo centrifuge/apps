@@ -45,10 +45,10 @@ const TooltipInfo = ({ payload }: any) => {
   return null
 }
 
-export function PortfolioValue({ rangeValue, address }: { rangeValue: string; address: string }) {
+export function PortfolioValue({ rangeValue, address }: { rangeValue: string; address: string | undefined }) {
   const theme = useTheme()
   const rangeNumber = getRangeNumber(rangeValue)
-  const dailyPortfolioValue = useDailyPortfolioValue(address, rangeNumber)
+  const dailyPortfolioValue = useDailyPortfolioValue(address || '', rangeNumber)
 
   const chartData = dailyPortfolioValue?.map((value) => ({
     ...value,
