@@ -155,16 +155,7 @@ export const TrancheTokenCards = ({
         overflow="auto"
         borderBottom={`1px solid ${theme.colors.borderPrimary}`}
       >
-        <DataTable
-          headerStyles={{
-            backgroundColor: 'white',
-            border: 'transparent',
-            borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
-          }}
-          columns={columns}
-          data={dataTable}
-          hideBorder
-        />
+        <DataTable columns={columns} data={dataTable} hideBorder hideHeader />
       </Box>
     </Shelf>
   )
