@@ -23,7 +23,7 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
               <div>
                 Invested{' '}
                 <Text fontWeight="bold">
-                  {formatBalance(state.order.payoutTokenAmount.mul(state.tokenPrice), state.poolCurrency?.displayName)}
+                  {formatBalance(state.order.investClaimableCurrencyAmount, state.poolCurrency?.displayName)}
                 </Text>
               </div>
               <div>
