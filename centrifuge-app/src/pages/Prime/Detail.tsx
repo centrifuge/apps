@@ -1,14 +1,14 @@
 import { addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, Stack, Text } from '@centrifuge/fabric'
+import { BackButton, Box, Stack, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { AssetSummary } from '../../../src/components/AssetSummary'
-import { BackButton } from '../../../src/components/BackButton'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../../src/components/Portfolio/CardPortfolioValue'
 import { Transactions } from '../../../src/components/Portfolio/Transactions'
 import { Resolutions } from '../../../src/components/Resolutions'
+import { RouterLinkButton } from '../../../src/components/RouterLinkButton'
 import { config } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../src/utils/formatting'
@@ -46,7 +46,9 @@ const PrimeDetail = () => {
 
   return !isLoading && dao && centAddress ? (
     <Stack mx={1} my={1}>
-      <BackButton label={`${dao.name} Investements`} to="/prime" align="flex-start" />
+      <Box mt={2} mb={2} ml={2}>
+        <BackButton label={`${dao.name} Investements`} to="/prime" align="flex-start" as={RouterLinkButton} />
+      </Box>
       <AssetSummary
         data={[
           {

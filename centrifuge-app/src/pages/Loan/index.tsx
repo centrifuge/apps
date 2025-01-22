@@ -7,13 +7,13 @@ import {
   PricingInfo,
   TinlakeLoan,
 } from '@centrifuge/centrifuge-js'
-import { Box, Button, Card, Drawer, Grid, Shelf, Spinner, Stack, Text, truncate } from '@centrifuge/fabric'
+import { BackButton, Box, Button, Card, Drawer, Grid, Shelf, Spinner, Stack, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { AssetSummary } from '../../../src/components/AssetSummary'
-import { BackButton } from '../../../src/components/BackButton'
 import { SimpleLineChart } from '../../../src/components/Charts/SimpleLineChart'
 import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
+import { RouterLinkButton } from '../../../src/components/RouterLinkButton'
 import { Dec } from '../../../src/utils/Decimal'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -184,9 +184,11 @@ function Loan() {
 
   return (
     <Stack>
-      <BackButton label={name} to={`${basePath}/${poolId}/assets`}>
-        {loan && <LoanLabel loan={loan} />}
-      </BackButton>
+      <Box mt={2} mb={2} ml={2}>
+        <BackButton label={name} to={`${basePath}/${poolId}/assets`} as={RouterLinkButton}>
+          {loan && <LoanLabel loan={loan} />}
+        </BackButton>
+      </Box>
 
       <AssetSummary
         data={
