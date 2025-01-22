@@ -13,16 +13,8 @@ import { convertCSV } from './utils'
 const noop = (v: any) => v
 
 const Orders = ({ pool }: { pool: Pool }) => {
-  const { setCsvData, setStartDate } = useContext(ReportContext)
+  const { setCsvData } = useContext(ReportContext)
   const orders = usePoolOrdersByPoolId(pool.id)
-
-  useEffect(() => {
-    if (!orders?.length) return
-    const dateStrings = orders?.map((order) => order.closedAt).filter(Boolean)
-    const oldestTimestamp = Math.min(...dateStrings.map((date) => new Date(date).getTime()))
-    const oldestDate = new Date(oldestTimestamp).toISOString().split('T')[0]
-    setStartDate(oldestDate)
-  }, [setStartDate, orders])
 
   const columnsConfig = [
     {
