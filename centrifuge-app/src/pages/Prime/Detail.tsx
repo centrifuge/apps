@@ -53,7 +53,7 @@ const PrimeDetail = () => {
         data={[
           {
             label: 'Portfolio Value',
-            value: formatBalance(currentPortfolioValue || 0, ''),
+            value: formatBalance(currentPortfolioValue || 0, 'USD'),
             heading: false,
             children: yieldSinceInception ? (
               <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4}>

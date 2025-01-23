@@ -38,6 +38,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
     {
       align: 'left',
       header: 'Action',
+      width: '140px',
       cell: ({ action, tranche, pool, amount }: Row) => (
         <TransactionTypeChip
           type={action as InvestorTransactionType}
@@ -166,7 +167,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
         <Text variant="heading4">{title}</Text>
         {csvUrl && (
           <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
-            <AnchorButton small variant="secondary" href={csvUrl} download={`transaction-history-${address}.csv`}>
+            <AnchorButton small variant="inverted" href={csvUrl} download={`transaction-history-${address}.csv`}>
               Download
             </AnchorButton>
           </Box>
