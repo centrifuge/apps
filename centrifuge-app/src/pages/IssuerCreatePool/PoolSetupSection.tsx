@@ -74,7 +74,7 @@ export const PoolSetupSection = () => {
 
   useEffect(() => {
     form.setFieldValue('adminMultisig.signers[0]', substrate.selectedAddress)
-  }, [substrate, form])
+  }, [substrate.selectedAddress])
 
   return (
     <Box>
