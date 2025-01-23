@@ -2,7 +2,7 @@ name: Promote staging to PROD
 on:
   release:
     types:
-      - released     
+      - released
   workflow_dispatch:
 concurrency:
   group: production-deployment
@@ -12,14 +12,14 @@ jobs:
   sync-staging-prod:
     permissions:
       contents: 'read'
-      id-token: 'write'  
+      id-token: 'write'
     runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
-          path: apps    
+          path: apps
 
       - name: prepare env logic
         id: prepare
@@ -36,23 +36,23 @@ jobs:
           service_account: '${{ secrets.GSA }}'
 
       - name: 'Set up Cloud SDK'
-        uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1 
+        uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1
 
       - name: Sync webpack from staging
         run: gsutil -m rsync -d -r gs://app.staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
-  
+
   retrieve-prod-assets:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - name: Download artifact
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: staging-deploy.yml
-          workflow_conclusion: "" # This will fail if the staging deployment isn't finished yet
+          workflow_conclusion: '' # This will fail if the staging deployment isn't finished yet
           # check_artifacts: true # This will search for the last available artifact, useful for testing
 
-      # Alternative: download from the release instead of 
+      # Alternative: download from the release instead of
       # workflow artifacts
       # - uses: dsaltares/fetch-gh-release-asset@master
       #   with:
@@ -77,17 +77,17 @@ jobs:
       #     echo "Workspace PATH: ${{ github.workspace }}"
       #     ls -la $GITHUB_WORKSPACE
 
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
-        with: 
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #@4.6.0
+        with:
           name: onboarding-api
           path: ${{ github.workspace }}/onboarding-api-staging/
-          if-no-files-found: error 
-          
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
-        with: 
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #@4.6.0
+        with:
           name: pinning-api
           path: ${{ github.workspace }}/pinning-api-staging/
-          if-no-files-found: error 
+          if-no-files-found: error
 
   pinning-prod-deploy:
     needs: retrieve-prod-assets
@@ -103,7 +103,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
-          path: apps  
+          path: apps
 
       - name: Deploy Gfunction
         id: functionsdeploy
@@ -114,7 +114,7 @@ jobs:
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
-          service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
+          service_account: '${{ vars.PINNING_API_FUNCT_SA }}'
           deploy_env: production
 
   onboarding-prod-deploy:
@@ -131,7 +131,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
-          path: apps  
+          path: apps
 
       - name: Deploy Gfunction
         id: functionsdeploy
@@ -141,7 +141,7 @@ jobs:
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}
-          service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
+          service_account: '${{ vars.ONBOARDING_FUNCT_SA }}'
           gcloud_region: ${{ vars.GCLOUD_REGION }}
           deploy_env: production
 
@@ -156,7 +156,7 @@ jobs:
           SLACK_MESSAGE: |
             app.staging.centrifuge.io has been promoted to app.centrifuge.io and is now LIVE!
             Check out the new release -> https://github.com/centrifuge/apps/releases/
-          SLACK_USERNAME: "Centrifuge GHA Bot"
-          SLACK_ICON: "https://centrifuge.io/favicon.ico"
-          SLACK_TITLE: "Centrifuge app has been promoted to prod."
-          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"           
+          SLACK_USERNAME: 'Centrifuge GHA Bot'
+          SLACK_ICON: 'https://centrifuge.io/favicon.ico'
+          SLACK_TITLE: 'Centrifuge app has been promoted to prod.'
+          SLACK_FOOTER: 'Automatic message from centrifuge/apps repository Actions'
