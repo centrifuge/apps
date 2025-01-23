@@ -72,7 +72,7 @@ jobs:
           cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
           yarn build:app --mode ${{ steps.prepare.outputs.env_name }}
 
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #@4.6.0
         with:
           name: ${{ env.artifact_name }}
           path: ./centrifuge-app/build

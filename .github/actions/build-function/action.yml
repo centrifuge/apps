@@ -3,7 +3,7 @@ description: 'Build a generic function usin yarn build and archiving the results
 
 inputs:
   app_name:
-    description: "function folder"
+    description: 'function folder'
     required: true
   artifact_name:
     description: artifact name to upload
@@ -34,12 +34,12 @@ runs:
       working-directory: ${{ inputs.app_name }}
       shell: sh
       # env:
-      #   NODE_ENV: production      
+      #   NODE_ENV: production
       # run: ${{ inputs.build_cmd }}
       run: yarn build
 
-    - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
-      with: 
+    - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #@4.6.0
+      with:
         name: ${{ inputs.artifact_name || inputs.app_name }}
         path: ./${{ inputs.app_name }}/dist
-        if-no-files-found: error  
+        if-no-files-found: error
