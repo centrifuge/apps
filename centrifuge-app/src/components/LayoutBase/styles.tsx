@@ -199,8 +199,8 @@ export const ContentWrapper = styled.div`
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
-    margin-left: 7vw;
-    width: calc(100% - 7vw);
+    margin-left: 6vw;
+    width: calc(100% - 6vw);
     margin-top: 10px;
   }
 

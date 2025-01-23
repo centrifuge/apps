@@ -22,7 +22,7 @@ type ChartData = {
   seniorTokenPrice?: number | null
   currency?: string
   seniorAPY: number | null | undefined
-  juniorAPY: number | null
+  juniorAPY: number | null | undefined
 }
 
 type GraphDataItemWithType = {
@@ -48,6 +48,7 @@ type CustomTickProps = {
   payload: {
     value: ValueType
   }
+  filterValue?: number
 }
 
 const rangeFilters = [
@@ -499,16 +500,20 @@ function CustomLegend({
   )
 }
 
-export const CustomTick = ({ x, y, payload }: CustomTickProps) => {
+export const CustomTick = ({ x, y, payload, filterValue }: CustomTickProps) => {
   const theme = useTheme()
 
   let dateValue: Date | null = null
-
   if (payload.value instanceof Date) {
     dateValue = payload.value
   } else if (typeof payload.value === 'string' || typeof payload.value === 'number') {
     dateValue = new Date(payload.value)
   }
+
+  const dateFormat: Intl.DateTimeFormatOptions =
+    typeof filterValue !== 'undefined' && filterValue <= 90
+      ? { month: 'short' as const, day: 'numeric' as const }
+      : { month: 'short' as const }
 
   return (
     <g transform={`translate(${x},${y})`}>
@@ -519,7 +524,7 @@ export const CustomTick = ({ x, y, payload }: CustomTickProps) => {
         dy={16}
         textAnchor="middle"
       >
-        {dateValue ? dateValue.toLocaleString('en-US', { month: 'short' }) : ''}
+        {dateValue ? dateValue.toLocaleString('en-US', dateFormat) : ''}
       </text>
     </g>
   )

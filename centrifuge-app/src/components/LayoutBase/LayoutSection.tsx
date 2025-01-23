@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode
 } & BoxProps
 
-export function LayoutSection({ title, titleAddition, subtitle, headerRight, children, ...boxProps }: Props) {
+export function LayoutSection({ title, titleAddition, subtitle, headerRight, children, gap = 2, ...boxProps }: Props) {
   return (
     <BasePadding as="section" gap={3} pt={20} pb={20} {...boxProps}>
       {(title || titleAddition || subtitle || headerRight) && (
@@ -37,7 +37,7 @@ export function LayoutSection({ title, titleAddition, subtitle, headerRight, chi
           <Box ml="auto">{headerRight}</Box>
         </Shelf>
       )}
-      <Stack gap={2} maxWidth="mainContent">
+      <Stack gap={gap} maxWidth="mainContent">
         {children}
       </Stack>
     </BasePadding>

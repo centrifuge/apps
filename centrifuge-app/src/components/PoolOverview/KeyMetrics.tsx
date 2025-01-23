@@ -136,6 +136,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric:
         centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] || tinlakeData[poolId as TinlakeDataKey]
           ? 'Target APY'
+          : metadata?.tranches
+          ? Object.values(metadata?.tranches)[0].apy
           : '30-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
@@ -218,10 +220,16 @@ export const KeyMetrics = ({ poolId }: Props) => {
           {metrics.map(({ metric, value }, index) => {
             return (
               <Box key={index} display="flex" justifyContent="space-between" paddingY={1} alignItems="center">
-                <Text color="textSecondary" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                <Text
+                  textTransform="capitalize"
+                  color="textSecondary"
+                  variant="body2"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
+                >
                   {metric}
                 </Text>
-                <Text variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
+                <Text textTransform="capitalize" variant="body2" textOverflow="ellipsis" whiteSpace="nowrap">
                   {value}
                 </Text>
               </Box>

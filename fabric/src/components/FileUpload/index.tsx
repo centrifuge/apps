@@ -1,21 +1,8 @@
 import * as React from 'react'
-import styled, { keyframes } from 'styled-components'
-import { InputAction, InputUnit, InputUnitProps, StyledTextInput, TextInputBox } from '../..'
-import IconSpinner from '../../icon/IconSpinner'
-import IconX from '../../icon/IconX'
+import styled from 'styled-components'
+import { Box, IconButton, IconUpload, IconX, InputUnit, InputUnitProps, StyledTextInput, Text } from '../..'
 import { useControlledState } from '../../utils/useControlledState'
-import { Button } from '../Button'
-import { Flex } from '../Flex'
 import { Stack } from '../Stack'
-
-const rotate = keyframes`
-  0% {
-    transform: rotate(0);
-  }
-  100% {
-    transform: rotate(1turn);
-  }
-`
 
 const FormField = styled.input`
   // Visually hidden
@@ -29,12 +16,18 @@ const FormField = styled.input`
   width: 1px;
 `
 
-const Spinner = styled(IconSpinner)`
-  animation: ${rotate} 600ms linear infinite;
-`
-
-const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: boolean }>`
+const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: boolean; small?: boolean }>`
   position: relative;
+  height: ${({ small }) => (small ? '40px' : '144px')};
+  background-color: #ffffff;
+  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
+  border-radius: ${({ theme }) => theme.radii.input}px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+  padding: 8px;
   &::before {
     content: '';
     width: 100%;
@@ -50,6 +43,17 @@ const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: bool
   }
 `
 
+const FileInputContent = styled(Box)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: ${({ theme }) => theme.radii.input}px;
+  background-color: #ffffff;
+`
+
 export type FileUploadProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
   InputUnitProps & {
     file?: File | string | null
@@ -57,6 +61,8 @@ export type FileUploadProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 
     onClear?: () => void
     validate?: (file: File) => string | undefined
     loading?: boolean
+    fileTypeText?: string
+    small?: boolean
   }
 
 export function FileUpload({
@@ -71,6 +77,8 @@ export function FileUpload({
   label,
   secondaryLabel,
   id,
+  fileTypeText,
+  small,
   ...inputProps
 }: FileUploadProps) {
   const defaultId = React.useId()
@@ -140,6 +148,12 @@ export function FileUpload({
     setDragOver(false)
   }
 
+  function handleContainerClick() {
+    if (!disabled) {
+      handleUploadBtnClick()
+    }
+  }
+
   return (
     <InputUnit
       id={id}
@@ -149,6 +163,7 @@ export function FileUpload({
       errorMessage={errorMessage}
       inputElement={
         <FileDragOverContainer
+          onClick={handleContainerClick}
           onDragOver={handleDrag}
           onDragEnter={handleDrag}
           onDragEnd={handleDragEnd}
@@ -156,45 +171,76 @@ export function FileUpload({
           onDrop={handleDrop}
           $active={dragOver}
           $disabled={disabled}
+          small={small}
         >
-          <TextInputBox
+          {small && (
+            <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
+              <Text color={curFile && typeof curFile !== 'string' && curFile.name ? 'textPrimary' : 'textSecondary'}>
+                {' '}
+                {(curFile && typeof curFile !== 'string' && curFile.name) || 'Click to upload'}
+              </Text>
+              {curFile && typeof curFile !== 'string' && curFile.name ? (
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleClear()
+                  }}
+                >
+                  <IconX size={20} />
+                </IconButton>
+              ) : (
+                <IconUpload size={20} />
+              )}
+            </Box>
+          )}
+          {!small && (
+            <FileInputContent>
+              <Box
+                backgroundColor="backgroundSecondary"
+                borderRadius="100%"
+                height={40}
+                width={40}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                marginBottom={16}
+              >
+                <IconUpload size={20} />
+              </Box>
+              <Box>
+                <Text variant="heading4">
+                  {(curFile && typeof curFile !== 'string' && curFile.name) || 'Click to upload'}
+                </Text>
+                {curFile && typeof curFile !== 'string' && curFile.name ? (
+                  ''
+                ) : (
+                  <Text variant="body2" color="textSecondary">
+                    {' '}
+                    or drag and drop
+                  </Text>
+                )}
+              </Box>
+              {curFile && typeof curFile !== 'string' && curFile.name ? (
+                ''
+              ) : (
+                <Text variant="body3">{fileTypeText}</Text>
+              )}
+              <StyledTextInput
+                readOnly
+                value={curFile ? (typeof curFile === 'string' ? curFile : curFile.name) : ''}
+                style={{ cursor: 'pointer', flex: 1, opacity: 0 }}
+              />
+            </FileInputContent>
+          )}
+          <FormField
+            id={id}
+            type="file"
+            onChange={handleFileChange}
+            value=""
             disabled={disabled}
-            error={!!errorMessage}
-            inputElement={
-              <>
-                <FormField
-                  id={id}
-                  type="file"
-                  onChange={handleFileChange}
-                  value=""
-                  disabled={disabled}
-                  tabIndex={-1}
-                  ref={inputRef}
-                  {...inputProps}
-                />
-                <StyledTextInput
-                  readOnly
-                  onClick={handleUploadBtnClick}
-                  value={curFile ? (typeof curFile === 'string' ? curFile : curFile.name) : ''}
-                  placeholder={placeholder}
-                  style={{ cursor: 'pointer' }}
-                />
-              </>
-            }
-            symbol={
-              loading ? (
-                <Spinner size="iconSmall" color={disabled ? 'textDisabled' : 'textPrimary'} />
-              ) : curFile && !disabled ? (
-                <Flex bleedX="10px">
-                  <Button variant="tertiary" small onClick={handleClear} icon={IconX} disabled={disabled} />
-                </Flex>
-              ) : null
-            }
-            action={
-              <InputAction onClick={handleUploadBtnClick} disabled={disabled}>
-                Choose file
-              </InputAction>
-            }
+            tabIndex={-1}
+            ref={inputRef}
+            {...inputProps}
           />
         </FileDragOverContainer>
       }

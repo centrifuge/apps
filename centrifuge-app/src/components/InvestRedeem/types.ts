@@ -15,6 +15,7 @@ export type InvestRedeemAction =
   | 'approveTrancheToken'
   | 'cancelInvest'
   | 'cancelRedeem'
+  | 'preAction'
 
 export type InvestRedeemState = {
   poolId: string
@@ -52,6 +53,7 @@ export type InvestRedeemState = {
   needsToCollectBeforeOrder: boolean
   needsPoolCurrencyApproval: (amount: number) => boolean
   needsTrancheTokenApproval: (amount: number) => boolean
+  needsPreAction: (action: InvestRedeemAction) => string
   canChangeOrder: boolean
   canCancelOrder: boolean
   pendingAction?: InvestRedeemAction | null
@@ -71,6 +73,7 @@ export type InvestRedeemActions = {
   collect(): void
   approvePoolCurrency(amount: BN): void
   approveTrancheToken(amount: BN): void
+  preAction(action: InvestRedeemAction): void
   cancelInvest(): void
   cancelRedeem(): void
   selectPoolCurrency(symbol: string): void

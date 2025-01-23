@@ -1,12 +1,12 @@
-import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Box, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Dec } from '../../src/utils/Decimal'
+import { formatBalance } from '../../src/utils/formatting'
 import { useListedPools } from '../../src/utils/useListedPools'
 import { LayoutSection } from '../components/LayoutBase/LayoutSection'
 import { PoolList } from '../components/PoolList'
 import { prefetchRoute } from '../components/Root'
 import { config } from '../config'
-import { Dec } from '../utils/Decimal'
 
 export default function PoolsPage() {
   const [, listedTokens] = useListedPools()

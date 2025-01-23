@@ -17,7 +17,7 @@ type AccentColorName =
   | 'textInteractive'
   | 'textInteractiveHover'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled' | 'Inverted' | 'Gold'}`
-type BorderColorName = `border${'Primary' | 'Secondary'}`
+type BorderColorName = `border${'Primary' | 'Secondary' | 'Tertiary'}`
 type BackgroundColorName = `background${
   | 'Primary'
   | 'Secondary'

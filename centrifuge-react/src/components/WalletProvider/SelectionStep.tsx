@@ -1,6 +1,5 @@
 import {
   Box,
-  IconButton,
   IconCheckInCircle,
   IconChevronDown,
   IconChevronUp,
@@ -23,10 +22,26 @@ type SelectionStepProps = {
   done: boolean
   expanded: boolean
   toggleExpanded: () => void
+  disabled?: boolean
 }
 
-export function SelectionStep({ title, children, tooltip, done, toggleExpanded, expanded }: SelectionStepProps) {
+export function SelectionStep({
+  title,
+  children,
+  tooltip,
+  done,
+  toggleExpanded,
+  expanded,
+  disabled = false,
+}: SelectionStepProps) {
   const theme = useTheme()
+
+  const toggle = () => {
+    if (!disabled) {
+      toggleExpanded()
+    }
+  }
+
   return (
     <Stack
       border={`1px solid ${theme.colors.borderPrimary}`}
@@ -36,20 +51,27 @@ export function SelectionStep({ title, children, tooltip, done, toggleExpanded, 
       justifyContent="center"
       pt={expanded ? 4 : 2}
     >
-      <Shelf justifyContent="space-between">
+      <Shelf justifyContent="space-between" onClick={() => toggle()} style={{ cursor: disabled ? 'auto' : 'pointer' }}>
         <Shelf gap={2}>
           <Box bleedY={2} display="flex" justifyContent="space-between" alignItems="center">
-            {done ? <IconCheckInCircle color="statusOk" /> : <IconCrosschair color="statusOkBg" />}
-            <Text as="h3" variant="heading3" style={{ marginLeft: 8, fontWeight: 700 }}>
+            {done ? (
+              <IconCheckInCircle color="statusOk" />
+            ) : (
+              <IconCrosschair color={disabled ? 'textSecondary' : 'statusOkBg'} />
+            )}
+            <Text
+              as="h3"
+              variant="heading3"
+              color={disabled ? 'textSecondary' : 'textPrimary'}
+              style={{ marginLeft: 8, fontWeight: 700 }}
+            >
               {title}
               {tooltip}
             </Text>
           </Box>
         </Shelf>
         <Box bleedY={2}>
-          <IconButton size="24px" onClick={toggleExpanded}>
-            {expanded ? <IconChevronUp /> : <IconChevronDown />}
-          </IconButton>
+          {expanded ? <IconChevronUp /> : <IconChevronDown color={disabled ? 'textSecondary' : 'textPrimary'} />}
         </Box>
       </Shelf>
 

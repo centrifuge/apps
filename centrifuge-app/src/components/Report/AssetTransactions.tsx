@@ -1,76 +1,100 @@
-import { Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { useGetExplorerUrl } from '@centrifuge/centrifuge-react'
 import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { formatBalance } from '../../../src/utils/formatting'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
+import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
-import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { getLabelAndAmount } from '../PoolOverview/TransactionHistory'
 import { Spinner } from '../Spinner'
+import { RouterTextLink } from '../TextLink'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
-import type { TableDataRow } from './index'
-import { formatAssetTransactionType } from './utils'
 
-const noop = (v: any) => v
+type Row = {
+  type: string
+  transactionDate: string
+  activeAssetId?: string
+  assetId: string
+  assetName: string
+  fromAssetId?: string
+  fromAssetName?: string
+  toAssetId?: string
+  toAssetName?: string
+  amount: CurrencyBalance | undefined
+  hash: string
+  label: string
+  sublabel?: string
+  epochId: string
+}
 
 export function AssetTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData, txType, loan: loanId } = React.useContext(ReportContext)
   const transactions = useAssetTransactions(pool.id, new Date(startDate), new Date(endDate))
-  const explorer = useGetExplorerUrl('centrifuge')
+  const explorer = useGetExplorerUrl()
+  const basePath = useBasePath()
 
-  const columnConfig = [
+  const columns = [
     {
-      header: 'Asset ID',
-      align: 'center',
-      csvOnly: false,
-      formatter: noop,
-      width: '80px',
-    },
-    {
-      header: 'Asset name',
+      header: 'Transaction date',
       align: 'left',
       csvOnly: false,
-      formatter: noop,
+      cell: ({ transactionDate }: Row) => (
+        <Text as="span" variant="body3">
+          {formatDate(transactionDate)}
+        </Text>
+      ),
+    },
+    {
+      header: 'Transaction',
+      align: 'left',
+      csvOnly: false,
+      width: '38%',
+      cell: ({ assetId, assetName, toAssetId, toAssetName, label, sublabel, fromAssetName, fromAssetId }: Row) => {
+        const base = `${basePath}/${pool.id}/assets/`
+        const isCashTransfer = label === 'Cash transfer from'
+        return (
+          <Text as="span" variant="body3">
+            {label}{' '}
+            <RouterTextLink to={`${base}${isCashTransfer ? fromAssetId?.split('-')[1] : assetId}`}>
+              {isCashTransfer ? fromAssetName : assetName}
+            </RouterTextLink>{' '}
+            {toAssetName ? (
+              <>
+                {' '}
+                {sublabel ? sublabel : `to`}{' '}
+                <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}> {toAssetName}</RouterTextLink>
+              </>
+            ) : null}
+          </Text>
+        )
+      },
+    },
+    {
+      header: 'Amount',
+      align: 'left',
+      csvOnly: false,
+      cell: ({ amount }: Row) => (
+        <Text variant="body3">{typeof amount === 'number' ? formatBalance(amount, pool.currency.symbol, 2) : '-'}</Text>
+      ),
     },
     {
       header: 'Epoch',
       align: 'center',
       csvOnly: false,
-      formatter: noop,
+      cell: ({ epochId }: Row) => <Text variant="body3">{epochId}</Text>,
     },
     {
-      header: 'Date',
-      align: 'left',
-      csvOnly: false,
-      formatter: formatDate,
-    },
-    {
-      header: 'Transaction type',
-      align: 'left',
-      csvOnly: false,
-      formatter: noop,
-    },
-    {
-      header: 'Currency amount',
-      align: 'left',
-      csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
-    },
-    {
-      header: 'Currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
-    {
-      header: 'Transaction',
+      header: 'View transaction',
       align: 'center',
       csvOnly: false,
-      width: '80px',
-      formatter: (v: any) => (
+      width: '120px',
+      cell: ({ hash }: Row) => (
         <IconAnchor
-          href={explorer.tx(v)}
+          href={explorer.tx(hash)}
           target="_blank"
           rel="noopener noreferrer"
           title="View account on block explorer"
@@ -81,78 +105,59 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     },
   ]
 
-  const data: TableDataRow[] = React.useMemo(() => {
-    if (!transactions) {
-      return []
-    }
+  const data = transactions
+    ?.map((transaction) => {
+      const { label, sublabel } = getLabelAndAmount(transaction)
 
-    return transactions
-      ?.map((tx) => ({
-        name: '',
-        value: [
-          tx.asset.id.split('-').at(-1)!,
-          tx.asset.name || `Asset ${tx.asset.id.split('-').at(-1)!}`,
-          tx.epochId.split('-').at(-1)!,
-          tx.timestamp.toISOString(),
-          formatAssetTransactionType(tx.type),
-          tx.amount?.toFloat() ?? '',
-          pool.currency.symbol,
-          tx.hash,
-        ],
-        heading: false,
-      }))
-      .filter((row) => {
-        if (!loanId || loanId === 'all') return true
-        return loanId === row.value[0]
-      })
-      .filter((row) => (!txType || txType === 'all' ? true : row.value[3] === txType))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions, txType, loanId])
-
-  const columns = columnConfig
-    .map((col, index) => ({
-      align: col.align,
-      header: col.header,
-      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
-      csvOnly: col.csvOnly,
-      width: col.width ?? '252px',
-    }))
-    .filter((col) => !col.csvOnly)
-
-  React.useEffect(() => {
-    if (!data.length) {
-      return
-    }
-
-    const formatted = data.map(({ value: values }) =>
-      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
-    )
-    const dataUrl = getCSVDownloadUrl(formatted)
-    if (!dataUrl) {
-      throw new Error('Failed to generate CSV')
-    }
-
-    setCsvData({
-      dataUrl,
-      fileName: `${pool.id}-asset-transactions-${formatDate(startDate, {
-        weekday: 'short',
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      }).replaceAll(',', '')}-${formatDate(endDate, {
-        weekday: 'short',
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      }).replaceAll(',', '')}.csv`,
+      return {
+        transactionDate: transaction.timestamp.toISOString(),
+        assetId: transaction.asset.id.split('-')[1],
+        assetName: transaction.asset.name,
+        fromAssetId: transaction.fromAsset?.id,
+        fromAssetName: transaction.fromAsset?.name,
+        toAssetId: transaction.toAsset?.id,
+        toAssetName: transaction.toAsset?.name,
+        amount: transaction.amount?.toFloat() ?? '',
+        hash: transaction.hash,
+        label,
+        sublabel,
+        epochId: transaction.epochId.split('-').at(-1)!,
+      }
+    })
+    .filter((row) => {
+      if (!loanId || loanId === 'all') return true
+      return loanId === row.assetId
     })
 
-    return () => {
-      setCsvData(undefined)
-      URL.revokeObjectURL(dataUrl)
+  React.useEffect(() => {
+    if (transactions) {
+      const csvData = transactions.map((transaction) => {
+        const { amount } = getLabelAndAmount(transaction)
+        return {
+          'Transaction Date': `"${formatDate(transaction.timestamp, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            timeZoneName: 'short',
+          })}"`,
+          Transaction: explorer.tx(transaction.hash),
+          Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
+          epoch: transaction.epochId,
+        }
+      })
+
+      const dataUrl = getCSVDownloadUrl(csvData)
+      if (dataUrl) {
+        setCsvData({
+          dataUrl,
+          fileName: 'asset-transactions.csv',
+        })
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data])
+  }, [transactions, setCsvData])
 
   if (!transactions) {
     return <Spinner mt={2} />

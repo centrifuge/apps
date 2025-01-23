@@ -12,10 +12,10 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
-import { createEmptyTranche } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
+import { createEmptyTranche } from './types'
 import { validate } from './validate'
 
 const MAX_TRANCHES = 3
@@ -157,7 +157,7 @@ export function TrancheInput({
                       {...field}
                       label={<Tooltips type="minimumInvestment" label="Min. investment*" />}
                       placeholder="0.00"
-                      currency={values.currency}
+                      currency={values.assetDenomination}
                       errorMessage={meta.touched ? meta.error : undefined}
                       onChange={(value) => form.setFieldValue(field.name, value)}
                       onBlur={() => form.setFieldTouched(field.name, true)}

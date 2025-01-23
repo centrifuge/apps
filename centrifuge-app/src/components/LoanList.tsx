@@ -1,5 +1,5 @@
 import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
-import { AssetSnapshot, CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -27,9 +27,8 @@ import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { useAllPoolAssetSnapshots, usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
-import { LoadBoundary } from './LoadBoundary'
 import { prefetchRoute } from './Root'
 
 type Row = (Loan | TinlakeLoan) & {
@@ -46,14 +45,14 @@ type Row = (Loan | TinlakeLoan) & {
 
 type Props = {
   loans: Loan[] | TinlakeLoan[]
-  snapshots: AssetSnapshot[]
 }
 
-export function LoanList({ loans, snapshots }: Props) {
+export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
   if (!poolId) throw new Error('Pool not found')
 
   const navigate = useNavigate()
+  const { data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toISOString().slice(0, 10))
   const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()
@@ -243,8 +242,6 @@ export function LoanList({ loans, snapshots }: Props) {
         ]),
   ].filter(Boolean) as Column[]
 
-  const pagination = usePagination({ data: rows, pageSize: 20 })
-
   const csvData = React.useMemo(() => {
     if (!rows.length) return undefined
 
@@ -265,6 +262,8 @@ export function LoanList({ loans, snapshots }: Props) {
   }, [rows, pool])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
+  const filteredData = showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero())
+  const pagination = usePagination({ data: filteredData, pageSize: 20 })
 
   return (
     <>
@@ -275,7 +274,7 @@ export function LoanList({ loans, snapshots }: Props) {
             <Checkbox
               label={
                 <Text color="textSecondary" variant="body2">
-                  Show repaid assets
+                  Show closed assets
                 </Text>
               }
               onChange={(e) => setShowRepaid(!showRepaid)}
@@ -290,7 +289,7 @@ export function LoanList({ loans, snapshots }: Props) {
             View asset transactions
           </Button>
           <AnchorButton
-            href={csvUrl}
+            href={csvUrl ?? ''}
             download={`pool-assets-${poolId}.csv`}
             variant="inverted"
             icon={IconDownload}
@@ -304,18 +303,16 @@ export function LoanList({ loans, snapshots }: Props) {
       </Box>
       <PaginationContainer pagination={pagination}>
         <Stack gap={2}>
-          <LoadBoundary>
-            <Box overflow="auto">
-              <DataTable
-                data={showRepaid ? rows : rows.filter((row) => !row?.marketValue?.isZero())}
-                columns={columns}
-                onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
-                pageSize={20}
-                page={pagination.page}
-                defaultSortKey="maturityDate"
-              />
-            </Box>
-          </LoadBoundary>
+          <Box overflow="auto">
+            <DataTable
+              data={filteredData}
+              columns={columns}
+              onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+              pageSize={20}
+              page={pagination.page}
+              defaultSortKey="maturityDate"
+            />
+          </Box>
           {pagination.pageCount > 1 && (
             <Box alignSelf="center">
               <Pagination />
@@ -382,13 +379,18 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
     </Shelf>
   )
 }
-export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean) {
+
+export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean, isPresentValue?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
 
     case 'Active':
-      if ('presentValue' in l) {
+      if ('outstandingQuantity' in l.pricing && !isPresentValue) {
+        return format ? formatBalance(l.pricing.outstandingQuantity) : l.pricing.outstandingQuantity
+      }
+
+      if ('presentValue' in l && isPresentValue) {
         return format ? formatBalance(l.presentValue) : l.presentValue
       }
 

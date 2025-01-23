@@ -13,10 +13,10 @@ import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { CreatePoolValues } from '../../IssuerCreatePool'
 import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
 import { PoolRatingInput } from '../../IssuerCreatePool/PoolRatingInput'
 import { PoolReportsInput } from '../../IssuerCreatePool/PoolReportsInput'
+import { CreatePoolValues } from '../../IssuerCreatePool/types'
 
 type Values = Pick<
   CreatePoolValues,

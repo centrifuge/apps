@@ -1,10 +1,11 @@
-import { Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, Perquintill, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { NetworkIcon, formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { evmChains } from '../../../src/config'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
@@ -22,7 +23,6 @@ import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
 import { RouterLinkButton } from '../RouterLinkButton'
-import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
 import { usePortfolioTokens } from './usePortfolio'
 
@@ -35,7 +35,11 @@ export type Holding = {
   tokenPrice: Decimal
   showActions?: boolean
   address?: string
-  connectedNetwork?: string | null
+  chainId?: number
+  realizedProfit?: CurrencyBalance
+  unrealizedProfit?: CurrencyBalance
+  yieldSinceInception?: Perquintill | null
+  connectedNetwork?: any
 }
 
 const columns: Column[] = [
@@ -45,9 +49,23 @@ const columns: Column[] = [
     cell: (token: Holding) => {
       return <TokenWithIcon {...token} />
     },
+    width: '300px',
   },
   {
-    header: <Tooltips type="cfgPrice" label="Token price" />,
+    align: 'left',
+    header: 'Network',
+    cell: ({ chainId }: Holding) => {
+      if (!chainId) return
+      return (
+        <Box display={'flex'}>
+          <NetworkIcon size="iconSmall" network={chainId || 'centrifuge'} />
+          <Text style={{ marginLeft: 4 }}> {(evmChains as any)[chainId]?.name || 'Centrifuge'}</Text>
+        </Box>
+      )
+    },
+  },
+  {
+    header: <SortableTableHeader label="Token price" />,
     cell: ({ tokenPrice }: Holding) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
@@ -79,6 +97,30 @@ const columns: Column[] = [
       )
     },
     sortKey: 'marketValue',
+    align: 'left',
+  },
+  {
+    header: <SortableTableHeader label="Realized P&L" />,
+    cell: ({ realizedProfit }: Holding) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(realizedProfit || 0, 'USD', 2)}
+        </Text>
+      )
+    },
+    sortKey: 'realizedProfit',
+    align: 'left',
+  },
+  {
+    header: <SortableTableHeader label="Unrealized P&L" />,
+    cell: ({ unrealizedProfit }: Holding) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(unrealizedProfit || 0, 'USD', 2)}
+        </Text>
+      )
+    },
+    sortKey: 'unrealizedProfit',
     align: 'left',
   },
   {
@@ -139,6 +181,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       showActions,
+      chainId: token.chainId,
     })),
     ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balancePending.isZero()) || []).map((balance) => {
       const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)
@@ -223,6 +266,7 @@ export function Holdings({
   address?: string
   chainId?: number
 }) {
+  const theme = useTheme()
   const { search, pathname } = useLocation()
   const navigate = useNavigate()
   const params = new URLSearchParams(search)
@@ -237,7 +281,7 @@ export function Holdings({
   const tokens = useHoldings(address, chainId, showActions)
 
   return address && tokens.length ? (
-    <>
+    <Box mt={2}>
       {investPoolId || redeemPoolId ? (
         <InvestRedeemDrawer
           poolId={investPoolId || redeemPoolId || ''}
@@ -251,8 +295,9 @@ export function Holdings({
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
-      <DataTable columns={columns} data={tokens} defaultSortKey="position" />
-    </>
+      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder />
+      <Box borderBottom={`1px solid ${theme.colors.backgroundTertiary}`} />
+    </Box>
   ) : (
     <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
       <Text color="textSecondary" variant="body2">

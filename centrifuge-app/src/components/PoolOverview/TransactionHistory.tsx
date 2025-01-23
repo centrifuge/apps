@@ -46,6 +46,105 @@ export const TransactionHistory = ({
   )
 }
 
+export const getLabelAndAmount = (transaction: AssetTransaction, activeAssetId?: string) => {
+  const netFlow = activeAssetId
+    ? activeAssetId === transaction.toAsset?.id.split('-')[1]
+      ? 'positive'
+      : 'negative'
+    : 'neutral'
+
+  if (transaction.type === 'CASH_TRANSFER') {
+    return {
+      label: 'Cash transfer from',
+      amount: transaction.amount,
+      netFlow,
+    }
+  }
+
+  if (transaction.type === 'DEPOSIT_FROM_INVESTMENTS') {
+    return {
+      label: 'Deposit from investments into',
+      amount: transaction.amount,
+      netFlow: 'positive',
+    }
+  }
+
+  if (transaction.type === 'WITHDRAWAL_FOR_REDEMPTIONS') {
+    return {
+      label: 'Withdrawal for redemptions',
+      amount: transaction.amount,
+      netFlow: 'negative',
+    }
+  }
+
+  if (transaction.type === 'WITHDRAWAL_FOR_FEES') {
+    return {
+      label: 'Withdrawal for fees',
+      amount: transaction.amount,
+      netFlow: 'negative',
+    }
+  }
+
+  if (transaction.type === 'BORROWED') {
+    return {
+      label: 'Purchase of',
+      amount: transaction.amount,
+      netFlow,
+    }
+  }
+
+  if (transaction.type === 'INCREASE_DEBT') {
+    return {
+      label: 'Correction ↑ of',
+      amount: transaction.amount,
+      netFlow: 'positive',
+    }
+  }
+
+  if (transaction.type === 'DECREASE_DEBT') {
+    return {
+      label: 'Correction ↓ of',
+      amount: transaction.amount,
+      netFlow: 'negative',
+    }
+  }
+
+  // TODO: ideally, if both principalAmount and interestAmount are non-zero, there should be 2 separate transactions
+  if (
+    transaction.type === 'REPAID' &&
+    !new BN(transaction.interestAmount || 0).isZero() &&
+    !new BN(transaction.principalAmount || 0).isZero()
+  ) {
+    return {
+      label: 'Principal & interest payment',
+      amount: new CurrencyBalance(
+        new BN(transaction.principalAmount || 0).add(new BN(transaction.interestAmount || 0)),
+        transaction.principalAmount!.decimals
+      ),
+      netFlow,
+    }
+  }
+
+  if (
+    transaction.type === 'REPAID' &&
+    !new BN(transaction.interestAmount || 0).isZero() &&
+    new BN(transaction.principalAmount || 0).isZero()
+  ) {
+    return {
+      label: 'Interest payment from',
+      amount: transaction.interestAmount,
+      netFlow,
+    }
+  }
+
+  return {
+    label: 'Sale of',
+    amount: transaction.principalAmount,
+    netFlow,
+    sublabel: 'settled into',
+  }
+}
+
 export const TransactionHistoryTable = ({
   transactions,
   poolId,
@@ -58,104 +157,6 @@ export const TransactionHistoryTable = ({
   preview?: boolean
 }) => {
   const basePath = useBasePath('/pools')
-  const getLabelAndAmount = (transaction: AssetTransaction) => {
-    const netFlow = activeAssetId
-      ? activeAssetId === transaction.toAsset?.id.split('-')[1]
-        ? 'positive'
-        : 'negative'
-      : 'neutral'
-
-    if (transaction.type === 'CASH_TRANSFER') {
-      return {
-        label: 'Cash transfer from',
-        amount: transaction.amount,
-        netFlow,
-      }
-    }
-
-    if (transaction.type === 'DEPOSIT_FROM_INVESTMENTS') {
-      return {
-        label: 'Deposit from investments into',
-        amount: transaction.amount,
-        netFlow: 'positive',
-      }
-    }
-
-    if (transaction.type === 'WITHDRAWAL_FOR_REDEMPTIONS') {
-      return {
-        label: 'Withdrawal for redemptions',
-        amount: transaction.amount,
-        netFlow: 'negative',
-      }
-    }
-
-    if (transaction.type === 'WITHDRAWAL_FOR_FEES') {
-      return {
-        label: 'Withdrawal for fees',
-        amount: transaction.amount,
-        netFlow: 'negative',
-      }
-    }
-
-    if (transaction.type === 'BORROWED') {
-      return {
-        label: 'Purchase of',
-        amount: transaction.amount,
-        netFlow,
-      }
-    }
-
-    if (transaction.type === 'INCREASE_DEBT') {
-      return {
-        label: 'Correction ↑ of',
-        amount: transaction.amount,
-        netFlow: 'positive',
-      }
-    }
-
-    if (transaction.type === 'DECREASE_DEBT') {
-      return {
-        label: 'Correction ↓ of',
-        amount: transaction.amount,
-        netFlow: 'negative',
-      }
-    }
-
-    // TODO: ideally, if both principalAmount and interestAmount are non-zero, there should be 2 separate transactions
-    if (
-      transaction.type === 'REPAID' &&
-      !new BN(transaction.interestAmount || 0).isZero() &&
-      !new BN(transaction.principalAmount || 0).isZero()
-    ) {
-      return {
-        label: 'Principal & interest payment',
-        amount: new CurrencyBalance(
-          new BN(transaction.principalAmount || 0).add(new BN(transaction.interestAmount || 0)),
-          transaction.principalAmount!.decimals
-        ),
-        netFlow,
-      }
-    }
-
-    if (
-      transaction.type === 'REPAID' &&
-      !new BN(transaction.interestAmount || 0).isZero() &&
-      new BN(transaction.principalAmount || 0).isZero()
-    ) {
-      return {
-        label: 'Interest payment from',
-        amount: transaction.interestAmount,
-        netFlow,
-      }
-    }
-
-    return {
-      label: 'Sale of',
-      amount: transaction.principalAmount,
-      netFlow,
-      sublabel: 'settled into',
-    }
-  }
 
   const transformedTransactions =
     transactions
@@ -169,7 +170,7 @@ export const TransactionHistoryTable = ({
       .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1)) || []
 
   const csvData = transformedTransactions.map((transaction) => {
-    const { label, amount } = getLabelAndAmount(transaction)
+    const { label, amount } = getLabelAndAmount(transaction, activeAssetId)
     const [, id] = transaction.asset.id.split('-')
     return {
       Type: label,
@@ -197,7 +198,7 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const { amount, netFlow, label, sublabel } = getLabelAndAmount(transaction)
+      const { amount, netFlow, label, sublabel } = getLabelAndAmount(transaction, activeAssetId)
       return {
         activeAssetId,
         netFlow,
@@ -292,7 +293,7 @@ export const TransactionHistoryTable = ({
               View all
             </AnchorButton>
           )}
-          {transactions?.length && (
+          {transactions?.length ? (
             <AnchorButton
               href={csvUrl}
               download={`pool-transaction-history-${poolId}.csv`}
@@ -304,7 +305,7 @@ export const TransactionHistoryTable = ({
             >
               Download
             </AnchorButton>
-          )}
+          ) : null}
         </Shelf>
       </Shelf>
       <Box overflow="auto">

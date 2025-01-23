@@ -42,9 +42,6 @@ export const TrancheTokenCards = ({
     return 'mezzanine'
   }
 
-  const getTarget = (tranche: Token) =>
-    (isTinlakePool && tranche.seniority === 0) || poolId === DYF_POOL_ID || poolId === NS3_POOL_ID
-
   const columns = useMemo(() => {
     return [
       {
@@ -121,6 +118,8 @@ export const TrancheTokenCards = ({
   }, [pool.tranches, metadata, poolId, pool?.currency.symbol])
 
   const dataTable = useMemo(() => {
+    const getTarget = (tranche: Token) =>
+      (isTinlakePool && tranche.seniority === 0) || poolId === DYF_POOL_ID || poolId === NS3_POOL_ID
     return trancheTokens.map((tranche) => {
       const calculateApy = (trancheToken: Token) => {
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
@@ -145,7 +144,7 @@ export const TrancheTokenCards = ({
         isTarget: getTarget(tranche),
       }
     })
-  }, [trancheTokens, getTarget])
+  }, [trancheTokens, daysSinceCreation, isTinlakePool, poolId])
 
   return (
     <Shelf gap={3}>
@@ -156,16 +155,7 @@ export const TrancheTokenCards = ({
         overflow="auto"
         borderBottom={`1px solid ${theme.colors.borderPrimary}`}
       >
-        <DataTable
-          headerStyles={{
-            backgroundColor: 'white',
-            border: 'transparent',
-            borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
-          }}
-          columns={columns}
-          data={dataTable}
-          hideBorder
-        />
+        <DataTable columns={columns} data={dataTable} hideBorder hideHeader />
       </Box>
     </Shelf>
   )

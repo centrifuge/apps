@@ -29,7 +29,7 @@ function PositionerInner({
     isOpen: isShown,
   })
 
-  return render({ ...overlayProps, pointer: restProps.placement })
+  return render({ ...overlayProps, pointer: restProps.placement ?? 'bottom' })
 }
 
 export function Positioner(props: PositionerProps) {

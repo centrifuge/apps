@@ -1,7 +1,7 @@
 import { Box, IconChevronDown, IconChevronRight, IconUser, Menu as Panel, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useMatch } from 'react-router'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Toggle } from './Toggle'
 
@@ -10,6 +10,12 @@ type IssuerMenuProps = {
   stacked?: boolean
   children?: React.ReactNode
 }
+
+const StyledPanel = styled(Panel)`
+  & > div {
+    max-height: 50vh;
+  }
+`
 
 export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
   const match = useMatch('/issuer/*')
@@ -56,9 +62,9 @@ export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
         Issuer
         {isLarge &&
           (open ? (
-            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
+            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} color="textInverted" />
           ) : (
-            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} />
+            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} color="textInverted" />
           ))}
       </Toggle>
 
@@ -81,7 +87,7 @@ export function IssuerMenu({ defaultOpen = false, children }: IssuerMenuProps) {
             {children}
           </Stack>
         ) : (
-          <Panel backgroundColor={theme.colors.backgroundInverted}>{children}</Panel>
+          <StyledPanel backgroundColor={theme.colors.backgroundInverted}>{children}</StyledPanel>
         )}
       </Box>
     </Box>

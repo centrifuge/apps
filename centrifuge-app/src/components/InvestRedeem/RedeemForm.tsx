@@ -90,8 +90,15 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
   const isApproving = state.pendingAction === 'approveTrancheToken' && isPending
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
+  const isPreAction = state.pendingAction === 'preAction' && isPending
 
-  const preSubmitAction = state.needsTrancheTokenApproval(inputToNumber(form.values.amount))
+  const preSubmitAction = state.needsPreAction('redeem')
+    ? {
+        onClick: () => actions.preAction('redeem'),
+        loading: isPreAction,
+        label: state.needsPreAction('redeem'),
+      }
+    : state.needsTrancheTokenApproval(inputToNumber(form.values.amount))
     ? {
         onClick: () =>
           actions.approveTrancheToken(TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)),

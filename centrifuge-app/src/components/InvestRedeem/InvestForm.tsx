@@ -92,12 +92,20 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
   const isInvesting = state.pendingAction === 'invest' && isPending
   const isCancelling = state.pendingAction === 'cancelInvest' && isPending
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
+  const isPreAction = state.pendingAction === 'preAction' && isPending
 
-  const preSubmitAction = state.needsPoolCurrencyApproval(inputToNumber(form.values.amount))
+  const preSubmitAction = state.needsPreAction('invest')
+    ? {
+        onClick: () => actions.preAction('invest'),
+        loading: isPreAction,
+        label: state.needsPreAction('invest'),
+      }
+    : state.needsPoolCurrencyApproval(inputToNumber(form.values.amount))
     ? {
         onClick: () =>
           actions.approvePoolCurrency(CurrencyBalance.fromFloat(form.values.amount, state.poolCurrency!.decimals)),
         loading: isApproving,
+        label: investLabel,
       }
     : null
 
@@ -206,16 +214,28 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
             {state.collectType && !claimDismissed ? (
               <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
-            {state.canCancelOrder && !state.collectType && hasPendingOrder && (
-              <Button
-                onClick={() => actions.cancelInvest()}
-                loading={isCancelling}
-                disabled={pool.epoch.status !== 'ongoing'}
-                variant="secondary"
-              >
-                {state.canChangeOrder ? 'Cancel' : 'Cancel order'}
-              </Button>
-            )}
+            {state.canCancelOrder &&
+              !state.collectType &&
+              hasPendingOrder &&
+              (state.needsPreAction('cancelInvest') ? (
+                <Button
+                  onClick={() => actions.preAction('cancelInvest')}
+                  loading={isPreAction}
+                  disabled={pool.epoch.status !== 'ongoing'}
+                  variant="secondary"
+                >
+                  {state.needsPreAction('cancelInvest')}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => actions.cancelInvest()}
+                  loading={isCancelling}
+                  disabled={pool.epoch.status !== 'ongoing'}
+                  variant="secondary"
+                >
+                  {state.canChangeOrder ? 'Cancel' : 'Cancel order'}
+                </Button>
+              ))}
           </ButtonGroup>
         </Stack>
       </Form>

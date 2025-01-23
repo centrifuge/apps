@@ -283,6 +283,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return permit as Permit
   }
 
+  function enableCentrifugeRouter(args: [lpAddress: string, chainId: number], options: TransactionRequest = {}) {
+    const [lpAddress, chainId] = args
+    const centrifugeRouterAddress = getCentrifugeRouterAddress(chainId)
+
+    return pending(contract(centrifugeRouterAddress, new Interface(ABI.CentrifugeRouter)).enable(lpAddress, options))
+  }
+
   function increaseInvestOrder(
     args: [lpAddress: string, order: BN, chainId: number],
     options: TransactionRequest = {}
@@ -573,7 +580,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const poolData = await multicall<{
       isActive: boolean
       canTrancheBeDeployed: Record<string, boolean>
-      trancheTokens: Record<string, string>
+      trancheTokens: Record<string, string | null>
       liquidityPools: Record<string, Record<string, string | null>>
       currencyNeedsAdding: Record<string, boolean>
     }>(
@@ -834,6 +841,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         call: ['function maxRedeem(address) view returns (uint256)', user],
         returns: [['maxRedeem', currencyBalanceTransform]],
       },
+      {
+        target: getCentrifugeRouterAddress(chainId),
+        call: ['function isEnabled(address, address) view returns (bool)', lp.lpAddress, user],
+        returns: [['isRouterEnabled']],
+      },
     ]
 
     const pool = await multicall<{
@@ -851,6 +863,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       claimableCancelRedeemRequest: TokenBalance
       pendingCancelDepositRequest: boolean
       pendingCancelRedeemRequest: boolean
+      isRouterEnabled: boolean
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
@@ -882,5 +895,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     getLiquidityPoolInvestment,
     getRecentLPEvents,
     getCentrifugeRouterAllowance,
+    enableCentrifugeRouter,
   }
 }

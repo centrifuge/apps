@@ -4,12 +4,14 @@ import {
   IconGlobe,
   IconInvestments,
   IconNft,
+  IconPlus,
   IconSwitch,
   IconWallet,
   MenuItemGroup,
   Shelf,
   Stack,
 } from '@centrifuge/fabric'
+import styled from 'styled-components'
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
@@ -23,12 +25,34 @@ import { NavManagementMenu } from './NavManagementMenu'
 import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
+const COLOR = '#7C8085'
+
+const StyledRouterLinkButton = styled(RouterLinkButton)`
+  width: 100%;
+  & > span {
+    background-color: ${COLOR};
+    border-color: transparent;
+    color: white;
+    margin-bottom: 20px;
+
+    &:hover {
+      box-shadow: 0px 0px 0px 3px #7c8085b3;
+      background-color: ${COLOR};
+      color: white;
+    }
+
+    &:active {
+      border-color: transparent;
+    }
+  }
+`
+
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
   const { showSwaps } = useDebugFlags()
-  const transactions = useTransactionsByAddress(address)
+  const { data: transactions } = useTransactionsByAddress(address)
 
   return (
     <Shelf
@@ -130,8 +154,8 @@ export function Menu() {
 
 function CreatePool() {
   return (
-    <RouterLinkButton to="/issuer/create-pool" small>
+    <StyledRouterLinkButton icon={<IconPlus size="iconSmall" />} to="/issuer/create-pool" small variant="inverted">
       Create pool
-    </RouterLinkButton>
+    </StyledRouterLinkButton>
   )
 }

@@ -1,6 +1,9 @@
 import { CurrencyBalance, addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Grid, IconExternalLink, IconGlobe, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { useTheme } from 'styled-components'
+import { AnchorTextLink } from '../../../src/components/TextLink'
+import primePageImage from '../../assets/images/prime_page_image.svg'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { formatDate } from '../../utils/date'
@@ -15,29 +18,60 @@ export default function PrimePage() {
 }
 
 function Prime() {
+  const theme = useTheme()
   return (
     <>
-      <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5} pb={3}>
-        <Text variant="heading1">Centrifuge Prime</Text>
-        <Box maxWidth={800}>
-          <Text variant="body1">
-            Centrifuge Prime was built to meet the needs of large decentralized organizations and protocols. Through
-            Centrifuge Prime, DeFi native organizations can integrate with the largest financial markets in the world
-            and take advantage of real yields from real economic activity - all onchain. Assets tailored to your needs,
-            processes adapted to your governance, and all through decentralized rails.
+      <LayoutSection alignItems="flex-start" pt={3} pb={3}>
+        <Box display="flex" alignItems="center" ml={2}>
+          <Box
+            backgroundColor="backgroundSecondary"
+            borderRadius={28}
+            height={40}
+            width={40}
+            border={`6px solid ${theme.colors.borderTertiary}`}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            padding="10px"
+          >
+            <IconGlobe size={20} />
+          </Box>
+          <Text variant="heading1" style={{ marginLeft: 8 }}>
+            Centrifuge Prime
           </Text>
         </Box>
-        <Box bleedX={2} bleedY={1}>
-          <AnchorButton
-            href="https://centrifuge.io/prime/"
-            target="_blank"
-            iconRight={IconExternalLink}
-            variant="tertiary"
-          >
-            Go to website
-          </AnchorButton>
-        </Box>
+        <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={2} mx={2} />
+        <Grid
+          gridTemplateColumns={['1fr', '1fr 1fr']}
+          gap={6}
+          mt={2}
+          padding="0px 50px"
+          style={{ placeItems: 'center' }}
+        >
+          <Box>
+            <Text variant="body1" style={{ lineHeight: '25.6px' }}>
+              Centrifuge Prime was built to meet the needs of large decentralized organizations and protocols. Through
+              Centrifuge Prime, DeFi native organizations can integrate with the largest financial markets in the world
+              and take advantage of real yields from real economic activity - all onchain. Assets tailored to your
+              needs, processes adapted to your governance, and all through decentralized rails.
+            </Text>
+            <Box display="flex" alignItems="center" mt={4}>
+              <AnchorTextLink
+                href="https://centrifuge.io/prime/"
+                target="_blank"
+                style={{ textDecoration: 'none', marginRight: 8 }}
+              >
+                Go to website
+              </AnchorTextLink>
+              <IconExternalLink size={20} />
+            </Box>
+          </Box>
+          <Box>
+            <Box as="img" src={primePageImage} />
+          </Box>
+        </Grid>
       </LayoutSection>
+      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={3} mx={3} />
       <DaoPortfoliosTable />
     </>
   )
@@ -134,30 +168,6 @@ function DaoPortfoliosTable() {
         trancheBalances[trancheId] = { balance, tokenPrice }
       }
     })
-    // const trancheBalances = !!account
-    //   ? Object.fromEntries(
-    //       account.trancheBalances.nodes.map((tranche: any) => {
-    //         const pool = pools?.find((p) => p.id === tranche.poolId)
-    //         const decimals = pool?.currency.decimals ?? 18
-    //         const tokenPrice = pool?.tranches.find((t) => tranche.trancheId.endsWith(t.id))?.tokenPrice?.toFloat() ?? 1
-    //         let balance = new CurrencyBalance(
-    //           new BN(tranche.claimableTrancheTokens).add(new BN(tranche.pendingRedeemTrancheTokens)),
-    //           decimals
-    //         ).toFloat()
-
-    //         const subqueryCurrencies = account?.currencyBalances.nodes.filter(
-    //           (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
-    //         )
-    //         if (subqueryCurrencies.length) {
-    //           balance += subqueryCurrencies.reduce(
-    //             (acc: number, cur: any) => acc + new CurrencyBalance(cur.amount, decimals).toFloat(),
-    //             0
-    //           )
-    //         }
-    //         return [tranche.trancheId.split('-')[1], { balance, tokenPrice }]
-    //       })
-    //     )
-    //   : {}
     const totalValue = Object.values(trancheBalances)?.reduce(
       (acc, { balance, tokenPrice }) => acc + balance * tokenPrice,
       0
@@ -184,6 +194,7 @@ function DaoPortfoliosTable() {
           <Text>{row.name}</Text>
         </Shelf>
       ),
+      width: '2fr',
     },
     {
       align: 'left',
@@ -196,8 +207,10 @@ function DaoPortfoliosTable() {
         />
       ),
       cell: (row: Row) => <Text>{getNetworkName(row.network)}</Text>,
+      width: '2fr',
     },
     {
+      align: 'left',
       header: <SortableTableHeader label="Portfolio value" />,
       cell: (row: Row) => (
         <TextWithPlaceholder isLoading={isSubqueryLoading}>
@@ -205,6 +218,7 @@ function DaoPortfoliosTable() {
         </TextWithPlaceholder>
       ),
       sortKey: 'value',
+      width: '2fr',
     },
     {
       align: 'left',
@@ -219,7 +233,10 @@ function DaoPortfoliosTable() {
   ]
 
   return (
-    <LayoutSection title="DAO portfolios">
+    <Box mt={2} px={4}>
+      <Text variant="heading4" style={{ marginBottom: 12 }}>
+        Portfolios
+      </Text>
       <DataTable
         columns={columns}
         data={filters.data}
@@ -227,6 +244,6 @@ function DaoPortfoliosTable() {
         defaultSortOrder="desc"
         onRowClicked={(row: Row) => `/prime/${row.slug}`}
       />
-    </LayoutSection>
+    </Box>
   )
 }

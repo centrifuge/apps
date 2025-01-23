@@ -10,6 +10,7 @@ import { FeeTransactions } from './FeeTransactions'
 import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
 import { OracleTransactions } from './OracleTransactions'
+import Orders from './Orders'
 import { PoolBalance } from './PoolBalance'
 import { ProfitAndLoss } from './ProfitAndLoss'
 import { ReportContext } from './ReportContext'
@@ -38,6 +39,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'cash-flow-statement' && <CashflowStatement pool={pool} />}
         {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
         {report === 'profit-and-loss' && <ProfitAndLoss pool={pool} />}
+        {report === 'orders' && <Orders pool={pool} />}
       </Box>
     </Box>
   )

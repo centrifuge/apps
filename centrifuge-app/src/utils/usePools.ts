@@ -109,7 +109,7 @@ export function useAggregatedPoolFeeStatesByGroup(
 }
 
 export function useTransactionsByAddress(address?: string) {
-  const [result] = useCentrifugeQuery(
+  const [result, isLoading] = useCentrifugeQuery(
     ['txByAddress', address],
     (cent) => cent.pools.getTransactionsByAddress([address!]),
     {
@@ -117,7 +117,7 @@ export function useTransactionsByAddress(address?: string) {
     }
   )
 
-  return result
+  return { data: result, isLoading }
 }
 
 export function useInvestorList(poolId: string, trancheId?: string) {
@@ -227,12 +227,11 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
   )
 }
 
-export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspense = true) {
+export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
     ['dailyPoolStates', poolId, from, to],
     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
     {
-      suspense,
       enabled: !poolId.startsWith('0x'),
     }
   )
@@ -245,7 +244,6 @@ export function useDailyTranchesStates(trancheIds: string[]) {
     ['dailyTrancheStates', { trancheIds }],
     (cent) => cent.pools.getDailyTrancheStates([{ trancheIds }]),
     {
-      suspense: true,
       enabled: !!trancheIds?.length,
     }
   )
@@ -264,6 +262,11 @@ export function useDailyTVL() {
 export function usePoolOrders(poolId: string) {
   const [result] = useCentrifugeQuery(['poolOrders', poolId], (cent) => cent.pools.getPoolOrders([poolId]))
 
+  return result
+}
+
+export function usePoolOrdersByPoolId(poolId: string) {
+  const [result] = useCentrifugeQuery(['poolOrdersByPoolId', poolId], (cent) => cent.pools.getPoolOrdersById([poolId]))
   return result
 }
 

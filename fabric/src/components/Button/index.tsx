@@ -1,4 +1,5 @@
 export * from './AnchorButton'
+export * from './BackButton'
 export * from './Button'
 export * from './IconAction'
 export * from './VisualButton'

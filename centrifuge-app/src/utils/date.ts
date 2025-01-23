@@ -8,6 +8,19 @@ export function formatDate(timestamp: number | string | Date, options?: Intl.Dat
   })
 }
 
+export function formatDateAndTime(timestamp: number | string | Date, options?: Intl.DateTimeFormatOptions) {
+  return new Date(timestamp).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: 'UTC',
+    ...options,
+  })
+}
+
 export function formatDateTechnical(timestamp: number | string) {
   return new Date(timestamp).toLocaleDateString('en-US')
 }

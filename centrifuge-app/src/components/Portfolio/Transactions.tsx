@@ -1,24 +1,12 @@
 import { AssetTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { Network, formatBalance, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
-import {
-  AnchorButton,
-  Box,
-  IconExternalLink,
-  IconEye,
-  Pagination,
-  PaginationProvider,
-  Shelf,
-  Stack,
-  Text,
-  usePagination,
-} from '@centrifuge/fabric'
+import { AnchorButton, Box, Button, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
-import { RouterLinkButton } from '../RouterLinkButton'
 
 type TransactionsProps = {
   onlyMostRecent?: boolean
@@ -26,6 +14,7 @@ type TransactionsProps = {
   txTypes?: InvestorTransactionType[]
   address?: string
   trancheId?: string
+  title?: string
 }
 
 type Row = {
@@ -41,12 +30,15 @@ type Row = {
   network: Network
 }
 
-export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId }: TransactionsProps) {
+export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId, title }: TransactionsProps) {
   const explorer = useGetExplorerUrl()
+  const [expandTable, setExpandTable] = React.useState(false)
+
   const columns = [
     {
       align: 'left',
       header: 'Action',
+      width: '140px',
       cell: ({ action, tranche, pool, amount }: Row) => (
         <TransactionTypeChip
           type={action as InvestorTransactionType}
@@ -80,16 +72,16 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
       ),
     },
     {
-      align: 'right',
+      align: 'left',
       header: 'Token price',
-      cell: ({ tranche, tranchePrice, pool }: Row) => (
+      cell: ({ tranchePrice, pool }: Row) => (
         <Text as="span" variant="body3">
           {typeof tranchePrice === 'string' ? tranchePrice : formatBalance(tranchePrice, pool?.currency.symbol, 4)}
         </Text>
       ),
     },
     {
-      align: 'right',
+      align: 'left',
       header: 'Amount',
       cell: ({ amount, tranche, action, pool }: Row) => (
         <Text as="span" variant="body3">
@@ -118,10 +110,11 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
           </Stack>
         )
       },
+      width: '120px',
     },
   ].filter(Boolean) as Column[]
 
-  const transactions = useTransactionsByAddress(address)
+  const { data: transactions } = useTransactionsByAddress(address)
   const pools = usePools()
   const investorTransactions = React.useMemo(() => {
     const txs = transactions?.investorTransactions
@@ -168,43 +161,28 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData), [csvData])
 
-  const pagination = usePagination({ data: investorTransactions, pageSize: onlyMostRecent ? 3 : 15 })
-
   return address && investorTransactions?.length ? (
-    <PaginationProvider pagination={pagination}>
-      <Stack gap={2}>
-        <Box overflow="auto" width="100%">
-          <DataTable
-            data={investorTransactions}
-            columns={columns}
-            pageSize={pagination.pageSize}
-            page={pagination.page}
-          />
-        </Box>
-        {onlyMostRecent ? (
-          <Box display="inline-block">
-            <RouterLinkButton newTab to={`/history/${address}`} small variant="tertiary" icon={IconEye}>
-              View all
-            </RouterLinkButton>
+    <Stack gap={2}>
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Text variant="heading4">{title}</Text>
+        {csvUrl && (
+          <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
+            <AnchorButton small variant="inverted" href={csvUrl} download={`transaction-history-${address}.csv`}>
+              Download
+            </AnchorButton>
           </Box>
-        ) : (
-          <Shelf justifyContent="space-between">
-            {pagination.pageCount > 1 && (
-              <Shelf>
-                <Pagination />
-              </Shelf>
-            )}
-            {csvUrl && (
-              <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
-                <AnchorButton small variant="secondary" href={csvUrl} download={`transaction-history-${address}.csv`}>
-                  Export as CSV
-                </AnchorButton>
-              </Box>
-            )}
-          </Shelf>
         )}
-      </Stack>
-    </PaginationProvider>
+      </Box>
+      <Box overflow="auto" width="100%">
+        <DataTable data={expandTable ? investorTransactions : investorTransactions.slice(0, 3)} columns={columns} />
+      </Box>
+
+      {investorTransactions.length > 3 && (
+        <Button onClick={() => setExpandTable(!expandTable)} variant="inverted" style={{ width: 120 }} small>
+          {expandTable ? 'Show less' : 'View all'}
+        </Button>
+      )}
+    </Stack>
   ) : (
     <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
       <Text color="textSecondary" variant="body2">

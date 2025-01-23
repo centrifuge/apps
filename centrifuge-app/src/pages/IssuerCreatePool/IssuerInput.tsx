@@ -70,8 +70,7 @@ export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
                 form.setFieldValue('issuerLogo', file)
               }}
               label="Issuer logo"
-              requirements="JPG/PNG/SVG, max 1MB, max 480x480px"
-              buttonLabel="Choose issuer logo"
+              placeholder="JPG/PNG/SVG, max 1MB, max 480x480px"
               errorMessage={meta.touched && meta.error ? meta.error : undefined}
               accept="image/*"
             />
