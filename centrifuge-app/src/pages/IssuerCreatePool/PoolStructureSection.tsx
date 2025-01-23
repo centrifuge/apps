@@ -180,7 +180,7 @@ export const PoolStructureSection = () => {
       </Text>
       <StyledGrid gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={3} mt={2}>
         <Box>
-          <Text variant="body2">Pool structure *</Text>
+          <Text variant="heading4">Pool structure*</Text>
           <CheckboxOption
             height={113}
             name="poolStructure"
@@ -209,7 +209,7 @@ export const PoolStructureSection = () => {
           </Box>
         </Box>
         <Box>
-          <Text variant="body2">Define tranche structure *</Text>
+          <Text variant="heading4">Define tranche structure *</Text>
 
           {Array.from({ length: 3 }).map((_, index) => {
             return (
