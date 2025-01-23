@@ -44,7 +44,7 @@ export function CardPortfolioValue({ address, chainId }: { address?: string; cha
                 </Text>
               </Box>
               <TextWithPlaceholder isLoading={!currentPortfolioValue} variant="heading1">
-                {formatBalance(currentPortfolioValue || 0)}
+                {formatBalance(currentPortfolioValue || 0, 'USD')}
               </TextWithPlaceholder>
             </Box>
             <Select options={rangeFilters} onChange={(e) => setRange(e.target.value as RangeValue)} hideBorder />
