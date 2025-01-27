@@ -80,3 +80,15 @@ export function truncateText(txt: string, len: number) {
   }
   return txt
 }
+
+export function formatDecimal(decimalVal: any, displayDecimals: number, currency?: string): string {
+  const val = decimalVal.toDecimal(decimalVal.decimals)
+  const rounded = val.toFixed(displayDecimals)
+
+  // Insert commas
+  const parts = rounded.split('.')
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  const formattedWithCommas = parts.join('.')
+
+  return currency ? `${formattedWithCommas} ${currency}` : formattedWithCommas
+}

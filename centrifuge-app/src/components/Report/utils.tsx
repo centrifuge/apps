@@ -1,9 +1,12 @@
-import { PoolFeeTransactionType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, PoolFeeTransactionType } from '@centrifuge/centrifuge-js'
 import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
+import { AssetTransactionReport } from '@centrifuge/sdk'
+import { BN } from 'bn.js'
 import React from 'react'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { truncate } from '../../utils/web3'
+import { GroupBy } from './ReportContext'
 
 const investorTransactionTypes: {
   [key in InvestorTransactionType]: (args: { trancheTokenSymbol: string; poolCurrencySymbol: string }) => string
@@ -177,4 +180,148 @@ export const getColumnHeader = (timestamp: string, groupBy: string) => {
     })
   }
   return ''
+}
+
+export const getAdjustedDates = (
+  groupBy?: GroupBy,
+  startDate?: Date,
+  endDate?: Date,
+  poolCreatedAt?: Date
+): [Date, Date] => {
+  const today = new Date()
+  today.setDate(today.getDate())
+  today.setHours(0, 0, 0, 0)
+
+  if (groupBy) {
+    switch (groupBy) {
+      case 'day': {
+        const from = new Date(startDate ?? today)
+        from.setHours(0, 0, 0, 0)
+        const to = new Date(startDate ?? today)
+        to.setDate(to.getDate() + 1)
+        to.setHours(0, 0, 0, 0)
+        return [from, to]
+      }
+      case 'daily': {
+        const from = new Date(startDate ?? today)
+        from.setHours(0, 0, 0, 0)
+        const to = new Date(endDate ?? today)
+        to.setDate(to.getDate() + 1)
+        to.setHours(0, 0, 0, 0)
+        return [from, to]
+      }
+      case 'quarter':
+      case 'year': {
+        const from = poolCreatedAt ? new Date(poolCreatedAt) : today
+        return [from, today]
+      }
+      default: {
+        const to = new Date(endDate ?? today)
+        to.setDate(to.getDate() + 1)
+        to.setHours(0, 0, 0, 0)
+        return [new Date(startDate ?? today), to]
+      }
+    }
+  }
+
+  return [startDate ?? today, endDate ?? today]
+}
+
+type NetFlow = 'positive' | 'negative' | 'neutral'
+
+export function getTransactionLabelAndAmount(transaction: AssetTransactionReport, activeAssetId?: string) {
+  const { transactionType, amount, toAsset, interestAmount, principalAmount } = transaction
+
+  let netFlow: NetFlow = 'neutral'
+  if (activeAssetId) {
+    const toAssetIdPart = toAsset?.id.split('-')[1]
+    netFlow = activeAssetId === toAssetIdPart ? 'positive' : 'negative'
+  }
+
+  switch (transactionType) {
+    case 'CASH_TRANSFER':
+      return {
+        label: 'Cash transfer from',
+        amount,
+        netFlow,
+      }
+
+    case 'DEPOSIT_FROM_INVESTMENTS':
+      return {
+        label: 'Deposit from investments into',
+        amount,
+        netFlow: 'positive',
+      }
+
+    case 'WITHDRAWAL_FOR_REDEMPTIONS':
+      return {
+        label: 'Withdrawal for redemptions',
+        amount,
+        netFlow: 'negative',
+      }
+
+    case 'WITHDRAWAL_FOR_FEES':
+      return {
+        label: 'Withdrawal for fees',
+        amount,
+        netFlow: 'negative',
+      }
+
+    case 'BORROWED':
+      return {
+        label: 'Purchase of',
+        amount,
+        netFlow,
+      }
+
+    case 'INCREASE_DEBT':
+      return {
+        label: 'Correction ↑ of',
+        amount,
+        netFlow: 'positive',
+      }
+
+    case 'DECREASE_DEBT':
+      return {
+        label: 'Correction ↓ of',
+        amount,
+        netFlow: 'negative',
+      }
+
+    case 'REPAID': {
+      const interestBN = new BN(interestAmount || 0)
+      const principalBN = new BN(principalAmount || 0)
+
+      if (!interestBN.isZero() && !principalBN.isZero()) {
+        return {
+          label: 'Principal & interest payment',
+          amount: new CurrencyBalance(principalBN.add(interestBN), principalAmount?.decimals ?? 0),
+          netFlow,
+        }
+      }
+
+      if (!interestBN.isZero() && principalBN.isZero()) {
+        return {
+          label: 'Interest payment from',
+          amount: interestAmount,
+          netFlow,
+        }
+      }
+
+      return {
+        label: 'Sale of',
+        amount: principalAmount,
+        netFlow,
+        sublabel: 'settled into',
+      }
+    }
+
+    default:
+      return {
+        label: 'Sale of',
+        amount: principalAmount,
+        netFlow,
+        sublabel: 'settled into',
+      }
+  }
 }
