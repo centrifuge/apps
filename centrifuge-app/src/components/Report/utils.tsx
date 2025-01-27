@@ -1,8 +1,7 @@
-import { CurrencyBalance, PoolFeeTransactionType } from '@centrifuge/centrifuge-js'
+import { PoolFeeTransactionType } from '@centrifuge/centrifuge-js'
 import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
 import { AssetTransactionReport } from '@centrifuge/sdk'
-import { BN } from 'bn.js'
 import React from 'react'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { truncate } from '../../utils/web3'
@@ -224,6 +223,8 @@ export const getAdjustedDates = (
     }
   }
 
+  console.log(startDate ?? today, endDate ?? today)
+
   return [startDate ?? today, endDate ?? today]
 }
 
@@ -289,18 +290,15 @@ export function getTransactionLabelAndAmount(transaction: AssetTransactionReport
       }
 
     case 'REPAID': {
-      const interestBN = new BN(interestAmount || 0)
-      const principalBN = new BN(principalAmount || 0)
-
-      if (!interestBN.isZero() && !principalBN.isZero()) {
+      if (interestAmount && principalAmount && !interestAmount.isZero() && !principalAmount.isZero()) {
         return {
           label: 'Principal & interest payment',
-          amount: new CurrencyBalance(principalBN.add(interestBN), principalAmount?.decimals ?? 0),
+          amount: principalAmount.add(interestAmount),
           netFlow,
         }
       }
 
-      if (!interestBN.isZero() && principalBN.isZero()) {
+      if (interestAmount && principalAmount && !interestAmount.isZero() && principalAmount.isZero()) {
         return {
           label: 'Interest payment from',
           amount: interestAmount,

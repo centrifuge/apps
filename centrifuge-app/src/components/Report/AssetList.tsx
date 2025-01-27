@@ -1,17 +1,19 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, Text } from '@centrifuge/fabric'
+import { AssetListReport } from '@centrifuge/sdk/dist/types/reports'
 import { useContext, useEffect, useMemo } from 'react'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { formatBalance, formatDecimal, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAllPoolAssetSnapshots, usePoolMetadata } from '../../utils/usePools'
+import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { RouterTextLink } from '../TextLink'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 
 const noop = (v: any) => v
 
@@ -21,7 +23,12 @@ const valuationLabels = {
   oracle: 'Fungible asset - external pricing',
 }
 
-function getColumnConfig(isPrivate: boolean, symbol: string) {
+type AssetSnapshot = AssetListReport & {
+  transactionType: 'ACTIVE' | string
+  name: string
+}
+
+function getColumnConfig(isPrivate: boolean, symbol: string, decimals: number) {
   if (isPrivate) {
     return [
       { header: 'Name', align: 'left', csvOnly: false, formatter: noop },
@@ -127,28 +134,28 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Face value',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Quantity',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, undefined, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, '') : '-'),
       },
       {
         header: 'Market price',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Maturity date',
@@ -162,14 +169,14 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Realized profit',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
     ]
   }
@@ -177,13 +184,25 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
 
 export function AssetList({ pool }: { pool: Pool }) {
   const basePath = useBasePath()
-  const { loanStatus, startDate, setCsvData } = useContext(ReportContext)
+  const { loanStatus, startDate, setCsvData, endDate } = useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const { symbol } = pool.currency
+  const { symbol, decimals } = pool.currency
   const poolCreditType = poolMetadata?.pool?.asset.class || 'privateCredit'
-  const { data: snapshots } = useAllPoolAssetSnapshots(pool.id, startDate)
   const isPrivate = poolCreditType === 'Private credit' || poolCreditType === 'privateCredit'
-  const columnConfig = getColumnConfig(isPrivate, symbol)
+  const columnConfig = getColumnConfig(isPrivate, symbol, decimals)
+
+  const { data: snapshots = [], isLoading } = useReport(
+    'assetList',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    undefined,
+    {
+      ...(loanStatus && { status: loanStatus }),
+    }
+  )
+
+  console.log(snapshots, isPrivate)
 
   const columns = useMemo(
     () =>
@@ -213,16 +232,14 @@ export function AssetList({ pool }: { pool: Pool }) {
   const data = useMemo((): any[] => {
     if (!snapshots) return []
 
-    return snapshots
+    return (snapshots as AssetSnapshot[])
       .filter((snapshot) => snapshot?.valuationMethod?.toLowerCase() !== 'cash')
       .filter((snapshot) => {
-        const isMaturityDatePassed = snapshot?.actualMaturityDate
-          ? new Date() > new Date(snapshot.actualMaturityDate)
-          : false
-        const isDebtZero = snapshot?.outstandingDebt?.isZero()
+        const isMaturityDatePassed = snapshot?.maturityDate ? new Date() > new Date(snapshot.maturityDate) : false
+        const isDebtZero = 'outstandingQuantity' in snapshot ? snapshot.outstandingQuantity?.isZero() : false
 
         if (loanStatus === 'ongoing') {
-          return snapshot.status === 'ACTIVE' && !isMaturityDatePassed && !isDebtZero
+          return snapshot.transactionType === 'ACTIVE' && !isMaturityDatePassed && !isDebtZero
         } else if (loanStatus === 'repaid') {
           return isMaturityDatePassed && isDebtZero
         } else if (loanStatus === 'overdue') {
@@ -231,12 +248,13 @@ export function AssetList({ pool }: { pool: Pool }) {
       })
       .sort((a, b) => {
         // Sort by actualMaturityDate in descending order
-        const dateA = new Date(a.actualMaturityDate || 0).getTime()
-        const dateB = new Date(b.actualMaturityDate || 0).getTime()
+        const dateA = new Date(a.maturityDate || 0).getTime()
+        const dateB = new Date(b.maturityDate || 0).getTime()
         return dateB - dateA
       })
       .map((snapshot) => {
-        const valuationMethod = snapshot?.valuationMethod as keyof typeof valuationLabels
+        const valuationMethod =
+          'valuationMethod' in snapshot ? (snapshot.valuationMethod as keyof typeof valuationLabels) : ''
         if (isPrivate) {
           return {
             name: '',
@@ -245,10 +263,10 @@ export function AssetList({ pool }: { pool: Pool }) {
               snapshot?.presentValue,
               snapshot?.outstandingPrincipal,
               snapshot?.outstandingInterest,
-              snapshot?.totalRepaidPrincipal,
-              snapshot?.totalRepaidInterest,
-              snapshot?.totalRepaidUnscheduled,
-              snapshot?.actualOriginationDate,
+              snapshot?.repaidPrincipal,
+              snapshot?.repaidInterest,
+              snapshot?.repaidUnscheduled,
+              snapshot?.originationDate,
               snapshot?.actualMaturityDate,
               valuationMethod || snapshot?.valuationMethod,
               snapshot?.advanceRate,
@@ -269,9 +287,9 @@ export function AssetList({ pool }: { pool: Pool }) {
               snapshot?.faceValue,
               snapshot?.outstandingQuantity,
               snapshot?.currentPrice,
-              snapshot?.actualMaturityDate,
-              snapshot?.unrealizedProfitAtMarketPrice,
-              snapshot?.sumRealizedProfitFifo,
+              snapshot?.maturityDate,
+              snapshot?.unrealizedProfit,
+              snapshot?.realizedProfit,
             ],
             heading: false,
             id: snapshot?.assetId,
@@ -304,7 +322,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  if (!snapshots) {
+  if (isLoading) {
     return <Spinner />
   }
 

@@ -4,20 +4,36 @@ import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useFeeTransactions, usePoolMetadata } from '../../utils/usePools'
+import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 import { formatPoolFeeTransactionType } from './utils'
 
 const noop = (v: any) => v
 
 export function FeeTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData, txType } = React.useContext(ReportContext)
-  const transactions = useFeeTransactions(pool.id, new Date(startDate), new Date(endDate))
   const { data: poolMetadata } = usePoolMetadata(pool)
+
+  const { data: transactions = [], isLoading } = useReport(
+    'feeTransactions',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    undefined,
+    {
+      // ...(address && { address }),
+      // ...(activeTranche !== 'all' && { tokenId: activeTranche }),
+      // ...(network !== 'all' && network && { network }),
+      // ...(txType !== 'all' && { transactionType: txType }),
+    }
+  )
+
+  console.log(transactions)
 
   const columnConfig = [
     {
@@ -63,7 +79,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
       .map((tx) => ({
         name: '',
         value: [
-          tx.timestamp.toISOString(),
+          tx.timestamp,
           poolMetadata?.pool?.poolFees?.find((f) => f.id === tx.poolFee.feeId)?.name || '-',
           formatPoolFeeTransactionType(tx.type),
           tx.amount?.toFloat() ?? '-',
