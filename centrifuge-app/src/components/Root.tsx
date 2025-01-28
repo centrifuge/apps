@@ -80,6 +80,7 @@ const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 const PoolsPage = React.lazy(() => import('../pages/Pools'))
+const DashboardPage = React.lazy(() => import('../pages/Dashboard'))
 
 const router = createHashRouter([
   {
@@ -89,6 +90,11 @@ const router = createHashRouter([
       {
         path: '/',
         element: <Navigate to="/pools" replace />,
+      },
+      {
+        path: '/dashboard/*',
+        element: <DashboardPage />,
+        handle: { component: DashboardPage },
       },
       {
         path: '/pools',
