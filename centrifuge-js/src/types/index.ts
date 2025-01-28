@@ -36,6 +36,7 @@ export type TransactionOptions = {
   proxies?: Config['proxies']
   multisig?: { signers: string[]; threshold: number }
   transferToActingAccount?: BN
+  evmGasLimit?: number
 }
 
 export type Account = HexString | string | Uint8Array
