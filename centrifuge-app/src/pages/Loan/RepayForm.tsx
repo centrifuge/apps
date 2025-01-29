@@ -1,14 +1,5 @@
+import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, Loan, Rate } from '@centrifuge/centrifuge-js'
 import {
-  ActiveLoan,
-  CreatedLoan,
-  CurrencyBalance,
-  ExternalLoan,
-  findBalance,
-  Loan,
-  Rate,
-} from '@centrifuge/centrifuge-js'
-import {
-  useBalances,
   useCentrifugeApi,
   useCentrifugeTransaction,
   useCentrifugeUtils,
@@ -19,7 +10,6 @@ import {
   Button,
   CurrencyInput,
   IconCheckCircle,
-  IconClock,
   InlineFeedback,
   Select,
   Shelf,
@@ -49,6 +39,7 @@ import { useChargePoolFees } from './ChargeFeesFields'
 import { ErrorMessage } from './ErrorMessage'
 import { StyledSuccessButton } from './ExternalFinanceForm'
 import { ExternalRepayForm } from './ExternalRepayForm'
+import { useMuxRepay } from './MuxRepay'
 import { SourceSelect } from './SourceSelect'
 import { isCashLoan, isExternalLoan } from './utils'
 
@@ -96,9 +87,8 @@ function InternalRepayForm({
   const theme = useTheme()
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
-  const balances = useBalances(account?.actingAddress)
-  const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const muxRepay = useMuxRepay(loan.poolId, loan.id)
   const { data: loans } = useLoans(loan.poolId)
   const api = useCentrifugeApi()
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
@@ -138,11 +128,11 @@ function InternalRepayForm({
           let borrow = { amount: borrowAmount }
           repayTx = cent.pools.transferLoanDebt([pool.id, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
-        return combineLatest([repayTx, poolFees.getBatch(repayForm)]).pipe(
-          switchMap(([repayTx, batch]) => {
+        return combineLatest([repayTx, poolFees.getBatch(repayForm), muxRepay.getBatch(totalRepay, destination)]).pipe(
+          switchMap(([repayTx, feesBatch, muxBatch]) => {
             let tx = wrapProxyCallsForAccount(api, repayTx, account, 'Borrow')
-            if (batch.length) {
-              tx = api.tx.utility.batchAll([tx, ...batch])
+            if (feesBatch.length || muxBatch.length) {
+              tx = api.tx.utility.batchAll([...muxBatch, tx, ...feesBatch])
             }
             return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
           })
@@ -212,35 +202,27 @@ function InternalRepayForm({
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const { maxAvailable, maxPrincipal, maxInterest, totalRepay } = React.useMemo(() => {
-    const { interest, principal, amountAdditional } = repayForm.values
-    const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
-    let maxAvailable
-    let maxPrincipal
-    let maxInterest
-    if (destination === 'reserve') {
-      maxAvailable = balance
-      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
-      maxInterest = outstandingInterest
-    } else if (destination === 'other') {
-      maxAvailable = UNLIMITED
-      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
-      maxInterest = Dec(0)
-    } else {
-      maxAvailable = UNLIMITED
-      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
-      maxInterest = outstandingInterest
-    }
-    const totalRepay = Dec(principal || 0)
-      .add(Dec(interest || 0))
-      .add(Dec(amountAdditional || 0))
-    return {
-      maxAvailable,
-      maxPrincipal,
-      maxInterest,
-      totalRepay,
-    }
-  }, [loan, balance, repayForm.values, destination])
+  const { interest, principal, amountAdditional } = repayForm.values
+  const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
+  let maxAvailable: Decimal
+  let maxPrincipal: Decimal
+  let maxInterest: Decimal
+  if (destination === 'reserve') {
+    maxAvailable = muxRepay.totalAvailable
+    maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
+    maxInterest = outstandingInterest
+  } else if (destination === 'other') {
+    maxAvailable = UNLIMITED
+    maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
+    maxInterest = Dec(0)
+  } else {
+    maxAvailable = UNLIMITED
+    maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
+    maxInterest = outstandingInterest
+  }
+  const totalRepay = Dec(principal || 0)
+    .add(Dec(interest || 0))
+    .add(Dec(amountAdditional || 0))
 
   return (
     <>
@@ -360,9 +342,9 @@ function InternalRepayForm({
                 outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
               </ErrorMessage>
 
-              <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(balance)}>
-                The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
-                insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+              <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(maxAvailable)}>
+                The balance of the asset originator account ({formatBalance(maxAvailable, displayCurrency, 2)}) is
+                insufficient. Transfer {formatBalance(totalRepay.sub(maxAvailable), displayCurrency, 2)} to{' '}
                 {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
               </ErrorMessage>
             </Stack>
@@ -429,13 +411,13 @@ function InternalRepayForm({
                 type="submit"
                 disabled={
                   !poolFees.isValid(repayForm) ||
-                  !repayForm.isValid ||
-                  maxAvailable.eq(0) ||
-                  (destination === 'reserve' && balance.lt(totalRepay))
+                  !muxRepay.isValid(totalRepay, destination) ||
+                  totalRepay.greaterThan(maxAvailable)
                 }
-                icon={isRepayLoading ? <IconClock size={24} /> : undefined}
+                loading={isRepayLoading}
+                loadingMessage="Transaction Pending"
               >
-                {isRepayLoading ? 'Transaction Pending' : isCashLoan(loan) ? 'Withdraw' : 'Repay'}
+                {isCashLoan(loan) ? 'Withdraw' : 'Repay'}
               </Button>
             )}
           </Stack>

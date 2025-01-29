@@ -1,21 +1,6 @@
-import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import {
-  useBalances,
-  useCentrifugeTransaction,
-  useCentrifugeUtils,
-  wrapProxyCallsForAccount,
-} from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  CurrencyInput,
-  IconCheckCircle,
-  IconClock,
-  InlineFeedback,
-  Shelf,
-  Stack,
-  Text,
-} from '@centrifuge/fabric'
+import { ActiveLoan, CurrencyBalance, ExternalLoan, Price, Rate } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction, useCentrifugeUtils, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
+import { Box, Button, CurrencyInput, IconCheckCircle, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -34,9 +19,10 @@ import { combine, maxNotRequired, nonNegativeNumberNotRequired } from '../../uti
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ErrorMessage } from './ErrorMessage'
 import { StyledSuccessButton } from './ExternalFinanceForm'
+import { useMuxRepay } from './MuxRepay'
 import { SourceSelect } from './SourceSelect'
 
-type RepayValues = {
+export type ExternalRepayValues = {
   price: number | '' | Decimal
   interest: number | '' | Decimal
   amountAdditional: number | '' | Decimal
@@ -61,9 +47,8 @@ export function ExternalRepayForm({
   const theme = useTheme()
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
-  const balances = useBalances(account?.actingAddress)
-  const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const muxRepay = useMuxRepay(loan.poolId, loan.id)
   const { data: loans } = useLoans(loan.poolId)
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
@@ -101,11 +86,16 @@ export function ExternalRepayForm({
           }
           repayTx = cent.pools.transferLoanDebt([pool.id, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
-        return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
-          switchMap(([api, repayTx, batch]) => {
+        return combineLatest([
+          cent.getApi(),
+          repayTx,
+          poolFees.getBatch(repayForm),
+          muxRepay.getBatch(totalRepay, destination),
+        ]).pipe(
+          switchMap(([api, repayTx, feesBatch, muxBatch]) => {
             let tx = wrapProxyCallsForAccount(api, repayTx, account, 'Borrow')
-            if (batch.length) {
-              tx = api.tx.utility.batchAll([tx, ...batch])
+            if (feesBatch.length || muxBatch.length) {
+              tx = api.tx.utility.batchAll([...muxBatch, tx, ...feesBatch])
             }
             return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
           })
@@ -118,7 +108,7 @@ export function ExternalRepayForm({
     }
   )
 
-  const repayForm = useFormik<RepayValues>({
+  const repayForm = useFormik<ExternalRepayValues>({
     initialValues: {
       price: '',
       quantity: '',
@@ -175,33 +165,23 @@ export function ExternalRepayForm({
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const { maxAvailable, maxInterest, totalRepay, maxQuantity, principal } = React.useMemo(() => {
-    const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
-    const { quantity, interest, price, amountAdditional } = repayForm.values
-    const totalRepay = Dec(price || 0)
-      .mul(quantity || 0)
-      .add(interest || 0)
-      .add(amountAdditional || 0)
+  const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
+  const { quantity, interest, price, amountAdditional } = repayForm.values
+  const totalRepay = Dec(price || 0)
+    .mul(quantity || 0)
+    .add(interest || 0)
+    .add(amountAdditional || 0)
 
-    const principal = Dec(price || 0).mul(quantity || 0)
+  const principal = Dec(price || 0).mul(quantity || 0)
 
-    const maxInterest = outstandingInterest
-    let maxQuantity = loan.pricing.outstandingQuantity
-    let maxAvailable
-    if (destination === 'reserve') {
-      maxAvailable = balance
-    } else {
-      maxAvailable = UNLIMITED
-    }
-
-    return {
-      maxAvailable,
-      maxInterest,
-      maxQuantity,
-      totalRepay,
-      principal,
-    }
-  }, [loan, balance, repayForm.values, destination])
+  const maxInterest = outstandingInterest
+  let maxQuantity = loan.pricing.outstandingQuantity
+  let maxAvailable
+  if (destination === 'reserve') {
+    maxAvailable = muxRepay.totalAvailable
+  } else {
+    maxAvailable = UNLIMITED
+  }
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
@@ -307,9 +287,9 @@ export function ExternalRepayForm({
           </Stack>
         </Box>
 
-        <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(balance)}>
-          The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is insufficient.
-          Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+        <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(maxAvailable)}>
+          The balance of the asset originator account ({formatBalance(maxAvailable, displayCurrency, 2)}) is
+          insufficient. Transfer {formatBalance(totalRepay.sub(maxAvailable), displayCurrency, 2)} to{' '}
           {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
         </ErrorMessage>
 
@@ -375,14 +355,13 @@ export function ExternalRepayForm({
               type="submit"
               disabled={
                 !poolFees.isValid(repayForm) ||
-                !repayForm.isValid ||
-                totalRepay.greaterThan(maxAvailable) ||
-                maxAvailable.eq(0) ||
-                (destination === 'reserve' && balance.lt(totalRepay))
+                !muxRepay.isValid(totalRepay, destination) ||
+                totalRepay.greaterThan(maxAvailable)
               }
-              icon={isRepayLoading ? <IconClock size={24} /> : undefined}
+              loading={isRepayLoading}
+              loadingMessage="Transaction Pending"
             >
-              {isRepayLoading ? 'Transaction Pending' : 'Sell'}
+              Sell
             </Button>
           )}
         </Stack>

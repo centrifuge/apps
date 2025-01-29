@@ -13,7 +13,6 @@ import {
   Button,
   CurrencyInput,
   IconCheckCircle,
-  IconClock,
   InlineFeedback,
   Shelf,
   Stack,
@@ -302,9 +301,10 @@ export function ExternalFinanceForm({
                     !financeForm.isValid ||
                     maxAvailable.eq(0)
                   }
-                  icon={isFinanceLoading ? <IconClock size={24} /> : undefined}
+                  loading={isFinanceLoading}
+                  loadingMessage="Transaction Pending"
                 >
-                  {isFinanceLoading ? 'Transaction Pending' : 'Purchase'}
+                  Purchase
                 </Button>
               )}
             </Stack>
