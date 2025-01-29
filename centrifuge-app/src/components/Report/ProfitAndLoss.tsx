@@ -153,10 +153,9 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         heading: false,
         formatter: (v: any) => (v ? `-${formatDecimal(v, 2, currency)}` : ''),
       },
-
       {
         name: 'Profit / loss from assets ',
-        value: data.map((report) => report.profitAndLossFromAsset.toDecimal()),
+        value: data.map((report) => report.totalProfitAndLoss.toDecimal()),
         heading: false,
         bold: true,
         formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),

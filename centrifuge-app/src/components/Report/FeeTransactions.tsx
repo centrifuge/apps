@@ -26,14 +26,11 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     new Date(endDate),
     undefined,
     {
-      // ...(address && { address }),
-      // ...(activeTranche !== 'all' && { tokenId: activeTranche }),
-      // ...(network !== 'all' && network && { network }),
-      // ...(txType !== 'all' && { transactionType: txType }),
+      ...(txType !== 'all' && { transactionType: txType }),
     }
   )
 
-  console.log(transactions)
+  console.log(transactions, 'transactions')
 
   const columnConfig = [
     {
@@ -134,7 +131,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  if (!transactions) {
+  if (isLoading) {
     return <Spinner mt={2} />
   }
 

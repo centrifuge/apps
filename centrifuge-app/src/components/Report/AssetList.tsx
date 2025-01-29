@@ -4,7 +4,7 @@ import { AssetListReport } from '@centrifuge/sdk/dist/types/reports'
 import { useContext, useEffect, useMemo } from 'react'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatDecimal, formatPercentage } from '../../utils/formatting'
+import { formatDecimal, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
@@ -37,42 +37,42 @@ function getColumnConfig(isPrivate: boolean, symbol: string, decimals: number) {
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Principal outstanding',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Interest outstanding',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Principal repaid',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Interest repaid',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Additional repaid',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Origination date',
@@ -105,25 +105,25 @@ function getColumnConfig(isPrivate: boolean, symbol: string, decimals: number) {
         header: 'Collateral value',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Probability of default (PD)',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Loss given default (LGD)',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
       {
         header: 'Discount rate',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatDecimal(v, 2, symbol) : '-'),
       },
     ]
   } else {

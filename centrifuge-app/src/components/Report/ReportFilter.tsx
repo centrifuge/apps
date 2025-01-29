@@ -68,13 +68,11 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
         .map((data) => {
           return {
             name: data.timestamp,
-            yAxis: data.totalCashflow.toDecimal(),
+            yAxis: data.totalCashflow?.toDecimal(),
           }
         })
     }
   }, [report, reportData])
-
-  console.log(transformDataChart, 'transform')
 
   return (
     <Shelf
