@@ -1,10 +1,11 @@
 import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
-import { NetworkIcon, formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useState } from 'react'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { useFilters } from '../../utils/useFilters'
-import { useInvestorList, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useInvestorListMulti, usePoolMetadataMulti, usePools } from '../../utils/usePools'
 
 type Row = {
   tokenName: string | undefined
@@ -15,21 +16,28 @@ type Row = {
   pendingInvestments: CurrencyBalance
   pendingRedemptions: CurrencyBalance
   investorSince: string
+  poolCurrency: string | undefined
 }
 
 export default function InvestorsPage() {
-  const filters = useFilters({ data: [] })
+  const pools = usePools()?.slice(0, 3)
+  const getNetworkName = useGetNetworkName()
+  const [selectedPools, setSelectedPools] = useState<string[]>(pools?.map((p) => p.id) ?? [])
   const cent = useCentrifuge()
-  const pool = usePool('4139607887')
-  const { data: poolMetadata } = usePoolMetadata(pool)
-  const investors = useInvestorList('4139607887')
+  const poolMetadata = usePoolMetadataMulti(pools ?? [])
+  const investors = useInvestorListMulti(selectedPools)
   const data: Row[] =
     investors?.map((investor) => {
-      const tokenName = pool.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
+      // match metadata to pool by trancheId since poolId doesnt exist in metadata
+      const metadata = poolMetadata.find((p) => Object.keys(p.data?.tranches ?? {}).includes(investor.trancheId))
+      const tokenName = pools?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))?.tranches[0].currency
+        .displayName
+      const poolCurrency = pools?.find((p) => p.id === investor.poolId)?.tranches[0].currency.displayName
       return {
         tokenName,
-        poolIcon: poolMetadata?.pool?.icon,
-        wallet: investor?.evmAddress || '',
+        poolIcon: metadata?.data?.pool?.icon,
+        poolCurrency,
+        wallet: investor?.evmAddress || investor.accountId || '',
         network: investor.chainId,
         holdings: investor.balance,
         pendingInvestments: investor.pendingInvestCurrency,
@@ -37,6 +45,8 @@ export default function InvestorsPage() {
         investorSince: '', // TODO: get investorSince
       }
     }) ?? []
+
+  const filters = useFilters({ data })
 
   const columns: Column[] = [
     {
@@ -59,7 +69,19 @@ export default function InvestorsPage() {
       cell: (row: Row) => (row?.wallet ? <CopyToClipboard address={row.wallet} /> : <Text>-</Text>),
     },
     {
-      header: <FilterableTableHeader label="Network" filterKey="network" options={[]} filters={filters} />,
+      header: (
+        <FilterableTableHeader
+          label="Network"
+          filterKey="network"
+          options={Object.fromEntries(
+            data.map((investor) => [
+              investor.network,
+              investor.network === 0 ? 'Centrifuge' : getNetworkName(investor.network),
+            ])
+          )}
+          filters={filters}
+        />
+      ),
       align: 'left',
       sortKey: 'network',
       cell: (row: Row) => <NetworkIcon size="iconMedium" network={row.network || 'centrifuge'} />,
@@ -74,13 +96,13 @@ export default function InvestorsPage() {
       header: <SortableTableHeader label="Pending investments" />,
       align: 'left',
       sortKey: 'pendingInvestments',
-      cell: (row: Row) => <Text>{formatBalance(row.pendingInvestments, pool.currency.symbol, 2)}</Text>,
+      cell: (row: Row) => <Text>{formatBalance(row.pendingInvestments, row.poolCurrency, 2)}</Text>,
     },
     {
       header: <SortableTableHeader label="Pending redemptions" />,
       align: 'left',
       sortKey: 'pendingRedemptions',
-      cell: (row: Row) => <Text>{formatBalance(row.pendingRedemptions, pool.currency.symbol, 2)}</Text>,
+      cell: (row: Row) => <Text>{formatBalance(row.pendingRedemptions, row.poolCurrency, 2)}</Text>,
     },
     {
       header: <SortableTableHeader label="Investor since" />,
@@ -92,8 +114,25 @@ export default function InvestorsPage() {
   return (
     <Stack gap={3} py={3} px={3}>
       <Text variant="heading1">Dashboard</Text>
+      <Shelf gap={1}>
+        {pools?.map((p) => (
+          <Checkbox
+            key={p.id}
+            label={p.id}
+            checked={selectedPools.includes(p.id)}
+            onChange={() => {
+              setSelectedPools((prev) => {
+                if (prev.includes(p.id)) {
+                  return prev.filter((id) => id !== p.id)
+                }
+                return [...prev, p.id]
+              })
+            }}
+          />
+        ))}
+      </Shelf>
       <Shelf justifyContent="space-between">
-        <Shelf>
+        <Shelf gap={1}>
           <Box backgroundColor="backgroundTertiary" borderRadius={100} padding="2px 4px">
             <Text variant="body2" fontWeight="600">
               {investors?.length ?? 1 - 1}
@@ -116,7 +155,14 @@ export default function InvestorsPage() {
         </Shelf>
       </Shelf>
       <Box>
-        <DataTable data={data} columns={columns} hoverable defaultSortKey="value[3]" scrollable />
+        <DataTable
+          data={filters.data}
+          columns={columns}
+          hoverable
+          defaultSortKey="poolTokenId"
+          defaultSortOrder="asc"
+          scrollable
+        />
       </Box>
     </Stack>
   )

@@ -937,6 +937,7 @@ export type OracleTransaction = {
 }
 
 type Holder = {
+  poolId: string
   accountId: string
   chainId: number
   trancheId: string
@@ -3546,6 +3547,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 trancheId: { startsWith: $trancheId }
               }) {
             nodes {
+              poolId
               accountId
               trancheId
               account {
@@ -3599,6 +3601,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.trancheBalances.nodes.map(
           (balance) =>
             ({
+              poolId: balance.poolId,
               accountId: balance.accountId,
               chainId: Number(balance.account?.chainId ?? 0),
               trancheId: balance.trancheId.split('-')[1],

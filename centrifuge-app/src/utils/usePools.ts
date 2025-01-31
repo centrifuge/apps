@@ -128,6 +128,22 @@ export function useInvestorList(poolId: string, trancheId?: string) {
   return result
 }
 
+export function useInvestorListMulti(poolIds: string[]) {
+  const [result] = useCentrifugeQuery(
+    ['investorListMulti', ...poolIds],
+    (cent) =>
+      combineLatest(poolIds.map((poolId) => cent.pools.getInvestors([poolId]))).pipe(
+        map((result) => {
+          return result.flat()
+        })
+      ),
+    {
+      enabled: !!poolIds?.length,
+    }
+  )
+  return result
+}
+
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(['investorTransactions', poolId, trancheId, from, to], (cent) =>
     cent.pools.getInvestorTransactions([poolId, trancheId, from, to])
