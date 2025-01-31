@@ -1,7 +1,8 @@
 import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, Drawer, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { useFilters } from '../../utils/useFilters'
@@ -9,6 +10,7 @@ import { useInvestorListMulti, usePoolMetadataMulti, usePools } from '../../util
 
 type Row = {
   tokenName: string | undefined
+  trancheId: string
   poolIcon: FileType | null | undefined
   wallet: string
   network: number
@@ -20,6 +22,9 @@ type Row = {
 }
 
 export default function InvestorsPage() {
+  const navigate = useNavigate()
+  const { search } = useLocation()
+  const investorId = new URLSearchParams(search).get('d_investorId')
   const pools = usePools()?.slice(0, 3)
   const getNetworkName = useGetNetworkName()
   const [selectedPools, setSelectedPools] = useState<string[]>(pools?.map((p) => p.id) ?? [])
@@ -35,6 +40,7 @@ export default function InvestorsPage() {
       const poolCurrency = pools?.find((p) => p.id === investor.poolId)?.tranches[0].currency.displayName
       return {
         tokenName,
+        trancheId: investor.trancheId,
         poolIcon: metadata?.data?.pool?.icon,
         poolCurrency,
         wallet: investor?.evmAddress || investor.accountId || '',
@@ -66,7 +72,7 @@ export default function InvestorsPage() {
     {
       header: 'Wallet', // TODO: make this searchable
       align: 'left',
-      cell: (row: Row) => (row?.wallet ? <CopyToClipboard address={row.wallet} /> : <Text>-</Text>),
+      cell: (row: Row) => <CopyToClipboard address={row.wallet} />,
     },
     {
       header: (
@@ -76,7 +82,10 @@ export default function InvestorsPage() {
           options={Object.fromEntries(
             data.map((investor) => [
               investor.network,
-              investor.network === 0 ? 'Centrifuge' : getNetworkName(investor.network),
+              <Shelf gap={1}>
+                <NetworkIcon size="iconMedium" network={investor.network || 'centrifuge'} />
+                <Text>{getNetworkName(investor.network || 'centrifuge')}</Text>
+              </Shelf>,
             ])
           )}
           filters={filters}
@@ -112,8 +121,14 @@ export default function InvestorsPage() {
     },
   ]
   return (
-    <Stack gap={3} py={3} px={3}>
-      <Text variant="heading1">Dashboard</Text>
+    <Stack gap={4} py={3} px={3}>
+      <InvestorDrawer
+        isOpen={!!investorId}
+        onClose={() => {
+          navigate('/dashboard/investors')
+        }}
+        investor={filters.data?.find((i) => `${i.wallet}-${i.trancheId}-${i.network}` === investorId) ?? null}
+      />
       <Shelf gap={1}>
         {pools?.map((p) => (
           <Checkbox
@@ -162,8 +177,25 @@ export default function InvestorsPage() {
           defaultSortKey="poolTokenId"
           defaultSortOrder="asc"
           scrollable
+          onRowClicked={(row) => `?d_investorId=${row.wallet}-${row.trancheId}-${row.network}`}
         />
       </Box>
     </Stack>
+  )
+}
+
+function InvestorDrawer({ isOpen, onClose, investor }: { isOpen: boolean; onClose: () => void; investor: Row | null }) {
+  if (!investor) return null
+  return (
+    <Drawer isOpen={isOpen} onClose={onClose} width="50%">
+      <Text variant="heading1">Dashboard</Text>
+      <Text variant="heading2">{investor.tokenName}</Text>
+      <Text variant="body2">Wallet: {investor.wallet}</Text>
+      <Text variant="body2">Network: {investor.network}</Text>
+      <Text variant="body2">Holdings: {investor.holdings.toString()}</Text>
+      <Text variant="body2">Pending investments: {investor.pendingInvestments.toString()}</Text>
+      <Text variant="body2">Pending redemptions: {investor.pendingRedemptions.toString()}</Text>
+      <Text variant="body2">Investor since: {investor.investorSince}</Text>
+    </Drawer>
   )
 }

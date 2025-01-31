@@ -397,7 +397,7 @@ export function FilterableTableHeader({
 }: {
   filterKey: string
   label: string
-  options: string[] | Record<string, string>
+  options: string[] | Record<string, string | React.ReactElement<any, string | React.JSXElementConstructor<any>>>
   filters: FiltersState
   tooltip?: string
 }) {
