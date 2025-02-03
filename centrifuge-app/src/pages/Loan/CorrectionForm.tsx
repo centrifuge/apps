@@ -1,16 +1,6 @@
 import { ActiveLoan, CurrencyBalance, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  CurrencyInput,
-  IconCheckCircle,
-  IconClock,
-  Shelf,
-  Stack,
-  Text,
-  TextInput,
-} from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, IconCheckCircle, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -253,9 +243,10 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
             <Button
               type="submit"
               disabled={!poolFees.isValid(correctionForm) || !correctionForm.isValid}
-              icon={isFinanceLoading ? <IconClock size={24} /> : undefined}
+              loading={isFinanceLoading}
+              loadingMessage="Transaction Pending"
             >
-              {isFinanceLoading ? 'Transaction Pending' : 'Adjust'}
+              Adjust
             </Button>
           )}
         </Stack>

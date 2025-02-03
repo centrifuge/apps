@@ -197,7 +197,7 @@ function InternalFinanceForm({
     <>
       {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
-          <Form noValidate ref={financeFormRef}>
+          <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Box
               px={3}
               py={2}
@@ -374,7 +374,7 @@ function InternalFinanceForm({
                 {isCashLoan(loan) ? 'Deposit' : 'Finance'}
               </Button>
             </Stack>
-          </Form>
+          </Stack>
         </FormikProvider>
       )}
     </>
