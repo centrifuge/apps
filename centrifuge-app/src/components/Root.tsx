@@ -118,7 +118,6 @@ const router = createHashRouter([
       { path: '/nfts', element: <CollectionsPage />, handle: { component: CollectionsPage } },
       { path: '/issuer/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
       { path: '/history/:address', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
-      { path: '/history', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
       { path: '/pools/:pid/assets/:aid', element: <LoanPage />, handle: { component: LoanPage } },
       {
         path: '/pools/:pid/transactions',
