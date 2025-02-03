@@ -19,8 +19,8 @@ import { combine, maxNotRequired, nonNegativeNumberNotRequired } from '../../uti
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ErrorMessage } from './ErrorMessage'
 import { StyledSuccessButton } from './ExternalFinanceForm'
-import { useMuxRepay } from './MuxRepay'
 import { SourceSelect } from './SourceSelect'
+import { useMuxRepay } from './useMuxRepay'
 
 export type ExternalRepayValues = {
   price: number | '' | Decimal

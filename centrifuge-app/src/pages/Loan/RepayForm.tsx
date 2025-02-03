@@ -39,8 +39,8 @@ import { useChargePoolFees } from './ChargeFeesFields'
 import { ErrorMessage } from './ErrorMessage'
 import { StyledSuccessButton } from './ExternalFinanceForm'
 import { ExternalRepayForm } from './ExternalRepayForm'
-import { useMuxRepay } from './MuxRepay'
 import { SourceSelect } from './SourceSelect'
+import { useMuxRepay } from './useMuxRepay'
 import { isCashLoan, isExternalLoan } from './utils'
 
 export type RepayValues = {
