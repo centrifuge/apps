@@ -51,6 +51,7 @@ export type DataTableProps<T = any> = {
   pageSize?: number
   page?: number
   hideHeader?: boolean
+  headerBackgroundColor?: string
   hideBorder?: boolean
 } & GroupedProps
 
@@ -101,6 +102,7 @@ export const DataTable = <T extends Record<string, any>>({
   pageSize = Infinity,
   page = 1,
   hideHeader,
+  headerBackgroundColor,
   scrollable = false,
   hideBorder,
 }: DataTableProps<T>) => {
@@ -156,7 +158,9 @@ export const DataTable = <T extends Record<string, any>>({
                   border: 'transparent',
                   borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
                 }
-              : {}
+              : {
+                  backgroundColor: headerBackgroundColor ?? 'backgroundSecondary',
+                }
           }
           scrollable={scrollable}
           hideBorder={hideBorder}

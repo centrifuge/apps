@@ -86,6 +86,12 @@ export type SubqueryInvestorTransaction = {
   tokenAmount?: CurrencyBalance | null
   tokenPrice?: Price | null
   transactionFee?: string | null
+  pool: {
+    currency: {
+      symbol: string
+      decimals: number
+    }
+  }
 }
 
 export type AssetTransactionType =

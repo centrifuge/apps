@@ -3040,6 +3040,12 @@ export function getPoolsModule(inst: Centrifuge) {
               tokenAmount
               tokenPrice
               currencyAmount
+              pool {
+                currency {
+                  symbol
+                  decimals
+                }
+              }
             }
           }
         }
@@ -3051,32 +3057,21 @@ export function getPoolsModule(inst: Centrifuge) {
     )
 
     return $query.pipe(
-      switchMap((data) => {
-        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId) ?? [])
-        if (!poolIds.size) {
-          return of({
-            investorTransactions: [],
-          })
+      map((data) => {
+        const txs = data?.investorTransactions.nodes.map((tx) => {
+          const poolCurrency = tx.pool.currency
+          return {
+            ...tx,
+            tokenAmount: new TokenBalance(tx.tokenAmount || 0, poolCurrency.decimals),
+            tokenPrice: new Price(tx.tokenPrice || 0),
+            currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
+            trancheId: tx.trancheId.split('-')[1],
+            poolCurrency: poolCurrency.symbol,
+          }
+        })
+        return {
+          investorTransactions: txs || [],
         }
-        const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
-        return combineLatest($poolCurrencies).pipe(
-          map((currencies) => {
-            const txs = data?.investorTransactions.nodes.map((tx) => {
-              const currencyIndex = Array.from(poolIds).indexOf(tx.poolId)
-              const poolCurrency = currencies[currencyIndex]
-              return {
-                ...tx,
-                tokenAmount: new TokenBalance(tx.tokenAmount || 0, poolCurrency.decimals),
-                tokenPrice: new Price(tx.tokenPrice || 0),
-                currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
-                trancheId: tx.trancheId.split('-')[1],
-              }
-            })
-            return {
-              investorTransactions: txs || [],
-            }
-          })
-        )
       })
     )
   }
