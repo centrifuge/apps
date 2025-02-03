@@ -26,8 +26,17 @@ import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { formatDate } from '../../../utils/date'
 import { usePool, usePools, useTransactionsByAddress } from '../../../utils/usePools'
+import { InvestorTableRow } from './InvestorTable'
 
-export function InvestorDrawer({ isOpen, onClose, investor }: { isOpen: boolean; onClose: () => void; investor: Row }) {
+export function InvestorDrawer({
+  isOpen,
+  onClose,
+  investor,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  investor: InvestorTableRow
+}) {
   const cent = useCentrifuge()
   const pool = usePool(investor.poolId)
   const getNetworkName = useGetNetworkName()
