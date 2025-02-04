@@ -63,7 +63,10 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
         p={2}
         justifyContent="space-between"
         alignItems="center"
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          e.preventDefault()
+          setOpen(!open)
+        }}
         aria-controls={`content-${id}`}
         aria-expanded={open}
       >
