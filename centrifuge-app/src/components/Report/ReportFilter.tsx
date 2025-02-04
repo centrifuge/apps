@@ -56,6 +56,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
     if (report === 'balance-sheet') {
       return (reportData as BalanceSheetReport[]).map((data) => ({
         name: data.timestamp,
+        yAxis: data.totalCapital?.toDecimal(),
       }))
     } else if (report === 'profit-and-loss') {
       return (reportData as ProfitAndLossReport[]).map((data) => ({

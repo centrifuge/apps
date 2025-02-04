@@ -30,8 +30,6 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     }
   )
 
-  console.log(transactions, 'transactions')
-
   const columnConfig = [
     {
       header: 'Date',
@@ -71,14 +69,16 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     }
 
     return transactions
-      ?.filter((tx) => tx.type !== 'PROPOSED' && tx.type !== 'ADDED' && tx.type !== 'REMOVED')
+      ?.filter(
+        (tx) => tx.transactionType !== 'PROPOSED' && tx.transactionType !== 'ADDED' && tx.transactionType !== 'REMOVED'
+      )
       .filter((tx) => (!txType || txType === 'all' ? true : tx.type === txType))
       .map((tx) => ({
         name: '',
         value: [
           tx.timestamp,
-          poolMetadata?.pool?.poolFees?.find((f) => f.id === tx.poolFee.feeId)?.name || '-',
-          formatPoolFeeTransactionType(tx.type),
+          poolMetadata?.pool?.poolFees?.find((f) => f.id === Number(tx.feeId))?.name || '-',
+          formatPoolFeeTransactionType(tx.transactionType),
           tx.amount?.toFloat() ?? '-',
           pool.currency.symbol,
         ],

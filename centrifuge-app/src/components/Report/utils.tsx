@@ -223,8 +223,6 @@ export const getAdjustedDates = (
     }
   }
 
-  console.log(startDate ?? today, endDate ?? today)
-
   return [startDate ?? today, endDate ?? today]
 }
 

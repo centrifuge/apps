@@ -1,6 +1,10 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, Text } from '@centrifuge/fabric'
-import { AssetListReport } from '@centrifuge/sdk/dist/types/reports'
+import {
+  AssetListReport,
+  AssetListReportPrivateCredit,
+  AssetListReportPublicCredit,
+} from '@centrifuge/sdk/dist/types/reports'
 import { useContext, useEffect, useMemo } from 'react'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
@@ -202,7 +206,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     }
   )
 
-  console.log(snapshots, isPrivate)
+  console.log(snapshots)
 
   const columns = useMemo(
     () =>
@@ -229,11 +233,14 @@ export function AssetList({ pool }: { pool: Pool }) {
         .filter((col) => !col.csvOnly),
     [columnConfig, basePath, pool.id]
   )
+
   const data = useMemo((): any[] => {
     if (!snapshots) return []
 
     return (snapshots as AssetSnapshot[])
-      .filter((snapshot) => snapshot?.valuationMethod?.toLowerCase() !== 'cash')
+      .filter((snapshot) =>
+        isPrivate ? 'valuationMethod' in snapshot && snapshot?.valuationMethod?.toLowerCase() !== 'cash' : true
+      )
       .filter((snapshot) => {
         const isMaturityDatePassed = snapshot?.maturityDate ? new Date() > new Date(snapshot.maturityDate) : false
         const isDebtZero = 'outstandingQuantity' in snapshot ? snapshot.outstandingQuantity?.isZero() : false
@@ -253,43 +260,44 @@ export function AssetList({ pool }: { pool: Pool }) {
         return dateB - dateA
       })
       .map((snapshot) => {
-        const valuationMethod =
-          'valuationMethod' in snapshot ? (snapshot.valuationMethod as keyof typeof valuationLabels) : ''
         if (isPrivate) {
+          const privateSnapshot = snapshot as AssetSnapshot & AssetListReportPrivateCredit
           return {
             name: '',
             value: [
-              snapshot?.name,
-              snapshot?.presentValue,
-              snapshot?.outstandingPrincipal,
-              snapshot?.outstandingInterest,
-              snapshot?.repaidPrincipal,
-              snapshot?.repaidInterest,
-              snapshot?.repaidUnscheduled,
-              snapshot?.originationDate,
-              snapshot?.actualMaturityDate,
-              valuationMethod || snapshot?.valuationMethod,
-              snapshot?.advanceRate,
-              snapshot?.collateralValue,
-              snapshot?.probabilityOfDefault,
-              snapshot?.lossGivenDefault,
-              snapshot?.discountRate,
+              privateSnapshot.name,
+              privateSnapshot.presentValue,
+              privateSnapshot.outstandingPrincipal,
+              privateSnapshot.outstandingInterest,
+              privateSnapshot.repaidPrincipal,
+              privateSnapshot.repaidInterest,
+              privateSnapshot.repaidUnscheduled,
+              privateSnapshot.originationDate,
+              privateSnapshot.maturityDate,
+              privateSnapshot.valuationMethod,
+              privateSnapshot.advanceRate,
+              privateSnapshot.collateralValue,
+              privateSnapshot.probabilityOfDefault,
+              privateSnapshot.lossGivenDefault,
+              privateSnapshot.discountRate,
             ],
             heading: false,
             id: snapshot?.assetId,
           }
         } else {
+          const publicSnapshot = snapshot as AssetSnapshot & AssetListReportPublicCredit
+
           return {
             name: '',
             value: [
-              snapshot?.name,
-              snapshot?.presentValue,
-              snapshot?.faceValue,
-              snapshot?.outstandingQuantity,
-              snapshot?.currentPrice,
-              snapshot?.maturityDate,
-              snapshot?.unrealizedProfit,
-              snapshot?.realizedProfit,
+              publicSnapshot.name,
+              publicSnapshot.presentValue,
+              publicSnapshot.faceValue,
+              publicSnapshot.outstandingQuantity,
+              publicSnapshot.currentPrice,
+              publicSnapshot.maturityDate,
+              publicSnapshot.unrealizedProfit,
+              publicSnapshot.realizedProfit,
             ],
             heading: false,
             id: snapshot?.assetId,

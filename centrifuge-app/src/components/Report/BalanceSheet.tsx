@@ -29,8 +29,6 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     groupBy
   )
 
-  console.log(poolStates, 'poolStates')
-
   const columns = React.useMemo(() => {
     if (!poolStates) {
       return []

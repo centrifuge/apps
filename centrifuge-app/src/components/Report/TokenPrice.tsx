@@ -28,8 +28,6 @@ export function TokenPrice({ pool }: { pool: Pool }) {
     groupBy
   )
 
-  console.log(poolStates, 'poolStates')
-
   const columns = React.useMemo(() => {
     if (!poolStates) {
       return []
@@ -127,7 +125,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
               value:
                 poolStates?.map((state) => {
                   const matchingTranche = state.tranches.find((t) => t.id === token.id)
-                  return matchingTranche?.yieldSinceInception.toFloat() ?? 0
+                  return matchingTranche?.yieldSinceInception?.toFloat() ?? 0
                 }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
