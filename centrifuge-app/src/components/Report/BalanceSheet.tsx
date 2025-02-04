@@ -151,7 +151,6 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               value:
                 poolStates?.map((poolState) => {
                   const trancheVal = poolState?.tranches?.find((state) => state.tokenId === token.id)?.trancheValue
-                  console.log(trancheVal)
                   return trancheVal || ('' as any)
                 }) || [],
               heading: false,

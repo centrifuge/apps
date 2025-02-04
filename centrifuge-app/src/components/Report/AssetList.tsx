@@ -206,8 +206,6 @@ export function AssetList({ pool }: { pool: Pool }) {
     }
   )
 
-  console.log(snapshots)
-
   const columns = useMemo(
     () =>
       columnConfig
