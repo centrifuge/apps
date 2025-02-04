@@ -38,6 +38,7 @@ export type Token = {
   capacity: CurrencyBalance
   tokenPrice: Price | null
   yield30DaysAnnualized?: string | null
+  yieldSinceInception?: string | null
 }
 
 const FullHeightLayoutSection = styled(LayoutSection)`
@@ -104,6 +105,7 @@ export function PoolDetailOverview() {
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
         yield30DaysAnnualized: tranche?.yield30DaysAnnualized?.toString() || '',
+        yieldSinceInception: tranche?.yieldSinceInception?.toString() || '',
       }
     })
     .reverse()

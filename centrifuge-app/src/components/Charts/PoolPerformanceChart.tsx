@@ -127,12 +127,12 @@ function PoolPerformanceChart() {
 
   const todayJuniorApy = pool?.tranches
     ?.find((pool) => pool.seniority === 0)
-    ?.yield30DaysAnnualized?.toPercent()
+    ?.[range.value === 'all' ? 'yieldSinceInception' : 'yield30DaysAnnualized']?.toPercent()
     .toNumber()
 
   const todaySeniorApy = pool?.tranches
     ?.find((pool) => pool.seniority === 1)
-    ?.yield30DaysAnnualized?.toPercent()
+    ?.[range.value === 'all' ? 'yieldSinceInception' : 'yield30DaysAnnualized']?.toPercent()
     .toNumber()
 
   const trancheTodayPrice = calculateTranchePrices(pool as Pool)
