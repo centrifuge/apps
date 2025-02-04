@@ -71,25 +71,25 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                     formik.setFieldValue('trancheId', trancheId)
                   }}
                 />
-                {pools?.length && pools.find((pool) => pool.id === formik.values.poolId)?.tranches.length! > 1 && (
-                  <Select
-                    label="Select tranche token"
-                    id="trancheId"
-                    name="trancheId"
-                    value={formik.values.trancheId}
-                    options={
-                      pools
-                        ?.find((pool) => pool.id === formik.values.poolId)
-                        ?.tranches.map((t) => {
-                          return {
-                            label: t.currency.displayName,
-                            value: t.id,
-                          }
-                        }) ?? []
-                    }
-                    onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
-                  />
-                )}
+
+                <Select
+                  label="Select tranche token"
+                  id="trancheId"
+                  name="trancheId"
+                  disabled={pools?.find((pool) => pool.id === formik.values.poolId)?.tranches.length! === 1}
+                  value={formik.values.trancheId}
+                  options={
+                    pools
+                      ?.find((pool) => pool.id === formik.values.poolId)
+                      ?.tranches.map((t) => {
+                        return {
+                          label: t.currency.displayName,
+                          value: t.id,
+                        }
+                      }) ?? []
+                  }
+                  onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
+                />
                 <AddressNetworkInput formik={formik} poolId={formik.values.poolId} />
               </Stack>
               <Button type="submit" loading={isTransactionPending}>

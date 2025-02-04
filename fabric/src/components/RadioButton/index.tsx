@@ -14,7 +14,7 @@ export type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
 export function RadioButton({ label, errorMessage, textStyle, ...radioProps }: RadioButtonProps) {
   return (
     <label>
-      <Shelf as={Text} gap={1} alignItems="baseline">
+      <Shelf as={Text} gap={1} alignItems="baseline" backgroundColor="white" px={1} py={1} borderRadius={8}>
         <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px">
           <StyledRadioButton type="radio" {...radioProps} />
           <StyledOutline />
@@ -44,6 +44,7 @@ const StyledOutline = styled.span`
   left: -4px;
   border: 2px solid var(--fabric-focus);
   border-radius: 20px;
+  border-color: ${({ theme }) => theme.colors.textPrimary};
 `
 
 const StyledWrapper = styled(Flex)`
