@@ -9,6 +9,7 @@ import {
   FeeTransactionReport,
   InvestorListReport,
   InvestorTransactionsReport,
+  OrdersListReport,
   ProfitAndLossReport,
   Report,
   TokenPriceReport,
@@ -36,6 +37,8 @@ type ReportResult<T extends ReportsType> = T extends 'cashflow'
   ? AssetListReport[]
   : T extends 'investorList'
   ? InvestorListReport[]
+  : T extends 'ordersList'
+  ? OrdersListReport[]
   : never
 
 type ReportsType = Report | DataReport
