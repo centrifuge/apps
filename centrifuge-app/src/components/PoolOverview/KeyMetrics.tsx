@@ -31,7 +31,7 @@ type Props = {
   poolId: string
 }
 
-type PartialDailyTrancheState = Pick<DailyTrancheState, 'yield30DaysAnnualized'> & {
+type PartialDailyTrancheState = Pick<DailyTrancheState, 'yield90DaysAnnualized'> & {
   tokenPrice: Price
   timestamp: string
 }
@@ -101,14 +101,12 @@ export const KeyMetrics = ({ poolId }: Props) => {
   }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
-    const thirtyDayAPY = getTodayValue(dailyTranches)
-    if (!thirtyDayAPY) return null
+    const apy = getTodayValue(dailyTranches)
+    if (!apy) return null
 
-    return Object.keys(thirtyDayAPY)
+    return Object.keys(apy)
       .map((key) => {
-        return thirtyDayAPY[key][0].yield30DaysAnnualized
-          ? thirtyDayAPY[key][0].yield30DaysAnnualized.toPercent().toNumber()
-          : 0
+        return apy[key][0].yield90DaysAnnualized ? apy[key][0].yield90DaysAnnualized.toPercent().toNumber() : 0
       })
       .sort((a, b) => a - b)
   }, [dailyTranches])
@@ -127,7 +125,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
     poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
     poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
 
-  console.log('Object.values(metadata?.tranches)[0].apy', metadata?.tranches)
   const metrics = [
     {
       metric: 'Asset type',
@@ -137,7 +134,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric:
         centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] || tinlakeData[poolId as TinlakeDataKey]
           ? 'Target APY'
-          : Object.values(metadata?.tranches ?? {})[0].apy || '30-day APY',
+          : Object.values(metadata?.tranches ?? {})[0].apy || '90-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
         : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
