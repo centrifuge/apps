@@ -6,13 +6,13 @@ import { formatBalance } from '../../../src/utils/formatting'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
-import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
-import { getLabelAndAmount } from '../PoolOverview/TransactionHistory'
 import { Spinner } from '../Spinner'
 import { RouterTextLink } from '../TextLink'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import { useReport } from './useReportsQuery'
+import { getTransactionLabelAndAmount } from './utils'
 
 type Row = {
   type: string
@@ -32,10 +32,20 @@ type Row = {
 }
 
 export function AssetTransactions({ pool }: { pool: Pool }) {
-  const { startDate, endDate, setCsvData, txType, loan: loanId } = React.useContext(ReportContext)
-  const transactions = useAssetTransactions(pool.id, new Date(startDate), new Date(endDate))
+  const { startDate, endDate, setCsvData, loan: loanId } = React.useContext(ReportContext)
   const explorer = useGetExplorerUrl()
   const basePath = useBasePath()
+
+  const { data: transactions = [], isLoading } = useReport(
+    'assetTransactions',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    undefined,
+    {
+      ...(loanId && { assetId: loanId }),
+    }
+  )
 
   const columns = [
     {
@@ -107,21 +117,21 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
 
   const data = transactions
     ?.map((transaction) => {
-      const { label, sublabel } = getLabelAndAmount(transaction)
+      const { label, sublabel } = getTransactionLabelAndAmount(transaction)
 
       return {
-        transactionDate: transaction.timestamp.toISOString(),
-        assetId: transaction.asset.id.split('-')[1],
-        assetName: transaction.asset.name,
+        transactionDate: transaction.timestamp,
+        assetId: transaction.assetId.split('-')[1],
+        assetName: transaction.name,
         fromAssetId: transaction.fromAsset?.id,
         fromAssetName: transaction.fromAsset?.name,
         toAssetId: transaction.toAsset?.id,
         toAssetName: transaction.toAsset?.name,
         amount: transaction.amount?.toFloat() ?? '',
-        hash: transaction.hash,
+        hash: transaction.transactionHash,
         label,
         sublabel,
-        epochId: transaction.epochId.split('-').at(-1)!,
+        epochId: transaction.epoch.split('-').at(-1)!,
       }
     })
     .filter((row) => {
@@ -132,7 +142,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
   React.useEffect(() => {
     if (transactions) {
       const csvData = transactions.map((transaction) => {
-        const { amount } = getLabelAndAmount(transaction)
+        const { amount } = getTransactionLabelAndAmount(transaction)
         return {
           'Transaction Date': `"${formatDate(transaction.timestamp, {
             year: 'numeric',
@@ -143,9 +153,9 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
             second: 'numeric',
             timeZoneName: 'short',
           })}"`,
-          Transaction: explorer.tx(transaction.hash),
+          Transaction: explorer.tx(transaction.transactionHash),
           Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
-          epoch: transaction.epochId,
+          epoch: transaction.epoch,
         }
       })
 
@@ -159,7 +169,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     }
   }, [transactions, setCsvData])
 
-  if (!transactions) {
+  if (isLoading) {
     return <Spinner mt={2} />
   }
 
