@@ -11,7 +11,7 @@ import { RouterTextLink } from '../TextLink'
 import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 
-type TrancheWithCurrency = Pick<Token, 'yield30DaysAnnualized' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
+type TrancheWithCurrency = Pick<Token, 'yieldSinceInception' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
 
 const StyledRouterTextLink = styled(RouterTextLink)`
   font-size: 12px;
@@ -177,8 +177,8 @@ export function PoolCard({
           if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[DYF_POOL_ID][0]
           if (poolId === NS3_POOL_ID && tranche.seniority === 0) return centrifugeTargetAPYs[NS3_POOL_ID][0]
           if (poolId === NS3_POOL_ID && tranche.seniority === 1) return centrifugeTargetAPYs[NS3_POOL_ID][1]
-          if (daysSinceCreation > 30 && tranche.yield30DaysAnnualized)
-            return formatPercentage(tranche.yield30DaysAnnualized, true, {}, 1)
+          if (daysSinceCreation > 30 && tranche.yieldSinceInception)
+            return formatPercentage(tranche.yieldSinceInception, true, {}, 1)
           if (tranche.interestRatePerSec) {
             return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
           }
