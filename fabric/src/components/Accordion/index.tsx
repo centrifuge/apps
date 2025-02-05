@@ -48,6 +48,7 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
     <Box as="li" borderStyle="solid" borderWidth={0} borderColor="borderPrimary" {...boxProps}>
       <Toggle
         as="button"
+        type="button"
         id={`accordion-control-${id}`}
         width="100%"
         p={2}

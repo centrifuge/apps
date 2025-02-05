@@ -64,7 +64,7 @@ function OnboardingSettingsAccordion({ children }: { children: React.ReactNode }
     <Stack
       borderRadius={8}
       mx={2}
-      mb={2}
+      mb={4}
       py={3}
       px={2}
       gap={3}
