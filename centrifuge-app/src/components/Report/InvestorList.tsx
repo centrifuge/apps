@@ -3,8 +3,8 @@ import { NetworkIcon, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
+import { formatBalance, formatPercentage } from '../../../src/utils/formatting-sdk'
 import { evmChains } from '../../config'
-import { formatBalance, formatToPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
@@ -51,27 +51,27 @@ export function InvestorList({ pool }: { pool: Pool }) {
       header: 'Position',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, 2, row.token.currency.symbol) : '-'),
     },
     {
       header: 'Pool %',
       align: 'left',
       sortable: true,
       csvOnly: false,
-      formatter: (v: any) => (v ? formatToPercentage(v) : '-'),
+      formatter: (v: any) => (v ? formatPercentage(v) : '-'),
     },
 
     {
       header: 'Pending invest order',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       header: 'Pending redeem order',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, 2, row.token.currency.symbol) : '-'),
     },
   ]
 
