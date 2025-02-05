@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { SupportedNetworksDrawer } from '../..//components/Dashboard/Investors/SupportedNetworksDrawer'
 import { AddNewInvestorDrawer } from '../../components/Dashboard/Investors/AddNewInvestorDrawer'
 import { InvestorTable } from '../../components/Dashboard/Investors/InvestorTable'
-import { OnboardingSettingDrawer } from '../../components/Dashboard/Investors/OnboardingSettingDrawer'
+import { OnboardingSettingsDrawer } from '../../components/Dashboard/Investors/OnboardingSettingsDrawer'
 import { useInvestorListMulti, usePools } from '../../utils/usePools'
 
 export default function InvestorsPage() {
@@ -21,7 +21,7 @@ export default function InvestorsPage() {
         isOpen={isSupportedNetworksDrawerOpen}
         onClose={() => setIsSupportedNetworksDrawerOpen(false)}
       />
-      <OnboardingSettingDrawer
+      <OnboardingSettingsDrawer
         isOpen={isOnboardingSettingsDrawerOpen}
         onClose={() => setIsOnboardingSettingsDrawerOpen(false)}
       />

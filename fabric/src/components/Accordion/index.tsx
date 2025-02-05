@@ -32,17 +32,7 @@ const Toggle = styled(Shelf)`
 
 export function Accordion({ items, ...boxProps }: AccordionProps) {
   return (
-    <Root
-      as="ul"
-      pl={0}
-      aria-label="Accordion Control Group Buttons"
-      borderRadius="card"
-      borderStyle="solid"
-      borderWidth={1}
-      borderColor="borderPrimary"
-      role="list"
-      {...boxProps}
-    >
+    <Root as="ul" pl={0} aria-label="Accordion Control Group Buttons" role="list" {...boxProps}>
       {items.map((entry, index) => (
         <AccordionEntry {...entry} key={index} borderTopWidth={index > 0 ? 1 : 0} />
       ))}
@@ -63,10 +53,7 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
         p={2}
         justifyContent="space-between"
         alignItems="center"
-        onClick={(e) => {
-          e.preventDefault()
-          setOpen(!open)
-        }}
+        onClick={() => setOpen(!open)}
         aria-controls={`content-${id}`}
         aria-expanded={open}
       >
@@ -76,7 +63,7 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
         <CollapsibleChevron open={open} />
       </Toggle>
       <Collapsible id={`content-${id}`} open={open}>
-        <Box p={2}>
+        <Box>
           <Text variant="body2">{body}</Text>
         </Box>
       </Collapsible>

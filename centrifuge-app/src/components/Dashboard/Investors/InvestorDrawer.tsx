@@ -92,6 +92,7 @@ export function InvestorDrawer({
                 <MenuItem
                   iconRight={<IconCopy size="iconMedium" />}
                   label="Copy"
+                  style={{ cursor: 'copy' }}
                   onClick={() => copyToClipboard(investor.wallet)}
                 />
               </Menu>

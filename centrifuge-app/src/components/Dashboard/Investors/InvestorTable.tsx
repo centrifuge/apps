@@ -1,10 +1,10 @@
 import { CurrencyBalance, FileType, Pool } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text, truncate } from '@centrifuge/fabric'
 import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../../components/DataTable'
-import { CopyToClipboard } from '../../../utils/copyToClipboard'
+import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { useFilters } from '../../../utils/useFilters'
 import { useInvestorListMulti, usePoolMetadataMulti } from '../../../utils/usePools'
 import { InvestorDrawer } from './InvestorDrawer'
@@ -75,7 +75,11 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
     {
       header: 'Wallet', // TODO: make this searchable
       align: 'left',
-      cell: (row: InvestorTableRow) => <CopyToClipboard address={row.wallet} />,
+      cell: (row: InvestorTableRow) => (
+        <Text style={{ cursor: 'copy' }} onClick={() => copyToClipboard(row.wallet)}>
+          {truncate(row.wallet)}
+        </Text>
+      ),
     },
     {
       header: (

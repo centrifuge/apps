@@ -28,13 +28,13 @@ import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermi
 import { usePool, usePoolMetadata, usePoolMetadataMulti, usePools } from '../../../utils/usePools'
 import { Column, DataTable } from '../../DataTable'
 
-export function OnboardingSettingDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function OnboardingSettingsDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pools = usePools()
   const [selectedPoolId, setSelectedPoolId] = useState<string | null>(pools?.[0]?.id ?? null)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   return (
     <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
-      <Text variant="heading2" fontWeight="600">
+      <Text variant="heading2" fontSize="20px" fontWeight="600">
         Onboarding Settings
       </Text>
       <Select
@@ -54,7 +54,6 @@ export function OnboardingSettingDrawer({ isOpen, onClose }: { isOpen: boolean; 
           setSelectedPoolId(event.target.value)
         }}
       />
-      <Divider />
       {selectedPoolId && <OnboardingSettings poolId={selectedPoolId} onClose={onClose} />}
     </Drawer>
   )
@@ -62,7 +61,18 @@ export function OnboardingSettingDrawer({ isOpen, onClose }: { isOpen: boolean; 
 
 function OnboardingSettingsAccordion({ children }: { children: React.ReactNode }) {
   return (
-    <Stack borderRadius={8} py={3} px={2} gap={3} backgroundColor="backgroundSecondary">
+    <Stack
+      borderRadius={8}
+      mx={2}
+      mb={2}
+      py={3}
+      px={2}
+      gap={3}
+      backgroundColor="backgroundSecondary"
+      borderStyle="solid"
+      borderWidth={1}
+      borderColor="borderPrimary"
+    >
       {children}
     </Stack>
   )
@@ -300,18 +310,20 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
   return (
     <FormikProvider value={formik}>
       <Form>
-        <Stack gap={3}>
-          <Accordion
-            items={[
-              {
-                title: (
-                  <Box paddingY={2}>
-                    <Text variant="heading2">Details</Text>
-                  </Box>
-                ),
-                body: (
-                  <OnboardingSettingsAccordion>
-                    {/* <Select
+        <Stack gap={0}>
+          <Stack gap={0}>
+            <Divider />
+            <Accordion
+              items={[
+                {
+                  title: (
+                    <Box paddingY={2}>
+                      <Text variant="heading2">Details</Text>
+                    </Box>
+                  ),
+                  body: (
+                    <OnboardingSettingsAccordion>
+                      {/* <Select
                     options={[
                       { label: 'Open', value: 'open' },
                       { label: 'Closed', value: 'closed' },
@@ -322,193 +334,196 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                       formik.setFieldValue('onboardingStatus', event.target.value)
                     }}
                   /> */}
-                    <Stack gap={2}>
-                      <Text variant="heading4">Onboarding experience</Text>
                       <Stack gap={2}>
-                        <RadioButton
-                          id="onboardingExperience"
-                          checked={formik.values.onboardingExperience === 'centrifuge'}
-                          label="Centrifuge"
-                          onChange={() => {
-                            formik.setFieldValue('onboardingExperience', 'centrifuge')
-                          }}
-                        />
-                        <RadioButton
-                          checked={formik.values.onboardingExperience === 'none'}
-                          label="None"
-                          id="onboardingExperience"
-                          onChange={() => {
-                            formik.setFieldValue('onboardingExperience', 'none')
-                          }}
-                        />
-                        <RadioButton
-                          checked={formik.values.onboardingExperience === 'other'}
-                          label="Other"
-                          id="onboardingExperience"
-                          onChange={() => {
-                            formik.setFieldValue('onboardingExperience', 'other')
-                          }}
-                        />
-                      </Stack>
-                      {formik.values.onboardingExperience === 'other' && (
-                        <TextInput
-                          value={formik.values.externalOnboardingUrl}
-                          onChange={(e) => formik.setFieldValue('externalOnboardingUrl', e.target.value)}
-                          placeholder="https://"
-                          label="External onboarding url"
-                          onBlur={formik.handleBlur}
-                          errorMessage={
-                            formik.errors.externalOnboardingUrl && formik.values.onboardingExperience === 'other'
-                              ? formik.errors.externalOnboardingUrl
-                              : undefined
-                          }
-                        />
-                      )}
-                      {formik.values.onboardingExperience === 'centrifuge' && (
+                        <Text variant="heading4">Onboarding experience</Text>
                         <Stack gap={2}>
-                          {Object.entries(poolMetadata?.onboarding?.tranches ?? {}).map(([tId]) => {
-                            return (
-                              <Box key={`${tId}-sub-docs`}>
-                                <FileUpload
-                                  small
-                                  label={`Subscription document for ${
-                                    (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.displayName
-                                  }`}
-                                  onFileChange={(file) => {
-                                    formik.setFieldValue('tranches', {
-                                      ...formik.values.tranches,
-                                      [tId]: { agreement: file, openForOnboarding: true, trancheId: tId },
-                                    })
-                                  }}
-                                  placeholder="Choose a file..."
-                                  file={formik.values.tranches[tId]?.agreement ?? undefined}
-                                  accept="application/pdf"
-                                />
-                              </Box>
-                            )
-                          })}
-                          <Select
-                            options={[
-                              { label: 'No', value: 'false' },
-                              { label: 'Yes', value: 'true' },
-                            ]}
-                            defaultValue="false"
-                            label="Require investors to upload tax documents before signing the subscription agreement"
-                            value={formik.values.taxInfoRequired ? 'true' : 'false'}
-                            onChange={(e) => {
-                              formik.setFieldValue('taxInfoRequired', e.target.value === 'true')
+                          <RadioButton
+                            id="onboardingExperience"
+                            checked={formik.values.onboardingExperience === 'centrifuge'}
+                            label="Centrifuge"
+                            onChange={() => {
+                              formik.setFieldValue('onboardingExperience', 'centrifuge')
+                            }}
+                          />
+                          <RadioButton
+                            checked={formik.values.onboardingExperience === 'none'}
+                            label="None"
+                            id="onboardingExperience"
+                            onChange={() => {
+                              formik.setFieldValue('onboardingExperience', 'none')
+                            }}
+                          />
+                          <RadioButton
+                            checked={formik.values.onboardingExperience === 'other'}
+                            label="Other"
+                            id="onboardingExperience"
+                            onChange={() => {
+                              formik.setFieldValue('onboardingExperience', 'other')
                             }}
                           />
                         </Stack>
-                      )}
-                    </Stack>
-                  </OnboardingSettingsAccordion>
-                ),
-              },
-
-              {
-                title: (
-                  <Box paddingY={2}>
-                    <Text variant="heading2">Restricted countries</Text>
-                  </Box>
-                ),
-                body: (
-                  <OnboardingSettingsAccordion>
-                    <SearchInput
-                      id="countrySearch"
-                      label="Add restricted onboarding countries"
-                      value={countrySearch}
-                      onChange={(e) => {
-                        setCountrySearch(e.target.value)
-                        // Check if the selected value matches one of the options
-                        const selectedCountry = uniqueCountryCodesEntries.find(
-                          ([_, country]) => country === e.target.value
-                        )
-
-                        if (selectedCountry) {
-                          setCountrySearch('')
-                          formik.setFieldValue('kycRestrictedCountries', [
-                            ...formik.values.kycRestrictedCountries,
-                            { label: selectedCountry[1], value: selectedCountry[0] },
-                          ])
-                          formik.setFieldValue('kybRestrictedCountries', [
-                            ...formik.values.kybRestrictedCountries,
-                            { label: selectedCountry[1], value: selectedCountry[0] },
-                          ])
-                        }
-                      }}
-                      list="countrySearchList"
-                    />
-                    <datalist id="countrySearchList">
-                      {(() => {
-                        const existingCountries = new Set(uniqueCountries.map((c) => c.label))
-                        return uniqueCountryCodesEntries
-                          .filter(([_, country]) => !existingCountries.has(country))
-                          .map(([code, country]) => (
-                            <option key={`${code}-onboarding-country`} value={country} id={code} />
-                          ))
-                      })()}
-                    </datalist>
-                    {uniqueCountries.length > 0 && (
-                      <Box backgroundColor="white">
-                        <DataTable
-                          columns={
-                            [
-                              {
-                                header: 'Countries',
-                                cell: (row) => <Text textOverflow="ellipsis">{row.country}</Text>,
-                                align: 'left',
-                                width: '80%',
-                              },
-                              {
-                                header: '',
-                                width: '20%',
-                                cell: (row) => (
-                                  <Button
-                                    variant="tertiary"
-                                    disabled={!row.canBeDeleted}
-                                    onClick={() => {
-                                      formik.setFieldValue(
-                                        'kycRestrictedCountries',
-                                        formik.values.kycRestrictedCountries.filter((c) => c.value !== row.id)
-                                      )
-                                      formik.setFieldValue(
-                                        'kybRestrictedCountries',
-                                        formik.values.kybRestrictedCountries.filter((c) => c.value !== row.id)
-                                      )
-                                    }}
-                                    icon={row.canBeDeleted ? <IconTrash size="iconSmall" /> : undefined}
-                                  ></Button>
-                                ),
-                              },
-                            ] as Column[]
-                          }
-                          data={(formik.values.onboardingExperience === 'centrifuge'
-                            ? [...uniqueCountries, ...shuftiUnsupportedCountries]
-                            : uniqueCountries
-                          ).map((c) => {
-                            return {
-                              country: c.label,
-                              id: c.value,
-                              canBeDeleted: 'canBeDeleted' in c ? c.canBeDeleted : true,
+                        {formik.values.onboardingExperience === 'other' && (
+                          <TextInput
+                            value={formik.values.externalOnboardingUrl}
+                            onChange={(e) => formik.setFieldValue('externalOnboardingUrl', e.target.value)}
+                            placeholder="https://"
+                            label="External onboarding url"
+                            onBlur={formik.handleBlur}
+                            errorMessage={
+                              formik.errors.externalOnboardingUrl && formik.values.onboardingExperience === 'other'
+                                ? formik.errors.externalOnboardingUrl
+                                : undefined
                             }
-                          })}
-                        />
-                      </Box>
-                    )}
-                  </OnboardingSettingsAccordion>
-                ),
-              },
-            ]}
-          />
-          <Divider />
-          <Stack gap={2}>
-            <Button small type="submit">
-              Save
-            </Button>
-            <Button small variant="inverted" onClick={onClose}>
-              Cancel
-            </Button>
+                          />
+                        )}
+                        {formik.values.onboardingExperience === 'centrifuge' && (
+                          <Stack gap={2}>
+                            {Object.entries(poolMetadata?.onboarding?.tranches ?? {}).map(([tId]) => {
+                              return (
+                                <Box key={`${tId}-sub-docs`}>
+                                  <FileUpload
+                                    small
+                                    label={`Subscription document for ${
+                                      (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.displayName
+                                    }`}
+                                    onFileChange={(file) => {
+                                      formik.setFieldValue('tranches', {
+                                        ...formik.values.tranches,
+                                        [tId]: { agreement: file, openForOnboarding: true, trancheId: tId },
+                                      })
+                                    }}
+                                    placeholder="Choose a file..."
+                                    file={formik.values.tranches[tId]?.agreement ?? undefined}
+                                    accept="application/pdf"
+                                  />
+                                </Box>
+                              )
+                            })}
+                            <Select
+                              options={[
+                                { label: 'No', value: 'false' },
+                                { label: 'Yes', value: 'true' },
+                              ]}
+                              defaultValue="false"
+                              label="Require investors to upload tax documents before signing the subscription agreement"
+                              value={formik.values.taxInfoRequired ? 'true' : 'false'}
+                              onChange={(e) => {
+                                formik.setFieldValue('taxInfoRequired', e.target.value === 'true')
+                              }}
+                            />
+                          </Stack>
+                        )}
+                      </Stack>
+                    </OnboardingSettingsAccordion>
+                  ),
+                },
+
+                {
+                  title: (
+                    <Box paddingY={2}>
+                      <Text variant="heading2">Restricted countries</Text>
+                    </Box>
+                  ),
+                  body: (
+                    <OnboardingSettingsAccordion>
+                      <SearchInput
+                        id="countrySearch"
+                        label="Add restricted onboarding countries"
+                        value={countrySearch}
+                        onChange={(e) => {
+                          setCountrySearch(e.target.value)
+                          // Check if the selected value matches one of the options
+                          const selectedCountry = uniqueCountryCodesEntries.find(
+                            ([_, country]) => country === e.target.value
+                          )
+
+                          if (selectedCountry) {
+                            setCountrySearch('')
+                            formik.setFieldValue('kycRestrictedCountries', [
+                              ...formik.values.kycRestrictedCountries,
+                              { label: selectedCountry[1], value: selectedCountry[0] },
+                            ])
+                            formik.setFieldValue('kybRestrictedCountries', [
+                              ...formik.values.kybRestrictedCountries,
+                              { label: selectedCountry[1], value: selectedCountry[0] },
+                            ])
+                          }
+                        }}
+                        list="countrySearchList"
+                      />
+                      <datalist id="countrySearchList">
+                        {(() => {
+                          const existingCountries = new Set(uniqueCountries.map((c) => c.label))
+                          return uniqueCountryCodesEntries
+                            .filter(([_, country]) => !existingCountries.has(country))
+                            .map(([code, country]) => (
+                              <option key={`${code}-onboarding-country`} value={country} id={code} />
+                            ))
+                        })()}
+                      </datalist>
+                      {uniqueCountries.length > 0 && (
+                        <Box backgroundColor="white">
+                          <DataTable
+                            columns={
+                              [
+                                {
+                                  header: 'Countries',
+                                  cell: (row) => <Text textOverflow="ellipsis">{row.country}</Text>,
+                                  align: 'left',
+                                  width: '80%',
+                                },
+                                {
+                                  header: '',
+                                  width: '20%',
+                                  cell: (row) => (
+                                    <Button
+                                      variant="tertiary"
+                                      disabled={!row.canBeDeleted}
+                                      onClick={() => {
+                                        formik.setFieldValue(
+                                          'kycRestrictedCountries',
+                                          formik.values.kycRestrictedCountries.filter((c) => c.value !== row.id)
+                                        )
+                                        formik.setFieldValue(
+                                          'kybRestrictedCountries',
+                                          formik.values.kybRestrictedCountries.filter((c) => c.value !== row.id)
+                                        )
+                                      }}
+                                      icon={row.canBeDeleted ? <IconTrash size="iconSmall" /> : undefined}
+                                    ></Button>
+                                  ),
+                                },
+                              ] as Column[]
+                            }
+                            data={(formik.values.onboardingExperience === 'centrifuge'
+                              ? [...uniqueCountries, ...shuftiUnsupportedCountries]
+                              : uniqueCountries
+                            ).map((c) => {
+                              return {
+                                country: c.label,
+                                id: c.value,
+                                canBeDeleted: 'canBeDeleted' in c ? c.canBeDeleted : true,
+                              }
+                            })}
+                          />
+                        </Box>
+                      )}
+                    </OnboardingSettingsAccordion>
+                  ),
+                },
+              ]}
+            />
+          </Stack>
+          <Stack gap={4}>
+            <Divider />
+            <Stack gap={2}>
+              <Button small type="submit">
+                Save
+              </Button>
+              <Button small variant="inverted" onClick={onClose}>
+                Cancel
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
       </Form>
