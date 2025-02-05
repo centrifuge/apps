@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { formatDecimal } from '../../../src/utils/formatting'
+import { formatBalance } from '../../../src/utils/formatting-sdk'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { DataTable } from '../DataTable'
@@ -84,31 +84,31 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         name: '\u00A0 \u00A0 Asset valuation',
         value: poolStates?.map((poolState) => poolState.assetValuation.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: '\u00A0 \u00A0 Onchain reserve',
         value: poolStates?.map((poolState) => poolState.onchainReserve.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: '\u00A0 \u00A0 Offchain cash',
         value: poolStates?.map((poolState) => poolState.offchainCash.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: '\u00A0 \u00A0 Accrued fees',
         value: poolStates?.map((poolState) => poolState.accruedFees.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Net Asset Value (NAV)',
         value: poolStates?.map((poolState) => poolState.netAssetValue.toDecimal()) || [],
         heading: true,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
   }, [pool.currency.displayName, poolStates])
@@ -134,7 +134,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
                   return tokenSupply || ('' as any)
                 }) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatDecimal(v, 2, token.currency.displayName) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, 2, token.currency.displayName) : ''),
             },
             {
               name: `\u00A0 \u00A0 * ${token.currency.displayName} token price`,
@@ -144,7 +144,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
                   return tokenPrice || ('' as any)
                 }) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatDecimal(v, 6, token.currency.displayName) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, 6, token.currency.displayName) : ''),
             },
             {
               name: `\u00A0 \u00A0 = ${token.currency.displayName} tranche value`,
@@ -155,7 +155,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
                 }) || [],
               heading: false,
               bold: true,
-              formatter: (v: any) => (v ? formatDecimal(v, 2, token.currency.displayName) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, 2, token.currency.displayName) : ''),
             },
           ]
         })
@@ -164,7 +164,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         name: 'Total capital',
         value: poolStates?.map((poolState) => poolState.totalCapital?.toDecimal() || ('' as any)) || [],
         heading: true,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
   }, [poolStates, pool])

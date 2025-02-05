@@ -3,7 +3,7 @@ import { Box, Text } from '@centrifuge/fabric'
 import { useContext, useEffect, useMemo } from 'react'
 import { TableDataRow } from '.'
 import { formatDateAndTime } from '../../../src/utils/date'
-import { formatDecimal } from '../../../src/utils/formatting'
+import { formatBalance } from '../../../src/utils/formatting-sdk'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
@@ -36,43 +36,43 @@ const Orders = ({ pool }: { pool: Pool }) => {
       align: 'left',
       header: 'NAV',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 6, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 6, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Nav per share',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 6, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 6, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Investments locked',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 2, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Investments executed',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 2, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Redemptions locked',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 2, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Redemptions executed',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 2, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Paid fees',
       sortable: true,
-      formatter: (v: any) => (v ? formatDecimal(v, 2, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
   ]
 

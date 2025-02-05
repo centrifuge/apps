@@ -1,11 +1,10 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import { Currency } from '@centrifuge/sdk'
 import { ProfitAndLossReport } from '@centrifuge/sdk/dist/types/reports'
 import * as React from 'react'
 import { formatDate } from '../../../src/utils/date'
-import { formatDecimal } from '../../../src/utils/formatting'
+import { formatBalance } from '../../../src/utils/formatting-sdk'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
@@ -86,19 +85,19 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         nameTooltip: 'Based on selling the assets in the pool at the current market price',
         value: data?.map((report) => report.profitAndLossFromAsset.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Interest payments',
         value: data?.map((report) => report.interestPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Other payments',
         value: data?.map((report) => report.otherPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Total income ',
@@ -110,7 +109,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         }),
         heading: false,
         bold: true,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
   }, [currency, data])
@@ -127,19 +126,19 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         name: 'Interest payments',
         value: data?.map((report) => report.interestPayments?.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Interest accrued',
         value: data?.map((report) => report.interestPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatDecimal(v, 2, currency)}`,
+        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, 2, currency)}`,
       },
       {
         name: 'Other payments',
         value: data?.map((report) => report.otherPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Asset write-offs',
@@ -151,14 +150,14 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             return report.assetWriteOffs.toDecimal()
           }) || [],
         heading: false,
-        formatter: (v: any) => (v ? `-${formatDecimal(v, 2, currency)}` : ''),
+        formatter: (v: any) => (v ? `-${formatBalance(v, 2, currency)}` : ''),
       },
       {
         name: 'Profit / loss from assets ',
         value: data.map((report) => report.totalProfitAndLoss.toDecimal()),
         heading: false,
         bold: true,
-        formatter: (v: any) => (v ? formatDecimal(v, 2, currency) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
   }, [currency, data])
@@ -200,7 +199,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         heading: false,
         bold: false,
         formatter: (v: Currency) => {
-          return `-${formatDecimal(v, 2, pool.currency.displayName)}`
+          return `-${formatBalance(v, 2, pool.currency.displayName)}`
         },
       })
     })
@@ -210,7 +209,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       value: data.map((report) => report.totalExpenses.toDecimal()),
       heading: false,
       bold: true,
-      formatter: (val: any) => (val ? formatBalance(val, pool.currency.displayName, 2) : ''),
+      formatter: (val: any) => (val ? formatBalance(val, 2, pool.currency.displayName) : ''),
     })
 
     return rows
@@ -222,7 +221,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         name: 'Total profit / loss',
         value: data?.map((report) => report.totalProfitAndLoss.toDecimal()) || [],
         heading: true,
-        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, 2, pool.currency.displayName)}`,
       },
     ]
   }, [data, poolMetadata?.pool?.asset.class, pool.currency.displayName])

@@ -1,17 +1,16 @@
 import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
-import { Currency } from '@centrifuge/sdk'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatDate } from '../../../src/utils/date'
-import { formatDecimal, formatDecimalAbbreviated } from '../../../src/utils/formatting'
+import { formatBalance, formatDecimalAbbreviated } from '../../../src/utils/formatting-sdk'
 import { LoadBoundary } from '../LoadBoundary'
 import { CustomTick } from './PoolPerformanceChart'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 
 type SimpleBarChartProps = {
   currency?: CurrencyMetadata
-  data: { name: string; yAxis: Currency }[]
+  data: { name: string; yAxis: number }[]
   groupBy?: string
 }
 
@@ -81,7 +80,7 @@ export const SimpleBarChart = ({ currency, data, groupBy }: SimpleBarChartProps)
                       return (
                         <Box>
                           <TooltipTitle>{formatDate(item.payload.name)}</TooltipTitle>
-                          <Text variant="body3">{formatDecimal(item.value, 2, currency?.displayName)}</Text>
+                          <Text variant="body3">{formatBalance(item.value ?? 0, 2, currency?.displayName)}</Text>
                         </Box>
                       )
                     })}

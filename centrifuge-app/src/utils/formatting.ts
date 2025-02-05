@@ -1,5 +1,4 @@
 import { CurrencyBalance, CurrencyMetadata, Perquintill, Price, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
-import { Currency } from '@centrifuge/sdk'
 import Decimal from 'decimal.js-light'
 
 export function formatBalance(
@@ -80,67 +79,4 @@ export function truncateText(txt: string, len: number) {
     return `${txt.slice(0, len)}...`
   }
   return txt
-}
-
-// FORMAT FUNCTIONS FOR NEW SDK
-
-export function formatDecimal(decimalVal: any, displayDecimals: number, currency?: string): string {
-  const val = decimalVal instanceof Decimal ? decimalVal : decimalVal.toDecimal()
-
-  const rounded = val.toFixed(displayDecimals)
-
-  const parts = rounded.split('.')
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  const formattedWithCommas = parts.join('.')
-
-  return currency ? `${formattedWithCommas} ${currency}` : formattedWithCommas
-}
-
-export function formatToPercentage(
-  rate: Rate,
-  precision = 2,
-  showSymbol = true,
-  options: Intl.NumberFormatOptions = {}
-): string {
-  const percentDecimal = rate.toPercent().toNumber()
-
-  const strValue = percentDecimal.toLocaleString('en', {
-    minimumFractionDigits: precision || 2,
-    maximumFractionDigits: precision || 2,
-    ...options,
-  })
-
-  return showSymbol ? `${strValue}%` : strValue
-}
-
-export function formatDecimalAbbreviated(
-  decimalVal: Decimal | number | Currency,
-  displayDecimals = 1,
-  currency?: string
-): string {
-  const val =
-    decimalVal instanceof Decimal
-      ? decimalVal
-      : decimalVal instanceof Currency
-      ? decimalVal.toDecimal()
-      : new Decimal(decimalVal)
-
-  const amountNumber = val.toNumber()
-  const absVal = Math.abs(amountNumber)
-  let formattedAmount = ''
-
-  if (absVal >= 1e9) {
-    formattedAmount = (amountNumber / 1e9).toFixed(displayDecimals) + 'B'
-  } else if (absVal >= 1e6) {
-    formattedAmount = (amountNumber / 1e6).toFixed(displayDecimals) + 'M'
-  } else if (absVal >= 1e3) {
-    formattedAmount = (amountNumber / 1e3).toFixed(displayDecimals) + 'K'
-  } else {
-    const rounded = val.toFixed(displayDecimals)
-    const parts = rounded.split('.')
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-    formattedAmount = parts.join('.')
-  }
-
-  return currency ? `${formattedAmount} ${currency}` : formattedAmount
 }
