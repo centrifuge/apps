@@ -25,24 +25,18 @@ export function formatBalance(amount: Decimal | Currency | number, displayDecima
 }
 
 export function formatPercentage(
-  rate: Decimal | number,
+  rate: Decimal | number | string,
   precision = 2,
   showSymbol = true,
   options: Intl.NumberFormatOptions = {}
 ): string {
-  const decRate = rate instanceof Decimal ? rate : Dec(rate.toString())
-
-  // If the rate is less than 1, we assume it's a fraction and multiply by 100.
-  // Otherwise, we assume it's already in percentage form.
-  const percentValue = decRate.lt(1) ? decRate.mul(100).toNumber() : decRate.toNumber()
-
-  const formatted = percentValue.toLocaleString('en', {
-    minimumFractionDigits: precision,
-    maximumFractionDigits: precision,
+  const formattedAmount = (rate instanceof Decimal ? rate.toNumber() : Number(rate)).toLocaleString('en', {
+    minimumFractionDigits: precision || 2,
+    maximumFractionDigits: precision || 2,
     ...options,
   })
 
-  return showSymbol ? `${formatted}%` : formatted
+  return showSymbol ? `${formattedAmount}%` : formattedAmount
 }
 
 export function formatBalanceAbbreviated(decimalVal: Decimal | number, displayDecimals = 1, currency?: string): string {

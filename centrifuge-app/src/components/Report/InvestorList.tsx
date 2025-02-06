@@ -58,7 +58,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
       align: 'left',
       sortable: true,
       csvOnly: false,
-      formatter: (v: any) => (v ? formatPercentage(v) : '-'),
+      formatter: (v: any) => (v ? formatPercentage(v.toPercent()) : '-'),
     },
 
     {
