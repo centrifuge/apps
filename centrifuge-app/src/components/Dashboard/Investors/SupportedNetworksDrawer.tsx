@@ -1,4 +1,5 @@
-import { useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { Token } from '@centrifuge/centrifuge-js'
+import { useGetExplorerUrl, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import {
   Accordion,
   Box,
@@ -10,6 +11,7 @@ import {
   IconExternalLink,
   Select,
   Shelf,
+  Spinner,
   Stack,
   Text,
   TextInput,
@@ -100,6 +102,7 @@ function SupportedNetworks({
   const pools = usePools()
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const getNetworkName = useGetNetworkName()
+
   return (
     <Accordion
       items={[
@@ -130,7 +133,7 @@ function SupportedNetworks({
                 <Stack gap={2}>
                   <DeployTrancheTokensInput
                     chainId={chainId}
-                    tranches={formik.values.networks[index]?.trancheIds.map((tId) => {
+                    tranches={formik.values.networks[index].trancheIds.map((tId) => {
                       return pools
                         ?.find((p) => p.id === formik.values.networks[index].poolId)
                         ?.tranches.find((t) => t.id === tId)
@@ -153,37 +156,60 @@ function SupportedNetworks({
   )
 }
 
-function DeployTrancheTokensInput({ tranches, poolId, chainId }: { tranches: any[]; poolId: string; chainId: number }) {
+function DeployTrancheTokensInput({
+  tranches,
+  poolId,
+  chainId,
+}: {
+  tranches?: (Token | undefined)[]
+  poolId: string
+  chainId: number
+}) {
   const { data: domains, isLoading } = useActiveDomains(poolId)
   const domain = domains?.find((d) => d.chainId === chainId)
-  console.log('🚀 ~ domain:', domain)
+  const explorer = useGetExplorerUrl(chainId)
   return (
     <Stack gap={2}>
       <Text variant="label1" color="textPrimary">
         Tranche token that will be deployed
       </Text>
-      {tranches?.map((t, index) => {
+      {tranches?.map((t) => {
         return (
-          <Shelf gap={2} width="100%">
-            <Box flex={1} width="100%">
-              <TextInput
-                value={t?.currency.displayName}
-                disabled={domain?.isActive}
-                symbol={
-                  <IconCheckInCircle
-                    color={domain?.isActive ? 'success' : 'textSecondary'}
-                    size="iconMedium"
-                    style={{ marginLeft: '4px' }}
+          <Shelf gap={2} width="100%" justifyContent="center">
+            {!isLoading ? (
+              <>
+                <Box flex={1} width="100%">
+                  <TextInput
+                    value={t?.currency.displayName}
+                    disabled={domain?.isActive}
+                    symbol={
+                      <IconCheckInCircle
+                        color={domain?.isActive ? 'statusOk' : 'textSecondary'}
+                        size="iconMedium"
+                        style={{ marginLeft: '4px' }}
+                      />
+                    }
                   />
-                }
-              />
-            </Box>
-            {domain?.isActive && (
-              <Stack flex={1} width="100%">
-                <Button small iconRight={<IconExternalLink />} variant="inverted">
-                  {truncate(Object.keys(domain?.liquidityPools ?? {})[index])}
-                </Button>
-              </Stack>
+                </Box>
+                {domain?.isActive && (
+                  <Stack flex={1} width="100%">
+                    <a
+                      href={explorer.address(domain.trancheTokens[t?.id ?? '']!)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button variant="inverted" small style={{ width: '100%' }}>
+                        <Shelf gap={1} p="3px" width="100%" justifyContent="space-between">
+                          {truncate(Object.keys(domain?.liquidityPools ?? {}).find((d) => d === t?.id) ?? '')}
+                          <IconExternalLink size="iconSmall" />
+                        </Shelf>
+                      </Button>
+                    </a>
+                  </Stack>
+                )}
+              </>
+            ) : (
+              <Spinner width="100%" height="100%" />
             )}
           </Shelf>
         )

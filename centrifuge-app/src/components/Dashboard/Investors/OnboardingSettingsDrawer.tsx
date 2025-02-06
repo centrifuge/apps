@@ -23,13 +23,14 @@ import {
   KYC_COUNTRY_CODES,
   RESTRICTED_COUNTRY_CODES,
 } from '../../../pages/Onboarding/geographyCodes'
+import { useSelectedPools2 } from '../../../utils/contexts/SelectedPoolsContext'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
-import { usePool, usePoolMetadata, usePoolMetadataMulti, usePools } from '../../../utils/usePools'
+import { usePool, usePoolMetadata, usePoolMetadataMulti } from '../../../utils/usePools'
 import { Column, DataTable } from '../../DataTable'
 
 export function OnboardingSettingsDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const pools = usePools()
+  const { pools } = useSelectedPools2(true)
   const [selectedPoolId, setSelectedPoolId] = useState<string | null>(pools?.[0]?.id ?? null)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   return (
@@ -338,6 +339,9 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                         <Text variant="heading4">Onboarding experience</Text>
                         <Stack gap={2}>
                           <RadioButton
+                            name="onboardingExperience"
+                            border
+                            height={44}
                             id="onboardingExperience"
                             checked={formik.values.onboardingExperience === 'centrifuge'}
                             label="Centrifuge"
@@ -346,17 +350,23 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                             }}
                           />
                           <RadioButton
+                            name="onboardingExperience"
+                            id="onboardingExperience"
+                            border
+                            height={44}
                             checked={formik.values.onboardingExperience === 'none'}
                             label="None"
-                            id="onboardingExperience"
                             onChange={() => {
                               formik.setFieldValue('onboardingExperience', 'none')
                             }}
                           />
                           <RadioButton
+                            name="onboardingExperience"
+                            id="onboardingExperience"
+                            height={44}
+                            border
                             checked={formik.values.onboardingExperience === 'other'}
                             label="Other"
-                            id="onboardingExperience"
                             onChange={() => {
                               formik.setFieldValue('onboardingExperience', 'other')
                             }}

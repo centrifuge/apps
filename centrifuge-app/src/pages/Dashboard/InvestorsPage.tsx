@@ -4,14 +4,14 @@ import { SupportedNetworksDrawer } from '../..//components/Dashboard/Investors/S
 import { AddNewInvestorDrawer } from '../../components/Dashboard/Investors/AddNewInvestorDrawer'
 import { InvestorTable } from '../../components/Dashboard/Investors/InvestorTable'
 import { OnboardingSettingsDrawer } from '../../components/Dashboard/Investors/OnboardingSettingsDrawer'
-import { useInvestorListMulti, usePools } from '../../utils/usePools'
+import { useSelectedPools2 } from '../../utils/contexts/SelectedPoolsContext'
+import { useInvestorListMulti } from '../../utils/usePools'
 
 export default function InvestorsPage() {
-  const pools = usePools()?.slice(0, 3)
-  const [selectedPools, setSelectedPools] = useState<string[]>(pools?.map((p) => p.id) ?? [])
+  const { pools, selectedPools, togglePoolSelection } = useSelectedPools2(true)
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
-  const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(true)
-  const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(false)
+  const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
+  const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(true)
   const investors = useInvestorListMulti(selectedPools)
 
   return (
@@ -19,7 +19,7 @@ export default function InvestorsPage() {
       <AddNewInvestorDrawer isOpen={isAddNewInvestorDrawerOpen} onClose={() => setIsAddNewInvestorDrawerOpen(false)} />
       <SupportedNetworksDrawer
         isOpen={isSupportedNetworksDrawerOpen}
-        onClose={() => setIsSupportedNetworksDrawerOpen(false)}
+        onClose={() => setIsSupportedNetworksDrawerOpen(true)}
       />
       <OnboardingSettingsDrawer
         isOpen={isOnboardingSettingsDrawerOpen}
@@ -32,12 +32,7 @@ export default function InvestorsPage() {
             label={p.id}
             checked={selectedPools.includes(p.id)}
             onChange={() => {
-              setSelectedPools((prev) => {
-                if (prev.includes(p.id)) {
-                  return prev.filter((id) => id !== p.id)
-                }
-                return [...prev, p.id]
-              })
+              togglePoolSelection(p.id)
             }}
           />
         ))}

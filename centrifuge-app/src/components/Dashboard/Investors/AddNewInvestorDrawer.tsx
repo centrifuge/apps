@@ -3,8 +3,9 @@ import { AddressInput, Button, Drawer, Select, Stack, Text } from '@centrifuge/f
 import { isAddress } from 'ethers'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
 import { isEvmAddress } from '../../../utils/address'
+import { useSelectedPools2 } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { usePoolMetadataMulti, usePools } from '../../../utils/usePools'
+import { usePoolMetadataMulti } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
   isOpen: boolean
@@ -12,7 +13,7 @@ type AddNewInvestorDrawerProps = {
 }
 
 export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
-  const pools = usePools()
+  const { pools } = useSelectedPools2(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
