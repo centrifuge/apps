@@ -10,8 +10,8 @@ export default function InvestorsPage() {
   const pools = usePools()?.slice(0, 3)
   const [selectedPools, setSelectedPools] = useState<string[]>(pools?.map((p) => p.id) ?? [])
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
-  const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
-  const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(true)
+  const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(true)
+  const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(false)
   const investors = useInvestorListMulti(selectedPools)
 
   return (
