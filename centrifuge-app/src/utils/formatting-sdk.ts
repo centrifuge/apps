@@ -1,15 +1,9 @@
-// FORMAT FUNCTIONS FOR NEW SDK
-import { Currency, DecimalWrapper } from '@centrifuge/sdk/dist/utils/BigInt'
-import { Decimal } from '@centrifuge/sdk/dist/utils/decimal'
+import { Currency } from '@centrifuge/sdk/dist/utils/BigInt'
+import Decimal from 'decimal.js-light'
 import { Dec } from './Decimal'
 
-export function formatBalance(
-  amount: DecimalWrapper | Currency | number,
-  displayDecimals: number,
-  currency?: string
-): string {
-  type DecimalInstance = InstanceType<typeof Decimal>
-  let val: DecimalInstance
+export function formatBalance(amount: Decimal | Currency | number, displayDecimals: number, currency?: string): string {
+  let val: Decimal
 
   if (typeof amount === 'number') {
     val = Dec(amount.toString())
@@ -31,12 +25,16 @@ export function formatBalance(
 }
 
 export function formatPercentage(
-  rate: DecimalWrapper,
+  rate: Decimal | number,
   precision = 2,
   showSymbol = true,
   options: Intl.NumberFormatOptions = {}
 ): string {
-  const percentValue = rate.toDecimal().mul(100).toNumber()
+  const decRate = rate instanceof Decimal ? rate : Dec(rate.toString())
+
+  // If the rate is less than 1, we assume it's a fraction and multiply by 100.
+  // Otherwise, we assume it's already in percentage form.
+  const percentValue = decRate.lt(1) ? decRate.mul(100).toNumber() : decRate.toNumber()
 
   const formatted = percentValue.toLocaleString('en', {
     minimumFractionDigits: precision,
@@ -47,18 +45,12 @@ export function formatPercentage(
   return showSymbol ? `${formatted}%` : formatted
 }
 
-export function formatBalanceAbbreviated(
-  decimalVal: DecimalWrapper | number | DecimalWrapper,
-  displayDecimals = 1,
-  currency?: string
-): string {
-  let val: InstanceType<typeof Decimal>
+export function formatBalanceAbbreviated(decimalVal: Decimal | number, displayDecimals = 1, currency?: string): string {
+  let val: Decimal
   if (typeof decimalVal === 'number') {
     val = Dec(decimalVal.toString())
-  } else if (decimalVal instanceof DecimalWrapper) {
-    val = decimalVal.toDecimal()
   } else {
-    val = decimalVal
+    val = decimalVal as Decimal
   }
 
   const amountNumber = val.toNumber()
