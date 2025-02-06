@@ -17,7 +17,7 @@ const rotate = keyframes`
   }
 `
 
-type IconProps = {
+export type IconProps = {
   size?: ResponsiveValue<Size>
 }
 

@@ -31,17 +31,28 @@ export const BackButton = ({
   label,
   to,
   width = '55%',
+  goBack,
+  ...props
 }: {
   align?: string
   as?: React.ElementType
   children?: ReactNode
   label: string
-  to: string
+  to?: string
   width?: string
+  goBack?: boolean
 }) => {
   return (
     <Box display="flex" width={width} justifyContent={align}>
-      <StyledRouterLinkButton as={as} to={to} small icon={<IconArrowLeft size={20} />} variant="tertiary" />
+      <StyledRouterLinkButton
+        as={as}
+        to={to}
+        small
+        icon={<IconArrowLeft size={20} />}
+        variant="tertiary"
+        {...props}
+        goBack={goBack}
+      />
       <Box display="flex" alignItems="center">
         <Text variant="heading1" style={{ marginRight: 8 }}>
           {label}
