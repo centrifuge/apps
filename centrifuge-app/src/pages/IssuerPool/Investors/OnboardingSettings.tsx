@@ -6,7 +6,6 @@ import {
   Checkbox,
   FileUpload,
   IconMinusCircle,
-  RadioButton,
   SearchInput,
   Shelf,
   Stack,
@@ -300,7 +299,7 @@ export const OnboardingSettings = () => {
             </Stack>
             <Stack gap={2}>
               <Text variant="heading4">Onboarding provider</Text>
-              <Shelf gap={1}>
+              {/* <Shelf gap={1}>
                 <RadioButton
                   disabled={!isEditing || formik.isSubmitting || isLoading}
                   checked={!useExternalUrl}
@@ -317,7 +316,7 @@ export const OnboardingSettings = () => {
                     setUseExternalUrl(true)
                   }}
                 />
-              </Shelf>
+              </Shelf> */}
               {useExternalUrl && (
                 <TextInput
                   value={formik.values.externalOnboardingUrl}

@@ -1,5 +1,6 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
+import { Box } from '../Box'
 import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
@@ -11,7 +12,56 @@ export type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
   textStyle?: string
 }
 
-export function RadioButton({ label, errorMessage, textStyle, ...radioProps }: RadioButtonProps) {
+export const RadioButton = ({
+  label,
+  disabled = false,
+  icon,
+  sublabel,
+  height,
+  styles,
+  border = false,
+  ...props
+}: {
+  name: string
+  sublabel?: string
+  icon?: React.ReactNode
+  height?: number
+  styles?: React.CSSProperties
+  label: string
+  value?: string | number
+  disabled?: boolean
+  onChange?: () => void
+  checked?: boolean
+  id?: string
+  border?: boolean
+}) => {
+  const theme = useTheme()
+
+  return (
+    // @ts-expect-error
+    <Box
+      backgroundColor="white"
+      borderRadius={8}
+      border={border ? `1px solid ${theme.colors.borderPrimary}` : 'none'}
+      display="flex"
+      flexDirection={icon ? 'row' : 'column'}
+      justifyContent={icon ? 'space-between' : 'center'}
+      height={height}
+      alignItems={icon ? 'center' : 'flex-start'}
+      {...styles}
+    >
+      <RadioButtonInput label={label} disabled={disabled} {...props} />
+      {icon && <Box ml={3}>{icon}</Box>}
+      {sublabel && (
+        <Text variant="body2" color="textSecondary" style={{ marginLeft: 26, lineHeight: 'normal' }}>
+          {sublabel}
+        </Text>
+      )}
+    </Box>
+  )
+}
+
+export function RadioButtonInput({ label, errorMessage, textStyle, ...radioProps }: RadioButtonProps) {
   return (
     <label>
       <Shelf as={Text} gap={1} alignItems="baseline" backgroundColor="white" px={1} py={1} borderRadius={8}>
