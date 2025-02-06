@@ -14,7 +14,7 @@ type SourceSelectProps = {
 }
 
 export function SourceSelect({ loan, value, onChange, action }: SourceSelectProps) {
-  const { data: unfilteredLoans } = useLoans(loan.poolId)
+  const { data: unfilteredLoans } = useLoans([loan.poolId])
   const account = useBorrower(loan.poolId, loan.id)
 
   // acceptable options are active loans with cash valuation ONLY if connected account is the borrower

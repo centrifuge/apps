@@ -173,7 +173,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     return <Spinner mt={2} />
   }
 
-  return data.length > 0 ? (
+  return data && data.length > 0 ? (
     <Box paddingX={2}>
       <DataTable data={data} columns={columns} hoverable scrollable />
     </Box>

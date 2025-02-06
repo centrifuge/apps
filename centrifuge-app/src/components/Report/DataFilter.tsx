@@ -48,7 +48,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
 
   const { data: domains } = useActiveDomains(pool.id)
   const getNetworkName = useGetNetworkName()
-  const { data: loans } = useLoans(pool.id) as { data: Loan[] | undefined | null; isLoading: boolean }
+  const { data: loans } = useLoans([pool.id]) as { data: Loan[] | undefined | null; isLoading: boolean }
 
   const { showOracleTx } = useDebugFlags()
 
