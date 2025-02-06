@@ -463,21 +463,21 @@ export function FilterableTableHeader({
                         value={option}
                         onChange={handleChange}
                         checked={checked}
-                        label={label}
+                        label={<Text variant="body3">{label}</Text>}
                         extendedClickArea
                       />
                     )
                   })}
                 </Stack>
 
-                <Divider borderColor="textPrimary" />
+                <Divider color="textDisabled" />
 
                 {selectedOptions?.size === optionKeys.length ? (
-                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => deselectAll()}>
+                  <QuickAction variant="body3" forwardedAs="button" type="button" onClick={() => deselectAll()}>
                     Deselect all
                   </QuickAction>
                 ) : (
-                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => selectAll()}>
+                  <QuickAction variant="body3" forwardedAs="button" type="button" onClick={() => selectAll()}>
                     Select all
                   </QuickAction>
                 )}

@@ -18,7 +18,7 @@ import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { OffchainMenu } from './OffchainMenu'
 
-const StyledRouterTextLink = styled(RouterTextLink)`
+export const StyledRouterTextLink = styled(RouterTextLink)`
   text-decoration: unset;
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@ export function PoolDetailAssets() {
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
+  const { data: loans } = useLoans([poolId])
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(

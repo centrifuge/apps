@@ -9,7 +9,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { BackButton, Box, Button, Card, Drawer, Grid, Shelf, Spinner, Stack, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { AssetSummary } from '../../../src/components/AssetSummary'
 import { SimpleLineChart } from '../../../src/components/Charts/SimpleLineChart'
 import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
@@ -105,6 +105,7 @@ function Loan() {
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
   if (!poolId || !loanId) throw new Error('Loan no found')
   const basePath = useBasePath()
+  const navigate = useNavigate()
   const isTinlakePool = poolId?.startsWith('0x')
   const pool = usePool(poolId)
   const loan = useLoan(poolId, loanId)
@@ -185,7 +186,7 @@ function Loan() {
   return (
     <Stack>
       <Box mt={2} mb={2} ml={2}>
-        <BackButton label={name} to={`${basePath}/${poolId}/assets`} as={RouterLinkButton}>
+        <BackButton label={name} as={RouterLinkButton} goBack>
           {loan && <LoanLabel loan={loan} />}
         </BackButton>
       </Box>
