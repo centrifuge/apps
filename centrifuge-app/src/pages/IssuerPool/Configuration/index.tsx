@@ -4,7 +4,6 @@ import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { useCanBorrow, usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
-import { OnboardingSettings } from '../Investors/OnboardingSettings'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
@@ -39,7 +38,6 @@ function IssuerPoolConfiguration() {
           <Issuer />
           <EpochAndTranches />
           <LoanTemplates />
-          {isPoolAdmin && <OnboardingSettings />}
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}
