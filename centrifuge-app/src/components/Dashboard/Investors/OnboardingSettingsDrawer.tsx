@@ -11,6 +11,7 @@ import {
   RadioButton,
   SearchInput,
   Select,
+  Shelf,
   Stack,
   Text,
   TextInput,
@@ -81,7 +82,7 @@ function OnboardingSettingsAccordion({ children }: { children: React.ReactNode }
 
 type OnboardingFormValues = {
   onboardingExperience: 'centrifuge' | 'other' | 'none'
-  tranches: { [trancheId: string]: { agreement: undefined | File; openForOnboarding: boolean; trancheId: string } }
+  tranches: { [trancheId: string]: { agreement: undefined | File; openForOnboarding: boolean } }
   kybRestrictedCountries: { label: string; value: string }[]
   kycRestrictedCountries: { label: string; value: string }[]
   externalOnboardingUrl?: string
@@ -100,6 +101,7 @@ const initialValues: OnboardingFormValues = {
 function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () => void }) {
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
+  console.log('🚀 ~ poolMetadata:', poolMetadata)
   const centrifuge = useCentrifuge()
   const [countrySearch, setCountrySearch] = useState('')
   const permissions = usePoolPermissions(poolId)
@@ -218,12 +220,12 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
         return
       }
       let onboardingTranches = {}
-      for (const [tId, file] of Object.entries(values.tranches)) {
-        if (values.onboardingExperience === 'centrifuge' && !file.agreement) {
+      for (const [tId, t] of Object.entries(values.tranches)) {
+        if (values.onboardingExperience === 'centrifuge' && t.openForOnboarding && !t.agreement) {
           throw new Error('Subscription document is required')
         }
-        const openForOnboarding = !!values.tranches[tId]?.openForOnboarding
-        if (!file) {
+        const openForOnboarding = t?.openForOnboarding
+        if (!t.agreement) {
           onboardingTranches = {
             ...onboardingTranches,
             [tId]: {
@@ -233,16 +235,16 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
           }
         }
         // file is already IPFS hash so it hasn't changed
-        else if (typeof file === 'string') {
+        else if (typeof t.agreement === 'string') {
           onboardingTranches = {
             ...onboardingTranches,
             [tId]: {
-              agreement: { uri: file, mime: 'application/pdf' },
+              agreement: { uri: t.agreement, mime: 'application/pdf' },
               openForOnboarding,
             },
           }
-        } else if (file.agreement) {
-          const uri = await getFileDataURI(file.agreement)
+        } else if (t.agreement) {
+          const uri = await getFileDataURI(t.agreement)
           const pinnedAgreement = await lastValueFrom(centrifuge.metadata.pinFile(uri))
           onboardingTranches = {
             ...onboardingTranches,
@@ -258,15 +260,11 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
       }
 
       const kybRestrictedCountries = values.kybRestrictedCountries
-        .map(
-          (country) => Object.entries(KYB_COUNTRY_CODES).find(([_c, _country]) => _country === country.value)?.[0] ?? ''
-        )
+        .map((country) => Object.entries(KYB_COUNTRY_CODES).find(([_c, _country]) => _c === country.value)?.[0] ?? '')
         .filter(Boolean)
 
       const kycRestrictedCountries = values.kycRestrictedCountries
-        .map(
-          (country) => Object.entries(KYC_COUNTRY_CODES).find(([_c, _country]) => _country === country.value)?.[0] ?? ''
-        )
+        .map((country) => Object.entries(KYC_COUNTRY_CODES).find(([_c, _country]) => _c === country.value)?.[0] ?? '')
         .filter(Boolean)
 
       const amendedMetadata: PoolMetadata = {
@@ -300,8 +298,9 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     (country, index, self) => index === self.findIndex((c) => c.value === country.value)
   )
   const uniqueCountryCodesEntries = [...Object.entries(KYC_COUNTRY_CODES), ...Object.entries(KYB_COUNTRY_CODES)].filter(
-    ([_, country], index, self) => index === self.findIndex(([_, c]) => c === country)
+    ([countryId], index, self) => index === self.findIndex(([cId]) => cId === countryId)
   )
+
   const shuftiUnsupportedCountries = Object.keys(RESTRICTED_COUNTRY_CODES).map((code) => ({
     label: RESTRICTED_COUNTRY_CODES[code as keyof typeof RESTRICTED_COUNTRY_CODES],
     value: code,
@@ -387,26 +386,46 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                           />
                         )}
                         {formik.values.onboardingExperience === 'centrifuge' && (
-                          <Stack gap={2}>
-                            {Object.entries(poolMetadata?.onboarding?.tranches ?? {}).map(([tId]) => {
+                          <Stack gap={2} justifyContent="flex-end">
+                            {Object.entries(formik?.values?.tranches ?? {}).map(([tId]) => {
                               return (
-                                <Box key={`${tId}-sub-docs`}>
-                                  <FileUpload
-                                    small
-                                    label={`Subscription document for ${
-                                      (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.displayName
-                                    }`}
-                                    onFileChange={(file) => {
-                                      formik.setFieldValue('tranches', {
-                                        ...formik.values.tranches,
-                                        [tId]: { agreement: file, openForOnboarding: true, trancheId: tId },
-                                      })
-                                    }}
-                                    placeholder="Choose a file..."
-                                    file={formik.values.tranches[tId]?.agreement ?? undefined}
-                                    accept="application/pdf"
-                                  />
-                                </Box>
+                                <Shelf key={`${tId}-sub-docs`} gap={1} alignItems="flex-end">
+                                  <Box flex={1}>
+                                    <Select
+                                      options={[
+                                        { label: 'Open', value: 'open' },
+                                        { label: 'Closed', value: 'closed' },
+                                      ]}
+                                      label={`${
+                                        (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.displayName
+                                      }`}
+                                      value={formik.values.tranches[tId]?.openForOnboarding ? 'open' : 'closed'}
+                                      onChange={(event) => {
+                                        const file = formik.values.tranches[tId]?.agreement
+                                        formik.setFieldValue('tranches', {
+                                          ...formik.values.tranches,
+                                          [tId]: { agreement: file, openForOnboarding: event.target.value === 'open' },
+                                        })
+                                      }}
+                                    />
+                                  </Box>
+                                  <Box flex={2}>
+                                    <FileUpload
+                                      small
+                                      label={`Subscription document`}
+                                      onFileChange={(file) => {
+                                        const onboardingStatus = formik.values.tranches[tId]?.openForOnboarding
+                                        formik.setFieldValue('tranches', {
+                                          ...formik.values.tranches,
+                                          [tId]: { agreement: file, openForOnboarding: onboardingStatus },
+                                        })
+                                      }}
+                                      placeholder="Choose a file..."
+                                      file={formik.values.tranches[tId]?.agreement ?? undefined}
+                                      accept="application/pdf"
+                                    />
+                                  </Box>
+                                </Shelf>
                               )
                             })}
                             <Select
@@ -467,7 +486,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                           return uniqueCountryCodesEntries
                             .filter(([_, country]) => !existingCountries.has(country))
                             .map(([code, country]) => (
-                              <option key={`${code}-onboarding-country`} value={country} id={code} />
+                              <option key={`${code}-onboarding-country-${code}`} value={country} id={code} />
                             ))
                         })()}
                       </datalist>
