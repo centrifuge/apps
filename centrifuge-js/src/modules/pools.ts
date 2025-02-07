@@ -942,6 +942,9 @@ type Holder = {
   chainId: number
   trancheId: string
   evmAddress?: string
+  initialisedAt: string
+  unrealizedProfit: CurrencyBalance
+  realizedProfit: CurrencyBalance
   balance: CurrencyBalance
   pendingInvestCurrency: CurrencyBalance
   claimableTrancheTokens: CurrencyBalance
@@ -3544,10 +3547,17 @@ export function getPoolsModule(inst: Centrifuge) {
             nodes {
               poolId
               accountId
+              initialisedAt
               trancheId
               account {
                 chainId
                 evmAddress
+              }
+              tranche {
+                pool{
+                  sumUnrealizedProfitAtMarketPrice
+                  sumRealizedProfitFifoByPeriod
+                }
               }
               pendingInvestCurrency
               claimableTrancheTokens
@@ -3598,11 +3608,20 @@ export function getPoolsModule(inst: Centrifuge) {
             ({
               poolId: balance.poolId,
               accountId: balance.accountId,
+              initialisedAt: balance.initialisedAt,
               chainId: Number(balance.account?.chainId ?? 0),
               trancheId: balance.trancheId.split('-')[1],
               evmAddress: balance.account?.evmAddress,
               balance: new CurrencyBalance(
                 currencyBalancesByAccountId[`${balance.accountId}-${balance.trancheId.split('-')[1]}`]?.amount ?? 0,
+                currency.decimals
+              ),
+              unrealizedProfit: new CurrencyBalance(
+                balance.tranche.pool.sumUnrealizedProfitAtMarketPrice,
+                currency.decimals
+              ),
+              realizedProfit: new CurrencyBalance(
+                balance.tranche.pool.sumRealizedProfitFifoByPeriod,
                 currency.decimals
               ),
               pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),

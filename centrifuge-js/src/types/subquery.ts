@@ -252,12 +252,19 @@ export type SubqueryTrancheBalances = {
   }
   poolId: string
   trancheId: string
+  initialisedAt: string
   pendingInvestCurrency: string
   claimableTrancheTokens: string
   sumClaimedTrancheTokens: string
   pendingRedeemTrancheTokens: string
   claimableCurrency: string
   sumClaimedCurrency: string
+  tranche: {
+    pool: {
+      sumUnrealizedProfitAtMarketPrice: string
+      sumRealizedProfitFifoByPeriod: string
+    }
+  }
 }
 
 export type SubqueryCurrencyBalances = {

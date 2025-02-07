@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../../components/DataTable'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
+import { formatDate } from '../../../utils/date'
 import { useFilters } from '../../../utils/useFilters'
 import { useInvestorListMulti, usePoolMetadataMulti } from '../../../utils/usePools'
 import { InvestorDrawer } from './InvestorDrawer'
@@ -21,6 +22,8 @@ export type InvestorTableRow = {
   investorSince: string
   poolCurrency: string | undefined
   poolId: string
+  unrealizedProfit: CurrencyBalance
+  realizedProfit: CurrencyBalance
 }
 
 export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
@@ -51,7 +54,9 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
         holdings: investor.balance,
         pendingInvestments: investor.pendingInvestCurrency,
         pendingRedemptions: investor.pendingRedeemTrancheTokens,
-        investorSince: '', // TODO: get investorSince
+        investorSince: investor.initialisedAt,
+        unrealizedProfit: investor.unrealizedProfit,
+        realizedProfit: investor.sumClaimedCurrency,
         investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
       }
     }) ?? []
@@ -124,7 +129,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
       header: <SortableTableHeader label="Investor since" />,
       align: 'left',
       sortKey: 'investorSince',
-      cell: (row: InvestorTableRow) => <Text>{row.investorSince}</Text>,
+      cell: (row: InvestorTableRow) => <Text>{formatDate(row.investorSince)}</Text>,
     },
   ]
   return (

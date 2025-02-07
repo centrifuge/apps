@@ -146,8 +146,7 @@ export function InvestorDrawer({
               Realized P&L ({pool.currency.displayName})
             </Text>
             <Text variant="body2" color="textPrimary" fontWeight="600">
-              {/* // TODO: get realized P&L */}
-              {formatBalance(investor.holdings, undefined, 2)}
+              {formatBalance(investor.realizedProfit, undefined, 2)}
             </Text>
           </Stack>
           <Stack>
@@ -155,8 +154,7 @@ export function InvestorDrawer({
               Unrealized P&L ({pool.currency.displayName})
             </Text>
             <Text variant="body2" color="textPrimary" fontWeight="600">
-              {/* // TODO: get unrealized P&L */}
-              {formatBalance(investor.holdings, undefined, 2)}
+              {formatBalance(investor.unrealizedProfit, undefined, 2)}
             </Text>
           </Stack>
           <Stack>
@@ -164,8 +162,7 @@ export function InvestorDrawer({
               Investor since
             </Text>
             <Text variant="body2" color="textPrimary" fontWeight="600">
-              {/* // TODO: get investor since */}
-              {investor.investorSince || 'today'}
+              {formatDate(investor.investorSince) || '-'}
             </Text>
           </Stack>
         </Shelf>
