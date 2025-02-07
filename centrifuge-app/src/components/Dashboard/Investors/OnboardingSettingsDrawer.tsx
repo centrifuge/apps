@@ -101,7 +101,6 @@ const initialValues: OnboardingFormValues = {
 function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () => void }) {
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  console.log('🚀 ~ poolMetadata:', poolMetadata)
   const centrifuge = useCentrifuge()
   const [countrySearch, setCountrySearch] = useState('')
   const permissions = usePoolPermissions(poolId)
@@ -182,7 +181,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     loadFiles()
   }, [baseInitialValues, pool.tranches])
 
-  const { execute: updatePermissionAndConfigTx, isLoading: isPermissionsLoading } = useCentrifugeTransaction(
+  const { execute: updatePermissionAndConfigTx } = useCentrifugeTransaction(
     'Update permissions and metadata',
     (cent) =>
       (
@@ -216,21 +215,30 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     initialValues: formInitialValues,
     enableReinitialize: true, // resets values when poolId changes
     onSubmit: async (values, actions) => {
+      console.log('🚀 ~ values:', values)
       if (!values || !poolMetadata) {
         return
       }
       let onboardingTranches = {}
       for (const [tId, t] of Object.entries(values.tranches)) {
         if (values.onboardingExperience === 'centrifuge' && t.openForOnboarding && !t.agreement) {
+          actions.setErrors({
+            tranches: {
+              [tId]: {
+                agreement:
+                  'To use the Centrifuge onboarding experience, you must upload a subscription document for each tranche.',
+              },
+            },
+          })
           throw new Error('Subscription document is required')
         }
-        const openForOnboarding = t?.openForOnboarding
+
         if (!t.agreement) {
           onboardingTranches = {
             ...onboardingTranches,
             [tId]: {
               agreement: undefined,
-              openForOnboarding,
+              openForOnboarding: t?.openForOnboarding,
             },
           }
         }
@@ -240,7 +248,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
             ...onboardingTranches,
             [tId]: {
               agreement: { uri: t.agreement, mime: 'application/pdf' },
-              openForOnboarding,
+              openForOnboarding: t?.openForOnboarding,
             },
           }
         } else if (t.agreement) {
@@ -253,7 +261,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                 uri: centrifuge.metadata.parseMetadataUrl(pinnedAgreement.ipfsHash),
                 mime: 'application/pdf',
               },
-              openForOnboarding,
+              openForOnboarding: t?.openForOnboarding,
             },
           }
         }
@@ -294,6 +302,10 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     },
   })
 
+  const hasChanges = useMemo(() => {
+    return JSON.stringify(formik.values) !== JSON.stringify(formInitialValues)
+  }, [formik.values, formInitialValues])
+
   const uniqueCountries = [...formik.values.kybRestrictedCountries, ...formik.values.kycRestrictedCountries].filter(
     (country, index, self) => index === self.findIndex((c) => c.value === country.value)
   )
@@ -323,17 +335,6 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                   ),
                   body: (
                     <OnboardingSettingsAccordion>
-                      {/* <Select
-                    options={[
-                      { label: 'Open', value: 'open' },
-                      { label: 'Closed', value: 'closed' },
-                    ]}
-                    label="Onboarding status"
-                    value={formik.values.onboardingStatus}
-                    onChange={(event) => {
-                      formik.setFieldValue('onboardingStatus', event.target.value)
-                    }}
-                  /> */}
                       <Stack gap={2}>
                         <Text variant="heading4">Onboarding experience</Text>
                         <Stack gap={2}>
@@ -428,6 +429,13 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                                 </Shelf>
                               )
                             })}
+                            {formik.errors?.tranches && (
+                              <Text variant="body2" color="statusCritical">
+                                {Object.values(formik.errors.tranches)
+                                  .map((error) => error?.agreement)
+                                  .join(', ')}
+                              </Text>
+                            )}
                             <Select
                               options={[
                                 { label: 'No', value: 'false' },
@@ -486,7 +494,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                           return uniqueCountryCodesEntries
                             .filter(([_, country]) => !existingCountries.has(country))
                             .map(([code, country]) => (
-                              <option key={`${code}-onboarding-country-${code}`} value={country} id={code} />
+                              <option key={`${code}-onboarding-country`} value={country} id={code} />
                             ))
                         })()}
                       </datalist>
@@ -546,7 +554,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
           <Stack gap={4}>
             <Divider />
             <Stack gap={2}>
-              <Button small type="submit">
+              <Button small type="submit" disabled={formik.isSubmitting || !hasChanges || !!formik.errors.tranches}>
                 Save
               </Button>
               <Button small variant="inverted" onClick={onClose}>
