@@ -85,13 +85,10 @@ export function PoolDetailAssets() {
     Dec(0)
   )
 
-  const total = isTinlakePool ? pool.nav.total : pool.reserve.total.toDecimal().add(offchainReserve).add(totalAssets)
-  const totalNAV = isTinlakePool ? pool.nav.total : Dec(total as any).sub(pool.fees.totalPending.toDecimal())
-
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
       label: `Total NAV (${pool.currency.symbol})`,
-      value: formatBalance(totalNAV),
+      value: formatBalance(pool.nav.total),
       heading: true,
     },
     {
