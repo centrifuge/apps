@@ -1,10 +1,11 @@
-import { Drawer, IconExternalLink, Stack } from '@centrifuge/fabric'
+import { Drawer, IconExternalLink, IconFreeze, IconStop, Stack } from '@centrifuge/fabric'
 
 import { CurrencyBalance, evmToSubstrateAddress, Price, TokenBalance } from '@centrifuge/centrifuge-js'
 import {
   formatBalance,
   NetworkIcon,
   useCentrifuge,
+  useCentrifugeTransaction,
   useGetExplorerUrl,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
@@ -20,11 +21,13 @@ import {
   Text,
   truncate,
 } from '@centrifuge/fabric'
+import { switchMap } from 'rxjs'
 import { Column, DataTable } from '../../../components/DataTable'
 import { formatInvestorTransactionsType } from '../../../components/Report/utils'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { formatDate } from '../../../utils/date'
+import { usePermissions } from '../../../utils/usePermissions'
 import { usePool, usePools, useTransactionsByAddress } from '../../../utils/usePools'
 import { InvestorTableRow } from './InvestorTable'
 
@@ -40,9 +43,81 @@ export function InvestorDrawer({
   const cent = useCentrifuge()
   const pool = usePool(investor.poolId)
   const getNetworkName = useGetNetworkName()
+  const permissions = usePermissions(investor.wallet)
+
+  const isEnabled = permissions?.pools[investor.poolId]?.tranches[investor.trancheId]
+  const isFrozen = false
+
+  const { execute: executeEnable, isLoading: isTransactionPending } = useCentrifugeTransaction(
+    'Update investor wallet',
+    (cent) => cent.pools.updatePoolRoles
+  )
+
+  const { execute: executeFreeze, isLoading: isTransactionPendingFreeze } = useCentrifugeTransaction(
+    'Freeze investor wallet',
+    (cent) => (args, options) => {
+      return cent.getApi().pipe(
+        switchMap((api) => {
+          const tx = api.tx.liquidityPools.freezeInvestor(
+            investor.poolId,
+            investor.trancheId,
+            { EVM: investor.network },
+            0
+          )
+          return cent.wrapSignAndSend(api, tx, options)
+        })
+      )
+    }
+  )
+
+  const { execute: executeUnfreeze, isLoading: isTransactionPendingUnfreeze } = useCentrifugeTransaction(
+    'Unfreeze investor wallet',
+    (cent) => (args, options) => {
+      return cent.getApi().pipe(
+        switchMap((api) => {
+          const tx = api.tx.liquidityPools.unfreezeInvestor(investor.poolId, investor.trancheId, {
+            EVM: investor.network,
+          })
+          return cent.wrapSignAndSend(api, tx, options)
+        })
+      )
+    }
+  )
+
+  function handleFreeze() {
+    executeFreeze([investor.poolId, investor.trancheId, { EVM: investor.network }])
+  }
+
+  function handleUnfreeze() {
+    executeUnfreeze([investor.poolId, investor.trancheId, { EVM: investor.network }])
+  }
+
+  function handleDisable() {
+    executeEnable([investor.poolId, [], [[investor.wallet, 'InvestorAdmin']]])
+  }
+
+  function handleEnable() {
+    executeEnable([investor.poolId, [[investor.wallet, 'InvestorAdmin']], []])
+  }
+
   const columns: Column[] = [
     {
-      header: '1. Wallet',
+      header: (
+        <Shelf gap={1}>
+          1. Wallet{' '}
+          {isFrozen ? (
+            <Shelf gap={'4px'}>
+              <IconFreeze size="iconSmall" color="#FF0000" />
+              Frozen
+            </Shelf>
+          ) : !isEnabled ? (
+            <Shelf gap={'4px'}>
+              <IconStop size="iconSmall" color="#FF6600" />
+              Disabled
+            </Shelf>
+          ) : null}
+        </Shelf>
+      ),
       align: 'left',
       cell: (row) => (
         <Text variant="body3" fontWeight="400">
@@ -85,9 +160,18 @@ export function InvestorDrawer({
           renderContent={(props, ref) => (
             <Box ref={ref} {...props} width="200px">
               <Menu backgroundColor="white">
-                {/* TODO: add disable and freeze */}
-                <MenuItem label="Disable" onClick={() => console.log('Action 1')} />
-                <MenuItem label="Freeze" onClick={() => console.log('Action 2')} />
+                {isEnabled ? (
+                  <>
+                    <MenuItem label="Disable" onClick={handleDisable} />
+                  </>
+                ) : (
+                  <MenuItem label="Enable" onClick={handleEnable} />
+                )}
+                {isFrozen ? (
+                  <MenuItem label="Unfreeze" onClick={handleUnfreeze} />
+                ) : (
+                  <MenuItem label="Freeze" onClick={handleFreeze} />
+                )}
                 <Divider />
                 <MenuItem
                   iconRight={<IconCopy size="iconMedium" />}
@@ -170,7 +254,11 @@ export function InvestorDrawer({
         <Text variant="body2" fontWeight="700">
           Wallet
         </Text>
-        <DataTable data={data} columns={columns} headerBackgroundColor="red" />
+        <DataTable
+          data={data}
+          columns={columns}
+          headerBackgroundColor={isFrozen ? '#FF000015' : !isEnabled ? '#FF660015' : 'backgroundSecondary'}
+        />
         <Shelf justifyContent="space-between">
           <Text variant="body2" fontWeight="700">
             Transaction history

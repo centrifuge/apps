@@ -34,6 +34,7 @@ type InitialValues = {
 export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pools = usePools()
   const domains = useDomainRouters()
+  const getNetworkName = useGetNetworkName()
 
   const initialValues: InitialValues = useMemo(() => {
     return {
@@ -45,6 +46,7 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
     initialValues,
     enableReinitialize: true,
     onSubmit: (values) => {
+      // checkboxes can't be checked
       console.log(values)
     },
   })
@@ -63,17 +65,21 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
           <FormikProvider value={formik}>
             <Form>
               <Stack gap={2}>
-                {domains?.map((domain, index) => (
-                  <Box
-                    backgroundColor="backgroundSecondary"
-                    borderRadius={8}
-                    borderStyle="solid"
-                    borderWidth={1}
-                    borderColor="borderPrimary"
-                  >
-                    <SupportedNetworks chainId={domain.chainId} index={index} />
-                  </Box>
-                ))}
+                {domains
+                  // filters out goerli networks on demo, they are not supported by the providers anymore
+                  ?.filter((domain) => getNetworkName(domain.chainId || 'centrifuge') !== 'Unknown')
+                  .map((domain, index) => (
+                    <Box
+                      key={`${domain.chainId}-supported-networks-${index}`}
+                      backgroundColor="backgroundSecondary"
+                      borderRadius={8}
+                      borderStyle="solid"
+                      borderWidth={1}
+                      borderColor="borderPrimary"
+                    >
+                      <SupportedNetworks chainId={domain.chainId} index={index} />
+                    </Box>
+                  ))}
                 <Button variant="primary" small type="submit">
                   Update
                 </Button>
@@ -96,7 +102,7 @@ function SupportedNetworks({ chainId, index }: { chainId: number; index: number 
   const [selectedPool, setSelectedPool] = useState<string | null>(pools?.[0]?.id ?? null)
 
   const getNetworkName = useGetNetworkName()
-  const { data: domains, isLoading } = useActiveDomains(pools?.[0]?.id ?? '')
+  const { data: domains, isLoading } = useActiveDomains(selectedPool ?? '')
   const domain = domains?.find((d) => d.chainId === chainId)
 
   return (
@@ -130,15 +136,18 @@ function SupportedNetworks({ chainId, index }: { chainId: number; index: number 
                 </Text>
 
                 {domain?.currencies.map((currency) => {
-                  console.log('🚀 ~ currency checkbox:', domain?.currencyNeedsAdding)
                   return (
                     <Field name={`networks[${index}].currencyAddress`}>
                       {({ field }: { field: any }) => (
                         <Checkbox
-                          {...field}
-                          label={<Text variant="label2">{currency.displayName}</Text>}
-                          checked={field.value ?? !domain?.currencyNeedsAdding[currency.address]}
-                          disabled={!domain?.currencyNeedsAdding[currency.address]}
+                          key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
+                          label={
+                            <Text variant="label2">
+                              {currency.displayName} ({currency.symbol})
+                            </Text>
+                          }
+                          checked={field.value ?? !domain?.liquidityPools[currency.address]}
+                          disabled={!domain?.liquidityPools[currency.address]}
                           onChange={(event) => {
                             if (event.target.checked) {
                               formik.setFieldValue(`networks[${index}].currencyAddress`, currency.address)
@@ -146,7 +155,13 @@ function SupportedNetworks({ chainId, index }: { chainId: number; index: number 
                               formik.setFieldValue(`networks[${index}].poolId`, selectedPool)
                               formik.setFieldValue(
                                 `networks[${index}].trancheId`,
-                                pools?.find((p) => p.id === selectedPool)?.tranches.find((t) => t.id)?.id
+                                pools
+                                  ?.find((p) => p.id === selectedPool)
+                                  ?.tranches.filter(
+                                    // @ts-expect-error
+                                    (t) => domain?.liquidityPools?.[chainId]?.currencyNeedsAdding?.[t.id] === true
+                                  )
+                                  .map((t) => t.id)
                               )
                             }
                             if (!event.target.checked) {
@@ -181,15 +196,15 @@ function TrancheTokensInput({ chainId, poolId }: { chainId: number; poolId: stri
         Tranche token that will be deployed
       </Text>
       {pool.tranches.map((t) => {
-        const tranche = pool?.tranches.find((poolTranche) => poolTranche.id === t.id)
         return (
-          <Shelf gap={2} width="100%" justifyContent="center">
+          <Shelf key={`tranche-token-${t.id}`} gap={2} width="100%" justifyContent="center">
             {!isLoading ? (
               <>
                 <Box flex={1} width="100%">
                   <TextInput
-                    value={tranche?.currency.displayName}
+                    value={t.currency.displayName}
                     disabled={domain?.isActive}
+                    readOnly
                     symbol={
                       <IconCheckInCircle
                         color={domain?.isActive ? 'statusOk' : 'textSecondary'}
@@ -199,7 +214,7 @@ function TrancheTokensInput({ chainId, poolId }: { chainId: number; poolId: stri
                     }
                   />
                 </Box>
-                {domain?.isActive && (
+                {domain?.isActive ? (
                   <Stack flex={1} width="100%">
                     <a
                       href={explorer.address(domain.trancheTokens[t.id ?? '']!)}
@@ -214,7 +229,9 @@ function TrancheTokensInput({ chainId, poolId }: { chainId: number; poolId: stri
                       </Button>
                     </a>
                   </Stack>
-                )}
+                ) : domain?.canTrancheBeDeployed[t.id] ? (
+                  <Button onClick={() => {}}>Enable</Button>
+                ) : null}
               </>
             ) : (
               <Spinner width="100%" height="100%" />
