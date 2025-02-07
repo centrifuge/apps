@@ -11,7 +11,7 @@ export default function InvestorsPage() {
   const { pools, selectedPools, togglePoolSelection } = useSelectedPools2(true)
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
   const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
-  const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(true)
+  const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(false)
   const investors = useInvestorListMulti(selectedPools)
 
   return (
@@ -19,7 +19,7 @@ export default function InvestorsPage() {
       <AddNewInvestorDrawer isOpen={isAddNewInvestorDrawerOpen} onClose={() => setIsAddNewInvestorDrawerOpen(false)} />
       <SupportedNetworksDrawer
         isOpen={isSupportedNetworksDrawerOpen}
-        onClose={() => setIsSupportedNetworksDrawerOpen(true)}
+        onClose={() => setIsSupportedNetworksDrawerOpen(false)}
       />
       <OnboardingSettingsDrawer
         isOpen={isOnboardingSettingsDrawerOpen}
