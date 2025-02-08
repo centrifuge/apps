@@ -33,7 +33,7 @@ jobs:
         uses: ./.github/actions/prepare-deploy
         with:
           app_base_name: ${{ env.app_name }}
-          deploy_to: ${{ env.deploy_to }}
+          deploy_to: ${{ inputs.deploy_env }}
 
       - name: build function
         uses: ./.github/actions/build-function

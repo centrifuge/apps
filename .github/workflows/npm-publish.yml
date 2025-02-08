@@ -10,7 +10,7 @@ on:
           - centrifuge-js
           - centrifuge-react
 concurrency:
-  group: '${{ github.workflow }}-${{ inputs.app_name || github.event.inputs.app_name }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: '${{ github.workflow }}-${{ inputs.app_name || github.event.inputs.app_name }} @ ${{ github.head_ref || github.ref }}'
   cancel-in-progress: true
 jobs:
   publish-npm:
@@ -51,7 +51,7 @@ jobs:
       - uses: actions-ecosystem/action-push-tag@6e82caefe706f5a729e354df7443dc82f98a414f # v1.0.0
         if: steps.publish.outputs.type
         with:
-          tag: ${{ inputs.appname }}/v${{ steps.publish.outputs.version }}
+          tag: ${{ inputs.app_name }}/v${{ steps.publish.outputs.version }}
           message: auto-created from GHActions after publishing npm package
 
       - if: steps.publish.outputs.type

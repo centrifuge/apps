@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: prepare env logic
         id: prepare
         uses: ./.github/actions/prepare-deploy
@@ -129,11 +129,12 @@ jobs:
     if: github.event_name == 'pull_request' || (inputs.deploy_env == 'ff-prod' &&  github.event_name == 'pull_request')
     steps:
       - name: PR comment with preview URL
+        id: prcomment
         uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
-          comment_tag: pr_preview_url${{ inputs.deploy_env }}
+          comment-tag: pr_preview_url${{ inputs.deploy_env }}
           mode: upsert
           message: |
             PR deployed in Google Cloud
