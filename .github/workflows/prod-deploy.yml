@@ -4,6 +4,11 @@ on:
     types:
       - released
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The release tag to promote (e.g. v1.2.3)'
+        required: true
+        type: string
 concurrency:
   group: production-deployment
   cancel-in-progress: false # Wait for staging-deploy to finish
@@ -17,7 +22,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           path: apps
 
@@ -29,13 +34,13 @@ jobs:
           deploy_to: 'production'
 
       - name: Auth gcloud
-        uses: google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c # v2.1.2
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
 
       - name: 'Set up Cloud SDK'
-        uses: google-github-actions/setup-gcloud@98ddc00a17442e89a24bbf282954a3b65ce6d200 # v2.1.0
+        uses: google-github-actions/auth@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
 
       - name: Sync webpack from staging
         run: gsutil -m rsync -d -r gs://app.staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
@@ -45,11 +50,12 @@ jobs:
     steps:
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v2.28.0
+        uses: dawidd6/action-download-artifact@20319c5641d495c8a52e688b7dc5fada6c3a9fbc # v8
         with:
           workflow: staging-deploy.yml
-          workflow_conclusion: '' # This will fail if the staging deployment isn't finished yet
-          # check_artifacts: true # This will search for the last available artifact, useful for testing
+          workflow_conclusion: success
+          commit: ${{ github.event_name == 'release' && github.ref_name || github.event.inputs.tag }}
+          search_artifacts: true
 
       # Alternative: download from the release instead of
       # workflow artifacts
@@ -100,7 +106,7 @@ jobs:
       function_handler: pinningApi
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@v4
         with:
           path: apps
 
@@ -128,7 +134,7 @@ jobs:
       function_handler: onboarding
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@v4
         with:
           path: apps
 
