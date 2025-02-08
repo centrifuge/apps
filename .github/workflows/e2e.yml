@@ -25,22 +25,21 @@ jobs:
           fluxbox &
         env:
           DISPLAY: :0.0
-      - uses: iamsauravsharma/create-dotenv@v2.0.1
-        with:
-          # input-prefix: '' # Optional (default: '')
-          file-path: 'centrifuge-app/.env' # Optional (default : '.env')
-        # output-prefix: 'OUTPUT_' # Optional (default: '')
-        env: # env available for only this steps
-          CYPRESS_PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
-          PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
-          NETWORK_NAME: centrifuge
-          RPC_URL: https://fullnode-apps.demo.k-f.dev
-          CHAIN_ID: 2090
-          SYMBOL: DEVEL
-          IS_TESTNET: true
-          DEBUG: true
+      - name: Create .env file
+        run: |
+          cat << EOF > centrifuge-app/.env
+          CYPRESS_PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}}
+          PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}}
+          NETWORK_NAME=centrifuge
+          RPC_URL=https://fullnode-apps.demo.k-f.dev
+          CHAIN_ID=2090
+          SYMBOL=DEVEL
+          IS_TESTNET=true
+          DEBUG=true
+          EOF
+          
       - name: Synpress run
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@1b70233146622b69e789ccdd4f9452adc638d25a # v6.6.0
         with:
           working-directory: centrifuge-app
           install-command: yarn

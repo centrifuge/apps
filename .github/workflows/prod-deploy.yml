@@ -17,7 +17,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           path: apps
 
@@ -29,14 +29,13 @@ jobs:
           deploy_to: 'production'
 
       - name: Auth gcloud
-        id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        uses: google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c # v2.1.2
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
 
       - name: 'Set up Cloud SDK'
-        uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1
+        uses: google-github-actions/setup-gcloud@98ddc00a17442e89a24bbf282954a3b65ce6d200 # v2.1.0
 
       - name: Sync webpack from staging
         run: gsutil -m rsync -d -r gs://app.staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
@@ -46,7 +45,7 @@ jobs:
     steps:
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v2.28.0
         with:
           workflow: staging-deploy.yml
           workflow_conclusion: '' # This will fail if the staging deployment isn't finished yet
@@ -150,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify prod deploy
-        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
+        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7 # v2.2.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: |

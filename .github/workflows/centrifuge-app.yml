@@ -26,7 +26,7 @@ jobs:
         working-directory: centrifuge-app
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: prepare env logic
         id: prepare
         uses: ./.github/actions/prepare-deploy
@@ -35,7 +35,7 @@ jobs:
           deploy_to: ${{ inputs.deploy_env }}
 
       - name: Setup Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.2
         with:
           node-version: '16'
           cache: yarn
@@ -128,8 +128,7 @@ jobs:
     if: github.event_name == 'pull_request' || (inputs.deploy_env == 'ff-prod' &&  github.event_name == 'pull_request')
     steps:
       - name: PR comment with preview URL
-        id: prcomment
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@1c2b0f15c51c53a99ae4c9e45f67796a3ef66bb3 # v2.5.0
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:

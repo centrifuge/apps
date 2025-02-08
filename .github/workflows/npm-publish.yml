@@ -43,7 +43,7 @@ jobs:
 
       - name: Publish
         id: publish
-        uses: JS-DevTools/npm-publish@v3.1.1
+        uses: JS-DevTools/npm-publish@19c28f1ef146469e409470805ea4279d47c3d35c # v3.1.1
         with:
           token: ${{secrets.NPM_TOKEN}}
           package: './${{ inputs.app_name }}/package.json'
