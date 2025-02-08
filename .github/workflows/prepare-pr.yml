@@ -24,13 +24,13 @@ jobs:
     steps:      
       - name: Auth gcloud
         id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1     
+        uses: google-github-actions/auth@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
       
       - name: Give time to avoid racing conditions
         uses: whatnick/wait-action@71008d68ab3939de1475f4938583e4480b5d09a6
@@ -72,13 +72,13 @@ jobs:
     steps:
       - name: Auth gcloud
         id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1     
+        uses: google-github-actions/auth@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
       
       - name: Give time for other jobs to finish
         uses: whatnick/wait-action@71008d68ab3939de1475f4938583e4480b5d09a6
@@ -118,13 +118,13 @@ jobs:
     steps:
       - name: Auth gcloud
         id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1     
+        uses: google-github-actions/auth@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
       
       - name: Give time for other jobs to finish
         uses: whatnick/wait-action@71008d68ab3939de1475f4938583e4480b5d09a6
@@ -161,13 +161,13 @@ jobs:
     steps:
       - name: Auth gcloud
         id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1     
+        uses: google-github-actions/auth@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
 
       - name: Delete functions
         shell: bash

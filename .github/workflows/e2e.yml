@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install linux deps
         run: |
           sudo apt-get install --no-install-recommends -y \
@@ -39,7 +40,7 @@ jobs:
           EOF
           
       - name: Synpress run
-        uses: cypress-io/github-action@1b70233146622b69e789ccdd4f9452adc638d25a # v6.6.0
+        uses: cypress-io/github-action@7271bed2a170d73c0b08939cd192db51a1c46c50 # v6.7.10
         with:
           working-directory: centrifuge-app
           install-command: yarn
