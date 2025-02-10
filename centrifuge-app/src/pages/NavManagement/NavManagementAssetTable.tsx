@@ -184,7 +184,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                   : {
                       assetId: l.id,
                       name: nftMetas[i]?.name ?? '',
-                      quantity: (l as ActiveLoan).presentValue.toString(),
+                      quantity: (l as ActiveLoan).presentValue?.toString() ?? '0',
                       price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
                     }
               ),
