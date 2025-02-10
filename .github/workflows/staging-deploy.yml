@@ -42,19 +42,44 @@ jobs:
     with:
       deploy_env: ${{ matrix.deploy_to }}
 
-  staging-slack-notify:
-    needs: app-staging
+  staging-slack-notify-success:
+    needs: [app-staging, onboarding-staging, pinning-staging]
+    if: success()
     runs-on: ubuntu-latest
     steps:
-      - name: Notify staging deploy
+      - name: Notify staging deploy success
         uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: |
+            ✅ Staging deployment successful!
             app.altair.centrifuge.io and app.staging.centrifuge.io updated by GH actions job
             Check out the new pre-release -> https://github.com/centrifuge/apps/releases/
           SLACK_USERNAME: "Centrifuge GHA Bot"
           SLACK_ICON: "https://centrifuge.io/favicon.ico"
           SLACK_TITLE: "Centrifuge app has been deployed in staging and Altair."
-          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"  
+          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"
+          MSG_MINIMAL: true
+          SLACK_COLOR: 'good'
+
+  staging-slack-notify-failure:
+    needs: [app-staging, onboarding-staging, pinning-staging]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify staging deploy failure
+        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: |
+            ❌ Staging deployment failed!
+            One or more jobs failed during the deployment to staging. 
+            Prod deployments will not work until the staging deployment is successful.
+            Please check the workflow run for details -> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_USERNAME: "Centrifuge GHA Bot"
+          SLACK_ICON: "https://centrifuge.io/favicon.ico"
+          SLACK_TITLE: "⚠️ Staging Deployment Failed"
+          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"
+          MSG_MINIMAL: true
+          SLACK_COLOR: 'danger'
     
