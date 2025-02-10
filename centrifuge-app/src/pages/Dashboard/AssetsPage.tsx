@@ -1,7 +1,7 @@
-import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, Checkbox, Text } from '@centrifuge/fabric'
 import { useEffect } from 'react'
 import { PoolCard } from '../../../src/components/Dashboard/PoolCard'
+import { AssetsProvider } from '../../../src/components/Dashboard/assets/AssetsContext'
 import { PageSummary } from '../../../src/components/PageSummary'
 import { Spinner } from '../../../src/components/Spinner'
 import { Tooltips } from '../../../src/components/Tooltips'
@@ -11,7 +11,8 @@ import { useLoans } from '../../../src/utils/useLoans'
 import AssetsTable from '../../components/Dashboard/assets/AssetsTable'
 import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/assets/utils'
 
-export default function AssetsPage({ pools }: { pools: Pool[] }) {
+export default function AssetsPage() {
+  const { pools = [] } = useSelectedPools()
   const ids = pools.map((pool) => pool.id)
   const { data: loans, isLoading } = useLoans(pools ? ids : [])
   const { selectedPools, togglePoolSelection, setSelectedPools } = useSelectedPools()
@@ -70,28 +71,30 @@ export default function AssetsPage({ pools }: { pools: Pool[] }) {
   if (isLoading || !loans || !pools.length) return <Spinner />
 
   return (
-    <Box py={4} px={3}>
-      <Text variant="heading1">Dashboard</Text>
-      <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
-        {pools.map((pool, index) => (
-          <PoolCard
-            key={index}
-            pool={pool}
-            active={selectedPools.includes(pool.id)}
-            children={
-              <Checkbox
-                variant="secondary"
-                onChange={() => togglePoolSelection(pool.id)}
-                onClick={(e) => e.stopPropagation()}
-                checked={selectedPools.includes(pool.id)}
-              />
-            }
-            onClick={() => togglePoolSelection(pool.id)}
-          />
-        ))}
+    <AssetsProvider>
+      <Box py={4} px={3}>
+        <Text variant="heading1">Dashboard</Text>
+        <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
+          {pools.map((pool, index) => (
+            <PoolCard
+              key={index}
+              pool={pool}
+              active={selectedPools.includes(pool.id)}
+              children={
+                <Checkbox
+                  variant="secondary"
+                  onChange={() => togglePoolSelection(pool.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  checked={selectedPools.includes(pool.id)}
+                />
+              }
+              onClick={() => togglePoolSelection(pool.id)}
+            />
+          ))}
+        </Box>
+        <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
+        <AssetsTable loans={loansWithPool as TransformedLoan[]} />
       </Box>
-      <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
-      <AssetsTable loans={loansWithPool as TransformedLoan[]} />
-    </Box>
+    </AssetsProvider>
   )
 }

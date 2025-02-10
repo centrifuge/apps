@@ -1,8 +1,7 @@
-import { Accordion, Box, Divider, IconHelpCircle, Text, TextInput } from '@centrifuge/fabric'
+import { Accordion, Box, Divider, IconHelpCircle, RadioButton, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { tooltipText } from 'src/components/Tooltips'
 import { useTheme } from 'styled-components'
-import { CheckboxOption } from '../../../pages/IssuerCreatePool/PoolStructureSection'
 import { useAssetsContext } from './AssetsContext'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 import { CustomAssetForm } from './CustomAssetForm'
@@ -46,13 +45,13 @@ export function CreateAssetsForm() {
         <Box>
           <Text variant="heading4">Select asset type*</Text>
           {assetTypes.map((asset) => (
-            <CheckboxOption
+            <RadioButton
               height={40}
               name="assetType"
               label={asset.label}
               icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
               onChange={() => form.setFieldValue('assetType', asset.id)}
-              isChecked={form.values.assetType === asset.id}
+              checked={form.values.assetType === asset.id}
               id={asset.tooltip as keyof typeof tooltipText}
             />
           ))}

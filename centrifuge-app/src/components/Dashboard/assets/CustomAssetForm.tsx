@@ -14,7 +14,8 @@ import { Field, FieldProps, useFormikContext } from 'formik'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { Tooltips } from '../../../../src/components/Tooltips'
-import { CreateAssetFormValues, PoolWithMetadata } from './CreateAssetsDrawer'
+import { useAssetsContext } from './AssetsContext'
+import { CreateAssetFormValues } from './CreateAssetsDrawer'
 import { maturityOptions } from './LiquidAssetsForm'
 
 const borrowOptions = [
@@ -22,9 +23,10 @@ const borrowOptions = [
   { label: 'Up to outstanding debt', value: 'upToOutstandingDebt' },
 ]
 
-export const CustomAssetForm = ({ selectedPool }: { selectedPool: PoolWithMetadata }) => {
+export const CustomAssetForm = () => {
   const theme = useTheme()
   const form = useFormikContext<CreateAssetFormValues>()
+  const { selectedPool } = useAssetsContext()
   const [selectedTabIndex, setSelectedTabIndex] = useState(0)
   return (
     <Box>
@@ -91,7 +93,7 @@ export const CustomAssetForm = ({ selectedPool }: { selectedPool: PoolWithMetada
                 form.setFieldValue('collateralValue', event)
               }}
               placeholder="0.0"
-              currency={selectedPool.currency.displayName}
+              currency={selectedPool?.currency.displayName}
             />
           )}
         </Field>

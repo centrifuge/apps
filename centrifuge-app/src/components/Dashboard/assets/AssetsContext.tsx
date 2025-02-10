@@ -1,9 +1,12 @@
 import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useFormikContext } from 'formik'
 import React, { ReactNode, createContext, useContext, useMemo, useState } from 'react'
-import { LoanTemplate } from 'src/types'
-import { useMetadataMulti } from 'src/utils/useMetadata'
-import { usePoolsThatAnyConnectedAddressHasPermissionsFor, useSuitableAccounts } from 'src/utils/usePermissions'
+import { LoanTemplate } from '../../../../src/types'
+import { useMetadataMulti } from '../../../../src/utils/useMetadata'
+import {
+  usePoolsThatAnyConnectedAddressHasPermissionsFor,
+  useSuitableAccounts,
+} from '../../../../src/utils/usePermissions'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 import { usePoolMetadataMap } from './utils'
 
