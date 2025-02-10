@@ -57,7 +57,7 @@ export const TrancheTokenCards = ({
         },
       },
       {
-        header: 'APY',
+        header: 'Yield since inception',
         align: 'left',
         cell: (row: Row) => {
           return (

@@ -1,4 +1,4 @@
-import { DailyPoolState, DailyTrancheState, Pool } from '@centrifuge/centrifuge-js'
+import { DailyPoolState, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, IconDownload, Select, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -73,18 +73,22 @@ function calculateTranchePrices(pool: Pool) {
   return { juniorTokenPrice, seniorTokenPrice }
 }
 
-function getYieldFieldForFilter(tranche: DailyTrancheState, filter: string) {
+function getYieldFieldForFilter(
+  tranche?: Pick<Token, 'yield30DaysAnnualized' | 'yield90DaysAnnualized' | 'yieldYTD' | 'yieldSinceInception'>,
+  filter?: string
+) {
+  const zero = new Perquintill(0)
   switch (filter) {
     case '30d':
-      return tranche.yield30DaysAnnualized || 0
+      return tranche?.yield30DaysAnnualized || zero
     case '90d':
-      return tranche.yield90DaysAnnualized || 0
+      return tranche?.yield90DaysAnnualized || zero
     case 'ytd':
-      return tranche.yieldYTD || 0
+      return tranche?.yieldYTD || zero
     case 'all':
-      return tranche.yieldSinceInception || 0
+      return tranche?.yieldSinceInception || zero
     default:
-      return 0
+      return zero
   }
 }
 
@@ -125,14 +129,18 @@ function PoolPerformanceChart() {
     ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
     : null
 
-  const todayJuniorApy = pool?.tranches
-    ?.find((pool) => pool.seniority === 0)
-    ?.[range.value === 'all' ? 'yieldSinceInception' : 'yield30DaysAnnualized']?.toPercent()
+  const todayJuniorApy = getYieldFieldForFilter(
+    pool?.tranches?.find((pool) => pool.seniority === 0),
+    range.value
+  )
+    ?.toPercent()
     .toNumber()
 
-  const todaySeniorApy = pool?.tranches
-    ?.find((pool) => pool.seniority === 1)
-    ?.[range.value === 'all' ? 'yieldSinceInception' : 'yield30DaysAnnualized']?.toPercent()
+  const todaySeniorApy = getYieldFieldForFilter(
+    pool?.tranches?.find((pool) => pool.seniority === 1),
+    range.value
+  )
+    ?.toPercent()
     .toNumber()
 
   const trancheTodayPrice = calculateTranchePrices(pool as Pool)
@@ -150,9 +158,9 @@ function PoolPerformanceChart() {
         const seniorTokenPrice = seniorTrancheKey ? day.tranches[seniorTrancheKey]?.price?.toFloat() ?? null : null
 
         const juniorAPY = getYieldFieldForFilter(day.tranches[juniorTrancheKey], range.value)
-        const formattedJuniorAPY = juniorAPY !== 0 ? juniorAPY.toPercent().toNumber() : 0
+        const formattedJuniorAPY = juniorAPY.toPercent().toNumber()
         const seniorAPY = seniorTrancheKey ? getYieldFieldForFilter(day.tranches[seniorTrancheKey], range.value) : null
-        const formattedSeniorAPY = seniorAPY !== 0 ? seniorAPY?.toPercent().toNumber() : null
+        const formattedSeniorAPY = seniorAPY?.toPercent().toNumber()
 
         if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
           const tranchePrices = calculateTranchePrices(pool as Pool)

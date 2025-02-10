@@ -319,6 +319,8 @@ export type Tranche = {
   currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
   yield30DaysAnnualized: Perquintill | null
+  yield90DaysAnnualized: Perquintill | null
+  yieldYTD: Perquintill | null
   yieldSinceInception: Perquintill | null
   lastUpdatedInterest: string
   ratio: Perquintill
@@ -2117,6 +2119,20 @@ export function getPoolsModule(inst: Centrifuge) {
               },
               {} as Record<string, string | null>
             )
+            const yield90DaysTrancheId = yieldsAnnualized?.trancheSnapshots.nodes.reduce(
+              (acc, { yield90DaysAnnualized, trancheId }) => {
+                acc[trancheId] = yield90DaysAnnualized
+                return acc
+              },
+              {} as Record<string, string | null>
+            )
+            const yieldYTDTrancheId = yieldsAnnualized?.trancheSnapshots.nodes.reduce(
+              (acc, { yieldYTD, trancheId }) => {
+                acc[trancheId] = yieldYTD
+                return acc
+              },
+              {} as Record<string, string | null>
+            )
             const yieldInceptionTrancheId = yieldsAnnualized?.trancheSnapshots.nodes.reduce(
               (acc, { yieldSinceInception, trancheId }) => {
                 acc[trancheId] = yieldSinceInception
@@ -2203,6 +2219,12 @@ export function getPoolsModule(inst: Centrifuge) {
                     interestRatePerSec,
                     yield30DaysAnnualized: yield30DaysTrancheId?.[`${poolId}-${trancheId}`]
                       ? new Perquintill(yield30DaysTrancheId[`${poolId}-${trancheId}`]!)
+                      : null,
+                    yield90DaysAnnualized: yield90DaysTrancheId?.[`${poolId}-${trancheId}`]
+                      ? new Perquintill(yield90DaysTrancheId[`${poolId}-${trancheId}`]!)
+                      : null,
+                    yieldYTD: yieldYTDTrancheId?.[`${poolId}-${trancheId}`]
+                      ? new Perquintill(yieldYTDTrancheId[`${poolId}-${trancheId}`]!)
                       : null,
                     yieldSinceInception: yieldInceptionTrancheId?.[`${poolId}-${trancheId}`]
                       ? new Perquintill(yieldInceptionTrancheId[`${poolId}-${trancheId}`]!)
@@ -2343,7 +2365,13 @@ export function getPoolsModule(inst: Centrifuge) {
   function getLatestTrancheSnapshots() {
     return inst.getSubqueryObservable<{
       trancheSnapshots: {
-        nodes: { yield30DaysAnnualized: string | null; yieldSinceInception: string | null; trancheId: string }[]
+        nodes: {
+          yield30DaysAnnualized: string | null
+          yield90DaysAnnualized: string | null
+          yieldYTD: string | null
+          yieldSinceInception: string | null
+          trancheId: string
+        }[]
       }
     }>(
       `{
@@ -2351,6 +2379,8 @@ export function getPoolsModule(inst: Centrifuge) {
           nodes {
             trancheId
             yield30DaysAnnualized
+            yield90DaysAnnualized
+            yieldYTD
             yieldSinceInception
           }
         }
