@@ -1679,7 +1679,7 @@ __metadata:
     "@centrifuge/centrifuge-js": "workspace:*"
     "@centrifuge/centrifuge-react": "workspace:*"
     "@centrifuge/fabric": "workspace:*"
-    "@centrifuge/sdk": latest
+    "@centrifuge/sdk": 0.0.0-alpha.12
     "@makerdao/multicall": ^0.12.0
     "@polkadot/react-identicon": ~3.1.4
     "@styled-system/css": ^5.1.5
@@ -1899,7 +1899,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/sdk@npm:latest":
+"@centrifuge/sdk@npm:0.0.0-alpha.12":
   version: 0.0.0-alpha.12
   resolution: "@centrifuge/sdk@npm:0.0.0-alpha.12"
   dependencies:
