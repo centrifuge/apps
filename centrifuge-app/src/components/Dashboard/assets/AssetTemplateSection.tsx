@@ -70,6 +70,7 @@ export function AssetTemplateSection({ label, input, name }: { label: string; in
           max={input.max}
         />
       )
+
     default: {
       const { type, ...rest } = input.type as any
       return (

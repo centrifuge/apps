@@ -3,16 +3,20 @@ import {
   Box,
   Divider,
   IconHelpCircle,
+  ImageUpload,
   RadioButton,
   Tabs,
   TabsItem,
   Text,
+  TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
+import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
 import { Tooltips, tooltipText } from '../../../../src/components/Tooltips'
+import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
 import { LoanTemplate } from '../../../../src/types'
 import { useMetadata } from '../../../../src/utils/useMetadata'
 import { AssetTemplateSection } from './AssetTemplateSection'
@@ -37,6 +41,8 @@ export function CreateAssetsForm() {
   const sectionsName = templateMetadata?.sections?.map((s) => s.name) ?? []
   const [selectedTabIndex, setSelectedTabIndex] = useState(0)
 
+  console.log(templateMetadata)
+
   const renderBody = (index: number) => {
     const sectionsAttrs =
       templateMetadata?.sections
@@ -48,16 +54,27 @@ export function CreateAssetsForm() {
         })
         .flat() ?? []
     const attrs = { ...templateMetadata?.attributes }
-    return sectionsAttrs.map((section) => {
-      if (section.index === index) {
-        const name = `attributes.${section.attr}`
-        return (
-          <Box mt={2} mb={2}>
-            <AssetTemplateSection label={attrs[section.attr].label} input={attrs[section.attr].input} name={name} />
-          </Box>
-        )
-      }
-    })
+    return (
+      <Box
+        p={2}
+        backgroundColor="backgroundSecondary"
+        borderRadius={8}
+        border={`1px solid ${theme.colors.borderPrimary}`}
+        mb={2}
+      >
+        {sectionsAttrs.map((section) => {
+          if (section.index === index) {
+            const name = `attributes.${section.attr}`
+            if (!attrs[section.attr]) return <></>
+            return (
+              <Box mt={2} mb={2}>
+                <AssetTemplateSection label={attrs[section.attr].label} input={attrs[section.attr].input} name={name} />
+              </Box>
+            )
+          }
+        })}
+      </Box>
+    )
   }
 
   return (
@@ -107,42 +124,44 @@ export function CreateAssetsForm() {
       {hasTemplates && canCreateAssets && form.values.assetType !== 'cash' && (
         <Box mt={3}>
           {form.values.assetType === 'custom' && (
-            <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
-              <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
-                <Field name="customType">
-                  {({ field, form }: FieldProps) => (
-                    <Box display="flex" alignItems="center" onClick={() => form.setFieldValue('customType', 'atPar')}>
-                      <Text>At par</Text>
-                      <Tooltips
-                        type="atPar"
-                        label={
-                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
-                        }
-                      />
-                    </Box>
-                  )}
-                </Field>
-              </TabsItem>
-              <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
-                <Field name="customType">
-                  {({ field, form }: FieldProps) => (
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      onClick={() => form.setFieldValue('customType', 'discountedCashFlow')}
-                    >
-                      <Text>Discounted cash flow</Text>
-                      <Tooltips
-                        type="discountedCashFlow"
-                        label={
-                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
-                        }
-                      />
-                    </Box>
-                  )}
-                </Field>
-              </TabsItem>
-            </Tabs>
+            <Box mt={2} mb={2}>
+              <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+                <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+                  <Field name="customType">
+                    {({ field, form }: FieldProps) => (
+                      <Box display="flex" alignItems="center" onClick={() => form.setFieldValue('customType', 'atPar')}>
+                        <Text>At par</Text>
+                        <Tooltips
+                          type="atPar"
+                          label={
+                            <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                          }
+                        />
+                      </Box>
+                    )}
+                  </Field>
+                </TabsItem>
+                <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+                  <Field name="customType">
+                    {({ field, form }: FieldProps) => (
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        onClick={() => form.setFieldValue('customType', 'discountedCashFlow')}
+                      >
+                        <Text>Discounted cash flow</Text>
+                        <Tooltips
+                          type="discountedCashFlow"
+                          label={
+                            <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                          }
+                        />
+                      </Box>
+                    )}
+                  </Field>
+                </TabsItem>
+              </Tabs>
+            </Box>
           )}
           <Accordion
             items={[
@@ -153,9 +172,45 @@ export function CreateAssetsForm() {
                 }))),
             ]}
           />
-          <Divider color="backgroundSecondary" mt={2} />
+          {(templateMetadata?.options?.image || templateId.options.description) && (
+            <Box mb={2}>
+              <Divider color="backgroundSecondary" />
+            </Box>
+          )}
+          {templateMetadata?.options?.image && (
+            <Box padding={2}>
+              <Field name="image" validate={validate.nftImage}>
+                {({ field, meta, form }: FieldProps) => (
+                  <ImageUpload
+                    file={field.value}
+                    onFileChange={(file) => {
+                      form.setFieldTouched('image', true, false)
+                      form.setFieldValue('image', file)
+                    }}
+                    accept="JPG/PNG/SVG, max 1MB"
+                    label="Asset image"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                  />
+                )}
+              </Field>
+            </Box>
+          )}
+          {templateMetadata?.options?.description && (
+            <Box padding={2}>
+              <FieldWithErrorMessage
+                name="description"
+                as={TextAreaInput}
+                label="Description"
+                placeholder="Add asset description paragraph..."
+                maxLength={100}
+              />
+            </Box>
+          )}
         </Box>
       )}
+      <Box mb={2}>
+        <Divider color="backgroundSecondary" />
+      </Box>
     </Box>
   )
 }
