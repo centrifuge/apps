@@ -69,10 +69,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     }
 
     return transactions
-      ?.filter(
-        (tx) => tx.transactionType !== 'PROPOSED' && tx.transactionType !== 'ADDED' && tx.transactionType !== 'REMOVED'
-      )
-      .filter((tx) => (!txType || txType === 'all' ? true : tx.type === txType))
+      ?.filter((tx) => (!txType || txType === 'all' ? true : tx.type === txType))
       .map((tx) => ({
         name: '',
         value: [
