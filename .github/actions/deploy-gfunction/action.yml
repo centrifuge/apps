@@ -38,7 +38,7 @@ inputs:
     description: 'RAM settings for function (without unit suffix)'
     # https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--memory
     # https://github.com/google-github-actions/deploy-cloud-functions?tab=readme-ov-file#inputs
-    default: 256
+    default: "256"
     required: false
 
 runs:
