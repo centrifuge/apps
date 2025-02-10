@@ -22,29 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: apps
-          sparse-checkout: |
-            .github/actions/prepare-deploy
-
-      - name: prepare env logic
-        id: prepare
-        uses: ./apps/.github/actions/prepare-deploy
-        with:
-          app_base_name: app
-          deploy_to: 'production'
-
-      - name: Auth gcloud
-        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
-        with:
-          workload_identity_provider: '${{ secrets.GWIP }}'
-          service_account: '${{ secrets.GSA }}'
-
-      - name: 'Set up Cloud SDK'
-        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
-
       - uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # v1.1.2
         with:
           repo: 'centrifuge/apps'
@@ -55,9 +32,29 @@ jobs:
       - name: Unzip release files
         run: |
           unzip webpack.zip -d webpack 1> /dev/null
+      # Unzipped folder structure is webpack/centrifuge-app/build/inde.js
+      
+      - name: Upload webpack files
+        uses: actions/upload-artifact@v4
+        with:
+          name: webpack
+          path: webpack/centrifuge-app/build/
 
-      - name: Sync webpack from staging
-        run: gsutil -m rsync -d -r ./webpack/ gs://${{ steps.prepare.outputs.front_url }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: apps
+          sparse-checkout: |
+            .github/actions/deploy-gcs
+
+      - name: Deploy to GCS
+        uses: ./apps/.github/actions/deploy-gcs
+        with:
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+          bucket_url: 'app.centrifuge.io'
+          artifact_name: webpack
+
 
   deploy-functions:
     name: ${{ matrix.function.name }}-prod-deploy
@@ -77,12 +74,6 @@ jobs:
             handler: onboarding
             service_account: ${{ vars.ONBOARDING_FUNCT_SA }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: apps
-          sparse-checkout: |
-            .github/actions/deploy-gfunction
 
       - uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # v1.1.2
         with:
@@ -93,13 +84,28 @@ jobs:
 
       - name: Unzip release files
         run: |
-          unzip ${{ matrix.function.name }}.zip -d ${{ matrix.function.name }} 1> /dev/null
+          unzip ${{ matrix.function.name }}.zip 1> /dev/null
+      # Unzipped folder structure is ${{ matrix.function.name }}/dist/index.js
+
+      - name: Upload function files
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.function.name }}
+          path: ${{ matrix.function.name }}/dist/
+          
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: apps
+          sparse-checkout: |
+            .github/actions/deploy-gfunction
 
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          app_name: ${{ matrix.function.name }}
+          app_name: "${{ matrix.function.name }}-production"
+          artifact_name: ${{ matrix.function.name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           target: ${{ matrix.function.handler }}
