@@ -6,15 +6,16 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'The release tag to promote (e.g. v1.2.3)'
+        description: 'The release tag to promote (e.g. v1.2.3) do not append centrifuge-app to the tag'
         required: true
         type: string
 concurrency:
   group: production-deployment
-  cancel-in-progress: false # Wait for staging-deploy to finish
+  cancel-in-progress: false
 
 jobs:
-  sync-staging-prod:
+  deploy-app:
+    name: app-prod-deploy
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -25,6 +26,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: apps
+          sparse-checkout: |
+            .github/actions/prepare-deploy
 
       - name: prepare env logic
         id: prepare
@@ -42,126 +45,104 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
 
+      - uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # v1.1.2
+        with:
+          repo: 'centrifuge/apps'
+          version: ${{ github.event_name == 'release' && github.event.release.id || format('tags/centrifuge-app/{0}', inputs.tag) }}
+          file: "webpack.zip"
+          regex: true
+
+      - name: Unzip release files
+        run: |
+          unzip webpack.zip -d webpack 1> /dev/null
+
       - name: Sync webpack from staging
-        run: gsutil -m rsync -d -r gs://app.staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
+        run: gsutil -m rsync -d -r ./webpack/ gs://${{ steps.prepare.outputs.front_url }}
 
-  retrieve-prod-assets:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@20319c5641d495c8a52e688b7dc5fada6c3a9fbc # v8
-        with:
-          workflow: staging-deploy.yml
-          workflow_conclusion: success
-          commit: ${{ github.event_name == 'release' && github.ref_name || github.event.inputs.tag }}
-          search_artifacts: true
-
-      # Alternative: download from the release instead of
-      # workflow artifacts
-      # - uses: dsaltares/fetch-gh-release-asset@master
-      #   with:
-      #     repo: 'centrifuge/apps'
-      #     version: 'tags/${{ github.ref_name }}'
-      #     file: ".*-api\\.zip"
-      #    # target: "./releases/"
-      #     regex: true
-      #     # target: 'subdir/${{ matrix.artifact_name }}.zip'
-      #     # token: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Unzip release files
-      #   run: |
-      #     unzip pinning-api.zip -d pinning-api 1> /dev/null
-      #     unzip onboarding-api.zip -d onboarding-api 1> /dev/null
-
-      # Debug artifacts:
-      # - name: list artifact files
-      #   run: |
-      #     ls -la ./
-      #     ls -la pinning-api/
-      #     ls -la onboarding-api/
-      #     echo "Workspace PATH: ${{ github.workspace }}"
-      #     ls -la $GITHUB_WORKSPACE
-
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #@4.6.0
-        with:
-          name: onboarding-api
-          path: ${{ github.workspace }}/onboarding-api-staging/
-          if-no-files-found: error
-
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 #@4.6.0
-        with:
-          name: pinning-api
-          path: ${{ github.workspace }}/pinning-api-staging/
-          if-no-files-found: error
-
-  pinning-prod-deploy:
-    needs: retrieve-prod-assets
+  deploy-functions:
+    name: ${{ matrix.function.name }}-prod-deploy
     runs-on: ubuntu-latest
     environment: production
     permissions:
       contents: 'read'
       id-token: 'write'
-    env:
-      app_name: pinning-api
-      function_handler: pinningApi
+    strategy:
+      fail-fast: false
+      matrix:
+        function:
+          - name: pinning-api
+            handler: pinningApi
+            service_account: ${{ vars.PINNING_API_FUNCT_SA }}
+          - name: onboarding-api
+            handler: onboarding
+            service_account: ${{ vars.ONBOARDING_FUNCT_SA }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           path: apps
+          sparse-checkout: |
+            .github/actions/deploy-gfunction
+
+      - uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # v1.1.2
+        with:
+          repo: 'centrifuge/apps'
+          version: ${{ github.event_name == 'release' && github.event.release.id || format('tags/centrifuge-app/{0}', inputs.tag) }}
+          file: "${{ matrix.function.name }}.zip"
+          regex: true
+
+      - name: Unzip release files
+        run: |
+          unzip ${{ matrix.function.name }}.zip -d ${{ matrix.function.name }} 1> /dev/null
 
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          app_name: ${{ env.app_name }}
+          app_name: ${{ matrix.function.name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          target: ${{ env.function_handler }}
+          target: ${{ matrix.function.handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
-          service_account: '${{ vars.PINNING_API_FUNCT_SA }}'
+          service_account: '${{ matrix.function.service_account }}'
           deploy_env: production
 
-  onboarding-prod-deploy:
-    needs: retrieve-prod-assets
-    runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    env:
-      app_name: onboarding-api
-      function_handler: onboarding
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: apps
-
-      - name: Deploy Gfunction
-        id: functionsdeploy
-        uses: ./apps/.github/actions/deploy-gfunction
-        with:
-          app_name: ${{ env.app_name }}
-          GWIP: ${{ secrets.GWIP }}
-          GSA: ${{ secrets.GSA }}
-          target: ${{ env.function_handler }}
-          service_account: '${{ vars.ONBOARDING_FUNCT_SA }}'
-          gcloud_region: ${{ vars.GCLOUD_REGION }}
-          deploy_env: production
-
-  prod-slack-notify:
-    needs: [sync-staging-prod, onboarding-prod-deploy, pinning-prod-deploy]
+  slack-notify-success:
+    needs: [deploy-app, deploy-functions]
+    if: success()
     runs-on: ubuntu-latest
     steps:
-      - name: Notify prod deploy
+      - name: Notify prod deploy success
         uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: |
+            ✅ Production deployment successful!
             app.staging.centrifuge.io has been promoted to app.centrifuge.io and is now LIVE!
             Check out the new release -> https://github.com/centrifuge/apps/releases/
           SLACK_USERNAME: 'Centrifuge GHA Bot'
           SLACK_ICON: 'https://centrifuge.io/favicon.ico'
           SLACK_TITLE: 'Centrifuge app has been promoted to prod.'
           SLACK_FOOTER: 'Automatic message from centrifuge/apps repository Actions'
+          MSG_MINIMAL: true
+          SLACK_COLOR: 'good'
+
+  slack-notify-failure:
+    needs: [deploy-app, deploy-functions]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify prod deploy failure
+        uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: |
+            ❌ Production deployment failed!
+            One or more jobs failed during the promotion to production.
+            Please check the workflow run for details -> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_USERNAME: 'Centrifuge GHA Bot'
+          SLACK_ICON: 'https://centrifuge.io/favicon.ico'
+          SLACK_TITLE: '⚠️ Production Deployment Failed'
+          SLACK_FOOTER: 'Automatic message from centrifuge/apps repository Actions'
+          MSG_MINIMAL: true
+          SLACK_COLOR: 'danger'
