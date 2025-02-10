@@ -12,10 +12,9 @@ import AssetsTable from '../../components/Dashboard/assets/AssetsTable'
 import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/assets/utils'
 
 export default function AssetsPage() {
-  const { pools = [] } = useSelectedPools()
+  const { selectedPools, togglePoolSelection, setSelectedPools, pools = [] } = useSelectedPools()
   const ids = pools.map((pool) => pool.id)
   const { data: loans, isLoading } = useLoans(pools ? ids : [])
-  const { selectedPools, togglePoolSelection, setSelectedPools } = useSelectedPools()
 
   useEffect(() => {
     if (selectedPools.length === 0 && pools.length > 0) {

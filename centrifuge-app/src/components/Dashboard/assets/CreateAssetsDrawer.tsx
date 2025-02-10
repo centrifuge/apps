@@ -23,7 +23,7 @@ export type CreateAssetFormValues = {
 }
 
 export function CreateAssetsDrawer() {
-  const { open, type, setOpen, setType, poolsMetadata, selectedPool } = useAssetsContext()
+  const { open, type, setOpen, setType, poolsMetadata, selectedPool, addSelectedPool } = useAssetsContext()
   const poolAdmin = usePoolAdmin(selectedPool?.id ?? '')
 
   const form = useFormik({
@@ -49,7 +49,7 @@ export function CreateAssetsDrawer() {
     }
   }
 
-  if (!poolsMetadata?.length || !selectedPool) return null
+  if (!poolsMetadata?.length) return null
 
   return (
     <LoadBoundary>
@@ -71,6 +71,7 @@ export function CreateAssetsDrawer() {
                     options={poolsMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
                     onChange={(event) => {
                       form.setFieldValue('poolId', event.target.value)
+                      addSelectedPool(event.target.value)
                     }}
                   />
                 )}

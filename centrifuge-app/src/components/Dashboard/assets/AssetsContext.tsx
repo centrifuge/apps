@@ -1,5 +1,4 @@
 import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useFormikContext } from 'formik'
 import React, { ReactNode, createContext, useContext, useMemo, useState } from 'react'
 import { LoanTemplate } from '../../../../src/types'
 import { useMetadataMulti } from '../../../../src/utils/useMetadata'
@@ -7,7 +6,6 @@ import {
   usePoolsThatAnyConnectedAddressHasPermissionsFor,
   useSuitableAccounts,
 } from '../../../../src/utils/usePermissions'
-import { CreateAssetFormValues } from './CreateAssetsDrawer'
 import { usePoolMetadataMap } from './utils'
 
 export type Step = 'upload-template' | 'create-asset'
@@ -23,6 +21,7 @@ interface AssetsContextProps {
   templatesMetadata: LoanTemplate[]
   canCreateAssets: boolean
   templatesData: LoanTemplate[]
+  addSelectedPool: (id: string) => void
 }
 
 const AssetsContext = createContext<AssetsContextProps | undefined>(undefined)
@@ -40,12 +39,14 @@ interface AssetsProviderProps {
 }
 
 export const AssetsProvider = ({ children }: AssetsProviderProps) => {
-  const form = useFormikContext<CreateAssetFormValues>()
-  const { values } = form
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const metas = usePoolMetadataMap(pools || [])
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<Step>('create-asset')
+  const [pool, setPool] = useState<PoolWithMetadata>()
+  const templateIds = pool?.meta?.loanTemplates?.map((s) => s.id) || []
+  const templatesMetadataResults = useMetadataMulti<LoanTemplate>(templateIds)
+  const templatesMetadata = templatesMetadataResults.map((result) => result.data).filter(Boolean) as LoanTemplate[]
 
   const poolsMetadata = useMemo(() => {
     return pools?.map((pool) => {
@@ -57,22 +58,16 @@ export const AssetsProvider = ({ children }: AssetsProviderProps) => {
     })
   }, [pools, metas])
 
-  const selectedPool = useMemo(
-    () => poolsMetadata.find((pool) => pool.id === values.poolId),
-    [poolsMetadata, values.poolId]
-  )
+  const addSelectedPool = (id: string) => {
+    setPool(poolsMetadata.find((pool) => pool.id === id))
+  }
 
   const canCreateAssets =
-    useSuitableAccounts({ poolId: values.poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
-
-  const templateIds = selectedPool?.meta?.loanTemplates?.map((s) => s.id)
-
-  const templatesMetadataResults = useMetadataMulti<LoanTemplate>(templateIds ?? [])
-  const templatesMetadata = templatesMetadataResults.map((result) => result.data).filter(Boolean) as LoanTemplate[]
+    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
 
   const templatesData = templateIds.map((id, i) => {
     const meta = templatesMetadata[i]?.data
-    const metaMeta = selectedPool?.meta?.loanTemplates?.[i]
+    const metaMeta = pool?.meta?.loanTemplates?.[i]
     return {
       id,
       name: meta?.name ?? `Version ${i + 1}`,
@@ -89,10 +84,11 @@ export const AssetsProvider = ({ children }: AssetsProviderProps) => {
         open,
         type,
         poolsMetadata: poolsMetadata || [],
-        selectedPool,
+        selectedPool: pool,
         templatesMetadata,
         canCreateAssets,
         templatesData,
+        addSelectedPool,
       }}
     >
       {children}

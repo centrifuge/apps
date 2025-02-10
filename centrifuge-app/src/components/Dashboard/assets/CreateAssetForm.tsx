@@ -1,13 +1,23 @@
-import { Accordion, Box, Divider, IconHelpCircle, RadioButton, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Accordion,
+  Box,
+  Divider,
+  IconHelpCircle,
+  RadioButton,
+  Tabs,
+  TabsItem,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
-import { tooltipText } from 'src/components/Tooltips'
+import { useState } from 'react'
 import { useTheme } from 'styled-components'
+import { Tooltips, tooltipText } from '../../../../src/components/Tooltips'
+import { LoanTemplate } from '../../../../src/types'
+import { useMetadata } from '../../../../src/utils/useMetadata'
+import { AssetTemplateSection } from './AssetTemplateSection'
 import { useAssetsContext } from './AssetsContext'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
-import { CustomAssetForm } from './CustomAssetForm'
-import { FundSharesForm } from './FundSharesForm'
-import { LiquidAssetsForm } from './LiquidAssetsForm'
-import { SecurityDataForm } from './SecurityDataForm'
 
 const assetTypes = [
   { label: 'Cash', tooltip: 'cashAsset', id: 'cash' },
@@ -18,19 +28,36 @@ const assetTypes = [
 
 export function CreateAssetsForm() {
   const theme = useTheme()
-  const { selectedPool: pool, canCreateAssets } = useAssetsContext()
+  const { selectedPool: pool, canCreateAssets, templatesData } = useAssetsContext()
   const form = useFormikContext<CreateAssetFormValues>()
   const hasTemplates = !!pool?.meta?.loanTemplates?.length
+  const templateIds = templatesData.map((s) => s.id) ?? []
+  const templateId = templateIds.at(-1)
+  const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+  const sectionsName = templateMetadata?.sections?.map((s) => s.name) ?? []
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0)
 
-  const renderBody = () => {
-    switch (form.values.assetType) {
-      case 'liquid':
-        return <LiquidAssetsForm />
-      case 'fund':
-        return <FundSharesForm />
-      case 'custom':
-        return <CustomAssetForm />
-    }
+  const renderBody = (index: number) => {
+    const sectionsAttrs =
+      templateMetadata?.sections
+        ?.map((s, i) => {
+          return s.attributes.map((attr) => ({
+            index: i,
+            attr,
+          }))
+        })
+        .flat() ?? []
+    const attrs = { ...templateMetadata?.attributes }
+    return sectionsAttrs.map((section) => {
+      if (section.index === index) {
+        const name = `attributes.${section.attr}`
+        return (
+          <Box mt={2} mb={2}>
+            <AssetTemplateSection label={attrs[section.attr].label} input={attrs[section.attr].input} name={name} />
+          </Box>
+        )
+      }
+    })
   }
 
   return (
@@ -49,10 +76,16 @@ export function CreateAssetsForm() {
               height={40}
               name="assetType"
               label={asset.label}
-              icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+              icon={
+                <Tooltips
+                  type={asset.tooltip as keyof typeof tooltipText}
+                  label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                />
+              }
               onChange={() => form.setFieldValue('assetType', asset.id)}
               checked={form.values.assetType === asset.id}
-              id={asset.tooltip as keyof typeof tooltipText}
+              styles={{ padding: '0px 8px', margin: '8px 0px' }}
+              border
             />
           ))}
         </Box>
@@ -73,20 +106,54 @@ export function CreateAssetsForm() {
       </Box>
       {hasTemplates && canCreateAssets && form.values.assetType !== 'cash' && (
         <Box mt={3}>
+          {form.values.assetType === 'custom' && (
+            <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+              <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+                <Field name="customType">
+                  {({ field, form }: FieldProps) => (
+                    <Box display="flex" alignItems="center" onClick={() => form.setFieldValue('customType', 'atPar')}>
+                      <Text>At par</Text>
+                      <Tooltips
+                        type="atPar"
+                        label={
+                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                        }
+                      />
+                    </Box>
+                  )}
+                </Field>
+              </TabsItem>
+              <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+                <Field name="customType">
+                  {({ field, form }: FieldProps) => (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      onClick={() => form.setFieldValue('customType', 'discountedCashFlow')}
+                    >
+                      <Text>Discounted cash flow</Text>
+                      <Tooltips
+                        type="discountedCashFlow"
+                        label={
+                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                        }
+                      />
+                    </Box>
+                  )}
+                </Field>
+              </TabsItem>
+            </Tabs>
+          )}
           <Accordion
             items={[
-              {
-                title: 'Pricing',
-                body: renderBody(),
-              },
-              {
-                title: 'Security data',
-                body: <SecurityDataForm />,
-              },
+              ...(sectionsName &&
+                sectionsName.map((section, index) => ({
+                  title: section,
+                  body: renderBody(index),
+                }))),
             ]}
-            hideBorder
           />
-          <Divider color="backgroundSecondary" />
+          <Divider color="backgroundSecondary" mt={2} />
         </Box>
       )}
     </Box>
