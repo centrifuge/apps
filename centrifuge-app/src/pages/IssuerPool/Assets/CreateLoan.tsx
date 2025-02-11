@@ -325,6 +325,8 @@ function IssuerCreateLoan() {
     },
   })
 
+  console.log(form.values)
+
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)

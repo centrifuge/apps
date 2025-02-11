@@ -22,6 +22,7 @@ import { useMetadata } from '../../../../src/utils/useMetadata'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { AssetTemplateSection } from './AssetTemplateSection'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
+import { PricingSection } from './PricingSection'
 
 const assetTypes = [
   { label: 'Cash', tooltip: 'cashAsset', id: 'cash' },
@@ -167,6 +168,10 @@ export function CreateAssetsForm() {
           )}
           <Accordion
             items={[
+              {
+                title: 'Pricing',
+                body: <PricingSection />,
+              },
               ...(sectionsName &&
                 sectionsName.map((section, index) => ({
                   title: section,

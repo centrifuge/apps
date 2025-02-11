@@ -1,7 +1,10 @@
-import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, LoanInfoInput, Pool, PoolMetadata, Price, Rate } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useMemo, useState } from 'react'
+import { firstValueFrom } from 'rxjs'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
 import { useFilterPoolsByUserRole, usePoolAdmin } from '../../../utils/usePermissions'
 import { CreateAssetsForm } from './CreateAssetForm'
@@ -23,23 +26,30 @@ interface CreateAssetsDrawerProps {
 }
 
 export type CreateAssetFormValues = {
-  poolId: string
-  assetType: string
+  assetType: 'cash' | 'liquid' | 'fund' | 'custom'
   assetName: string
-  oracleSource: string
-  maturity: string
-  interestRate: number
-  linearPricing: number
-  customType: string
+  customType: 'atPar' | 'discountedCashFlow'
+  selectedPool: PoolWithMetadata
+  maxBorrowQuantity: number | ''
+  uploadedTemplates: UploadedTemplate[]
+  oracleSource: 'isin' | 'assetSpecific'
+  maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+  maturity: 'fixed' | 'none' | 'fixedWithExtension'
+  value: number | ''
   maturityDate: string
   maturityExtensionDays: number
-  advanceRate: number
-  discountedCashFlow: string
-  uploadedTemplates: UploadedTemplate[]
-  selectedPool: PoolWithMetadata
+  advanceRate: number | ''
+  interestRate: number | ''
+  probabilityOfDefault: number | ''
+  lossGivenDefault: number | ''
+  discountRate: number | ''
+  isin: string
+  notional: number | ''
+  withLinearPricing: boolean
 }
 
 export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
+  const centrifuge = useCentrifuge()
   const filteredPools = useFilterPoolsByUserRole(type === 'upload-template' ? ['PoolAdmin'] : ['Borrower', 'PoolAdmin'])
   const metas = usePoolMetadataMap(filteredPools || [])
   const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
@@ -60,16 +70,87 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     initialValues: {
       assetType: 'cash',
       assetName: '',
-      oracleSource: 'isin',
-      maturity: 'fixed',
-      interestRate: 0,
-      linearPricing: false,
       customType: 'atPar',
-      uploadedTemplates: poolsMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
       selectedPool: poolsMetadata[0],
+      uploadedTemplates: poolsMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
+      valuationMethod: 'oracle',
+      maxBorrowAmount: 'upToTotalBorrowed',
+      maturity: 'fixed',
+      value: '',
+      maturityDate: '',
+      maturityExtensionDays: 0,
+      advanceRate: '',
+      interestRate: '',
+      probabilityOfDefault: '',
+      lossGivenDefault: '',
+      discountRate: '',
+      maxBorrowQuantity: '',
+      isin: '',
+      notional: 100,
+      withLinearPricing: false,
+      oracleSource: 'isin',
     },
-    onSubmit: (values) => {
-      console.log(values)
+    onSubmit: async (values) => {
+      const decimals = form.values.selectedPool.currency.decimals
+      let pricingInfo: LoanInfoInput
+      switch (values.assetType) {
+        case 'cash':
+          pricingInfo = {
+            valuationMethod: 'cash',
+            advanceRate: Rate.fromPercent(100),
+            interestRate: Rate.fromPercent(0),
+            value: new BN(2).pow(new BN(128)).subn(1), // max uint128
+            maxBorrowAmount: 'upToOutstandingDebt' as const,
+            maturityDate: null,
+          }
+          return
+        case 'liquid':
+        case 'fund':
+          const pid = form.values.selectedPool.id
+          const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
+          pricingInfo = {
+            valuationMethod: 'oracle',
+            maxPriceVariation: Rate.fromPercent(9999),
+            maxBorrowAmount: values.maxBorrowQuantity ? Price.fromFloat(values.maxBorrowQuantity) : null,
+            priceId:
+              values.oracleSource === 'isin'
+                ? { isin: values.isin }
+                : { poolLoanId: [pid, loanId.toString()] satisfies [string, string] },
+            maturityDate: values.maturity !== 'none' ? new Date(values.maturityDate) : null,
+            interestRate: Rate.fromPercent(values.notional === 0 ? 0 : values.interestRate),
+            notional: CurrencyBalance.fromFloat(values.notional, decimals),
+            withLinearPricing: values.withLinearPricing,
+          }
+          return
+        case 'custom':
+          if (values.customType === 'atPar') {
+            pricingInfo = {
+              valuationMethod: 'outstandingDebt',
+              maxBorrowAmount: 'upToOutstandingDebt',
+              value: CurrencyBalance.fromFloat(values.value, decimals),
+              maturityDate: values.maturity !== 'none' ? new Date(values.maturityDate) : null,
+              maturityExtensionDays: values.maturity === 'fixedWithExtension' ? values.maturityExtensionDays : null,
+              advanceRate: Rate.fromPercent(values.advanceRate),
+              interestRate: Rate.fromPercent(values.interestRate),
+            }
+          } else if (values.customType === 'discountedCashFlow') {
+            pricingInfo = {
+              valuationMethod: 'discountedCashFlow',
+              maxBorrowAmount: 'upToTotalBorrowed',
+              value: CurrencyBalance.fromFloat(values.value, decimals),
+              maturityDate: values.maturity !== 'none' ? new Date(values.maturityDate) : null,
+              maturityExtensionDays: values.maturity === 'fixedWithExtension' ? values.maturityExtensionDays : null,
+              advanceRate: Rate.fromPercent(values.advanceRate),
+              interestRate: Rate.fromPercent(values.interestRate),
+              probabilityOfDefault: Rate.fromPercent(values.probabilityOfDefault || 0),
+              lossGivenDefault: Rate.fromPercent(values.lossGivenDefault || 0),
+              discountRate: Rate.fromPercent(values.discountRate || 0),
+            }
+          }
+          return
+        default:
+          return
+      }
     },
   })
 
