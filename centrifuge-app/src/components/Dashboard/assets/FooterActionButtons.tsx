@@ -1,34 +1,67 @@
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconWarning, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useMemo } from 'react'
-import { usePoolAdmin } from '../../../../src/utils/usePermissions'
-import { CreateAssetFormValues, PoolWithMetadata } from './CreateAssetsDrawer'
+import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
+import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
 export const FooterActionButtons = ({
-  pool,
   type,
   setType,
   setOpen,
+  isUploadingTemplates,
+  resetToDefault,
 }: {
-  pool: PoolWithMetadata
   type: string
   setType: (type: 'create-asset' | 'upload-template') => void
   setOpen: (open: boolean) => void
+  isUploadingTemplates: boolean
+  resetToDefault: () => void
 }) => {
   const form = useFormikContext<CreateAssetFormValues>()
+  const pool = form.values.selectedPool
   const isCash = form.values.assetType === 'cash'
   const poolAdmin = usePoolAdmin(pool?.id ?? '')
   const loanTemplates = pool?.meta?.loanTemplates || []
+  const [account] = useSuitableAccounts({ poolId: pool?.id ?? '', poolRole: ['PoolAdmin'] })
 
   const hasTemplates = loanTemplates.length > 0
   const isAdmin = !!poolAdmin
+
+  const { execute: updateTemplatesTx, isLoading } = useCentrifugeTransaction(
+    'Create asset template',
+    (cent) => cent.pools.setMetadata,
+    {
+      onSuccess: () => resetToDefault(),
+    }
+  )
+
+  const uploadTemplates = () => {
+    const loanTemplatesPayload = form.values.uploadedTemplates.map((template) => ({
+      id: template.id,
+      createdAt: template.createdAt || new Date().toISOString(),
+    }))
+
+    const newPoolMetadata = {
+      ...(pool?.meta as PoolMetadata),
+      loanTemplates: loanTemplatesPayload,
+    }
+
+    updateTemplatesTx([pool?.id, newPoolMetadata], { account })
+  }
 
   const createButton = useMemo(() => {
     // If the mode is 'upload-template', show a Save button.
     if (type === 'upload-template') {
       return (
         <Box width="100%">
-          <Button disabled={!form.values.assetName} style={{ width: '100%', marginBottom: 8 }}>
+          <Button
+            loading={isUploadingTemplates || isLoading}
+            disabled={form.values.uploadedTemplates.length === 0}
+            style={{ width: '100%', marginBottom: 8 }}
+            onClick={uploadTemplates}
+          >
             Save
           </Button>
         </Box>
@@ -87,7 +120,7 @@ export const FooterActionButtons = ({
         )
       }
     }
-  }, [type, form.values.assetName, form.values.assetType, isCash, hasTemplates, isAdmin, setType, loanTemplates])
+  }, [type, form, isCash, hasTemplates, isAdmin, setType, loanTemplates, isLoading, isUploadingTemplates])
 
   return (
     <Box display="flex" flexDirection="column" mt={3}>

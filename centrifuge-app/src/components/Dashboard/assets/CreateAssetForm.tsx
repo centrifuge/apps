@@ -21,7 +21,6 @@ import { LoanTemplate } from '../../../../src/types'
 import { useMetadata } from '../../../../src/utils/useMetadata'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { AssetTemplateSection } from './AssetTemplateSection'
-import { PoolWithMetadata } from './AssetsContext'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
 const assetTypes = [
@@ -31,15 +30,12 @@ const assetTypes = [
   { label: 'Custom assets', tooltip: 'customAsset', id: 'custom' },
 ]
 
-export function CreateAssetsForm({
-  selectedPool: pool,
-  templateId,
-}: {
-  selectedPool: PoolWithMetadata
-  templateId: string
-}) {
+export function CreateAssetsForm() {
   const theme = useTheme()
   const form = useFormikContext<CreateAssetFormValues>()
+  const pool = form.values.selectedPool
+  const templateIds = pool?.meta?.loanTemplates?.map((s: { id: string }) => s.id) || []
+  const templateId = templateIds.at(-1)
   const hasTemplates = !!pool?.meta?.loanTemplates?.length
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
   const sectionsName = templateMetadata?.sections?.map((s) => s.name) ?? []

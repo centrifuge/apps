@@ -1,7 +1,8 @@
 import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
 import { useFilterPoolsByUserRole, usePoolAdmin } from '../../../utils/usePermissions'
 import { CreateAssetsForm } from './CreateAssetForm'
@@ -10,6 +11,11 @@ import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
 import { usePoolMetadataMap } from './utils'
 
 export type PoolWithMetadata = Pool & { meta: PoolMetadata }
+
+export type UploadedTemplate = {
+  id: string
+  createdAt: string
+}
 interface CreateAssetsDrawerProps {
   open: boolean
   setOpen: (open: boolean) => void
@@ -30,11 +36,15 @@ export type CreateAssetFormValues = {
   maturityExtensionDays: number
   advanceRate: number
   discountedCashFlow: string
+  uploadedTemplates: UploadedTemplate[]
+  selectedPool: PoolWithMetadata
 }
 
 export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
+  const cent = useCentrifuge()
   const filteredPools = useFilterPoolsByUserRole(['Borrower', 'PoolAdmin'])
   const metas = usePoolMetadataMap(filteredPools || [])
+  const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
 
   const poolsMetadata = useMemo(() => {
     return (
@@ -50,7 +60,6 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
 
   const form = useFormik({
     initialValues: {
-      poolId: poolsMetadata[0]?.id,
       assetType: 'cash',
       assetName: '',
       oracleSource: 'isin',
@@ -58,29 +67,21 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       interestRate: 0,
       linearPricing: false,
       customType: 'atPar',
+      uploadedTemplates: poolsMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
+      selectedPool: poolsMetadata[0],
     },
     onSubmit: (values) => {
       console.log(values)
     },
   })
 
-  const selectedPool = poolsMetadata.find((pool) => pool.id === form.values.poolId)
-  const templateIds = selectedPool?.meta?.loanTemplates?.map((s: { id: string }) => s.id) || []
-  const templateId = templateIds.at(-1)
-
-  const poolAdmin = usePoolAdmin(selectedPool?.id ?? '')
+  const poolAdmin = usePoolAdmin(form.values.selectedPool?.id ?? '')
 
   const resetToDefault = () => {
     setOpen(false)
     setType('create-asset')
+    setIsUploadingTemplates(false)
     form.resetForm()
-  }
-
-  const handleButtonClick = () => {
-    console.log('clicked')
-    if (type === 'create-asset') {
-      setType('upload-template')
-    }
   }
 
   if (!poolsMetadata?.length) return null
@@ -103,22 +104,25 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
                     label="Select pool"
                     value={field.value}
                     options={poolsMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
-                    onChange={(event) => form.setFieldValue('poolId', event.target.value)}
+                    onChange={(event) => {
+                      const selectedPool = poolsMetadata.find((pool) => pool.id === event.target.value)
+                      form.setFieldValue('selectedPool', selectedPool)
+                      form.setFieldValue('uploadedTemplates', selectedPool?.meta?.loanTemplates || [])
+                    }}
                   />
                 )}
               </Field>
             </Box>
-            {type === 'create-asset' && (
-              <CreateAssetsForm selectedPool={selectedPool as PoolWithMetadata} templateId={templateId} />
-            )}
+            {type === 'create-asset' && <CreateAssetsForm />}
             {type === 'upload-template' && !!poolAdmin && (
-              <UploadAssetTemplateForm selectedPool={selectedPool as PoolWithMetadata} templateIds={templateIds} />
+              <UploadAssetTemplateForm setIsUploadingTemplates={setIsUploadingTemplates} />
             )}
             <FooterActionButtons
-              pool={selectedPool as PoolWithMetadata}
               type={type}
               setType={setType}
               setOpen={resetToDefault}
+              isUploadingTemplates={isUploadingTemplates}
+              resetToDefault={resetToDefault}
             />
           </Form>
         </FormikProvider>

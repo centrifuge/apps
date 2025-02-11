@@ -1,16 +1,22 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, FileUploadButton, IconDownload, IconFile, IconPlus, Text } from '@centrifuge/fabric'
-import { useEffect, useMemo, useState } from 'react'
+import { useFormikContext } from 'formik'
+import { useMemo } from 'react'
+import { lastValueFrom } from 'rxjs'
 import { LoanTemplate } from 'src/types'
 import { useTheme } from 'styled-components'
 import { useMetadataMulti } from '../../../../src/utils/useMetadata'
 import { createDownloadJson } from '../../../utils/createDownloadJson'
-import { PoolWithMetadata } from './CreateAssetsDrawer'
+import { CreateAssetFormValues, UploadedTemplate } from './CreateAssetsDrawer'
 
-interface UploadedFile {
+export interface UploadedFile {
   id: string
   file: File
   url: string
   fileName: string
+  data: any
+  downloadUrl: string
+  name: string
 }
 
 interface DownloadItem {
@@ -22,27 +28,31 @@ interface DownloadItem {
 }
 
 export const UploadAssetTemplateForm = ({
-  selectedPool,
-  templateIds,
+  setIsUploadingTemplates,
 }: {
-  selectedPool: PoolWithMetadata
-  templateIds: string[]
+  setIsUploadingTemplates: (isUploadingTemplates: boolean) => void
 }) => {
   const theme = useTheme()
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const cent = useCentrifuge()
+  const form = useFormikContext<CreateAssetFormValues>()
+  const selectedPool = form.values.selectedPool
+  const uploadedFiles: UploadedTemplate[] = form.values.uploadedTemplates
+  const templateIds = uploadedFiles.map((s: { id: string }) => s.id) || []
   const templatesMetadataResults = useMetadataMulti<LoanTemplate>(templateIds)
-  const templatesMetadata = templatesMetadataResults.map((result) => result.data).filter(Boolean)
+  const templatesMetadata = templatesMetadataResults.filter(Boolean)
 
-  const templatesData = templateIds.map((id, i) => {
-    const meta = templatesMetadata[i]?.data
-    const metaMeta = selectedPool?.meta?.loanTemplates?.[i]
-    return {
-      id,
-      name: meta?.name ?? `Version ${i + 1}`,
-      createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,
-      data: meta,
-    }
-  })
+  const templatesData = useMemo(() => {
+    return templateIds.map((id, i) => {
+      const meta = templatesMetadata[i].data
+      const metaMeta = selectedPool?.meta?.loanTemplates?.[i]
+      return {
+        id,
+        name: `Version ${i + 1}`,
+        createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,
+        data: meta,
+      }
+    })
+  }, [templateIds, templatesMetadata])
 
   const templateDownloadItems: DownloadItem[] = useMemo(() => {
     return templatesData.map((template) => {
@@ -57,31 +67,22 @@ export const UploadAssetTemplateForm = ({
     })
   }, [templatesData])
 
-  useEffect(() => {
-    return () => {
-      templateDownloadItems.forEach((item) => item.revoke && item.revoke())
+  const pinFiles = async (newUpload: UploadedFile) => {
+    setIsUploadingTemplates(true)
+    try {
+      const templateMetadataHash = await lastValueFrom(cent.metadata.pinJson(newUpload.data))
+      const updatedUpload = { id: templateMetadataHash.ipfsHash, createdAt: new Date().toISOString() }
+      form.setFieldValue('uploadedTemplates', [...form.values.uploadedTemplates, updatedUpload])
+      setIsUploadingTemplates(false)
+    } catch (error) {
+      console.error('Error pinning template:', error)
+      setIsUploadingTemplates(false)
     }
-  }, [templateDownloadItems])
-
-  useEffect(() => {
-    return () => {
-      uploadedFiles.forEach((upload) => URL.revokeObjectURL(upload.url))
-    }
-  }, [uploadedFiles])
-
-  const allDownloadItems: DownloadItem[] = useMemo(() => {
-    const uploadedItems: DownloadItem[] = uploadedFiles.map((upload) => ({
-      id: upload.id,
-      name: upload.fileName,
-      url: upload.url,
-      downloadFileName: upload.fileName,
-    }))
-    return [...templateDownloadItems, ...uploadedItems]
-  }, [templateDownloadItems, uploadedFiles])
+  }
 
   return (
     <Box display="flex" flexDirection="column" justifyContent="flex-start">
-      {allDownloadItems.map((item) => (
+      {templateDownloadItems.map((item) => (
         <Box
           key={item.id}
           display="flex"
@@ -96,7 +97,7 @@ export const UploadAssetTemplateForm = ({
           <Box display="flex" alignItems="center">
             <IconFile />
             <Text variant="heading4" ml={2}>
-              {item.name.length > 20 ? `${item.name.slice(0, 20)}...` : item.name}
+              {item?.name?.length > 20 ? `${item.name.slice(0, 20)}...` : item?.name}
             </Text>
           </Box>
           <AnchorButton
@@ -117,14 +118,39 @@ export const UploadAssetTemplateForm = ({
           maxFileSize={5000000} // 5 MB
           icon={<IconPlus />}
           small
-          text={allDownloadItems.length ? 'Upload another template' : 'Upload asset template'}
+          text={templateDownloadItems.length ? 'Upload another template' : 'Upload asset template'}
           onFileChange={(files) => {
-            const newUploads: UploadedFile[] = Array.from(files).map((file) => {
-              const url = URL.createObjectURL(file)
-              const id = `${file.name}-${Date.now()}`
-              return { id, file, url, fileName: file.name }
+            Array.from(files).forEach((file) => {
+              const reader = new FileReader()
+              reader.onload = (event) => {
+                try {
+                  const text = event.target?.result as string
+                  const parsedData = JSON.parse(text)
+                  if (typeof parsedData !== 'object' || parsedData === null) {
+                    throw new Error('Uploaded JSON is not a valid object.')
+                  }
+                  const blob = new Blob([JSON.stringify(parsedData, null, 2)], {
+                    type: 'application/json',
+                  })
+                  const downloadUrl = URL.createObjectURL(blob)
+                  const url = URL.createObjectURL(file)
+                  const id = `${file.name}-${Date.now()}`
+                  const newUpload: UploadedFile = {
+                    id,
+                    file,
+                    url,
+                    fileName: file.name,
+                    data: parsedData,
+                    downloadUrl,
+                    name: file.name,
+                  }
+                  pinFiles(newUpload)
+                } catch (error) {
+                  alert(`Error parsing file "${file.name}": ${error instanceof Error ? error.message : error}`)
+                }
+              }
+              reader.readAsText(file)
             })
-            setUploadedFiles((prev) => [...prev, ...newUploads])
           }}
         />
       </Box>
