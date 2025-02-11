@@ -133,12 +133,16 @@ jobs:
         uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
+          PINNING_URL: https:\/\/${{ vars.GCLOUD_REGION  }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/pinning-api-pr${{ github.event.number }}
+          ONBOARDING_URL: https:\/\/${{ vars.GCLOUD_REGION  }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/onboarding-api-pr${{ github.event.number }}
         with:
           comment-tag: pr_preview_url${{ inputs.deploy_env }}
           mode: upsert
           message: |
             PR deployed in Google Cloud
             URL: https://${{ needs.deploy-app.outputs.bucket_url }}
+            PINNING_URL: ${{ env.PINNING_URL }}
+            ONBOARDING_URL: ${{ env.ONBOARDING_URL }}
             Commit #: ${{ env.pull_sha }}   
             To access the functions directly check the corresponding deploy Action
       - name: Check notify outputs
