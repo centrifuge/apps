@@ -263,7 +263,7 @@ const IssuerCreatePoolPage = () => {
     onSubmit: async (values, { setSubmitting }) => {
       const poolId = await centrifuge.pools.getAvailablePoolId()
 
-      if (!currencies || !address) return
+      if (!currencies || !address || step !== 3) return
 
       const metadataValues: PoolMetadataInput = { ...values } as any
 
@@ -479,23 +479,23 @@ const IssuerCreatePoolPage = () => {
           onClose={() => setIsMultisigDialogOpen(false)}
         />
       )}
+      <Box padding={3}>
+        <Text variant="heading2">New pool setup</Text>
+      </Box>
+      <Box
+        backgroundColor={theme.colors.backgroundSecondary}
+        padding={isSmall ? '32px 208px' : '12px'}
+        borderTop={`1px solid ${theme.colors.borderPrimary}`}
+        borderBottom={`1px solid ${theme.colors.borderPrimary}`}
+      >
+        <Stepper activeStep={step} setActiveStep={setStep} direction="row">
+          <Step label="Pool structure" isStepCompleted={stepCompleted[1] && step !== 1} />
+          <Step label="Pool details" isStepCompleted={stepCompleted[2] && step !== 2} />
+          <Step label="Pool setup" />
+        </Stepper>
+      </Box>
       <FormikProvider value={form}>
         <Form ref={formRef} noValidate>
-          <Box padding={3}>
-            <Text variant="heading2">New pool setup</Text>
-          </Box>
-          <Box
-            backgroundColor={theme.colors.backgroundSecondary}
-            padding={isSmall ? '32px 208px' : '12px'}
-            borderTop={`1px solid ${theme.colors.borderPrimary}`}
-            borderBottom={`1px solid ${theme.colors.borderPrimary}`}
-          >
-            <Stepper activeStep={step} setActiveStep={setStep} direction="row">
-              <Step label="Pool structure" isStepCompleted={stepCompleted[1] && step !== 1} />
-              <Step label="Pool details" isStepCompleted={stepCompleted[2] && step !== 2} />
-              <Step label="Pool setup" />
-            </Stepper>
-          </Box>
           {step === 1 && (
             <Box px={2} py={2} display="flex" justifyContent="center" backgroundColor="statusInfoBg">
               <Text variant="body3">
