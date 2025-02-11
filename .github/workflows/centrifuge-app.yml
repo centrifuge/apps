@@ -144,7 +144,6 @@ jobs:
             PINNING_URL: ${{ env.PINNING_URL }}
             ONBOARDING_URL: ${{ env.ONBOARDING_URL }}
             Commit #: ${{ env.pull_sha }}   
-            To access the functions directly check the corresponding deploy Action
       - name: Check notify outputs
         run: |
           echo "id : ${{ steps.prcomment.outputs.id }}"
