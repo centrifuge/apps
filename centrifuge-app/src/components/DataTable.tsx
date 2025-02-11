@@ -1,13 +1,16 @@
 import {
   Box,
+  Button,
   Checkbox,
   Divider,
   Grid,
   IconChevronDown,
   IconChevronUp,
   IconFilter,
+  IconSearch,
   Menu,
   Popover,
+  SearchInput,
   Shelf,
   Stack,
   Text,
@@ -505,3 +508,61 @@ const StyledHeader = styled(Text)`
     cursor: pointer;
   }
 `
+
+export function SearchableTableHeader({
+  label,
+  value,
+  onSubmit,
+}: {
+  label: string
+  value: string
+  onSubmit: (searchValue: string) => void
+}) {
+  const [searchValue, setSearchValue] = React.useState(value)
+
+  React.useEffect(() => {
+    if (!searchValue) {
+      onSubmit('')
+    }
+  }, [searchValue])
+
+  return (
+    <Box position="relative">
+      <Popover
+        placement="bottom left"
+        renderTrigger={(props, ref, state) => {
+          return (
+            <Box ref={ref}>
+              <FilterButton forwardedAs="button" type="button" variant="body3" {...props}>
+                {label}
+                <IconSearch color={'currentColor'} size="1em" />
+              </FilterButton>
+            </Box>
+          )
+        }}
+        renderContent={(props, ref, state) => (
+          <Box {...props} ref={ref}>
+            <Menu width={300}>
+              <Stack
+                as="form"
+                p={[2, 3]}
+                gap={2}
+                onSubmit={() => {
+                  onSubmit(searchValue)
+                  state.close()
+                }}
+              >
+                <Stack borderWidth={0} gap={2}>
+                  <SearchInput label={label} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+                  <Button variant="inverted" small type="submit">
+                    Search
+                  </Button>
+                </Stack>
+              </Stack>
+            </Menu>
+          </Box>
+        )}
+      />
+    </Box>
+  )
+}
