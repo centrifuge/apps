@@ -1,9 +1,16 @@
 import { CurrencyBalance, FileType, Pool } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Text, truncate } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text, truncate } from '@centrifuge/fabric'
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
-import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../../components/DataTable'
+import {
+  Column,
+  DataTable,
+  FilterableTableHeader,
+  SearchableTableHeader,
+  SortableTableHeader,
+} from '../../../components/DataTable'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { formatDate } from '../../../utils/date'
 import { useFilters } from '../../../utils/useFilters'
@@ -61,6 +68,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
       }
     }) ?? []
   const filters = useFilters({ data })
+  const [searchValue, setSearchValue] = useState('')
 
   const columns: Column[] = [
     {
@@ -78,7 +86,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
       },
     },
     {
-      header: 'Wallet', // TODO: make this searchable
+      header: <SearchableTableHeader label="Wallet" value={searchValue} onSubmit={setSearchValue} />,
       align: 'left',
       cell: (row: InvestorTableRow) => (
         <Text style={{ cursor: 'copy' }} onClick={() => copyToClipboard(row.wallet)}>
@@ -132,6 +140,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
       cell: (row: InvestorTableRow) => <Text>{formatDate(row.investorSince)}</Text>,
     },
   ]
+  const tableData = filters.data.filter((i) => (searchValue ? i.wallet.includes(searchValue) : true))
   return (
     <Box>
       {filters.data?.find((i) => `${i.wallet}-${i.trancheId}-${i.network}` === investorParam) && (
@@ -144,7 +153,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
         />
       )}
       <DataTable
-        data={filters.data}
+        data={tableData}
         columns={columns}
         hoverable
         defaultSortKey="poolTokenId"
@@ -152,6 +161,13 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
         scrollable
         onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
       />
+      {tableData.length === 0 && (
+        <Stack width="100%" alignItems="center">
+          <Text variant="body2" color="textSecondary">
+            No investors found
+          </Text>
+        </Stack>
+      )}
     </Box>
   )
 }
