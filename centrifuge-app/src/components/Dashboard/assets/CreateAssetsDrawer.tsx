@@ -1,5 +1,4 @@
 import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useMemo, useState } from 'react'
@@ -41,8 +40,7 @@ export type CreateAssetFormValues = {
 }
 
 export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
-  const cent = useCentrifuge()
-  const filteredPools = useFilterPoolsByUserRole(['Borrower', 'PoolAdmin'])
+  const filteredPools = useFilterPoolsByUserRole(type === 'upload-template' ? ['PoolAdmin'] : ['Borrower', 'PoolAdmin'])
   const metas = usePoolMetadataMap(filteredPools || [])
   const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
 
@@ -84,7 +82,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     form.resetForm()
   }
 
-  if (!poolsMetadata?.length) return null
+  if (!filteredPools?.length) return null
 
   return (
     <LoadBoundary>

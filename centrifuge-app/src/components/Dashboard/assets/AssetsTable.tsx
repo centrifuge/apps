@@ -254,7 +254,7 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
 
           <Text variant="heading4">Assets</Text>
         </Box>
-        <Grid gridTemplateColumns="160px 220px 44px" gap={1}>
+        <Grid gridTemplateColumns={filters.data.length ? '160px 220px 44px' : '160px 220px'} gap={1}>
           <Button
             icon={<IconPlus />}
             small
@@ -275,23 +275,32 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
           >
             Manage asset templates
           </Button>
-          <StyledButton
-            href={csvUrl ?? ''}
-            download={`dashboard-assets.csv`}
-            variant="inverted"
-            icon={IconDownload}
-            small
-            target="_blank"
-          />
+          {!!filters.data.length && (
+            <StyledButton
+              href={csvUrl ?? ''}
+              download={`dashboard-assets.csv`}
+              variant="inverted"
+              icon={IconDownload}
+              small
+              target="_blank"
+              disabled={!filters.data.length}
+            />
+          )}
         </Grid>
       </Box>
       <Box mt={3}>
-        <DataTable
-          data={filters.data}
-          columns={columns}
-          scrollable
-          onRowClicked={(row) => `/pools/${row.poolId}/assets/${row.assetId}`}
-        />
+        {filters.data.length ? (
+          <DataTable
+            data={filters.data}
+            columns={columns}
+            scrollable
+            onRowClicked={(row) => `/pools/${row.poolId}/assets/${row.assetId}`}
+          />
+        ) : (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%" mt={5}>
+            <Text variant="heading4">No data available</Text>
+          </Box>
+        )}
       </Box>
       <CreateAssetsDrawer open={drawerOpen} setOpen={setDrawerOpen} type={drawerType} setType={setDrawerType} />
     </>
