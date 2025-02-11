@@ -7,7 +7,7 @@ concurrency:
  # Cancel any staging or prod deployment on-going
  # in favor of this new pre-release
   group: production-deployment
-  cancel-in-progress: true 
+  cancel-in-progress: false 
   
 jobs:
   app-staging:
