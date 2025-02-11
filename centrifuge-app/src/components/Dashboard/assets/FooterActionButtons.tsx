@@ -1,14 +1,26 @@
 import { Box, Button, IconWarning, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
-import { usePoolAdmin } from '../../../../src/utils/usePermissions'
-import { useAssetsContext } from './AssetsContext'
+import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
+import { PoolWithMetadata } from './AssetsContext'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
-export const FooterActionButtons = () => {
-  const { selectedPool: pool, canCreateAssets, setOpen, setType, type } = useAssetsContext()
+export const FooterActionButtons = ({
+  pool,
+  type,
+  setType,
+  setOpen,
+}: {
+  pool: PoolWithMetadata
+  type: string
+  setType: (type: 'create-asset' | 'upload-template') => void
+  setOpen: (open: boolean) => void
+}) => {
   const form = useFormikContext<CreateAssetFormValues>()
   const isCash = form.values.assetType === 'cash'
   const poolAdmin = usePoolAdmin(pool?.id ?? '')
+
+  const canCreateAssets =
+    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
 
   const loanTemplates = pool?.meta?.loanTemplates || []
 

@@ -19,8 +19,9 @@ import { Tooltips, tooltipText } from '../../../../src/components/Tooltips'
 import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
 import { LoanTemplate } from '../../../../src/types'
 import { useMetadata } from '../../../../src/utils/useMetadata'
+import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { AssetTemplateSection } from './AssetTemplateSection'
-import { useAssetsContext } from './AssetsContext'
+import { PoolWithMetadata } from './AssetsContext'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
 const assetTypes = [
@@ -30,18 +31,23 @@ const assetTypes = [
   { label: 'Custom assets', tooltip: 'customAsset', id: 'custom' },
 ]
 
-export function CreateAssetsForm() {
+export function CreateAssetsForm({
+  selectedPool: pool,
+  templateId,
+}: {
+  selectedPool: PoolWithMetadata
+  templateId: string
+}) {
   const theme = useTheme()
-  const { selectedPool: pool, canCreateAssets, templatesData } = useAssetsContext()
   const form = useFormikContext<CreateAssetFormValues>()
   const hasTemplates = !!pool?.meta?.loanTemplates?.length
-  const templateIds = templatesData.map((s) => s.id) ?? []
-  const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
   const sectionsName = templateMetadata?.sections?.map((s) => s.name) ?? []
+
   const [selectedTabIndex, setSelectedTabIndex] = useState(0)
 
-  console.log(templateMetadata)
+  const canCreateAssets =
+    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
 
   const renderBody = (index: number) => {
     const sectionsAttrs =
@@ -172,13 +178,19 @@ export function CreateAssetsForm() {
                 }))),
             ]}
           />
-          {(templateMetadata?.options?.image || templateId.options.description) && (
+          {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
             <Box mb={2}>
               <Divider color="backgroundSecondary" />
             </Box>
           )}
           {templateMetadata?.options?.image && (
-            <Box padding={2}>
+            <Box
+              backgroundColor="backgroundSecondary"
+              borderRadius={8}
+              border={`1px solid ${theme.colors.borderPrimary}`}
+              padding={2}
+              mb={2}
+            >
               <Field name="image" validate={validate.nftImage}>
                 {({ field, meta, form }: FieldProps) => (
                   <ImageUpload
@@ -196,7 +208,13 @@ export function CreateAssetsForm() {
             </Box>
           )}
           {templateMetadata?.options?.description && (
-            <Box padding={2}>
+            <Box
+              backgroundColor="backgroundSecondary"
+              borderRadius={8}
+              border={`1px solid ${theme.colors.borderPrimary}`}
+              padding={2}
+              mb={2}
+            >
               <FieldWithErrorMessage
                 name="description"
                 as={TextAreaInput}

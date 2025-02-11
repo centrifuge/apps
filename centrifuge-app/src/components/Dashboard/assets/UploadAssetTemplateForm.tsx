@@ -1,8 +1,10 @@
 import { AnchorButton, Box, FileUploadButton, IconDownload, IconFile, IconPlus, Text } from '@centrifuge/fabric'
 import { useEffect, useMemo, useState } from 'react'
+import { LoanTemplate } from 'src/types'
 import { useTheme } from 'styled-components'
+import { useMetadataMulti } from '../../../../src/utils/useMetadata'
 import { createDownloadJson } from '../../../utils/createDownloadJson'
-import { useAssetsContext } from './AssetsContext'
+import { PoolWithMetadata } from './CreateAssetsDrawer'
 
 interface UploadedFile {
   id: string
@@ -19,10 +21,28 @@ interface DownloadItem {
   revoke?: () => void
 }
 
-export const UploadAssetTemplateForm = () => {
+export const UploadAssetTemplateForm = ({
+  selectedPool,
+  templateIds,
+}: {
+  selectedPool: PoolWithMetadata
+  templateIds: string[]
+}) => {
   const theme = useTheme()
-  const { templatesData } = useAssetsContext()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const templatesMetadataResults = useMetadataMulti<LoanTemplate>(templateIds)
+  const templatesMetadata = templatesMetadataResults.map((result) => result.data).filter(Boolean)
+
+  const templatesData = templateIds.map((id, i) => {
+    const meta = templatesMetadata[i]?.data
+    const metaMeta = selectedPool?.meta?.loanTemplates?.[i]
+    return {
+      id,
+      name: meta?.name ?? `Version ${i + 1}`,
+      createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,
+      data: meta,
+    }
+  })
 
   const templateDownloadItems: DownloadItem[] = useMemo(() => {
     return templatesData.map((template) => {

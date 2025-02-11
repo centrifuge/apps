@@ -1,7 +1,7 @@
 import { CurrencyBalance, CurrencyMetadata, Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, Grid, IconDownload, IconPlus, Text } from '@centrifuge/fabric'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { formatDate } from '../../../utils/date'
@@ -13,7 +13,6 @@ import { DataTable, FilterableTableHeader, SortableTableHeader } from '../../Dat
 import { LoanLabel, getLoanLabelStatus } from '../../LoanLabel'
 import { Amount, getAmount } from '../../LoanList'
 import { Spinner } from '../../Spinner'
-import { useAssetsContext } from './AssetsContext'
 import { CreateAssetsDrawer } from './CreateAssetsDrawer'
 import { TransformedLoan, usePoolMetadataMap } from './utils'
 
@@ -48,11 +47,12 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
   const theme = useTheme()
   const cent = useCentrifuge()
   const { selectedPools } = useSelectedPools()
-  const { setOpen, setType, open } = useAssetsContext()
   const extractedPools = loans.map((loan) => loan.pool)
   const poolMetadataMap = usePoolMetadataMap(extractedPools)
   const today = new Date().toISOString().slice(0, 10)
   const [allSnapshots, isLoading] = useAllPoolAssetSnapshotsMulti(extractedPools, today)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerType, setDrawerType] = useState<'create-asset' | 'upload-template'>('create-asset')
 
   const loansData = loans
     .flatMap((loan) => {
@@ -259,8 +259,8 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
             icon={<IconPlus />}
             small
             onClick={() => {
-              setOpen(true)
-              setType('create-asset')
+              setDrawerOpen(true)
+              setDrawerType('create-asset')
             }}
           >
             Create asset
@@ -269,8 +269,8 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
             variant="inverted"
             small
             onClick={() => {
-              setOpen(true)
-              setType('upload-template')
+              setDrawerOpen(true)
+              setDrawerType('upload-template')
             }}
           >
             Manage asset templates
@@ -293,7 +293,7 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
           onRowClicked={(row) => `/pools/${row.poolId}/assets/${row.assetId}`}
         />
       </Box>
-      {open && <CreateAssetsDrawer />}
+      <CreateAssetsDrawer open={drawerOpen} setOpen={setDrawerOpen} type={drawerType} setType={setDrawerType} />
     </>
   )
 }

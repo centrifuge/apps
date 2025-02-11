@@ -1,11 +1,21 @@
+import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
+import { useMemo } from 'react'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
-import { usePoolAdmin } from '../../../utils/usePermissions'
-import { useAssetsContext } from './AssetsContext'
+import { usePoolAdmin, usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../../utils/usePermissions'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
+import { usePoolMetadataMap } from './utils'
+
+export type PoolWithMetadata = Pool & { meta: PoolMetadata }
+interface CreateAssetsDrawerProps {
+  open: boolean
+  setOpen: (open: boolean) => void
+  type: 'create-asset' | 'upload-template'
+  setType: (type: 'create-asset' | 'upload-template') => void
+}
 
 export type CreateAssetFormValues = {
   poolId: string
@@ -22,9 +32,19 @@ export type CreateAssetFormValues = {
   discountedCashFlow: string
 }
 
-export function CreateAssetsDrawer() {
-  const { open, type, setOpen, setType, poolsMetadata, selectedPool, addSelectedPool } = useAssetsContext()
-  const poolAdmin = usePoolAdmin(selectedPool?.id ?? '')
+export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
+  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
+  const metas = usePoolMetadataMap(pools || [])
+
+  const poolsMetadata = useMemo(() => {
+    return pools?.map((pool) => {
+      const meta = metas.get(pool.id)
+      return {
+        ...pool,
+        meta,
+      }
+    })
+  }, [pools, metas])
 
   const form = useFormik({
     initialValues: {
@@ -41,6 +61,12 @@ export function CreateAssetsDrawer() {
       console.log(values)
     },
   })
+
+  const selectedPool = poolsMetadata.find((pool) => pool.id === form.values.poolId)
+  const templateIds = selectedPool?.meta?.loanTemplates?.map((s) => s.id) || []
+  const templateId = templateIds.at(-1)
+
+  const poolAdmin = usePoolAdmin(selectedPool?.id ?? '')
 
   const handleButtonClick = () => {
     console.log('clicked')
@@ -69,17 +95,23 @@ export function CreateAssetsDrawer() {
                     label="Select pool"
                     value={field.value}
                     options={poolsMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
-                    onChange={(event) => {
-                      form.setFieldValue('poolId', event.target.value)
-                      addSelectedPool(event.target.value)
-                    }}
+                    onChange={(event) => form.setFieldValue('poolId', event.target.value)}
                   />
                 )}
               </Field>
             </Box>
-            {type === 'create-asset' && <CreateAssetsForm />}
-            {type === 'upload-template' && !!poolAdmin && <UploadAssetTemplateForm />}
-            <FooterActionButtons />
+            {type === 'create-asset' && (
+              <CreateAssetsForm selectedPool={selectedPool as PoolWithMetadata} templateId={templateId} />
+            )}
+            {type === 'upload-template' && !!poolAdmin && (
+              <UploadAssetTemplateForm selectedPool={selectedPool as PoolWithMetadata} templateIds={templateIds} />
+            )}
+            <FooterActionButtons
+              pool={selectedPool as PoolWithMetadata}
+              type={type}
+              setType={setType}
+              setOpen={setOpen}
+            />
           </Form>
         </FormikProvider>
       </Drawer>
