@@ -76,13 +76,14 @@ export const useLoanCalculations = (transformedLoans: TransformedLoan[]) => {
     }, Dec(0))
   }, [uniquePools])
 
-  const total = useMemo(() => {
-    return onchainReserve.add(offchainReserve).add(totalAssets)
-  }, [onchainReserve, offchainReserve, totalAssets])
-
   const totalNAV = useMemo(() => {
-    return total.sub(pendingFees)
-  }, [total, pendingFees])
+    return uniquePools.reduce((sum, loan) => {
+      const navTotal = loan.pool.nav?.total || '0'
+      const navAmount = new CurrencyBalance(navTotal, loan.pool.currency.decimals).toDecimal()
+      return sum.add(navAmount)
+    }, Dec(0))
+  }, [uniquePools])
+
   return {
     totalLoans,
     totalAssets,
