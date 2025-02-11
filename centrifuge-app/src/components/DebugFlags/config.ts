@@ -136,7 +136,7 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showDashboard: {
-    default: true,
+    default: false,
     type: 'checkbox',
     alwaysShow: true,
   },
