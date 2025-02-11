@@ -1,16 +1,38 @@
-import { CurrencyBalance, LoanInfoInput, Pool, PoolMetadata, Price, Rate } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import {
+  CurrencyBalance,
+  LoanInfoInput,
+  NFTMetadataInput,
+  Pool,
+  PoolMetadata,
+  Price,
+  Rate,
+} from '@centrifuge/centrifuge-js'
+import {
+  useCentrifuge,
+  useCentrifugeApi,
+  useCentrifugeTransaction,
+  wrapProxyCallsForAccount,
+} from '@centrifuge/centrifuge-react'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useMemo, useState } from 'react'
-import { firstValueFrom } from 'rxjs'
+import { Navigate } from 'react-router'
+import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
-import { useFilterPoolsByUserRole, usePoolAdmin } from '../../../utils/usePermissions'
+import { LoanTemplate } from '../../../../src/types'
+import { getFileDataURI } from '../../../../src/utils/getFileDataURI'
+import { useMetadata } from '../../../../src/utils/useMetadata'
+import {
+  useFilterPoolsByUserRole,
+  usePoolAccess,
+  usePoolAdmin,
+  useSuitableAccounts,
+} from '../../../utils/usePermissions'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
-import { usePoolMetadataMap } from './utils'
+import { usePoolMetadataMap, valuesToNftProperties } from './utils'
 
 export type PoolWithMetadata = Pool & { meta: PoolMetadata }
 
@@ -26,6 +48,9 @@ interface CreateAssetsDrawerProps {
 }
 
 export type CreateAssetFormValues = {
+  image: File | null
+  description: string
+  attributes: Record<string, string | number>
   assetType: 'cash' | 'liquid' | 'fund' | 'custom'
   assetName: string
   customType: 'atPar' | 'discountedCashFlow'
@@ -49,10 +74,13 @@ export type CreateAssetFormValues = {
 }
 
 export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
+  const api = useCentrifugeApi()
   const centrifuge = useCentrifuge()
   const filteredPools = useFilterPoolsByUserRole(type === 'upload-template' ? ['PoolAdmin'] : ['Borrower', 'PoolAdmin'])
   const metas = usePoolMetadataMap(filteredPools || [])
   const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
+  const [redirect, setRedirect] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const poolsMetadata = useMemo(() => {
     return (
@@ -66,8 +94,61 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     )
   }, [filteredPools, metas])
 
+  const [pid, setPid] = useState<string>(poolsMetadata[0].id)
+  const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['Borrow'] })
+  const { assetOriginators } = usePoolAccess(pid)
+
+  const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
+    ?.collateralCollections[0]?.id
+
+  const templateIds =
+    poolsMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
+  const templateId = templateIds.at(-1)
+  const { data: template } = useMetadata<LoanTemplate>(templateId)
+
+  const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
+    'Create asset',
+    (cent) =>
+      (
+        [collectionId, nftId, owner, metadataUri, pricingInfo]: [string, string, string, string, LoanInfoInput],
+        options
+      ) => {
+        return centrifuge.pools.createLoan([pid, collectionId, nftId, pricingInfo], { batch: true }).pipe(
+          switchMap((createTx) => {
+            const tx = api.tx.utility.batchAll([
+              wrapProxyCallsForAccount(api, api.tx.uniques.mint(collectionId, nftId, owner), account, 'PodOperation'),
+              wrapProxyCallsForAccount(
+                api,
+                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, false),
+                account,
+                'PodOperation'
+              ),
+              wrapProxyCallsForAccount(api, createTx, account, 'Borrow'),
+            ])
+            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+          })
+        )
+      },
+    {
+      onSuccess: (_, result) => {
+        const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
+        if (event) {
+          const eventData = event.toHuman() as any
+          const loanId = eventData.event.data.loanId.replace(/\D/g, '')
+
+          // Doing the redirect via state, so it only happens if the user is still on this
+          // page when the transaction completes
+          setRedirect(`/issuer/${pid}/assets/${loanId}`)
+        }
+      },
+    }
+  )
+
   const form = useFormik({
     initialValues: {
+      image: null,
+      description: '',
+      attributes: {},
       assetType: 'cash',
       assetName: '',
       customType: 'atPar',
@@ -91,8 +172,10 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       oracleSource: 'isin',
     },
     onSubmit: async (values) => {
+      if (!pid || !collateralCollectionId || !template || !account) return
+      setIsLoading(true)
       const decimals = form.values.selectedPool.currency.decimals
-      let pricingInfo: LoanInfoInput
+      let pricingInfo: LoanInfoInput | undefined
       switch (values.assetType) {
         case 'cash':
           pricingInfo = {
@@ -103,10 +186,9 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
             maxBorrowAmount: 'upToOutstandingDebt' as const,
             maturityDate: null,
           }
-          return
+          break
         case 'liquid':
-        case 'fund':
-          const pid = form.values.selectedPool.id
+        case 'fund': {
           const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
           pricingInfo = {
             valuationMethod: 'oracle',
@@ -115,13 +197,14 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
             priceId:
               values.oracleSource === 'isin'
                 ? { isin: values.isin }
-                : { poolLoanId: [pid, loanId.toString()] satisfies [string, string] },
+                : { poolLoanId: [pid, loanId.toString()] as [string, string] },
             maturityDate: values.maturity !== 'none' ? new Date(values.maturityDate) : null,
             interestRate: Rate.fromPercent(values.notional === 0 ? 0 : values.interestRate),
             notional: CurrencyBalance.fromFloat(values.notional, decimals),
             withLinearPricing: values.withLinearPricing,
           }
-          return
+          break
+        }
         case 'custom':
           if (values.customType === 'atPar') {
             pricingInfo = {
@@ -147,10 +230,40 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
               discountRate: Rate.fromPercent(values.discountRate || 0),
             }
           }
-          return
+          break
         default:
-          return
+          break
       }
+
+      if (!pricingInfo) {
+        throw new Error(`Pricing information is not set for asset type: ${values.assetType}`)
+      }
+
+      const properties =
+        values.valuationMethod === 'cash'
+          ? {}
+          : { ...(valuesToNftProperties(values.attributes, template as any) as any), _template: templateId }
+
+      const metadataValues: NFTMetadataInput = {
+        name: values.assetName,
+        description: values.description,
+        properties,
+      }
+
+      if (values.image) {
+        const fileDataUri = await getFileDataURI(values.image)
+        const imageMetadataHash = await lastValueFrom(centrifuge.metadata.pinFile(fileDataUri))
+        metadataValues.image = imageMetadataHash.uri
+      }
+
+      const metadataHash = await lastValueFrom(centrifuge.metadata.pinJson(metadataValues))
+      const nftId = await centrifuge.nfts.getAvailableNftId(collateralCollectionId)
+
+      doTransaction([collateralCollectionId, nftId, account.actingAddress, metadataHash.uri, pricingInfo], {
+        account,
+        forceProxyType: 'Borrow',
+      })
+      setIsLoading(false)
     },
   })
 
@@ -161,6 +274,10 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     setType('create-asset')
     setIsUploadingTemplates(false)
     form.resetForm()
+  }
+
+  if (redirect) {
+    return <Navigate to={redirect} />
   }
 
   if (!filteredPools?.length) return null
@@ -187,6 +304,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
                       const selectedPool = poolsMetadata.find((pool) => pool.id === event.target.value)
                       form.setFieldValue('selectedPool', selectedPool)
                       form.setFieldValue('uploadedTemplates', selectedPool?.meta?.loanTemplates || [])
+                      setPid(selectedPool?.id ?? '')
                     }}
                   />
                 )}
@@ -202,6 +320,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
               setOpen={resetToDefault}
               isUploadingTemplates={isUploadingTemplates}
               resetToDefault={resetToDefault}
+              isLoading={isLoading || isTxLoading}
             />
           </Form>
         </FormikProvider>

@@ -227,9 +227,11 @@ export function CreateAssetsForm() {
           )}
         </Box>
       )}
-      <Box mb={2}>
-        <Divider color="backgroundSecondary" />
-      </Box>
+      {form.values.assetType !== 'cash' && (
+        <Box mb={2}>
+          <Divider color="backgroundSecondary" />
+        </Box>
+      )}
     </Box>
   )
 }

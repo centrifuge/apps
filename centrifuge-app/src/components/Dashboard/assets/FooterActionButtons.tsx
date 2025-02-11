@@ -12,12 +12,14 @@ export const FooterActionButtons = ({
   setOpen,
   isUploadingTemplates,
   resetToDefault,
+  isLoading,
 }: {
   type: string
   setType: (type: 'create-asset' | 'upload-template') => void
   setOpen: (open: boolean) => void
   isUploadingTemplates: boolean
   resetToDefault: () => void
+  isLoading: boolean
 }) => {
   const form = useFormikContext<CreateAssetFormValues>()
   const pool = form.values.selectedPool
@@ -29,7 +31,7 @@ export const FooterActionButtons = ({
   const hasTemplates = loanTemplates.length > 0
   const isAdmin = !!poolAdmin
 
-  const { execute: updateTemplatesTx, isLoading } = useCentrifugeTransaction(
+  const { execute: updateTemplatesTx, isLoading: isTemplatesTxLoading } = useCentrifugeTransaction(
     'Create asset template',
     (cent) => cent.pools.setMetadata,
     {
@@ -57,7 +59,7 @@ export const FooterActionButtons = ({
       return (
         <Box width="100%">
           <Button
-            loading={isUploadingTemplates || isLoading}
+            loading={isTemplatesTxLoading || isUploadingTemplates}
             disabled={form.values.uploadedTemplates.length === 0}
             style={{ width: '100%', marginBottom: 8 }}
             onClick={uploadTemplates}
@@ -71,7 +73,7 @@ export const FooterActionButtons = ({
     // If the asset type is cash, no template is needed.
     if (isCash) {
       return (
-        <Button style={{ width: '100%' }} disabled={!form.values.assetName}>
+        <Button style={{ width: '100%' }} disabled={!form.values.assetName} loading={isLoading}>
           Create
         </Button>
       )
@@ -81,7 +83,7 @@ export const FooterActionButtons = ({
     if (hasTemplates) {
       // Templates exist: allow both admins and borrowers to create assets.
       return (
-        <Button style={{ width: '100%' }} disabled={!form.values.assetName}>
+        <Button style={{ width: '100%' }} disabled={!form.values.assetName} loading={isLoading}>
           Create
         </Button>
       )
@@ -93,6 +95,7 @@ export const FooterActionButtons = ({
           <Box width="100%">
             <Button
               disabled={!form.values.assetName}
+              loading={isLoading}
               style={{ width: '100%', marginBottom: 8 }}
               onClick={() => setType('upload-template')}
             >
@@ -120,7 +123,18 @@ export const FooterActionButtons = ({
         )
       }
     }
-  }, [type, form, isCash, hasTemplates, isAdmin, setType, loanTemplates, isLoading, isUploadingTemplates])
+  }, [
+    type,
+    form,
+    isCash,
+    hasTemplates,
+    isAdmin,
+    setType,
+    loanTemplates,
+    isLoading,
+    isTemplatesTxLoading,
+    isUploadingTemplates,
+  ])
 
   return (
     <Box display="flex" flexDirection="column" mt={3}>

@@ -1,8 +1,10 @@
 import { CurrencyBalance, Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useMemo } from 'react'
+import { LoanTemplate } from '../../../../src/types'
 import { Dec } from '../../../utils/Decimal'
 import { usePoolMetadataMulti } from '../../../utils/usePools'
 import { getAmount } from '../../LoanList'
+import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
 export type TransformedLoan = Loan & {
   pool: Pool
@@ -102,4 +104,35 @@ export function usePoolMetadataMap(pools: Pool[]) {
     return map
   }, [pools, metas])
   return poolMetadataMap
+}
+
+export function valuesToNftProperties(values: CreateAssetFormValues['attributes'], template: LoanTemplate) {
+  return Object.fromEntries(
+    template.sections.flatMap((section) =>
+      section.attributes
+        .map((key) => {
+          const attr = template.attributes[key]
+          if (!attr.public) return undefined as never
+          const value = values[key]
+          switch (attr.input.type) {
+            case 'date':
+              return [key, new Date(value).toISOString()]
+            case 'currency': {
+              return [
+                key,
+                attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
+              ]
+            }
+            case 'number':
+              return [
+                key,
+                attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
+              ]
+            default:
+              return [key, String(value)]
+          }
+        })
+        .filter(Boolean)
+    )
+  )
 }
