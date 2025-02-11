@@ -71,7 +71,7 @@ export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
   return filtered
 }
 
-export const useFilterPoolsByUserRole = (role: 'Borrower' | 'PoolAdmin') => {
+export const useFilterPoolsByUserRole = (roles: PoolRoles['roles'][0][]) => {
   const {
     substrate: { combinedAccounts, proxiesAreLoading },
   } = useWallet()
@@ -84,7 +84,7 @@ export const useFilterPoolsByUserRole = (role: 'Borrower' | 'PoolAdmin') => {
         Object.entries(permissions?.pools || {})
           .filter(([poolId, rolesObj]) => {
             const rolesArray = rolesObj.roles || []
-            return rolesArray.includes(role)
+            return roles.some((role) => rolesArray.includes(role))
           })
           .map(([poolId]) => poolId)
       )

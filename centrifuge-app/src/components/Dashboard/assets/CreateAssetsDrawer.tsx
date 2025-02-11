@@ -33,7 +33,7 @@ export type CreateAssetFormValues = {
 }
 
 export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
-  const filteredPools = useFilterPoolsByUserRole('Borrower')
+  const filteredPools = useFilterPoolsByUserRole(['Borrower', 'PoolAdmin'])
   const metas = usePoolMetadataMap(filteredPools || [])
 
   const poolsMetadata = useMemo(() => {
