@@ -1,8 +1,9 @@
 name: Synpress tests
 
 on:
-  schedule:
-    - cron: '0 12 * * *'
+  workflow_dispatch:
+  # schedule:
+    # - cron: '0 12 * * *'
 
 jobs:
   cypress-run:
