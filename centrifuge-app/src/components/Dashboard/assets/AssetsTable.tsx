@@ -89,7 +89,7 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
   const data = useMemo(
     () =>
       loansData.map((loan) => {
-        const [_, text] = getLoanLabelStatus(loan.loan)
+        const [, text] = getLoanLabelStatus(loan.loan)
         const {
           quantity,
           value,
@@ -255,26 +255,30 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
           <Text variant="heading4">Assets</Text>
         </Box>
         <Grid gridTemplateColumns={filters.data.length ? '160px 220px 44px' : '160px 220px'} gap={1}>
-          <Button
-            icon={<IconPlus />}
-            small
-            onClick={() => {
-              setDrawerOpen(true)
-              setDrawerType('create-asset')
-            }}
-          >
-            Create asset
-          </Button>
-          <Button
-            variant="inverted"
-            small
-            onClick={() => {
-              setDrawerOpen(true)
-              setDrawerType('upload-template')
-            }}
-          >
-            Manage asset templates
-          </Button>
+          {!!selectedPools.length && (
+            <Button
+              icon={<IconPlus />}
+              small
+              onClick={() => {
+                setDrawerOpen(true)
+                setDrawerType('create-asset')
+              }}
+            >
+              Create asset
+            </Button>
+          )}
+          {!!selectedPools.length && (
+            <Button
+              variant="inverted"
+              small
+              onClick={() => {
+                setDrawerOpen(true)
+                setDrawerType('upload-template')
+              }}
+            >
+              Manage asset templates
+            </Button>
+          )}
           {!!filters.data.length && (
             <StyledButton
               href={csvUrl ?? ''}
@@ -302,7 +306,9 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
           </Box>
         )}
       </Box>
-      <CreateAssetsDrawer open={drawerOpen} setOpen={setDrawerOpen} type={drawerType} setType={setDrawerType} />
+      {!!selectedPools.length && (
+        <CreateAssetsDrawer open={drawerOpen} setOpen={setDrawerOpen} type={drawerType} setType={setDrawerType} />
+      )}
     </>
   )
 }

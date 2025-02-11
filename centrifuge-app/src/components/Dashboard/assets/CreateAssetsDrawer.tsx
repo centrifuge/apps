@@ -280,7 +280,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     return <Navigate to={redirect} />
   }
 
-  if (!filteredPools?.length) return null
+  if (!filteredPools?.length || !poolsMetadata.length) return null
 
   return (
     <LoadBoundary>

@@ -2,7 +2,7 @@ import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconWarning, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
@@ -39,7 +39,7 @@ export const FooterActionButtons = ({
     }
   )
 
-  const uploadTemplates = () => {
+  const uploadTemplates = useCallback(() => {
     const loanTemplatesPayload = form.values.uploadedTemplates.map((template) => ({
       id: template.id,
       createdAt: template.createdAt || new Date().toISOString(),
@@ -51,7 +51,7 @@ export const FooterActionButtons = ({
     }
 
     updateTemplatesTx([pool?.id, newPoolMetadata], { account })
-  }
+  }, [form.values.uploadedTemplates, pool?.meta, pool?.id, account, updateTemplatesTx])
 
   const createButton = useMemo(() => {
     // If the mode is 'upload-template', show a Save button.
@@ -144,10 +144,10 @@ export const FooterActionButtons = ({
     hasTemplates,
     isAdmin,
     setType,
-    loanTemplates,
     isLoading,
     isTemplatesTxLoading,
     isUploadingTemplates,
+    uploadTemplates,
   ])
 
   return (

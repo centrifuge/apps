@@ -40,11 +40,11 @@ export function CreateAssetsForm() {
   const hasTemplates = !!pool?.meta?.loanTemplates?.length
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
   const sectionsName = templateMetadata?.sections?.map((s) => s.name) ?? []
-
   const [selectedTabIndex, setSelectedTabIndex] = useState(0)
 
   const canCreateAssets =
-    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
+    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower', 'PoolAdmin'], proxyType: ['Borrow', 'PoolAdmin'] })
+      .length > 0
 
   const renderBody = (index: number) => {
     const sectionsAttrs =
@@ -74,7 +74,7 @@ export function CreateAssetsForm() {
                 <AssetTemplateSection label={attrs[section.attr].label} input={attrs[section.attr].input} name={name} />
               </Box>
             )
-          }
+          } else return <></>
         })}
       </Box>
     )

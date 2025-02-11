@@ -19,7 +19,7 @@ export default function AssetsPage() {
     if (selectedPools.length === 0 && pools.length > 0) {
       setSelectedPools(pools.map((pool) => pool.id))
     }
-  }, [])
+  }, [pools.length, selectedPools.length, setSelectedPools, pools])
 
   const poolMap = pools.reduce<Record<string, (typeof pools)[number]>>((map, pool) => {
     map[pool.id] = pool

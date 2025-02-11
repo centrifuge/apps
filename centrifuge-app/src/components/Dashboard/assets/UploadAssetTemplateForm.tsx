@@ -1,5 +1,14 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, FileUploadButton, IconDownload, IconFile, IconPlus, Text } from '@centrifuge/fabric'
+import {
+  AnchorButton,
+  Box,
+  FileUploadButton,
+  IconDownload,
+  IconFile,
+  IconPlus,
+  IconWarning,
+  Text,
+} from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useMemo } from 'react'
 import { lastValueFrom } from 'rxjs'
@@ -7,6 +16,7 @@ import { LoanTemplate } from 'src/types'
 import { useTheme } from 'styled-components'
 import { useMetadataMulti } from '../../../../src/utils/useMetadata'
 import { createDownloadJson } from '../../../utils/createDownloadJson'
+import { usePoolAdmin } from '../../../utils/usePermissions'
 import { CreateAssetFormValues, UploadedTemplate } from './CreateAssetsDrawer'
 
 export interface UploadedFile {
@@ -37,9 +47,12 @@ export const UploadAssetTemplateForm = ({
   const form = useFormikContext<CreateAssetFormValues>()
   const selectedPool = form.values.selectedPool
   const uploadedFiles: UploadedTemplate[] = form.values.uploadedTemplates
-  const templateIds = uploadedFiles.map((s: { id: string }) => s.id) || []
+  const templateIds = useMemo(() => {
+    return uploadedFiles.map((s: { id: string }) => s.id)
+  }, [uploadedFiles])
   const templatesMetadataResults = useMetadataMulti<LoanTemplate>(templateIds)
   const templatesMetadata = templatesMetadataResults.filter(Boolean)
+  const poolAdmin = usePoolAdmin(form.values.selectedPool?.id)
 
   const templatesData = useMemo(() => {
     return templateIds.map((id, i) => {
@@ -52,7 +65,7 @@ export const UploadAssetTemplateForm = ({
         data: meta,
       }
     })
-  }, [templateIds, templatesMetadata])
+  }, [templateIds, templatesMetadata, selectedPool])
 
   const templateDownloadItems: DownloadItem[] = useMemo(() => {
     return templatesData.map((template) => {
@@ -112,47 +125,54 @@ export const UploadAssetTemplateForm = ({
       ))}
 
       <Box>
-        <FileUploadButton
-          accept=".json"
-          allowedFileTypes={['application/json']}
-          maxFileSize={5000000} // 5 MB
-          icon={<IconPlus />}
-          small
-          text={templateDownloadItems.length ? 'Upload another template' : 'Upload asset template'}
-          onFileChange={(files) => {
-            Array.from(files).forEach((file) => {
-              const reader = new FileReader()
-              reader.onload = (event) => {
-                try {
-                  const text = event.target?.result as string
-                  const parsedData = JSON.parse(text)
-                  if (typeof parsedData !== 'object' || parsedData === null) {
-                    throw new Error('Uploaded JSON is not a valid object.')
+        {!!poolAdmin ? (
+          <FileUploadButton
+            accept=".json"
+            allowedFileTypes={['application/json']}
+            maxFileSize={5000000} // 5 MB
+            icon={<IconPlus />}
+            small
+            text={templateDownloadItems.length ? 'Upload another template' : 'Upload asset template'}
+            onFileChange={(files) => {
+              Array.from(files).forEach((file) => {
+                const reader = new FileReader()
+                reader.onload = (event) => {
+                  try {
+                    const text = event.target?.result as string
+                    const parsedData = JSON.parse(text)
+                    if (typeof parsedData !== 'object' || parsedData === null) {
+                      throw new Error('Uploaded JSON is not a valid object.')
+                    }
+                    const blob = new Blob([JSON.stringify(parsedData, null, 2)], {
+                      type: 'application/json',
+                    })
+                    const downloadUrl = URL.createObjectURL(blob)
+                    const url = URL.createObjectURL(file)
+                    const id = `${file.name}-${Date.now()}`
+                    const newUpload: UploadedFile = {
+                      id,
+                      file,
+                      url,
+                      fileName: file.name,
+                      data: parsedData,
+                      downloadUrl,
+                      name: file.name,
+                    }
+                    pinFiles(newUpload)
+                  } catch (error) {
+                    alert(`Error parsing file "${file.name}": ${error instanceof Error ? error.message : error}`)
                   }
-                  const blob = new Blob([JSON.stringify(parsedData, null, 2)], {
-                    type: 'application/json',
-                  })
-                  const downloadUrl = URL.createObjectURL(blob)
-                  const url = URL.createObjectURL(file)
-                  const id = `${file.name}-${Date.now()}`
-                  const newUpload: UploadedFile = {
-                    id,
-                    file,
-                    url,
-                    fileName: file.name,
-                    data: parsedData,
-                    downloadUrl,
-                    name: file.name,
-                  }
-                  pinFiles(newUpload)
-                } catch (error) {
-                  alert(`Error parsing file "${file.name}": ${error instanceof Error ? error.message : error}`)
                 }
-              }
-              reader.readAsText(file)
-            })
-          }}
-        />
+                reader.readAsText(file)
+              })
+            }}
+          />
+        ) : (
+          <Box display="flex" alignItems="center" mb={1}>
+            <IconWarning size={24} />
+            <Text variant="body2">Only pool admins can upload asset templates.</Text>
+          </Box>
+        )}
       </Box>
     </Box>
   )
