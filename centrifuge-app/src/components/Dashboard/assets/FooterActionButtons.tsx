@@ -73,7 +73,14 @@ export const FooterActionButtons = ({
     // If the asset type is cash, no template is needed.
     if (isCash) {
       return (
-        <Button style={{ width: '100%' }} disabled={!form.values.assetName} loading={isLoading}>
+        <Button
+          style={{ width: '100%' }}
+          disabled={!form.values.assetName}
+          loading={isLoading}
+          onClick={() => {
+            form.submitForm()
+          }}
+        >
           Create
         </Button>
       )
@@ -83,7 +90,14 @@ export const FooterActionButtons = ({
     if (hasTemplates) {
       // Templates exist: allow both admins and borrowers to create assets.
       return (
-        <Button style={{ width: '100%' }} disabled={!form.values.assetName} loading={isLoading}>
+        <Button
+          style={{ width: '100%' }}
+          disabled={!form.values.assetName}
+          loading={isLoading}
+          onClick={() => {
+            form.submitForm()
+          }}
+        >
           Create
         </Button>
       )

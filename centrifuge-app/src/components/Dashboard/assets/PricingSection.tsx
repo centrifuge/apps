@@ -68,13 +68,15 @@ export function PricingSection() {
               />
             )}
           </Field>
-          <FieldWithErrorMessage
-            as={TextInput}
-            label={<Tooltips type="isin" label={<Text variant="heading4">ISIN*</Text>} />}
-            placeholder="Type here..."
-            name="isin"
-            validate={validate.isin}
-          />
+          {values.oracleSource === 'isin' && (
+            <FieldWithErrorMessage
+              as={TextInput}
+              label={<Tooltips type="isin" label={<Text variant="heading4">ISIN*</Text>} />}
+              placeholder="Type here..."
+              name="isin"
+              validate={validate.isin}
+            />
+          )}
           <Field name="notional" validate={combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
