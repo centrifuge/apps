@@ -5,3 +5,10 @@
 
 .github/workflows/ @sophialittlejohn
 .github/actions/ @sophialittlejohn
+
+# Workflows are less sensitive than actions
+.github/workflows/ @kattylucy
+
+# Add Jeroen for both actions and workflows
+.github/workflows/ @hieronx
+.github/actions/ @hieronx
