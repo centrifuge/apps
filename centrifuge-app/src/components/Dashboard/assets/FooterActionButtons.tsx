@@ -1,8 +1,8 @@
 import { Box, Button, IconWarning, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
-import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
-import { PoolWithMetadata } from './AssetsContext'
-import { CreateAssetFormValues } from './CreateAssetsDrawer'
+import { useMemo } from 'react'
+import { usePoolAdmin } from '../../../../src/utils/usePermissions'
+import { CreateAssetFormValues, PoolWithMetadata } from './CreateAssetsDrawer'
 
 export const FooterActionButtons = ({
   pool,
@@ -19,14 +19,11 @@ export const FooterActionButtons = ({
   const isCash = form.values.assetType === 'cash'
   const poolAdmin = usePoolAdmin(pool?.id ?? '')
 
-  const canCreateAssets =
-    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
-
   const loanTemplates = pool?.meta?.loanTemplates || []
 
-  const renderCreateButton = () => {
+  const createButton = useMemo(() => {
     const hasLoanTemplates = loanTemplates.length > 0
-    const isPoolAdmin = !!poolAdmin
+    const isPoolAdminFlag = !!poolAdmin
 
     if (type === 'upload-template') {
       return (
@@ -38,7 +35,7 @@ export const FooterActionButtons = ({
       )
     }
 
-    if (poolAdmin && !isCash && !hasLoanTemplates) {
+    if (isPoolAdminFlag && !isCash && !hasLoanTemplates) {
       return (
         <Box width="100%">
           <Button
@@ -55,7 +52,7 @@ export const FooterActionButtons = ({
       )
     }
 
-    if (canCreateAssets && !isPoolAdmin && !isCash && !hasLoanTemplates) {
+    if (!isPoolAdminFlag && !isCash && !hasLoanTemplates) {
       return (
         <Box>
           <Box display="flex" alignItems="center" mb={1}>
@@ -71,7 +68,7 @@ export const FooterActionButtons = ({
       )
     }
 
-    if ((canCreateAssets && hasLoanTemplates && !isCash) || (poolAdmin && isCash)) {
+    if ((hasLoanTemplates && !isCash) || (isPoolAdminFlag && isCash)) {
       return (
         <Button style={{ width: '100%' }} disabled={!form.values.assetName}>
           Create
@@ -79,12 +76,16 @@ export const FooterActionButtons = ({
       )
     }
 
-    return null
-  }
+    return (
+      <Button style={{ width: '100%' }} disabled={true}>
+        Create
+      </Button>
+    )
+  }, [type, form.values.assetName, form.values.assetType, poolAdmin, loanTemplates, isCash, setType])
 
   return (
     <Box display="flex" flexDirection="column" mt={3}>
-      <Box flexGrow={1}>{renderCreateButton()}</Box>
+      <Box flexGrow={1}>{createButton}</Box>
       <Box mt={2} flexGrow={1}>
         <Button variant="inverted" onClick={() => setOpen(false)} style={{ width: '100%' }}>
           Cancel

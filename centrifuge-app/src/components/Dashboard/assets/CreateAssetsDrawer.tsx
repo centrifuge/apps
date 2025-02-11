@@ -3,7 +3,7 @@ import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useMemo } from 'react'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
-import { usePoolAdmin, usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../../utils/usePermissions'
+import { useFilterPoolsByUserRole, usePoolAdmin } from '../../../utils/usePermissions'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
@@ -33,18 +33,20 @@ export type CreateAssetFormValues = {
 }
 
 export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAssetsDrawerProps) {
-  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const metas = usePoolMetadataMap(pools || [])
+  const filteredPools = useFilterPoolsByUserRole('Borrower')
+  const metas = usePoolMetadataMap(filteredPools || [])
 
   const poolsMetadata = useMemo(() => {
-    return pools?.map((pool) => {
-      const meta = metas.get(pool.id)
-      return {
-        ...pool,
-        meta,
-      }
-    })
-  }, [pools, metas])
+    return (
+      filteredPools?.map((pool) => {
+        const meta = metas.get(pool.id)
+        return {
+          ...pool,
+          meta,
+        }
+      }) || []
+    )
+  }, [filteredPools, metas])
 
   const form = useFormik({
     initialValues: {
@@ -63,10 +65,16 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
   })
 
   const selectedPool = poolsMetadata.find((pool) => pool.id === form.values.poolId)
-  const templateIds = selectedPool?.meta?.loanTemplates?.map((s) => s.id) || []
+  const templateIds = selectedPool?.meta?.loanTemplates?.map((s: { id: string }) => s.id) || []
   const templateId = templateIds.at(-1)
 
   const poolAdmin = usePoolAdmin(selectedPool?.id ?? '')
+
+  const resetToDefault = () => {
+    setOpen(false)
+    setType('create-asset')
+    form.resetForm()
+  }
 
   const handleButtonClick = () => {
     console.log('clicked')
@@ -81,7 +89,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     <LoadBoundary>
       <Drawer
         isOpen={open}
-        onClose={() => setOpen(false)}
+        onClose={resetToDefault}
         title={type === 'upload-template' ? 'Upload asset template' : 'Create asset'}
       >
         <Divider color="backgroundSecondary" />
@@ -110,7 +118,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
               pool={selectedPool as PoolWithMetadata}
               type={type}
               setType={setType}
-              setOpen={setOpen}
+              setOpen={resetToDefault}
             />
           </Form>
         </FormikProvider>
