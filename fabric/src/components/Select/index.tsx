@@ -18,9 +18,10 @@ export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   errorMessage?: string
   small?: boolean
   hideBorder?: boolean
+  variant?: 'primary' | 'secondary'
 }
 
-const StyledSelect = styled.select`
+const StyledSelect = styled.select<{ variant?: 'primary' | 'secondary' }>`
   appearance: none;
   background-color: transparent;
   border: none;
@@ -32,7 +33,8 @@ const StyledSelect = styled.select`
   cursor: pointer;
   line-height: inherit;
   text-overflow: ellipsis;
-  font-weight: 400;
+  font-weight: ${({ variant }) => (variant === 'secondary' ? 500 : 400)};
+  color: ${({ theme, variant }) => (variant === 'secondary' ? theme.colors.textDisabled : theme.colors.textPrimary)};
 
   &:disabled {
     cursor: default;
@@ -45,12 +47,13 @@ export function SelectInner({
   disabled,
   small,
   hideBorder,
+  variant,
   ...rest
 }: Omit<SelectProps, 'label' | 'errorMessage'>) {
   return (
     <Flex position="relative" width="100%">
       <IconChevronDown
-        color={disabled ? 'textSecondary' : 'textPrimary'}
+        color={disabled ? 'textSecondary' : variant === 'secondary' ? 'textDisabled' : 'textPrimary'}
         size={small ? 'iconSmall' : 'iconMedium'}
         style={{
           position: 'absolute',
@@ -62,7 +65,7 @@ export function SelectInner({
           pointerEvents: 'none',
         }}
       />
-      <StyledSelect disabled={disabled} {...rest}>
+      <StyledSelect disabled={disabled} {...rest} variant={variant}>
         {placeholder && (
           <option value="" disabled>
             {placeholder}
@@ -73,7 +76,9 @@ export function SelectInner({
             key={`${index}${option.value}`}
             value={option.value}
             disabled={option.disabled}
-            style={{ textAlign: hideBorder ? 'right' : 'left' }}
+            style={{
+              textAlign: hideBorder ? 'right' : 'left',
+            }}
           >
             {option.label}
           </option>
@@ -83,7 +88,7 @@ export function SelectInner({
   )
 }
 
-export function Select({ label, errorMessage, id, hideBorder, ...rest }: SelectProps) {
+export function Select({ label, errorMessage, id, hideBorder, variant = 'primary', ...rest }: SelectProps) {
   const defaultId = React.useId()
   id ??= defaultId
   return (
@@ -93,8 +98,14 @@ export function Select({ label, errorMessage, id, hideBorder, ...rest }: SelectP
       disabled={rest.disabled}
       errorMessage={errorMessage}
       inputElement={
-        <StyledInputBox alignItems="stretch" height="input" px={1} hideBorder={hideBorder}>
-          <SelectInner id={id} {...rest} hideBorder={hideBorder} />
+        <StyledInputBox
+          alignItems="stretch"
+          height="input"
+          px={1}
+          hideBorder={hideBorder}
+          background={variant === 'secondary' ? 'transparent' : 'background'}
+        >
+          <SelectInner id={id} {...rest} hideBorder={hideBorder} variant={variant} />
         </StyledInputBox>
       }
     />
