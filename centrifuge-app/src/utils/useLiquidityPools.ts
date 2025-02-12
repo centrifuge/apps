@@ -136,7 +136,7 @@ export function useLiquidityPoolRestrictions(
   const query = useQuery(
     ['poolRestrictions', poolId, trancheId, lp?.lpAddress, chainId],
     async () => {
-      return cent.liquidityPools.getRestrictions([lp!.trancheTokenAddress, address!], {
+      return cent.liquidityPools.getRestrictions([lp!.trancheTokenAddress, address], {
         rpcProvider: getProvider(chainId!),
       })
     },

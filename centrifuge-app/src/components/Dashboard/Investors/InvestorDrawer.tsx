@@ -1,4 +1,4 @@
-import { Drawer, IconExternalLink, IconFreeze, IconStop, Stack } from '@centrifuge/fabric'
+import { Drawer, IconClock, IconExternalLink, IconFreeze, IconStop, Stack } from '@centrifuge/fabric'
 
 import { CurrencyBalance, evmToSubstrateAddress, Price, TokenBalance } from '@centrifuge/centrifuge-js'
 import {
@@ -28,7 +28,7 @@ import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { formatDate } from '../../../utils/date'
 import { useLiquidityPoolRestrictions } from '../../../utils/useLiquidityPools'
-import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePermissions, usePoolAdmin } from '../../../utils/usePermissions'
 import { usePool, usePools, useTransactionsByAddress } from '../../../utils/usePools'
 import { InvestorTableRow } from './InvestorTable'
 
@@ -53,7 +53,28 @@ export function InvestorDrawer({
   const investorWallet =
     investor.network === 0 ? investor.wallet : evmToSubstrateAddress(investor.wallet, investor.network)
   const permissions = usePermissions(investorWallet)
-  const [account] = useSuitableAccounts({ poolId: investor.poolId, poolRole: ['PoolAdmin'] })
+
+  // only for LP: freeze is pending if isFrozen is true in the substrate chain permissions but is false in the evm restrictions
+  const isLPFreezePending =
+    investor.network !== 0 &&
+    permissions?.pools[investor.poolId]?.tranches[investor.trancheId]?.isFrozen &&
+    !restrictions?.isFrozen
+
+  // only for LP: unfreeze is pending if isFrozen is false in the substrate chain permissions but is true in the evm restrictions
+  const isLPUnfreezePending =
+    investor.network !== 0 &&
+    !permissions?.pools[investor.poolId]?.tranches[investor.trancheId]?.isFrozen &&
+    restrictions?.isFrozen
+
+  // only for LP: enable is pending if isFrozen is true in the substrate chain permissions but is false in the evm restrictions
+  const isLPEnablePending =
+    investor.network !== 0 &&
+    permissions?.pools[investor.poolId]?.tranches[investor.trancheId]?.permissionedTill &&
+    !restrictions?.isMember
+
+  // disable doesn't need a pending state since it's subjet to a 7 day delay
+
+  const account = usePoolAdmin(investor.poolId)
 
   const isDisabled = !!(
     permissions !== undefined &&
@@ -62,6 +83,7 @@ export function InvestorDrawer({
       ? !permissions?.pools[investor.poolId]?.tranches[investor.trancheId]
       : !restrictions?.isMember)
   )
+
   const isFrozen = investor.network !== 0 ? restrictions?.isFrozen : false
 
   const { execute: executeUpdateRoles } = useCentrifugeTransaction(
@@ -72,17 +94,30 @@ export function InvestorDrawer({
   const { execute: executeFreeze } = useCentrifugeTransaction('Freeze investor wallet', (cent) => (_, options) => {
     return cent.getApi().pipe(
       switchMap((api) => {
-        let tx
+        let batch = []
+        batch.push(
+          api.tx.permissions.add(
+            { PoolRole: 'PoolAdmin' },
+            evmToSubstrateAddress(investor.wallet, investor.network),
+            { Pool: investor.poolId },
+            { PoolRole: { FrozenTrancheInvestor: investor.trancheId } }
+          )
+        )
         if (investor.network === 0) {
-          tx = api.tx.liquidityPools.freezeInvestor(investor.poolId, investor.trancheId, {
-            Centrifuge: investor.wallet,
-          })
+          batch.push(
+            api.tx.liquidityPools.freezeInvestor(investor.poolId, investor.trancheId, {
+              Centrifuge: investor.wallet,
+            })
+          )
         } else {
-          tx = api.tx.liquidityPools.freezeInvestor(investor.poolId, investor.trancheId, {
-            EVM: [investor.network, investor.wallet],
-          })
+          batch.push(
+            api.tx.liquidityPools.freezeInvestor(investor.poolId, investor.trancheId, {
+              EVM: [investor.network, investor.wallet],
+            })
+          )
         }
-        return cent.wrapSignAndSend(api, tx, options)
+        const submittable = api.tx.utility.batchAll(batch)
+        return cent.wrapSignAndSend(api, submittable, options)
       })
     )
   })
@@ -90,49 +125,40 @@ export function InvestorDrawer({
   const { execute: executeUnfreeze } = useCentrifugeTransaction('Unfreeze investor wallet', (cent) => (_, options) => {
     return cent.getApi().pipe(
       switchMap((api) => {
-        let tx
+        let batch = []
+        batch.push(
+          api.tx.permissions.remove(
+            { PoolRole: 'PoolAdmin' },
+            evmToSubstrateAddress(investor.wallet, investor.network),
+            { Pool: investor.poolId },
+            { PoolRole: { FrozenTrancheInvestor: investor.trancheId } }
+          )
+        )
         if (investor.network === 0) {
-          tx = api.tx.liquidityPools.unfreezeInvestor(investor.poolId, investor.trancheId, {
-            Centrifuge: investor.wallet,
-          })
+          batch.push(
+            api.tx.liquidityPools.unfreezeInvestor(investor.poolId, investor.trancheId, {
+              Centrifuge: investor.wallet,
+            })
+          )
         } else {
-          tx = api.tx.liquidityPools.unfreezeInvestor(investor.poolId, investor.trancheId, {
-            EVM: [investor.network, investor.wallet],
-          })
+          batch.push(
+            api.tx.liquidityPools.unfreezeInvestor(investor.poolId, investor.trancheId, {
+              EVM: [investor.network, investor.wallet],
+            })
+          )
         }
-        return cent.wrapSignAndSend(api, tx, options)
+        const submittable = api.tx.utility.batchAll(batch)
+        return cent.wrapSignAndSend(api, submittable, options)
       })
     )
   })
 
-  function handleFreeze() {
-    if (investor.network === 0) {
-      return executeFreeze([investor.poolId, investor.trancheId, { Centrifuge: investor.wallet }], {
-        account,
-      })
-    }
-    return executeFreeze([investor.poolId, investor.trancheId, { EVM: [investor.network, investor.wallet] }], {
-      account,
-    })
-  }
-
-  function handleUnfreeze() {
-    if (investor.network === 0) {
-      return executeUnfreeze([investor.poolId, investor.trancheId, { Centrifuge: investorWallet }], {
-        account,
-      })
-    }
-    return executeUnfreeze([investor.poolId, investor.trancheId, { EVM: [investor.network, investorWallet] }], {
-      account,
-    })
-  }
-
   function handleDisable() {
     const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
-    // remove investor permissions on tranche
+    // remove TrancheInvestor permission for tranche
     executeUpdateRoles(
-      [investor.poolId, [], [[investor.wallet, { TrancheInvestor: [investor.trancheId, SevenDaysFromNow] }]]],
+      [investor.poolId, [], [[investorWallet, { TrancheInvestor: [investor.trancheId, SevenDaysFromNow] }]]],
       {
         account,
       }
@@ -141,9 +167,9 @@ export function InvestorDrawer({
 
   function handleEnable() {
     const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
-
+    // add TrancheInvestor permission for tranche
     executeUpdateRoles(
-      [investor.poolId, [[investor.wallet, { TrancheInvestor: [investor.trancheId, OneHundredYearsFromNow] }]], []],
+      [investor.poolId, [[investorWallet, { TrancheInvestor: [investor.trancheId, OneHundredYearsFromNow] }]], []],
       {
         account,
       }
@@ -212,7 +238,8 @@ export function InvestorDrawer({
               <Menu backgroundColor="white">
                 {isDisabled ? (
                   <MenuItem
-                    label="Enable"
+                    label={isLPEnablePending ? 'Enable (pending)' : 'Enable'}
+                    disabled={isLPEnablePending}
                     onClick={() => {
                       handleEnable()
                       state.close()
@@ -231,19 +258,23 @@ export function InvestorDrawer({
                   <>
                     {isFrozen ? (
                       <MenuItem
-                        label="Unfreeze"
+                        label={isLPUnfreezePending ? 'Unfreeze (pending)' : 'Unfreeze'}
+                        disabled={isLPUnfreezePending}
                         onClick={() => {
-                          handleUnfreeze()
+                          executeUnfreeze([], { account })
                           state.close()
                         }}
+                        iconRight={isLPUnfreezePending ? <IconClock size="iconMedium" /> : undefined}
                       />
                     ) : (
                       <MenuItem
-                        label="Freeze"
+                        label={isLPFreezePending ? 'Freeze (pending)' : 'Freeze'}
+                        disabled={isLPFreezePending}
                         onClick={() => {
-                          handleFreeze()
+                          executeFreeze([], { account })
                           state.close()
                         }}
+                        iconRight={isLPFreezePending ? <IconClock size="iconMedium" /> : undefined}
                       />
                     )}
                   </>
