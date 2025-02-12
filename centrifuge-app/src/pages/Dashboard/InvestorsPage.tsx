@@ -4,11 +4,11 @@ import { SupportedNetworksDrawer } from '../..//components/Dashboard/Investors/S
 import { AddNewInvestorDrawer } from '../../components/Dashboard/Investors/AddNewInvestorDrawer'
 import { InvestorTable } from '../../components/Dashboard/Investors/InvestorTable'
 import { OnboardingSettingsDrawer } from '../../components/Dashboard/Investors/OnboardingSettingsDrawer'
-import { useSelectedPools2 } from '../../utils/contexts/SelectedPoolsContext'
+import { useSelectedPools } from '../../utils/contexts/SelectedPoolsContext'
 import { useInvestorListMulti } from '../../utils/usePools'
 
 export default function InvestorsPage() {
-  const { pools, selectedPools, togglePoolSelection } = useSelectedPools2(true)
+  const { pools, selectedPools, togglePoolSelection } = useSelectedPools(true)
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
   const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
   const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(false)

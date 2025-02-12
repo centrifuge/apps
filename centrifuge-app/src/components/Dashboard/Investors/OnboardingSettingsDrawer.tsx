@@ -24,14 +24,14 @@ import {
   KYC_COUNTRY_CODES,
   RESTRICTED_COUNTRY_CODES,
 } from '../../../pages/Onboarding/geographyCodes'
-import { useSelectedPools2 } from '../../../utils/contexts/SelectedPoolsContext'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata, usePoolMetadataMulti } from '../../../utils/usePools'
 import { Column, DataTable } from '../../DataTable'
 
 export function OnboardingSettingsDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { pools } = useSelectedPools2(true)
+  const { pools } = useSelectedPools(true)
   const [selectedPoolId, setSelectedPoolId] = useState<string | null>(pools?.[0]?.id ?? null)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   return (

@@ -21,7 +21,7 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldArray, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import { useState } from 'react'
-import { useSelectedPools2 } from '../../../utils/contexts/SelectedPoolsContext'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { Domain, useActiveDomains, useDomainRouters } from '../../../utils/useLiquidityPools'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadataMulti } from '../../../utils/usePools'
@@ -44,7 +44,7 @@ interface NetworkFormValues {
 export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const domains = useDomainRouters()
   const getNetworkName = useGetNetworkName()
-  const { selectedPools } = useSelectedPools2(true)
+  const { selectedPools } = useSelectedPools(true)
   const [selectedPool, setSelectedPool] = useState<string | null>(selectedPools?.[0] ?? null)
   const [successMessage, setSuccessMessage] = useState<string | null>(
     'Transaction complete. Please visit Axelar to finish enabling the network.'
@@ -180,7 +180,7 @@ function SupportedNetworks({
   setSelectedPool: (poolId: string) => void
 }) {
   const formik = useFormikContext<NetworkFormValues>()
-  const { pools } = useSelectedPools2()
+  const { pools } = useSelectedPools()
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const pool = usePool(selectedPool ?? '')
   const getNetworkName = useGetNetworkName()
