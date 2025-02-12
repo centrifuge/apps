@@ -1,9 +1,9 @@
-import { CurrencyBalance, CurrencyMetadata } from '@centrifuge/centrifuge-js'
-import { Shelf, Text } from '@centrifuge/fabric'
+import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatDate } from '../../../src/utils/date'
-import { formatBalance, formatBalanceAbbreviated } from '../../../src/utils/formatting'
+import { formatBalance, formatBalanceAbbreviated } from '../../../src/utils/formatting-sdk'
 import { LoadBoundary } from '../LoadBoundary'
 import { CustomTick } from './PoolPerformanceChart'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
@@ -62,10 +62,7 @@ export const SimpleBarChart = ({ currency, data, groupBy }: SimpleBarChartProps)
             angle={45}
           />
           <YAxis
-            tickFormatter={(tick: number) => {
-              const balance = new CurrencyBalance(tick, currency?.decimals || 0)
-              return formatBalanceAbbreviated(balance, '', 0)
-            }}
+            tickFormatter={(tick: any) => formatBalanceAbbreviated(tick, 0)}
             tick={{ fontSize: 10, color: theme.colors.textPrimary }}
             tickLine={false}
             axisLine={false}
@@ -79,10 +76,14 @@ export const SimpleBarChart = ({ currency, data, groupBy }: SimpleBarChartProps)
               if (payload && payload?.length > 0) {
                 return (
                   <TooltipContainer>
-                    <TooltipTitle>{formatDate(payload[0].payload.name)}</TooltipTitle>
-                    {payload.map((item) => (
-                      <Text variant="body3">{formatBalance(item.value as number, currency)}</Text>
-                    ))}
+                    {payload.map((item) => {
+                      return (
+                        <Box>
+                          <TooltipTitle>{formatDate(item.payload.name)}</TooltipTitle>
+                          <Text variant="body3">{formatBalance(item.value ?? 0, 2, currency?.displayName)}</Text>
+                        </Box>
+                      )
+                    })}
                   </TooltipContainer>
                 )
               }

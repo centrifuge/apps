@@ -1679,7 +1679,7 @@ __metadata:
     "@centrifuge/centrifuge-js": "workspace:*"
     "@centrifuge/centrifuge-react": "workspace:*"
     "@centrifuge/fabric": "workspace:*"
-    "@centrifuge/sdk": "file:../../centrifuge-sdk"
+    "@centrifuge/sdk": 0.0.0-alpha.12
     "@makerdao/multicall": ^0.12.0
     "@polkadot/react-identicon": ~3.1.4
     "@styled-system/css": ^5.1.5
@@ -1899,9 +1899,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/sdk@file:../../centrifuge-sdk::locator=%40centrifuge%2Fcentrifuge-app%40workspace%3Acentrifuge-app":
-  version: 0.0.0
-  resolution: "@centrifuge/sdk@file:../../centrifuge-sdk#../../centrifuge-sdk::hash=e53833&locator=%40centrifuge%2Fcentrifuge-app%40workspace%3Acentrifuge-app"
+"@centrifuge/sdk@npm:0.0.0-alpha.12":
+  version: 0.0.0-alpha.12
+  resolution: "@centrifuge/sdk@npm:0.0.0-alpha.12"
   dependencies:
     decimal.js-light: ^2.5.1
     eth-permit: ^0.2.3
@@ -1909,7 +1909,7 @@ __metadata:
     rxjs: ^7.8.1
   peerDependencies:
     viem: ^2
-  checksum: 737d0f5c92d5c843909a273969aa77df37d4543c6c5699557d275b751e5737c7502d047307aad535e58d93bb4e40afb77e3a6ad3883947c2873ca29166ca5b65
+  checksum: d7d4a7e8250a8694a622ceee956cc3b3b62ac955d1ff1b933861a2f5a2cef443fb7de83ee686b5aec0fe972c3e13d6b9ba90a1402a2dfe42ef74fc6a58ca198f
   languageName: node
   linkType: hard
 

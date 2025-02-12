@@ -1,3 +1,4 @@
+import { Rate } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -18,7 +19,7 @@ import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
   name: string
-  value: (string | number | JSX.Element | Decimal | undefined)[]
+  value: (string | number | JSX.Element | Decimal | undefined | Rate)[]
   heading?: boolean
 }
 

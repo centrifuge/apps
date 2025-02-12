@@ -4,13 +4,13 @@ import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useDailyPoolStates, usePoolStatesByGroup } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { useDebugFlags } from '../DebugFlags'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 
 type Row = TableDataRow & {
   formatter?: (v: any) => any
@@ -20,16 +20,13 @@ export function TokenPrice({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
   const { showTokenYields } = useDebugFlags()
 
-  const { poolStates: dailyPoolStates } =
-    useDailyPoolStates(pool.id, startDate ? new Date(startDate) : undefined, endDate ? new Date(endDate) : undefined) ||
-    {}
-  const monthlyPoolStates = usePoolStatesByGroup(
-    pool.id,
-    startDate ? new Date(startDate) : undefined,
-    endDate ? new Date(endDate) : undefined,
-    'month'
+  const { data: poolStates = [], isLoading } = useReport(
+    'tokenPrice',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    groupBy
   )
-  const poolStates = groupBy === 'day' || groupBy === 'daily' ? dailyPoolStates : monthlyPoolStates
 
   const columns = React.useMemo(() => {
     if (!poolStates) {
@@ -85,9 +82,10 @@ export function TokenPrice({ pool }: { pool: Pool }) {
         .map((token) => ({
           name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
           value:
-            poolStates?.map((state) =>
-              state.tranches[token.id]?.price ? state.tranches[token.id].price!.toFloat() : 1
-            ) || [],
+            poolStates?.map((state) => {
+              const matchingTranche = state.tranches.find((t) => t.id === token.id)
+              return matchingTranche?.price.toFloat() ?? 1
+            }) || [],
           heading: false,
           formatter: (v: any) => formatBalance(v, pool.currency.symbol, 6),
         })) || []),
@@ -101,7 +99,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
         .reverse()
         .map((token) => ({
           name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-          value: poolStates?.map((state) => state.tranches[token.id].tokenSupply.toFloat()) || [],
+          value:
+            poolStates?.map((state) => {
+              const matchingTranche = state.tranches.find((t) => t.id === token.id)
+              return matchingTranche?.supply.toFloat() ?? 0
+            }) || [],
           heading: false,
           formatter: (v: any) => formatBalance(v, '', 2),
         })) || []),
@@ -120,7 +122,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yieldSinceInception.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yieldSinceInception?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -140,19 +146,14 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yieldMTD.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yieldMTD?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
-        : []),
-      ...(!!showTokenYields
-        ? [
-            {
-              name: 'Yield QTD',
-              value: poolStates?.map(() => '' as any) || [],
-              heading: false,
-            },
-          ]
         : []),
       ...(!!showTokenYields
         ? pool?.tranches
@@ -160,7 +161,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yieldQTD.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yieldQTD?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -180,7 +185,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yieldYTD.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yieldYTD?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -200,7 +209,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yield7DaysAnnualized.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yield7daysAnnualized?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -220,7 +233,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yield30DaysAnnualized.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yield30daysAnnualized?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -240,7 +257,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .reverse()
             .map((token) => ({
               name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
-              value: poolStates?.map((state) => state.tranches[token.id].yield90DaysAnnualized.toFloat()) || [],
+              value:
+                poolStates?.map((state) => {
+                  const matchingTranche = state.tranches.find((t) => t.id === token.id)
+                  return matchingTranche?.yield90daysAnnualized?.toFloat() ?? 0
+                }) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -288,7 +309,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [priceRecords])
 
-  if (!poolStates) {
+  if (isLoading) {
     return <Spinner mt={2} />
   }
 
