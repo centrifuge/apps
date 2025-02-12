@@ -1,11 +1,14 @@
-import { CurrencyBalance, Loan, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
-import { useSubquery } from 'src/utils/useSubquery'
+import { daysBetween } from '../../../src/utils/date'
+import { formatPercentage } from '../../../src/utils/formatting'
 import { LoanTemplate } from '../../types'
 import { Dec } from '../../utils/Decimal'
 import { usePoolMetadataMulti } from '../../utils/usePools'
+import { useSubquery } from '../../utils/useSubquery'
 import { getAmount } from '../LoanList'
+import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { CreateAssetFormValues } from './Assets/CreateAssetsDrawer'
 
 type FlattenedDataItem = {
@@ -233,4 +236,25 @@ export function useNavGrowth(pools: Pool[], period: 'YTD' | '90d' | '180d') {
   const growth = snapshotNAV ? ((currentNAV - snapshotNAV) / snapshotNAV) * 100 : 0
 
   return { growth, isLoading }
+}
+
+const getTrancheText = (trancheToken: Token) => {
+  if (trancheToken.seniority === 0) return 'junior'
+  if (trancheToken.seniority === 1) return 'senior'
+  return 'mezzanine'
+}
+
+export const calculateApyPerToken = (trancheToken: Token, pool: Pool) => {
+  const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
+  const poolId = pool.id
+  if (getTrancheText(trancheToken) === 'senior')
+    return formatPercentage(trancheToken?.interestRatePerSec ? trancheToken?.interestRatePerSec.toAprPercent() : Dec(0))
+  if (trancheToken.seniority === 0) return '15%'
+  if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+  if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
+    return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
+  if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
+    return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
+  if (daysSinceCreation < 30) return 'N/A'
+  return trancheToken.yieldSinceInception ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception)) : '-'
 }
