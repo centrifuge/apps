@@ -23,13 +23,19 @@ const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
 
 type PageLinkProps = LinkProps & {
   stacked?: boolean
+  exact?: boolean
 }
 
-export function PageLink({ stacked = false, to, children }: PageLinkProps) {
+export function PageLink({ stacked = false, to, children, exact = false }: PageLinkProps) {
   const location = useLocation()
   const isMedium = useIsAboveBreakpoint('M')
 
-  const isActive = location.pathname.startsWith(to as string)
+  let isActive = false
+  if (exact) {
+    isActive = location.pathname === to
+  } else {
+    isActive = location.pathname.startsWith(to as string)
+  }
 
   return (
     <Root

@@ -479,25 +479,17 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function withdraw(
-    args: [lpAddress: string, withdraw: BN, chainId: number, receiver?: string],
-    options: TransactionRequest = {}
-  ) {
-    const [lpAddress, withdraw, chainId, receiver] = args
+  function withdraw(args: [lpAddress: string, chainId: number], options: TransactionRequest = {}) {
+    const [lpAddress, chainId] = args
     const user = inst.getSignerAddress('evm')
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).claimRedeem(
-            lpAddress,
-            withdraw.toString(),
-            receiver ?? user,
-            {
-              ...options,
-              value: estimate,
-              gasLimit: 200000,
-            }
-          )
+          contract(centrifugeRouter, new Interface(ABI.CentrifugeRouter)).claimRedeem(lpAddress, user, user, {
+            ...options,
+            value: estimate,
+            gasLimit: 200000,
+          })
         )
       })
     )

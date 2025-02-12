@@ -40,7 +40,8 @@ type ProxyType = string
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
 const WEIGHT_PER_GAS = 25_000
 const GAS_LIMIT_POV_SIZE_RATIO = 4
-const EVM_DISPATCH_OVERHEAD_GAS = 1_000_000
+const EVM_DISPATCH_OVERHEAD_GAS = 100_000
+const MAX_GAS_LIMIT = 7_920_027
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -537,7 +538,7 @@ export class CentrifugeBase {
           // type: 2,
           to: EVM_DISPATCH_PRECOMPILE,
           data: submittable.method.toHex(),
-          gasLimit: gas,
+          gasLimit: Math.min(options?.evmGasLimit ?? gas, MAX_GAS_LIMIT),
           // gas: 0 // TODO: How to estimate gas here?,
           // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
         }
