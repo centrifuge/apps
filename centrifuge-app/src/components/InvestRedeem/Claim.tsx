@@ -69,13 +69,7 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
                 : state.poolCurrency?.symbol
             )}`}
           >
-            Claim{' '}
-            {formatBalanceAbbreviated(
-              state.collectAmount,
-              ['invest', 'cancelRedeem'].includes(state.collectType)
-                ? state.trancheCurrency?.symbol
-                : state.poolCurrency?.symbol
-            )}
+            Claim
           </Button>
         )}
         {!state.needsToCollectBeforeOrder && (

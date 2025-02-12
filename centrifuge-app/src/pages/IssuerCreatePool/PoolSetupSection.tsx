@@ -16,7 +16,6 @@ import {
 } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
-import { useEffect } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
@@ -71,10 +70,6 @@ export const PoolSetupSection = () => {
   const utils = useCentrifugeUtils()
   const ctx = useWallet()
   const { substrate, connectedType } = ctx
-
-  useEffect(() => {
-    form.setFieldValue('adminMultisig.signers[0]', substrate.selectedAddress)
-  }, [substrate.selectedAddress])
 
   return (
     <Box>

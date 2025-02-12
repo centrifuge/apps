@@ -57,7 +57,7 @@ export const TrancheTokenCards = ({
         },
       },
       {
-        header: 'APY',
+        header: 'Yield since inception',
         align: 'left',
         cell: (row: Row) => {
           return (
@@ -130,8 +130,8 @@ export const TrancheTokenCards = ({
         if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
           return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
         if (daysSinceCreation < 30) return 'N/A'
-        return trancheToken.yield30DaysAnnualized
-          ? formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
+        return trancheToken.yieldSinceInception
+          ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception))
           : '-'
       }
       return {

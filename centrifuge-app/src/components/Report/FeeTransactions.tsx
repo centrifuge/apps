@@ -26,7 +26,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     new Date(endDate),
     undefined,
     {
-      ...(txType !== 'all' && { transactionType: txType }),
+      ...(txType !== 'all' && { transactionType: txType.toLowerCase() }),
     }
   )
 
@@ -68,22 +68,17 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
       return []
     }
 
-    return transactions
-      ?.filter(
-        (tx) => tx.transactionType !== 'PROPOSED' && tx.transactionType !== 'ADDED' && tx.transactionType !== 'REMOVED'
-      )
-      .filter((tx) => (!txType || txType === 'all' ? true : tx.type === txType))
-      .map((tx) => ({
-        name: '',
-        value: [
-          tx.timestamp,
-          poolMetadata?.pool?.poolFees?.find((f) => f.id === Number(tx.feeId))?.name || '-',
-          formatPoolFeeTransactionType(tx.transactionType),
-          tx.amount?.toFloat() ?? '-',
-          pool.currency.symbol,
-        ],
-        heading: false,
-      }))
+    return transactions.map((tx) => ({
+      name: '',
+      value: [
+        tx.timestamp,
+        poolMetadata?.pool?.poolFees?.find((f) => f.id === Number(tx.feeId))?.name || '-',
+        formatPoolFeeTransactionType(tx.transactionType),
+        tx.amount?.toFloat() ?? '-',
+        pool.currency.symbol,
+      ],
+      heading: false,
+    }))
   }, [transactions, txType, poolMetadata, pool.currency.symbol])
 
   const columns = columnConfig

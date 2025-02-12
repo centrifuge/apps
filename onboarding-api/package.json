@@ -12,7 +12,7 @@
     "deploy:dev": "gcloud functions deploy onboarding-api-dev --region=europe-central2 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=onboarding --env-vars-file .env.yaml"
   },
   "engines": {
-    "node": "16"
+    "node": ">=20"
   },
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:centrifuge-js",

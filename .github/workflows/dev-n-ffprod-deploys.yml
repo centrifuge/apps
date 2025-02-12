@@ -5,17 +5,17 @@ on:
   pull_request:
     # paths:
     #   - '.github/workflows/main-branch-deploys.yml'
-  
+# For FF and dev environments deploy only webApp, no functions
 jobs:
   development:
     if: github.ref == 'refs/heads/main'
     name: deploy-development
-    uses: ./.github/workflows/deploy_all.yml
+    uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
-      environment: development
-# For FF-PROD deploy only webApp
+      deploy_env: development
   ff-prod:
+    name: deploy-ff-prod
     uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
