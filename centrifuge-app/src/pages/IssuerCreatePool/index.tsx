@@ -39,7 +39,7 @@ import { config } from '../../config'
 import { PoolDetailsSection } from './PoolDetailsSection'
 import { PoolSetupSection } from './PoolSetupSection'
 import { Line, PoolStructureSection } from './PoolStructureSection'
-import { CreatePoolValues, initialValues } from './types'
+import { createEmptyTranche, createPoolFee, CreatePoolValues } from './types'
 import { pinFileIfExists, pinFiles } from './utils'
 import { validateValues } from './validate'
 
@@ -88,9 +88,7 @@ const IssuerCreatePoolPage = () => {
   const { chainDecimals } = useCentrifugeConsts()
   const pools = usePools()
   const createType = (poolCreationType as TransactionOptions['createType']) || config.poolCreationType || 'immediate'
-  const {
-    substrate: { addMultisig },
-  } = useWallet()
+  const { substrate } = useWallet()
 
   const [step, setStep] = useState(1)
   const [stepCompleted, setStepCompleted] = useState({ 1: false, 2: false, 3: false })
@@ -99,8 +97,8 @@ const IssuerCreatePoolPage = () => {
   const [createdModal, setCreatedModal] = useState(false)
   const [preimageHash, setPreimageHash] = useState('')
   const [isPreimageDialogOpen, setIsPreimageDialogOpen] = useState(false)
-  const [proposalId, setProposalId] = useState(null)
-  const [poolId, setPoolId] = useState(null)
+  const [proposalId, setProposalId] = useState<string | null>(null)
+  const [poolId, setPoolId] = useState<string | null>(null)
 
   useEffect(() => {
     if (createType === 'notePreimage') {
@@ -256,8 +254,49 @@ const IssuerCreatePoolPage = () => {
     }
   )
 
-  const form = useFormik({
-    initialValues,
+  const form = useFormik<CreatePoolValues>({
+    initialValues: {
+      // pool structure
+      poolStructure: 'revolving',
+      assetClass: 'Private credit',
+      assetDenomination: 'USDC',
+      subAssetClass: '',
+      tranches: [createEmptyTranche('Junior')],
+      // pool details section
+      poolName: '',
+      poolIcon: null,
+      maxReserve: 1000000,
+      investorType: '',
+      issuerName: null,
+      issuerRepName: '',
+      issuerLogo: null,
+      issuerDescription: '',
+      issuerShortDescription: '',
+      issuerCategories: [{ type: '', value: '' }],
+      poolRatings: [{ agency: '', value: '', reportUrl: '', reportFile: null }],
+      executiveSummary: null,
+      website: '',
+      forum: '',
+      email: '',
+      details: [],
+      reportAuthorName: '',
+      reportAuthorTitle: '',
+      reportAuthorAvatar: null,
+      reportUrl: '',
+      assetOriginators: [''],
+      adminMultisig: {
+        signers: [substrate?.selectedAddress ?? ''],
+        threshold: 1,
+      },
+      adminMultisigEnabled: false,
+      poolFees: [createPoolFee()],
+      poolType: 'open',
+      onboarding: {
+        tranches: {},
+        taxInfoRequired: false,
+      },
+      onboardingExperience: 'none',
+    },
     validate: (values) => validateValues(values),
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
@@ -377,7 +416,7 @@ const IssuerCreatePoolPage = () => {
           : undefined
 
       if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
-        addMultisig(metadataValues.adminMultisig)
+        substrate.addMultisig(metadataValues.adminMultisig)
       }
 
       // Onboarding
