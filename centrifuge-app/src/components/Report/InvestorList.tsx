@@ -1,27 +1,38 @@
-import { CurrencyBalance, Pool, isSameAddress } from '@centrifuge/centrifuge-js'
+import { Pool, isSameAddress } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
-import BN from 'bn.js'
 import * as React from 'react'
+import { formatBalance, formatPercentage } from '../../../src/utils/formatting-sdk'
 import { evmChains } from '../../config'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useInvestorList } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 import { convertCSV, copyable } from './utils'
 
 const noop = (v: any) => v
 
 export function InvestorList({ pool }: { pool: Pool }) {
-  const { activeTranche, setCsvData, network, address } = React.useContext(ReportContext)
+  const { activeTranche, setCsvData, network, address, startDate, endDate } = React.useContext(ReportContext)
 
   const utils = useCentrifugeUtils()
-  const investors = useInvestorList(pool.id, activeTranche === 'all' ? undefined : activeTranche)
+
+  const { data: investors = [], isLoading } = useReport(
+    'investorList',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    undefined,
+    {
+      ...(network !== 'all' && network && { network }),
+      ...(address && { address }),
+      ...(activeTranche !== 'all' && { tokenId: activeTranche }),
+    }
+  )
 
   const columnConfig = [
     {
@@ -40,44 +51,27 @@ export function InvestorList({ pool }: { pool: Pool }) {
       header: 'Position',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, 2, row.token.currency.symbol) : '-'),
     },
     {
       header: 'Pool %',
       align: 'left',
       sortable: true,
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatPercentage(v * 100, true, {}, 2) : '-'),
+      formatter: (v: any) => (v ? formatPercentage(v.toPercent()) : '-'),
     },
-    {
-      header: 'Position currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
+
     {
       header: 'Pending invest order',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
-    },
-    {
-      header: 'Pending invest order currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       header: 'Pending redeem order',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
-    },
-    {
-      header: 'Pending redeem order currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, 2, row.token.currency.symbol) : '-'),
     },
   ]
 
@@ -96,15 +90,8 @@ export function InvestorList({ pool }: { pool: Pool }) {
       return []
     }
 
-    const totalPositions = new CurrencyBalance(
-      investors.reduce((sum: BN, investor) => {
-        return sum.add(investor.balance).add(investor.claimableTrancheTokens)
-      }, new BN(0)),
-      investors[0].balance.decimals || 18
-    ).toFloat()
-
     return investors
-      .filter((investor) => !investor.balance.isZero() || !investor.claimableTrancheTokens.isZero())
+      .filter((investor) => !investor.position.isZero())
       .filter((tx) => {
         if (!network || network === 'all') return true
         return network === (tx.chainId || 'centrifuge')
@@ -115,17 +102,17 @@ export function InvestorList({ pool }: { pool: Pool }) {
           name: '',
           value: [
             <Box display={'flex'}>
-              <NetworkIcon size="iconSmall" network={investor.chainId || 'centrifuge'} />
+              <NetworkIcon
+                size="iconSmall"
+                network={(investor.chainId !== 'all' && investor.chainId) || 'centrifuge'}
+              />
               <Text style={{ marginLeft: 4 }}> {(evmChains as any)[investor.chainId]?.name || 'Centrifuge'}</Text>
             </Box>,
             investor.evmAddress || utils.formatAddress(investor.accountId),
-            investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat(),
-            (investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat()) / totalPositions,
-            token.currency.symbol,
-            investor.pendingInvestCurrency.toFloat(),
-            pool.currency.symbol,
-            investor.pendingRedeemTrancheTokens.toFloat(),
-            token.currency.symbol,
+            investor.position.toFloat(),
+            investor.poolPercentage,
+            investor.pendingInvest.toFloat(),
+            investor.pendingRedeem.toFloat(),
           ],
           token,
           heading: false,
@@ -164,7 +151,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataUrl, pool.id])
 
-  if (!investors) {
+  if (isLoading) {
     return <Spinner />
   }
 

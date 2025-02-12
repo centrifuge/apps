@@ -3,18 +3,20 @@ import { Box, Text } from '@centrifuge/fabric'
 import { useContext, useEffect, useMemo } from 'react'
 import { TableDataRow } from '.'
 import { formatDateAndTime } from '../../../src/utils/date'
-import { formatBalance } from '../../../src/utils/formatting'
+import { formatBalance } from '../../../src/utils/formatting-sdk'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
-import { usePoolOrdersByPoolId } from '../../../src/utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
+import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
+import { useReport } from './useReportsQuery'
 import { convertCSV } from './utils'
 
 const noop = (v: any) => v
 
 const Orders = ({ pool }: { pool: Pool }) => {
-  const { setCsvData } = useContext(ReportContext)
-  const orders = usePoolOrdersByPoolId(pool.id)
+  const { setCsvData, startDate, endDate } = useContext(ReportContext)
+
+  const { data: orders = [], isLoading } = useReport('ordersList', pool, new Date(startDate), new Date(endDate))
 
   const columnsConfig = [
     {
@@ -34,43 +36,43 @@ const Orders = ({ pool }: { pool: Pool }) => {
       align: 'left',
       header: 'NAV',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 6, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Nav per share',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 6, 6) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 6, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Investments locked',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 2) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Investments executed',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 2) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Redemptions locked',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 2) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Redemptions executed',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 2) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
     {
       align: 'left',
       header: 'Paid fees',
       sortable: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.symbol, 2) : '-'),
+      formatter: (v: any) => (v ? formatBalance(v, 2, pool.currency.symbol) : '-'),
     },
   ]
 
@@ -88,18 +90,17 @@ const Orders = ({ pool }: { pool: Pool }) => {
     if (!orders?.length) return []
     else {
       return orders.map((order) => {
-        const epoch = order.epochId.split('-')
         return {
           name: '',
           value: [
-            epoch[1],
-            order.closedAt,
+            order.epoch,
+            order.timestamp,
             order.netAssetValue,
-            order.tokenPrice,
-            order.sumOutstandingInvestOrders,
-            order.sumFulfilledInvestOrders,
-            order.sumOutstandingRedeemOrders,
-            order.sumFulfilledRedeemOrders,
+            order.navPerShare,
+            order.lockedInvestments,
+            order.executedInvestments,
+            order.lockedRedemptions,
+            order.executedRedemptions,
             order.paidFees,
           ],
           heading: false,
@@ -132,6 +133,8 @@ const Orders = ({ pool }: { pool: Pool }) => {
     return () => setCsvData(undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataUrl, pool.id])
+
+  if (isLoading) return <Spinner />
 
   return (
     <Box paddingX={2}>
