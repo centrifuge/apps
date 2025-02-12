@@ -52,6 +52,7 @@ export type DataTableProps<T = any> = {
   page?: number
   hideHeader?: boolean
   hideBorder?: boolean
+  rowProps?: React.HTMLAttributes<HTMLDivElement>
 } & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
@@ -103,6 +104,7 @@ export const DataTable = <T extends Record<string, any>>({
   hideHeader,
   scrollable = false,
   hideBorder,
+  rowProps,
 }: DataTableProps<T>) => {
   const theme = useTheme()
   const tableRef = React.useRef<HTMLDivElement>(null)
@@ -185,6 +187,7 @@ export const DataTable = <T extends Record<string, any>>({
           key={keyField ? row[keyField] : i}
           tabIndex={onRowClicked ? 0 : undefined}
           hideBorder={hideBorder}
+          {...rowProps}
         >
           {columns.map((col, index) => (
             <DataCol variant="body2" align={col?.align} key={index} isLabel={col.isLabel}>
@@ -203,6 +206,7 @@ export const DataTable = <T extends Record<string, any>>({
             key={keyField ? row[keyField] : i}
             tabIndex={onRowClicked ? 0 : undefined}
             hideBorder={hideBorder}
+            {...rowProps}
           >
             {columns.map((col, index) => (
               <DataCol

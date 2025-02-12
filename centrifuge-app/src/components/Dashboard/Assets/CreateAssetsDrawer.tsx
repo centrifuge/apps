@@ -16,7 +16,7 @@ import {
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { LoanTemplate } from '../../../types'
@@ -24,10 +24,11 @@ import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useMetadata } from '../../../utils/useMetadata'
 import { useFilterPoolsByUserRole, usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
 import { LoadBoundary } from '../../LoadBoundary'
-import { usePoolMetadataMap, valuesToNftProperties } from '../utils'
+import { valuesToNftProperties } from '../utils'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
+import { useGetPoolsMetadata } from './utils'
 
 export type PoolWithMetadata = Pool & { meta: PoolMetadata }
 
@@ -72,22 +73,10 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
   const api = useCentrifugeApi()
   const centrifuge = useCentrifuge()
   const filteredPools = useFilterPoolsByUserRole(type === 'upload-template' ? ['PoolAdmin'] : ['Borrower', 'PoolAdmin'])
-  const metas = usePoolMetadataMap(filteredPools || [])
+  const poolsMetadata = useGetPoolsMetadata(filteredPools || [])
   const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
   const [redirect, setRedirect] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-
-  const poolsMetadata = useMemo(() => {
-    return (
-      filteredPools?.map((pool) => {
-        const meta = metas.get(pool.id)
-        return {
-          ...pool,
-          meta,
-        }
-      }) || []
-    )
-  }, [filteredPools, metas])
 
   const [pid, setPid] = useState<string>(poolsMetadata[0].id)
   const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['Borrow'] })
