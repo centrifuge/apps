@@ -1,8 +1,9 @@
 name: Synpress tests
 
 on:
-  schedule:
-    - cron: '0 12 * * *'
+  workflow_dispatch:
+  # schedule:
+    # - cron: '0 12 * * *'
 
 jobs:
   cypress-run:
@@ -13,6 +14,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install linux deps
         run: |
           sudo apt-get install --no-install-recommends -y \
@@ -25,22 +27,21 @@ jobs:
           fluxbox &
         env:
           DISPLAY: :0.0
-      - uses: iamsauravsharma/create-dotenv@v2.0.1
-        with:
-          # input-prefix: '' # Optional (default: '')
-          file-path: 'centrifuge-app/.env' # Optional (default : '.env')
-        # output-prefix: 'OUTPUT_' # Optional (default: '')
-        env: # env available for only this steps
-          CYPRESS_PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
-          PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
-          NETWORK_NAME: centrifuge
-          RPC_URL: https://fullnode-apps.demo.k-f.dev
-          CHAIN_ID: 2090
-          SYMBOL: DEVEL
-          IS_TESTNET: true
-          DEBUG: true
+      - name: Create .env file
+        run: |
+          cat << EOF > centrifuge-app/.env
+          CYPRESS_PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}}
+          PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}}
+          NETWORK_NAME=centrifuge
+          RPC_URL=https://fullnode-apps.demo.k-f.dev
+          CHAIN_ID=2090
+          SYMBOL=DEVEL
+          IS_TESTNET=true
+          DEBUG=true
+          EOF
+          
       - name: Synpress run
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@7271bed2a170d73c0b08939cd192db51a1c46c50 # v6.7.10
         with:
           working-directory: centrifuge-app
           install-command: yarn
