@@ -10,6 +10,7 @@ import {
   Drawer,
   IconCheckInCircle,
   IconExternalLink,
+  IconInfo,
   Select,
   Shelf,
   Spinner,
@@ -21,8 +22,8 @@ import {
 import { Field, FieldArray, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import { useState } from 'react'
 import { useSelectedPools2 } from '../../../utils/contexts/SelectedPoolsContext'
-import { useActiveDomains, useDomainRouters } from '../../../utils/useLiquidityPools'
-import { useSuitableAccounts } from '../../../utils/usePermissions'
+import { Domain, useActiveDomains, useDomainRouters } from '../../../utils/useLiquidityPools'
+import { usePoolAdmin } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadataMulti } from '../../../utils/usePools'
 
 interface NetworkCurrency {
@@ -44,9 +45,12 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
   const domains = useDomainRouters()
   const getNetworkName = useGetNetworkName()
   const { selectedPools } = useSelectedPools2(true)
+  const [selectedPool, setSelectedPool] = useState<string | null>(selectedPools?.[0] ?? null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(
+    'Transaction complete. Please visit Axelar to finish enabling the network.'
+  )
 
-  // TODO: find a way to get suitable account for selected pool, any pool that'ss available in the selected list should have pooladmin permissions
-  const [account] = useSuitableAccounts({ poolId: selectedPools?.[0] ?? '', proxyType: ['PoolAdmin'] })
+  const admin = usePoolAdmin(selectedPool ?? '')
 
   const { execute } = useCentrifugeTransaction(
     'Enable networks',
@@ -61,7 +65,12 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
         options?: CentrifugeTransactionOptions
       ) => {
         return cent.liquidityPools.enablePoolOnDomain(args, options)
-      }
+      },
+    {
+      onSuccess: () => {
+        setSuccessMessage('Transaction complete. Please visit Axelar to finish enabling the network.')
+      },
+    }
   )
 
   const initialValues: NetworkFormValues = {
@@ -74,7 +83,7 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
     onSubmit: (values) => {
       const formattedValues = values.networks.map((network) => {
         const currenciesToAdd = Object.keys(network.currencies)
-          .filter((key) => network.currencies[key].currencyNeedsAdding)
+          .filter((key) => network.currencies[key].currencyNeedsAdding && network.currencies[key].checked)
           .map((key) => key as CurrencyKey)
         return [network.poolId, network.chainId, currenciesToAdd, []]
       })
@@ -85,7 +94,7 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
           currencyKeysToAdd: CurrencyKey[],
           tokenPricesToUpdate: [string, CurrencyKey][]
         ][],
-        { account }
+        { account: admin, forceProxyType: ['PoolAdmin'] }
       )
     },
   })
@@ -117,13 +126,31 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
                       borderWidth={1}
                       borderColor="borderPrimary"
                     >
-                      <SupportedNetworks chainId={domain.chainId} index={index} />
+                      <SupportedNetworks
+                        chainId={domain.chainId}
+                        index={index}
+                        selectedPool={selectedPool}
+                        setSelectedPool={setSelectedPool}
+                      />
                     </Box>
                   ))}
+                <Shelf
+                  p={1}
+                  borderRadius={8}
+                  backgroundColor="statusWarningBg"
+                  justifyContent="flex-start"
+                  alignItems="flex-start"
+                  gap={1}
+                >
+                  <IconInfo size="iconSmall" color="statusWarning" />
+                  <Text variant="body2" color="statusWarning">
+                    {successMessage}
+                  </Text>
+                </Shelf>
                 <Button variant="primary" small type="submit">
                   Update
                 </Button>
-                <Button variant="inverted" small onClick={onClose}>
+                <Button variant="inverted" small onClick={onClose} disabled={formik.isSubmitting}>
                   Cancel
                 </Button>
               </Stack>
@@ -135,16 +162,31 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
   )
 }
 
-function SupportedNetworks({ chainId, index }: { chainId: number; index: number }) {
+function getDomainStatus(domain?: Domain) {
+  if (!domain || !domain.isActive) return 'inactive'
+  if (domain.hasDeployedLp) return 'deployed'
+  return 'deploying'
+}
+
+function SupportedNetworks({
+  chainId,
+  index,
+  selectedPool,
+  setSelectedPool,
+}: {
+  chainId: number
+  index: number
+  selectedPool: string | null
+  setSelectedPool: (poolId: string) => void
+}) {
   const formik = useFormikContext<NetworkFormValues>()
   const { pools } = useSelectedPools2()
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
-  const [selectedPool, setSelectedPool] = useState<string | null>(pools?.[0]?.id ?? null)
-
+  const pool = usePool(selectedPool ?? '')
   const getNetworkName = useGetNetworkName()
   const { data: domains } = useActiveDomains(selectedPool ?? '')
   const domain = domains?.find((d) => d.chainId === chainId)
-
+  const status = getDomainStatus(domain)
   return (
     <Accordion
       items={[
@@ -195,7 +237,11 @@ function SupportedNetworks({ chainId, index }: { chainId: number; index: number 
                                     domain?.isAllowedAsset[currency.address]
                                   }
                                   // !isAllowedAsset[currency.address] means that the asset is already enabled, it cannot be disabled
-                                  disabled={domain?.isAllowedAsset[currency.address]}
+                                  disabled={
+                                    status === 'deployed' ||
+                                    status === 'deploying' ||
+                                    domain?.isAllowedAsset[currency.address]
+                                  }
                                   onChange={(event) => {
                                     if (event.target.checked) {
                                       // Check if the network already exists
