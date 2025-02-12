@@ -1,4 +1,4 @@
-import { DailyPoolState } from '@centrifuge/centrifuge-js'
+import { BalanceSheetReport, CashflowReport, ProfitAndLossReport } from '@centrifuge/sdk/dist/types/reports'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
@@ -52,8 +52,8 @@ export type ReportContextType = {
   loan: string
   setLoan: (type: string) => void
 
-  reportData: DailyPoolState[]
-  setReportData: (type: DailyPoolState[]) => void
+  reportData: CashflowReport[] | BalanceSheetReport[] | ProfitAndLossReport[]
+  setReportData: (data: CashflowReport[] | BalanceSheetReport[] | ProfitAndLossReport[]) => void
 }
 
 export type CsvDataProps = {
@@ -84,7 +84,9 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [address, setAddress] = React.useState(searchParams.get('address') || '')
   const [network, setNetwork] = React.useState<string | number>(searchParams.get('network') || 'all')
   const [loan, setLoan] = React.useState(searchParams.get('loan') || '')
-  const [reportData, setReportData] = React.useState<DailyPoolState[]>([])
+  const [reportData, setReportData] = React.useState<CashflowReport[] | BalanceSheetReport[] | ProfitAndLossReport[]>(
+    []
+  )
 
   React.useEffect(() => {
     const startDate = searchParams.get('from')

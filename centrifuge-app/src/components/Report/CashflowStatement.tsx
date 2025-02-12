@@ -1,22 +1,17 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import {
-  useAggregatedPoolStatesByGroup,
-  usePoolFeeStatesByGroup,
-  usePoolMetadata,
-  usePoolStatesByGroup,
-} from '../../utils/usePools'
+import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 import { getColumnHeader } from './utils'
 
 type Row = TableDataRow & {
@@ -29,58 +24,14 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
-    const today = new Date()
-    today.setDate(today.getDate())
-    today.setHours(0, 0, 0, 0)
-    if (groupBy === 'day') {
-      const from = new Date(startDate ?? today)
-      from.setHours(0, 0, 0, 0)
-      const to = new Date(startDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [from, to]
-    } else if (groupBy === 'daily') {
-      const from = new Date(startDate ?? today)
-      from.setHours(0, 0, 0, 0)
-      const to = new Date(endDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [from, to]
-    } else if (groupBy === 'quarter' || groupBy === 'year') {
-      const from = pool.createdAt ? new Date(pool.createdAt) : today
-      return [from, today]
-    } else {
-      const to = new Date(endDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [new Date(startDate), to]
-    }
-  }, [groupBy, startDate, endDate, pool.createdAt])
+  const { data = [], isLoading } = useReport('cashflow', pool, new Date(startDate), new Date(endDate), groupBy)
 
-  const poolStates = useAggregatedPoolStatesByGroup(
-    pool.id,
-    adjustedStartDate,
-    adjustedEndDate,
-    groupBy === 'daily' ? 'day' : groupBy
-  )
-
-  const poolStatesNotAggregated = usePoolStatesByGroup(
-    pool.id,
-    adjustedStartDate,
-    adjustedEndDate,
-    groupBy === 'daily' ? 'day' : groupBy
-  )
-
-  const poolFeeStates = usePoolFeeStatesByGroup(
-    pool.id,
-    adjustedStartDate,
-    adjustedEndDate,
-    groupBy === 'daily' ? 'day' : groupBy
-  )
+  React.useEffect(() => {
+    setReportData(data)
+  }, [data])
 
   const columns = React.useMemo(() => {
-    if (!poolStates || !poolStates.length) {
+    if (!data.length && !isLoading) {
       return []
     }
 
@@ -100,7 +51,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       },
     ]
       .concat(
-        poolStates.map((state, index) => ({
+        data.map((state, index) => ({
           align: 'right',
           timestamp: state.timestamp,
           header: getColumnHeader(state.timestamp, groupBy),
@@ -110,7 +61,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
             </Text>
           ),
           width: '170px',
-        }))
+        })) || []
       )
       .concat({
         align: 'left',
@@ -118,18 +69,13 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy])
+  }, [data, groupBy])
 
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'Principal payments',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState?.sumPrincipalRepaidAmountByPeriod
-              .toDecimal()
-              .sub(poolState.sumRealizedProfitFifoByPeriod.toDecimal())
-          ) || [],
+        value: data.map((report) => report.principalPayments.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
@@ -138,147 +84,128 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
             {
               name: 'Realized profit / loss',
               nameTooltip: 'Based on first-in, first-out calculation of the transactions of each individual asset',
-              value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
+              value: data?.map((day) => (day.subtype === 'publicCredit' ? day?.realizedPL?.toDecimal() : 0)) || [],
               heading: false,
               formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+            },
+            {
+              name: 'Asset financings',
+              value:
+                data?.map((day) => (day.subtype === 'privateCredit' ? day?.assetFinancing?.toDecimal().neg() : 0)) ||
+                [],
+              heading: false,
+              formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
             },
           ]
         : []),
       {
         name: 'Interest payments',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumInterestRepaidAmountByPeriod
-              .toDecimal()
-              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-          ) || [],
+        value: data.map((day) => day.interestPayments.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
-      {
-        name: poolMetadata?.pool?.asset.class === 'Private credit' ? 'Asset financings' : 'Asset purchases',
-        value: poolStates?.map(({ poolState }) => poolState.sumBorrowedAmountByPeriod.toDecimal().neg()) || [],
-        heading: false,
-        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
-      },
+      ...(poolMetadata?.pool?.asset.class === 'Public credit'
+        ? [
+            {
+              name: 'Asset financings',
+              value:
+                data.map((day) => (day.subtype === 'publicCredit' ? day?.assetPurchases?.toDecimal().neg() : 0)) || [],
+              heading: false,
+              formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+            },
+          ]
+        : [
+            {
+              name: 'Asset purchases',
+              value:
+                data.map((day) => (day.subtype === 'privateCredit' ? day?.assetFinancing?.toDecimal().neg() : 0)) || [],
+              heading: false,
+              formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+            },
+          ]),
       {
         name: 'Net cash flow from assets',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumPrincipalRepaidAmountByPeriod
-              .toDecimal()
-              .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
-              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-          ) || [],
+        value: data.map((state) => state.netCashflowAsset.toDecimal()) || [],
         heading: false,
         bold: true,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [pool.currency.displayName, poolMetadata?.pool?.asset.class, poolStates])
+  }, [pool.currency.displayName, poolMetadata?.pool?.asset.class, data])
 
   const netCashflowRecords: Row[] = React.useMemo(() => {
+    const feeRows =
+      data.reduce<Row[]>((acc, state, stateIndex) => {
+        state.fees.forEach((fee) => {
+          const existingFee = acc.find((row) => row.name === fee.name)
+
+          if (existingFee) {
+            ;(existingFee.value as any[])[stateIndex] = fee.amount.toDecimal().neg()
+          } else {
+            acc.push({
+              name: fee.name,
+              value: Array(data.length)
+                .fill(null)
+                .map((_, i) => (i === stateIndex ? fee.amount.toDecimal().neg() : 0)),
+              formatter: (v: any) => (v ? formatBalance(v || 0, pool.currency.displayName, 2) : 'n/a'),
+            })
+          }
+        })
+        return acc
+      }, []) ?? []
+
     return [
-      ...(Object.entries(poolFeeStates || {})?.flatMap(([, feeState]) => {
-        // some fee data may be incomplete since fees may have been added sometime after pool creation
-        // this fill the nonexistant fee data with zero values
-        let missingStates: {
-          timestamp: string
-          sumPaidAmountByPeriod: CurrencyBalance
-        }[] = []
-        if (feeState.length !== poolStates?.length) {
-          const missingTimestamps = poolStates
-            ?.map((state) => state.timestamp)
-            .filter((timestamp) => !feeState.find((state) => state.timestamp.slice(0, 10) === timestamp.slice(0, 10)))
-          missingStates =
-            missingTimestamps?.map((timestamp) => {
-              return {
-                timestamp,
-                sumPaidAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
-              }
-            }) || []
-        }
-        return {
-          name: feeState[0].poolFee.name,
-          value: [...missingStates, ...feeState].map((state) => state.sumPaidAmountByPeriod.toDecimal().neg()),
-          formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
-        }
-      }) || []),
+      ...feeRows,
       {
         name: 'Net cash flow after fees',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumPrincipalRepaidAmountByPeriod
-              .toDecimal()
-              .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
-              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-              .sub(poolState.sumPoolFeesPaidAmountByPeriod.toDecimal())
-          ) || [],
+        value: data.map((state) => state.netCashflowAfterFees.toDecimal()) || [],
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         heading: false,
         bold: true,
       },
     ]
-  }, [poolStates, pool, poolFeeStates])
+  }, [data, pool.currency.displayName])
 
   const investRedeemRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'Pool investments',
-        value: poolStates?.map(({ poolState }) => poolState.sumInvestedAmountByPeriod.toDecimal()) || [],
+        value: data.map((state) => state.investments.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
         name: 'Pool redemptions',
-        value: poolStates?.map(({ poolState }) => poolState.sumRedeemedAmountByPeriod.toDecimal().neg()) || [],
+        value: data.map((state) => state.redemptions.toDecimal().neg()) || [],
         heading: false,
         formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
         name: 'Cash flow from investment activities',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumInvestedAmountByPeriod.toDecimal().sub(poolState.sumRedeemedAmountByPeriod.toDecimal())
-          ) || [],
+        value: data.map((state) => state.activitiesCashflow.toDecimal()) || [],
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         heading: false,
         bold: true,
       },
     ]
-  }, [poolStates, pool])
+  }, [data, pool.currency.displayName])
 
   const endCashflowRecords = React.useMemo(() => {
     return [
       {
         name: 'Total cash flow',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumPrincipalRepaidAmountByPeriod
-              .toDecimal()
-              .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
-              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-              .sub(poolState.sumPoolFeesPaidAmountByPeriod.toDecimal())
-              .add(poolState.sumInvestedAmountByPeriod.toDecimal())
-              .sub(poolState.sumRedeemedAmountByPeriod.toDecimal())
-          ) || [],
+        value: data.map((state) => state.totalCashflow.toDecimal()) || [],
         heading: true,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
         name: 'End cash balance',
-        value:
-          poolStatesNotAggregated?.map(({ poolState }) =>
-            poolState.totalReserve.toDecimal().add(poolState.offchainCashValue.toDecimal())
-          ) || [],
+        value: data.map((state) => state.endCashBalance.balance.toDecimal()) || [],
         bold: true,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates, poolStatesNotAggregated, pool.currency.displayName])
+  }, [data, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
@@ -323,23 +250,11 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grossCashflowRecords, netCashflowRecords])
 
-  React.useEffect(() => {
-    if (poolStates && Object.keys(poolStates).length > 0) {
-      const fullPoolStates: DailyPoolState[] = Object.values(poolStates).map((partialState) => {
-        return {
-          ...partialState,
-        } as DailyPoolState
-      })
-
-      setReportData(fullPoolStates)
-    }
-  }, [poolStates, setReportData])
-
-  if (!poolStates) {
+  if (isLoading) {
     return <Spinner mt={2} />
   }
 
-  return poolStates?.length > 0 ? (
+  return data?.length > 0 ? (
     <DataTableGroup>
       <DataTable data={grossCashflowRecords} columns={columns} hoverable />
       <DataTable data={netCashflowRecords} columns={columns} hoverable />

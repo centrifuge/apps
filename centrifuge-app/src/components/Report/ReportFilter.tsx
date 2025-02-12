@@ -1,4 +1,4 @@
-import { CurrencyBalance, DailyPoolState, Pool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -11,10 +11,11 @@ import {
   Select,
   Shelf,
 } from '@centrifuge/fabric'
+import { BalanceSheetReport, CashflowReport, ProfitAndLossReport } from '@centrifuge/sdk/dist/types/reports'
 import * as React from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
-import { usePool, usePoolMetadata } from '../../../src/utils/usePools'
+import { usePool } from '../../../src/utils/usePools'
 import { useBasePath } from '../../utils/useBasePath'
 import { SimpleBarChart } from '../Charts/SimpleBarChart'
 import { GroupBy, ReportContext } from './ReportContext'
@@ -49,49 +50,30 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
   const navigate = useNavigate()
   const basePath = useBasePath()
   const pool = usePool(poolId) as Pool
-  const metadata = usePoolMetadata(pool as Pool)
 
   const transformDataChart = React.useMemo(() => {
     if (!reportData.length) return
     if (report === 'balance-sheet') {
-      return reportData.map((data: DailyPoolState) => ({
+      return (reportData as BalanceSheetReport[]).map((data) => ({
         name: data.timestamp,
-        yAxis: new CurrencyBalance(data.poolState.netAssetValue, pool.currency.decimals).toNumber(),
+        yAxis: data.totalCapital?.toDecimal(),
       }))
     } else if (report === 'profit-and-loss') {
-      return reportData.map((data: DailyPoolState) => {
-        return {
-          name: data.timestamp,
-          yAxis: (metadata?.data?.pool?.asset.class === 'Private credit'
-            ? data.poolState.sumInterestRepaidAmountByPeriod
-                .add(data.poolState.sumInterestAccruedByPeriod)
-                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod)
-                .sub(data.poolState.sumDebtWrittenOffByPeriod)
-            : data.poolState.sumUnrealizedProfitByPeriod
-                .add(data.poolState.sumInterestRepaidAmountByPeriod)
-                .add(data.poolState.sumUnscheduledRepaidAmountByPeriod)
-          )
-            .sub(data.poolState.sumPoolFeesChargedAmountByPeriod)
-            .sub(data.poolState.sumPoolFeesAccruedAmountByPeriod)
-            .toNumber(),
-        }
-      })
+      return (reportData as ProfitAndLossReport[]).map((data) => ({
+        name: data.timestamp,
+        yAxis: data.totalProfitAndLoss?.toDecimal(),
+      }))
     } else {
-      return reportData.map((data: DailyPoolState) => {
-        return {
-          name: data.timestamp,
-          yAxis: data.poolState.sumPrincipalRepaidAmountByPeriod
-            .sub(data.poolState.sumBorrowedAmountByPeriod)
-            .add(data.poolState.sumInterestRepaidAmountByPeriod)
-            .add(data.poolState.sumUnscheduledRepaidAmountByPeriod)
-            .sub(data.poolState.sumPoolFeesPaidAmountByPeriod)
-            .add(data.poolState.sumInvestedAmountByPeriod)
-            .sub(data.poolState.sumRedeemedAmountByPeriod)
-            .toNumber(),
-        }
-      })
+      return (reportData as CashflowReport[])
+        .filter((data) => !data.totalCashflow?.isZero())
+        .map((data) => {
+          return {
+            name: data.timestamp,
+            yAxis: data.totalCashflow?.toDecimal(),
+          }
+        })
     }
-  }, [report, reportData, metadata?.data?.pool?.asset.class, pool.currency.decimals])
+  }, [report, reportData])
 
   return (
     <Shelf
@@ -188,7 +170,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
           </AnchorButton>
         </Shelf>
       </Shelf>
-      {transformDataChart?.length && (
+      {!!transformDataChart?.length && (
         <Box mt={4} width="100%" height={200} marginLeft="-50px">
           <SimpleBarChart data={transformDataChart} currency={pool.currency} />
         </Box>

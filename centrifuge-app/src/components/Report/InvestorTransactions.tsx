@@ -8,12 +8,12 @@ import { evmChains } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useInvestorTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 import { convertCSV, copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
@@ -22,6 +22,20 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate, txType, address, network } = React.useContext(ReportContext)
   const utils = useCentrifugeUtils()
   const explorer = useGetExplorerUrl('centrifuge')
+
+  const { data: transactions = [], isLoading } = useReport(
+    'investorTransactions',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    undefined,
+    {
+      ...(address && { address }),
+      ...(activeTranche !== 'all' && { tokenId: activeTranche }),
+      ...(network !== 'all' && network && { network }),
+      ...(txType !== 'all' && { transactionType: txType }),
+    }
+  )
 
   const columnConfig = [
     {
@@ -127,13 +141,6 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     },
   ]
 
-  const transactions = useInvestorTransactions(
-    pool.id,
-    activeTranche === 'all' ? undefined : activeTranche,
-    startDate ? new Date(startDate) : undefined,
-    endDate ? new Date(endDate) : undefined
-  )
-
   const columns = columnConfig
 
     .map((col, index) => ({
@@ -159,26 +166,29 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
 
         if (
           txType === 'orders' &&
-          (tx.type === 'INVEST_ORDER_UPDATE' ||
-            tx.type === 'REDEEM_ORDER_UPDATE' ||
-            tx.type === 'INVEST_ORDER_CANCEL' ||
-            tx.type === 'REDEEM_ORDER_CANCEL')
+          (tx.transactionType === 'INVEST_ORDER_UPDATE' ||
+            tx.transactionType === 'REDEEM_ORDER_UPDATE' ||
+            tx.transactionType === 'INVEST_ORDER_CANCEL' ||
+            tx.transactionType === 'REDEEM_ORDER_CANCEL')
         ) {
           return true
         }
 
-        if (txType === 'executions' && (tx.type === 'INVEST_EXECUTION' || tx.type === 'REDEEM_EXECUTION')) {
+        if (
+          txType === 'executions' &&
+          (tx.transactionType === 'INVEST_EXECUTION' || tx.transactionType === 'REDEEM_EXECUTION')
+        ) {
           return true
         }
 
         if (
           txType === 'transfers' &&
-          (tx.type === 'INVEST_COLLECT' ||
-            tx.type === 'REDEEM_COLLECT' ||
-            tx.type === 'INVEST_LP_COLLECT' ||
-            tx.type === 'REDEEM_LP_COLLECT' ||
-            tx.type === 'TRANSFER_IN' ||
-            tx.type === 'TRANSFER_OUT')
+          (tx.transactionType === 'INVEST_COLLECT' ||
+            tx.transactionType === 'REDEEM_COLLECT' ||
+            tx.transactionType === 'INVEST_LP_COLLECT' ||
+            tx.transactionType === 'REDEEM_LP_COLLECT' ||
+            tx.transactionType === 'TRANSFER_IN' ||
+            tx.transactionType === 'TRANSFER_OUT')
         ) {
           return true
         }
@@ -190,7 +200,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
         return network === (tx.chainId || 'centrifuge')
       })
       .map((tx) => {
-        const token = pool.tranches.find((t) => t.id === tx.trancheId)!
+        const token = pool.tranches.find((t) => t.id === tx.trancheTokenId)!
         return {
           name: '',
           value: [
@@ -199,22 +209,22 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
               <NetworkIcon size="iconSmall" network={tx.chainId || 'centrifuge'} />
               <Text style={{ marginLeft: 4 }}> {(evmChains as any)[tx.chainId]?.name || 'Centrifuge'}</Text>
             </Box>,
-            utils.formatAddress(tx.evmAddress || tx.accountId),
-            tx.epochNumber ? tx.epochNumber.toString() : '-',
-            tx.timestamp.toISOString(),
+            utils.formatAddress(tx.account),
+            tx.epoch || '-',
+            tx.timestamp,
             formatInvestorTransactionsType({
-              type: tx.type,
+              type: tx.transactionType,
               trancheTokenSymbol: token.currency.symbol,
               poolCurrencySymbol: pool.currency.symbol,
-              currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
+              currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toDecimal().toNumber() : null,
             }),
             tx.currencyAmount?.toFloat() ?? '-',
             pool.currency.symbol,
-            tx.tokenAmount?.toFloat() ?? '-',
+            tx.trancheTokenAmount?.toFloat() ?? '-',
             token.currency.symbol,
-            tx.tokenPrice?.toFloat() ?? '-',
+            tx.price?.toFloat() ?? '-',
             pool.currency.symbol,
-            tx.hash,
+            tx.transactionHash,
           ],
           heading: false,
         }
@@ -262,7 +272,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  if (!transactions) {
+  if (isLoading) {
     return <Spinner mt={2} />
   }
 
