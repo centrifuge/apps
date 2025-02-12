@@ -90,6 +90,7 @@ const AdminRoleBits = {
   InvestorAdmin: 0b00010000,
   LoanAdmin: 0b00100000,
   PODReadAccess: 0b01000000,
+  FrozenTrancheInvestor: 0b10000000,
 }
 
 // const CurrencyRoleBits = {
@@ -99,7 +100,7 @@ const AdminRoleBits = {
 
 export type PoolRoles = {
   roles: AdminRole[]
-  tranches: { [key: string]: string } // trancheId -> permissionedTill
+  tranches: { [key: string]: { permissionedTill: string; isFrozen: boolean } } // trancheId -> permissionedTill
 }
 
 export type LoanInfoInput =
@@ -1603,7 +1604,10 @@ export function getPoolsModule(inst: Centrifuge) {
                     permissions.trancheInvestor.info
                       .filter((info: any) => info.permissionedTill * 1000 > Date.now())
                       .forEach((info: any) => {
-                        roles.tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                        roles.tranches[info.trancheId] = {
+                          permissionedTill: new Date(info.permissionedTill * 1000).toISOString(),
+                          isFrozen: info.isFrozen,
+                        }
                       })
 
                     setPoolRoles(account, poolId, roles)
@@ -1678,7 +1682,10 @@ export function getPoolsModule(inst: Centrifuge) {
               permissions.trancheInvestor.info
                 .filter((info: any) => info.permissionedTill * 1000 > Date.now())
                 .forEach((info: any) => {
-                  roles[account].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                  roles[account].tranches[info.trancheId] = {
+                    permissionedTill: new Date(info.permissionedTill * 1000).toISOString(),
+                    isFrozen: info.isFrozen,
+                  }
                 })
             })
             return roles

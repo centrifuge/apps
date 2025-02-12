@@ -213,7 +213,7 @@ export function useInvestorStatus(poolId: string, address: string, network: Netw
   const allowedTranches = useMemo(
     () =>
       Object.entries(permissions?.pools[poolId]?.tranches ?? {})
-        .filter(([, till]) => new Date(till).getTime() - Date.now() > SevenDaysMs)
+        .filter(([, t]) => new Date(t.permissionedTill).getTime() - Date.now() > SevenDaysMs)
         .map(([tid]) => tid),
     [permissions, poolId]
   )
