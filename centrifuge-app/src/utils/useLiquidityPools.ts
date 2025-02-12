@@ -120,6 +120,33 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   return query
 }
 
+export function useLiquidityPoolRestrictions(
+  poolId: string,
+  trancheId: string,
+  chainId: number,
+  address: string,
+  lpIndex?: number
+) {
+  const { data: lps } = useLiquidityPools(poolId, trancheId, chainId)
+  const lp = lps?.[lpIndex ?? 0]
+  const cent = useCentrifuge()
+  const {
+    evm: { getProvider },
+  } = useWallet()
+  const query = useQuery(
+    ['poolRestrictions', poolId, trancheId, lp?.lpAddress, chainId],
+    async () => {
+      return cent.liquidityPools.getRestrictions([lp!.trancheTokenAddress, address!], {
+        rpcProvider: getProvider(chainId!),
+      })
+    },
+    {
+      enabled: !!lp,
+    }
+  )
+  return query
+}
+
 function timeout(ms: number): Promise<never> {
   return new Promise((_, reject) => setTimeout(() => reject(new Error('Operation timed out')), ms))
 }

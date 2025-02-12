@@ -1,4 +1,6 @@
-import { useGetExplorerUrl, useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { CurrencyKey } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction, useGetExplorerUrl, useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
 import {
   Accordion,
   Box,
@@ -16,38 +18,75 @@ import {
   TextInput,
   truncate,
 } from '@centrifuge/fabric'
-import { Field, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
-import { useMemo, useState } from 'react'
+import { Field, FieldArray, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
+import { useState } from 'react'
 import { useSelectedPools2 } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains, useDomainRouters } from '../../../utils/useLiquidityPools'
-import { usePool, usePoolMetadataMulti, usePools } from '../../../utils/usePools'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePool, usePoolMetadataMulti } from '../../../utils/usePools'
 
-type InitialValues = {
-  networks: {
-    poolManager: string
-    poolId: string
-    trancheId: string
-    currencyAddress: string
-  }[]
+interface NetworkCurrency {
+  checked: boolean
+  currencyNeedsAdding: boolean
+}
+
+interface Network {
+  chainId: number
+  poolId: string
+  currencies: Record<string, NetworkCurrency> // key is currencyAddress
+}
+
+interface NetworkFormValues {
+  networks: Network[]
 }
 
 export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const pools = usePools()
   const domains = useDomainRouters()
   const getNetworkName = useGetNetworkName()
+  const { selectedPools } = useSelectedPools2(true)
 
-  const initialValues: InitialValues = useMemo(() => {
-    return {
-      networks: [],
-    }
-  }, [domains, pools])
+  // TODO: find a way to get suitable account for selected pool, any pool that'ss available in the selected list should have pooladmin permissions
+  const [account] = useSuitableAccounts({ poolId: selectedPools?.[0] ?? '', proxyType: ['PoolAdmin'] })
 
-  const formik = useFormik<InitialValues>({
+  const { execute } = useCentrifugeTransaction(
+    'Enable networks',
+    (cent) =>
+      (
+        args: [
+          poolId: string,
+          chainId: number,
+          currencyKeysToAdd: CurrencyKey[],
+          tokenPricesToUpdate: [string, CurrencyKey][]
+        ][],
+        options?: CentrifugeTransactionOptions
+      ) => {
+        return cent.liquidityPools.enablePoolOnDomain(args, options)
+      }
+  )
+
+  const initialValues: NetworkFormValues = {
+    networks: [],
+  }
+
+  const formik = useFormik<NetworkFormValues>({
     initialValues,
     enableReinitialize: true,
     onSubmit: (values) => {
-      // checkboxes can't be checked
-      console.log(values)
+      const formattedValues = values.networks.map((network) => {
+        const currenciesToAdd = Object.keys(network.currencies)
+          .filter((key) => network.currencies[key].currencyNeedsAdding)
+          .map((key) => key as CurrencyKey)
+        return [network.poolId, network.chainId, currenciesToAdd, []]
+      })
+      execute(
+        formattedValues as [
+          poolId: string,
+          chainId: number,
+          currencyKeysToAdd: CurrencyKey[],
+          tokenPricesToUpdate: [string, CurrencyKey][]
+        ][],
+        { account }
+      )
     },
   })
 
@@ -66,6 +105,7 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
             <Form>
               <Stack gap={2}>
                 {domains
+                  ?.slice(0, 2)
                   // filters out goerli networks on demo, they are not supported by the providers anymore
                   ?.filter((domain) => getNetworkName(domain.chainId || 'centrifuge') !== 'Unknown')
                   .map((domain, index) => (
@@ -96,13 +136,13 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
 }
 
 function SupportedNetworks({ chainId, index }: { chainId: number; index: number }) {
-  const formik = useFormikContext<InitialValues>()
+  const formik = useFormikContext<NetworkFormValues>()
   const { pools } = useSelectedPools2()
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const [selectedPool, setSelectedPool] = useState<string | null>(pools?.[0]?.id ?? null)
 
   const getNetworkName = useGetNetworkName()
-  const { data: domains, isLoading } = useActiveDomains(selectedPool ?? '')
+  const { data: domains } = useActiveDomains(selectedPool ?? '')
   const domain = domains?.find((d) => d.chainId === chainId)
 
   return (
@@ -135,47 +175,75 @@ function SupportedNetworks({ chainId, index }: { chainId: number; index: number 
                   Tokens
                 </Text>
 
-                {domain?.currencies.map((currency) => {
-                  return (
-                    <Field name={`networks[${index}].currencyAddress`}>
-                      {({ field }: { field: any }) => (
-                        <Checkbox
-                          key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
-                          label={
-                            <Text variant="label2">
-                              {currency.displayName} ({currency.symbol})
-                            </Text>
-                          }
-                          checked={field.value ?? !domain?.liquidityPools[currency.address]}
-                          disabled={!domain?.liquidityPools[currency.address]}
-                          onChange={(event) => {
-                            if (event.target.checked) {
-                              formik.setFieldValue(`networks[${index}].currencyAddress`, currency.address)
-                              formik.setFieldValue(`networks[${index}].poolManager`, domain?.poolManager)
-                              formik.setFieldValue(`networks[${index}].poolId`, selectedPool)
-                              formik.setFieldValue(
-                                `networks[${index}].trancheId`,
-                                pools
-                                  ?.find((p) => p.id === selectedPool)
-                                  ?.tranches.filter(
-                                    // @ts-expect-error
-                                    (t) => domain?.liquidityPools?.[chainId]?.currencyNeedsAdding?.[t.id] === true
-                                  )
-                                  .map((t) => t.id)
+                <FieldArray name={`networks`}>
+                  {() => (
+                    <>
+                      {domain?.currencies.map((currency) => {
+                        return (
+                          <Field name={`networks[${index}]`}>
+                            {({ field }: { field: any }) => {
+                              return (
+                                <Checkbox
+                                  key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
+                                  label={
+                                    <Text variant="label2">
+                                      {currency.displayName} ({currency.symbol})
+                                    </Text>
+                                  }
+                                  checked={
+                                    field.value?.currencies?.[currency.address]?.checked ??
+                                    domain?.isAllowedAsset[currency.address]
+                                  }
+                                  // !isAllowedAsset[currency.address] means that the asset is already enabled, it cannot be disabled
+                                  disabled={domain?.isAllowedAsset[currency.address]}
+                                  onChange={(event) => {
+                                    if (event.target.checked) {
+                                      // Check if the network already exists
+                                      if (!formik.values.networks[index]) {
+                                        formik.setFieldValue(`networks[${index}]`, {
+                                          chainId,
+                                          poolId: selectedPool,
+                                          currencies: {
+                                            [currency.address]: {
+                                              currencyNeedsAdding: domain?.currencyNeedsAdding[currency.address],
+                                              checked: true,
+                                            },
+                                          },
+                                        })
+                                      } else {
+                                        // Add currency to existing network
+                                        formik.setFieldValue(`networks[${index}].currencies.${currency.address}`, {
+                                          currencyNeedsAdding: domain?.currencyNeedsAdding[currency.address],
+                                          checked: true,
+                                        })
+                                      }
+                                    }
+                                    if (!event.target.checked) {
+                                      const updatedCurrencies = {
+                                        ...formik.values.networks[index]?.currencies,
+                                      }
+                                      delete updatedCurrencies[currency.address]
+
+                                      // If no currencies left, remove the entire network
+                                      if (Object.keys(updatedCurrencies).length === 0) {
+                                        const updatedNetworks = [...formik.values.networks]
+                                        updatedNetworks.splice(index, 1)
+                                        formik.setFieldValue('networks', updatedNetworks)
+                                      } else {
+                                        // Otherwise just update currencies
+                                        formik.setFieldValue(`networks[${index}].currencies`, updatedCurrencies)
+                                      }
+                                    }
+                                  }}
+                                />
                               )
-                            }
-                            if (!event.target.checked) {
-                              const filteredNetworks = formik.values.networks.filter((network) => {
-                                return network.currencyAddress !== currency.address
-                              })
-                              formik.setFieldValue(`networks`, filteredNetworks)
-                            }
-                          }}
-                        />
-                      )}
-                    </Field>
-                  )
-                })}
+                            }}
+                          </Field>
+                        )
+                      })}
+                    </>
+                  )}
+                </FieldArray>
               </Stack>
             </>
           ),

@@ -215,7 +215,6 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     initialValues: formInitialValues,
     enableReinitialize: true, // resets values when poolId changes
     onSubmit: async (values, actions) => {
-      console.log('🚀 ~ values:', values)
       if (!values || !poolMetadata) {
         return
       }

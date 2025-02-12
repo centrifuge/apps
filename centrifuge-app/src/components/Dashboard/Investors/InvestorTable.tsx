@@ -42,6 +42,24 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
   const investors = useInvestorListMulti(pools?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
 
+  // const data = [
+  //   {
+  //     wallet: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
+  //     trancheId: '0xc4bbcd7f0ad814f2625b93561a6ca3c1',
+  //     network: 11155111,
+  //     poolId: '1464125771',
+  //     tokenName: 'USDC',
+  //     poolCurrency: 'USDC',
+  //     poolIcon: null,
+  //     holdings: new CurrencyBalance(100, 6),
+  //     pendingInvestments: new CurrencyBalance(10000, 6),
+  //     pendingRedemptions: new CurrencyBalance(100, 6),
+  //     investorSince: '2025-02-12',
+  //     unrealizedProfit: new CurrencyBalance(100, 6),
+  //     realizedProfit: new CurrencyBalance(100, 6),
+  //     investorId: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f-0xc4bbcd7f0ad814f2625b93561a6ca3c1-11155111',
+  //   },
+  // ]
   const data: InvestorTableRow[] =
     investors?.map((investor) => {
       // match metadata to pool by trancheId since poolId doesnt exist in metadata
@@ -80,7 +98,9 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
         return (
           <Shelf gap={1}>
             <Box as="img" width="iconMedium" height="iconMedium" src={iconUri} borderRadius={4} />
-            <Text fontWeight="500">{row.tokenName}</Text>
+            <Text variant="body3" fontWeight="500">
+              {row.tokenName}
+            </Text>
           </Shelf>
         )
       },
@@ -89,7 +109,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
       header: <SearchableTableHeader label="Wallet" value={searchValue} onSubmit={setSearchValue} />,
       align: 'left',
       cell: (row: InvestorTableRow) => (
-        <Text style={{ cursor: 'copy' }} onClick={() => copyToClipboard(row.wallet)}>
+        <Text variant="body3" fontWeight="500" style={{ cursor: 'copy' }} onClick={() => copyToClipboard(row.wallet)}>
           {truncate(row.wallet)}
         </Text>
       ),
@@ -104,7 +124,9 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
               investor.network,
               <Shelf gap={1}>
                 <NetworkIcon size="iconMedium" network={investor.network || 'centrifuge'} />
-                <Text>{getNetworkName(investor.network || 'centrifuge')}</Text>
+                <Text variant="body3" fontWeight="500">
+                  {getNetworkName(investor.network || 'centrifuge')}
+                </Text>
               </Shelf>,
             ])
           )}
@@ -119,25 +141,41 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
       header: <SortableTableHeader label="Holdings" />,
       align: 'left',
       sortKey: 'holdings',
-      cell: (row: InvestorTableRow) => <Text>{formatBalance(row.holdings, row.tokenName, 2)}</Text>,
+      cell: (row: InvestorTableRow) => (
+        <Text variant="body3" fontWeight="500">
+          {formatBalance(row.holdings, row.tokenName, 2)}
+        </Text>
+      ),
     },
     {
       header: <SortableTableHeader label="Pending investments" />,
       align: 'left',
       sortKey: 'pendingInvestments',
-      cell: (row: InvestorTableRow) => <Text>{formatBalance(row.pendingInvestments, row.poolCurrency, 2)}</Text>,
+      cell: (row: InvestorTableRow) => (
+        <Text variant="body3" fontWeight="500">
+          {formatBalance(row.pendingInvestments, row.poolCurrency, 2)}
+        </Text>
+      ),
     },
     {
       header: <SortableTableHeader label="Pending redemptions" />,
       align: 'left',
       sortKey: 'pendingRedemptions',
-      cell: (row: InvestorTableRow) => <Text>{formatBalance(row.pendingRedemptions, row.poolCurrency, 2)}</Text>,
+      cell: (row: InvestorTableRow) => (
+        <Text variant="body3" fontWeight="500">
+          {formatBalance(row.pendingRedemptions, row.poolCurrency, 2)}
+        </Text>
+      ),
     },
     {
       header: <SortableTableHeader label="Investor since" />,
       align: 'left',
       sortKey: 'investorSince',
-      cell: (row: InvestorTableRow) => <Text>{formatDate(row.investorSince)}</Text>,
+      cell: (row: InvestorTableRow) => (
+        <Text variant="body3" fontWeight="500">
+          {formatDate(row.investorSince)}
+        </Text>
+      ),
     },
   ]
   const tableData = filters.data.filter((i) => (searchValue ? i.wallet.includes(searchValue) : true))

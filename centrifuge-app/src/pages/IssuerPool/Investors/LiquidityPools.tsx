@@ -262,11 +262,10 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
   return (
     <Button
       loading={isLoading}
-      onClick={() =>
-        execute([poolId, domain.chainId, currenciesToAdd, tokenPricesToUpdate, domain.chainId], {
-          account: poolAdmin,
-        })
-      }
+      onClick={() => console.log('enable')}
+      // execute([poolId, domain.chainId, currenciesToAdd, tokenPricesToUpdate], {
+      //   account: poolAdmin,
+      // })
       small
     >
       Enable
