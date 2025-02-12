@@ -28,8 +28,6 @@ export default function Dashboard() {
   const [selectedAumOption, setSelectedAumOption] = useState(aumOptions[0])
   const { growth } = useNavGrowth(filteredPools, selectedAumOption.value as 'YTD' | '180d' | '90d')
 
-  console.log(growth > 0)
-
   useEffect(() => {
     if (selectedPools.length === 0 && pools.length > 0) {
       setSelectedPools(pools.map((pool) => pool.id))
@@ -58,24 +56,28 @@ export default function Dashboard() {
         <Grid display="flex" alignItems="center" height={40} gap={1}>
           <Text variant="heading4">Total AUM</Text>
           <Box display="flex" alignItems="center">
-            {growth && growth > 0 ? (
-              <IconArrowUp color={theme.colors.statusOk} />
-            ) : (
-              <IconArrowDown color={theme.colors.statusCritical} />
-            )}
-            <Text>{growth ? formatPercentage(growth) : '...'}</Text>
+            <Box display="flex" alignItems="center" ml={1}>
+              {growth && growth > 0 ? (
+                <IconArrowUp color={theme.colors.statusOk} size={20} />
+              ) : (
+                <IconArrowDown color={theme.colors.statusCritical} size={20} />
+              )}
+              <Text variant="body2" color={growth > 0 ? theme.colors.statusOk : theme.colors.statusCritical}>
+                {growth ? formatPercentage(growth) : '...'}
+              </Text>
+            </Box>
+            <Select
+              options={aumOptions}
+              onChange={(e) =>
+                setSelectedAumOption(aumOptions.find((option) => option.value === e.target.value) ?? aumOptions[0])
+              }
+              value={selectedAumOption.value}
+              variant="secondary"
+              hideBorder
+              small
+              style={{ paddingRight: '18px' }}
+            />
           </Box>
-          <Select
-            options={aumOptions}
-            onChange={(e) =>
-              setSelectedAumOption(aumOptions.find((option) => option.value === e.target.value) ?? aumOptions[0])
-            }
-            value={selectedAumOption.value}
-            variant="secondary"
-            hideBorder
-            small
-            style={{ paddingRight: '18px' }}
-          />
         </Grid>
       ),
       value: `$${formatBalance(totalNAV)}`,
