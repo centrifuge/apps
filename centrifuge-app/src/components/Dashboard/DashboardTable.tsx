@@ -7,8 +7,7 @@ import { useTheme } from 'styled-components'
 import { Dec } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../DataTable'
-import { useGetPoolsMetadata } from './Assets/utils'
-import { calculateApyPerToken } from './utils'
+import { calculateApyPerToken, useGetPoolsMetadata } from './utils'
 
 export type Row = {
   poolIcon: string
