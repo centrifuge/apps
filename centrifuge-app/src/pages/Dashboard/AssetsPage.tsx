@@ -7,8 +7,8 @@ import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsConte
 import { formatBalance } from '../../../src/utils/formatting'
 import { useLoans } from '../../../src/utils/useLoans'
 import AssetsTable from '../../components/Dashboard/Assets/AssetsTable'
-import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/Assets/utils'
 import { PoolSelector } from '../../components/Dashboard/PoolSelector'
+import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/utils'
 
 export default function AssetsPage() {
   const { selectedPools, togglePoolSelection, setSelectedPools, pools = [] } = useSelectedPools()

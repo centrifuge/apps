@@ -24,10 +24,10 @@ import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useMetadata } from '../../../utils/useMetadata'
 import { useFilterPoolsByUserRole, usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
 import { LoadBoundary } from '../../LoadBoundary'
+import { usePoolMetadataMap, valuesToNftProperties } from '../utils'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
-import { usePoolMetadataMap, valuesToNftProperties } from './utils'
 
 export type PoolWithMetadata = Pool & { meta: PoolMetadata }
 
