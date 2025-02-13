@@ -159,7 +159,7 @@ export const DataTable = <T extends Record<string, any>>({
           styles={
             hideHeader
               ? {
-                  backgroundColor: 'transparent',
+                  backgroundColor: theme.colors.backgroundPrimary,
                   border: 'transparent',
                   borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
                 }
