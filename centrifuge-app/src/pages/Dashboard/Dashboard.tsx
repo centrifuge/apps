@@ -8,9 +8,8 @@ import { Dec } from '../../../src/utils/Decimal'
 import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsContext'
 import { formatBalance, formatPercentage } from '../../../src/utils/formatting'
 import { useLiquidityMulti } from '../../../src/utils/useLiquidity'
-import { useTotalNAV } from '../../components/Dashboard/Assets/utils'
 import { DashboardTable } from '../../components/Dashboard/DashboardTable'
-import { useNavGrowth } from '../../components/Dashboard/utils'
+import { useNavGrowth, useTotalNAV } from '../../components/Dashboard/utils'
 
 const aumOptions = [
   { label: 'YTD', value: 'YTD' },
