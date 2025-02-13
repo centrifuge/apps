@@ -1,6 +1,6 @@
 import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Divider, Grid, Text } from '@centrifuge/fabric'
+import { Box, Button, Divider, Grid, IconSettings, IconUsers, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
@@ -13,12 +13,11 @@ import { calculateApyPerToken } from './utils'
 export type Row = {
   poolIcon: string
   poolName: string
-  tranches: {
-    tranchetoken: string
-    apy: string
-    navPerToken: CurrencyBalance
-    valueLocked: Decimal
-  }[]
+  trancheToken: string
+  apy: string
+  navPerToken: CurrencyBalance
+  valueLocked: Decimal
+  poolId: string
 }
 
 export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
@@ -27,18 +26,17 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
   const pools = useGetPoolsMetadata(filteredPools || [])
 
   const data = useMemo(() => {
-    return pools.map((pool) => {
-      return {
+    return pools.flatMap((pool) =>
+      pool.tranches.map((token: Token) => ({
         poolIcon: cent.metadata.parseMetadataUrl(pool.meta?.pool?.icon?.uri),
         poolName: pool.meta?.pool?.name,
-        tranches: pool.tranches.map((token: Token) => ({
-          tranchetoken: token.currency.displayName,
-          apy: calculateApyPerToken(token, pool),
-          navPerToken: token.tokenPrice,
-          valueLocked: token?.tokenPrice ? token.totalIssuance.toDecimal().mul(token.tokenPrice.toDecimal()) : Dec(0),
-        })),
-      }
-    })
+        trancheToken: token.currency.displayName,
+        apy: calculateApyPerToken(token, pool),
+        navPerToken: token.tokenPrice,
+        valueLocked: token?.tokenPrice ? token.totalIssuance.toDecimal().mul(token.tokenPrice.toDecimal()) : Dec(0),
+        poolId: pool.id,
+      }))
+    )
   }, [pools])
 
   const columns = useMemo(() => {
@@ -59,62 +57,23 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
       },
       {
         header: 'Tranche',
-        cell: ({ tranches }: Row) => {
-          return (
-            <Grid gap={2}>
-              {tranches.map((tranche, index) => (
-                <Box key={index}>
-                  <Text variant="body3">{tranche.tranchetoken}</Text>
-                </Box>
-              ))}
-            </Grid>
-          )
-        },
+        sortKey: 'tranchetoken',
+        cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
       },
       {
         header: <SortableTableHeader label="APY" />,
-        sortKey: 'tranches.apy',
-        cell: ({ tranches }: Row) => {
-          return (
-            <Grid gap={2}>
-              {tranches.map((tranche, index) => (
-                <Box key={index}>
-                  <Text variant="body3">{tranche.apy}</Text>
-                </Box>
-              ))}
-            </Grid>
-          )
-        },
+        sortKey: 'apy',
+        cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
       },
       {
         header: <SortableTableHeader label="NAV (USDC)" />,
-        sortKey: 'tranches.valueLocked',
-        cell: ({ tranches }: Row) => {
-          return (
-            <Grid gap={2}>
-              {tranches.map((tranche, index) => (
-                <Box key={index}>
-                  <Text variant="body3">{tranche.valueLocked ? formatBalance(tranche.valueLocked) : '-'}</Text>
-                </Box>
-              ))}
-            </Grid>
-          )
-        },
+        sortKey: 'valueLocked',
+        cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
       },
       {
         header: <SortableTableHeader label="NAV per share" />,
-        sortKey: 'tranches.navPerToken',
-        cell: ({ tranches }: Row) => {
-          return (
-            <Grid gap={2}>
-              {tranches.map((tranche, index) => (
-                <Box key={index}>
-                  <Text variant="body3">{tranche.navPerToken ? formatBalance(tranche.navPerToken) : '-'}</Text>
-                </Box>
-              ))}
-            </Grid>
-          )
-        },
+        sortKey: 'navPerToken',
+        cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
       },
     ]
   }, [pools])
@@ -123,7 +82,22 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
 
   return (
     <Box>
-      <DataTable data={data || []} columns={columns} scrollable hideBorder hideHeader />
+      <Grid display="flex" justifyContent="flex-end" gap={2} mb={2}>
+        <Button variant="inverted" small icon={IconUsers} onClick={() => {}}>
+          Access
+        </Button>
+        <Button variant="inverted" small icon={IconSettings} onClick={() => {}}>
+          Configuration
+        </Button>
+      </Grid>
+      <DataTable
+        data={data || []}
+        columns={columns}
+        scrollable
+        hideBorder
+        hideHeader
+        onRowClicked={(row) => `/pools/${row.poolId}`}
+      />
       <Divider color={theme.colors.backgroundSecondary} />
     </Box>
   )
