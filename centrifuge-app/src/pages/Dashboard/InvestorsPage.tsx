@@ -1,5 +1,6 @@
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useState } from 'react'
+import { useTheme } from 'styled-components'
 import { SupportedNetworksDrawer } from '../..//components/Dashboard/Investors/SupportedNetworksDrawer'
 import { AddNewInvestorDrawer } from '../../components/Dashboard/Investors/AddNewInvestorDrawer'
 import { InvestorTable } from '../../components/Dashboard/Investors/InvestorTable'
@@ -8,6 +9,7 @@ import { useSelectedPools } from '../../utils/contexts/SelectedPoolsContext'
 import { useInvestorListMulti } from '../../utils/usePools'
 
 export default function InvestorsPage() {
+  const theme = useTheme()
   const { pools, selectedPools, togglePoolSelection } = useSelectedPools(true)
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
   const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
@@ -39,10 +41,17 @@ export default function InvestorsPage() {
       </Shelf>
       <Shelf justifyContent="space-between">
         <Shelf gap={1}>
-          <Box backgroundColor="backgroundTertiary" borderRadius={100} padding="2px 4px">
-            <Text variant="body2" fontWeight="600">
-              {investors?.length ?? 1 - 1}
-            </Text>
+          <Box
+            background={theme.colors.backgroundTertiary}
+            borderRadius="50%"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            width="28px"
+            height="28px"
+            style={{ fontWeight: 500, fontSize: 12 }}
+          >
+            {investors?.length ?? 1 - 1}
           </Box>
           <Text variant="body2" fontWeight="700">
             Investors

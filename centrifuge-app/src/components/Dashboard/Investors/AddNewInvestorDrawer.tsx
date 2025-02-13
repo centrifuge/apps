@@ -28,7 +28,6 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
       network: '',
     },
     onSubmit: (values) => {
-      console.log(values)
       const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
       const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
       const validator = typeof values.network === 'number' ? isEvmAddress : isAddress

@@ -55,22 +55,3 @@ export const SelectedPoolsProvider = ({ children }: SelectedPoolsProviderProps) 
     </SelectedPoolsContext.Provider>
   )
 }
-
-export function useSelectedPools2(defaultSelectAll: boolean = false) {
-  // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor()
-  // FOR TESTING ONLY
-  const pools = usePools()
-  const [selectedPools, setSelectedPools] = useState<string[]>(defaultSelectAll ? pools?.map((p) => p.id) ?? [] : [])
-
-  const togglePoolSelection = (poolId: string) => {
-    setSelectedPools((prevSelected) =>
-      prevSelected.includes(poolId) ? prevSelected.filter((id) => id !== poolId) : [...prevSelected, poolId]
-    )
-  }
-
-  const clearSelectedPools = () => {
-    setSelectedPools([])
-  }
-
-  return { pools, selectedPools, togglePoolSelection, clearSelectedPools }
-}
