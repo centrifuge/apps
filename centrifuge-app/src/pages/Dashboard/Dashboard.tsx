@@ -1,7 +1,7 @@
 import { Box, Checkbox, Grid, IconArrowDown, IconArrowUp, Select, Text } from '@centrifuge/fabric'
 import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { PoolCard } from '../../../src/components/Dashboard/PoolCard'
+import { PoolSelector } from '../../../src/components/Dashboard/PoolSelector'
 import { useTotalNAV } from '../../../src/components/Dashboard/assets/utils'
 import { PageSummary } from '../../../src/components/PageSummary'
 import { Spinner } from '../../../src/components/Spinner'
@@ -112,7 +112,7 @@ export default function Dashboard() {
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         {pools.map((pool, index) => (
-          <PoolCard
+          <PoolSelector
             key={index}
             pool={pool}
             active={selectedPools.includes(pool.id)}
