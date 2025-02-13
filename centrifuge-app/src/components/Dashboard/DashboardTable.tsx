@@ -7,7 +7,7 @@ import { useTheme } from 'styled-components'
 import { Dec } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../DataTable'
-import { useGetPoolsMetadata } from './assets/utils'
+import { useGetPoolsMetadata } from './Assets/utils'
 import { calculateApyPerToken } from './utils'
 
 export type Row = {
