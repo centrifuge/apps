@@ -128,29 +128,35 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       sortable: false,
       csvOnly: false,
       width: '100px',
-      formatter: (v: any) => (
-        <IconAnchor
-          href={explorer.tx(v)}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="View account on block explorer"
-        >
-          <IconExternalLink />
-        </IconAnchor>
-      ),
+      formatter: (v: any, values: any) => {
+        const chainId = values.at(-1)
+        return (
+          <IconAnchor
+            href={explorer.tx(v, chainId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View account on block explorer"
+          >
+            <IconExternalLink />
+          </IconAnchor>
+        )
+      },
     },
   ]
 
   const columns = columnConfig
 
-    .map((col, index) => ({
-      align: col.align,
-      header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
-      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row.value)}</Text>,
-      width: col.width ?? '200px',
-      sortKey: col.sortable ? `value[${index}]` : undefined,
-      csvOnly: col.csvOnly,
-    }))
+    .map((col, index) => {
+      console.log('COLLLL', col)
+      return {
+        align: col.align,
+        header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
+        cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row.value)}</Text>,
+        width: col.width ?? '200px',
+        sortKey: col.sortable ? `value[${index}]` : undefined,
+        csvOnly: col.csvOnly,
+      }
+    })
     .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -185,6 +191,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
             tx.price?.toFloat() ?? '-',
             pool.currency.symbol,
             tx.transactionHash,
+            tx.chainId,
           ],
           heading: false,
         }
