@@ -21,7 +21,7 @@ const noop = (v: any) => v
 export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate, txType, address, network } = React.useContext(ReportContext)
   const utils = useCentrifugeUtils()
-  const explorer = useGetExplorerUrl('centrifuge')
+  const explorer = useGetExplorerUrl()
 
   const { data: transactions = [], isLoading } = useReport(
     'investorTransactions',
@@ -33,7 +33,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       ...(address && { address }),
       ...(activeTranche !== 'all' && { tokenId: activeTranche }),
       ...(network !== 'all' && network && { network }),
-      ...(txType !== 'all' && { transactionType: txType }),
+      ...(txType !== 'all' && { transactionType: txType.toLowerCase() }),
     }
   )
 
@@ -44,6 +44,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       sortable: false,
       csvOnly: false,
       formatter: noop,
+      width: '20%',
     },
     {
       header: 'Network',
@@ -147,7 +148,6 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   const columns = columnConfig
 
     .map((col, index) => {
-      console.log('COLLLL', col)
       return {
         align: col.align,
         header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
@@ -191,6 +191,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
             tx.price?.toFloat() ?? '-',
             pool.currency.symbol,
             tx.transactionHash,
+            tx.account,
             tx.chainId,
           ],
           heading: false,
