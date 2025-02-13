@@ -43,49 +43,49 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
   const investors = useInvestorListMulti(pools?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
 
-  // const data: InvestorTableRow[] = [
-  //   {
-  //     wallet: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
-  //     trancheId: '0xc4bbcd7f0ad814f2625b93561a6ca3c1',
-  //     network: 11155111,
-  //     poolId: '1464125771',
-  //     tokenName: 'USDC',
-  //     poolCurrency: 'USDC',
-  //     poolIcon: null,
-  //     holdings: new CurrencyBalance(100, 6),
-  //     pendingInvestments: new CurrencyBalance(10000, 6),
-  //     pendingRedemptions: new CurrencyBalance(100, 6),
-  //     investorSince: '2025-02-12',
-  //     unrealizedProfit: new CurrencyBalance(100, 6),
-  //     realizedProfit: new CurrencyBalance(100, 6),
-  //     investorId: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f-0xc4bbcd7f0ad814f2625b93561a6ca3c1-11155111',
-  //   },
-  // ]
-  const data: InvestorTableRow[] =
-    investors?.map((investor) => {
-      // match metadata to pool by trancheId since poolId doesnt exist in metadata
-      const metadata = poolMetadata.find((p) => Object.keys(p.data?.tranches ?? {}).includes(investor.trancheId))
-      const tokenName = pools
-        ?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))
-        ?.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
-      const poolCurrency = pools?.find((p) => p.id === investor.poolId)?.currency.displayName
-      return {
-        tokenName,
-        trancheId: investor.trancheId,
-        poolId: investor.poolId,
-        poolIcon: metadata?.data?.pool?.icon,
-        poolCurrency,
-        wallet: investor?.evmAddress || investor.accountId || '',
-        network: investor.chainId,
-        holdings: investor.balance,
-        pendingInvestments: investor.pendingInvestCurrency,
-        pendingRedemptions: investor.pendingRedeemTrancheTokens,
-        investorSince: investor.initialisedAt,
-        unrealizedProfit: investor.unrealizedProfit,
-        realizedProfit: investor.sumClaimedCurrency,
-        investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
-      }
-    }) ?? []
+  const data: InvestorTableRow[] = [
+    {
+      wallet: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
+      trancheId: '0xc4bbcd7f0ad814f2625b93561a6ca3c1',
+      network: 11155111,
+      poolId: '1464125771',
+      tokenName: 'USDC',
+      poolCurrency: 'USDC',
+      poolIcon: null,
+      holdings: new CurrencyBalance(100, 6),
+      pendingInvestments: new CurrencyBalance(10000, 6),
+      pendingRedemptions: new CurrencyBalance(100, 6),
+      investorSince: '2025-02-12',
+      unrealizedProfit: new CurrencyBalance(100, 6),
+      realizedProfit: new CurrencyBalance(100, 6),
+      investorId: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f-0xc4bbcd7f0ad814f2625b93561a6ca3c1-11155111',
+    },
+  ]
+  // const data: InvestorTableRow[] =
+  //   investors?.map((investor) => {
+  //     // match metadata to pool by trancheId since poolId doesnt exist in metadata
+  //     const metadata = poolMetadata.find((p) => Object.keys(p.data?.tranches ?? {}).includes(investor.trancheId))
+  //     const tokenName = pools
+  //       ?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))
+  //       ?.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
+  //     const poolCurrency = pools?.find((p) => p.id === investor.poolId)?.currency.displayName
+  //     return {
+  //       tokenName,
+  //       trancheId: investor.trancheId,
+  //       poolId: investor.poolId,
+  //       poolIcon: metadata?.data?.pool?.icon,
+  //       poolCurrency,
+  //       wallet: investor?.evmAddress || investor.accountId || '',
+  //       network: investor.chainId,
+  //       holdings: investor.balance,
+  //       pendingInvestments: investor.pendingInvestCurrency,
+  //       pendingRedemptions: investor.pendingRedeemTrancheTokens,
+  //       investorSince: investor.initialisedAt,
+  //       unrealizedProfit: investor.unrealizedProfit,
+  //       realizedProfit: investor.sumClaimedCurrency,
+  //       investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
+  //     }
+  //   }) ?? []
   const filters = useFilters({ data })
   const [searchValue, setSearchValue] = useState('')
 
