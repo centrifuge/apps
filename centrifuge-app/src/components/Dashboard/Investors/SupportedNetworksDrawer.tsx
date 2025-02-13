@@ -46,9 +46,7 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
   const getNetworkName = useGetNetworkName()
   const { selectedPools } = useSelectedPools(true)
   const [selectedPool, setSelectedPool] = useState<string | null>(selectedPools?.[0] ?? null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(
-    'Transaction complete. Please visit Axelar to finish enabling the network.'
-  )
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const admin = usePoolAdmin(selectedPool ?? '')
 
@@ -134,19 +132,21 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
                       />
                     </Box>
                   ))}
-                <Shelf
-                  p={1}
-                  borderRadius={8}
-                  backgroundColor="statusWarningBg"
-                  justifyContent="flex-start"
-                  alignItems="flex-start"
-                  gap={1}
-                >
-                  <IconInfo size="iconSmall" color="statusWarning" />
-                  <Text variant="body2" color="statusWarning">
-                    {successMessage}
-                  </Text>
-                </Shelf>
+                {successMessage && (
+                  <Shelf
+                    p={1}
+                    borderRadius={8}
+                    backgroundColor="statusWarningBg"
+                    justifyContent="flex-start"
+                    alignItems="flex-start"
+                    gap={1}
+                  >
+                    <IconInfo size="iconSmall" color="statusWarning" />
+                    <Text variant="body2" color="statusWarning">
+                      {successMessage}
+                    </Text>
+                  </Shelf>
+                )}
                 <Button variant="primary" small type="submit">
                   Update
                 </Button>
@@ -182,7 +182,6 @@ function SupportedNetworks({
   const formik = useFormikContext<NetworkFormValues>()
   const { pools } = useSelectedPools()
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
-  const pool = usePool(selectedPool ?? '')
   const getNetworkName = useGetNetworkName()
   const { data: domains } = useActiveDomains(selectedPool ?? '')
   const domain = domains?.find((d) => d.chainId === chainId)
