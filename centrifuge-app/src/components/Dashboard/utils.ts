@@ -125,6 +125,18 @@ export function usePoolMetadataMap(pools: Pool[]) {
   return poolMetadataMap
 }
 
+export function useGetPoolsMetadata(pools: Pool[]) {
+  const metas = usePoolMetadataMap(pools)
+  return (
+    pools?.map((pool) => {
+      const meta = metas.get(pool.id)
+      return {
+        ...pool,
+        meta,
+      }
+    }) || []
+  )
+}
 export function valuesToNftProperties(values: CreateAssetFormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
