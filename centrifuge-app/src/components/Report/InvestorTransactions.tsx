@@ -159,46 +159,6 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     }
 
     return transactions
-      ?.filter((tx) => {
-        if (txType === 'all') {
-          return true
-        }
-
-        if (
-          txType === 'orders' &&
-          (tx.transactionType === 'INVEST_ORDER_UPDATE' ||
-            tx.transactionType === 'REDEEM_ORDER_UPDATE' ||
-            tx.transactionType === 'INVEST_ORDER_CANCEL' ||
-            tx.transactionType === 'REDEEM_ORDER_CANCEL')
-        ) {
-          return true
-        }
-
-        if (
-          txType === 'executions' &&
-          (tx.transactionType === 'INVEST_EXECUTION' || tx.transactionType === 'REDEEM_EXECUTION')
-        ) {
-          return true
-        }
-
-        if (
-          txType === 'transfers' &&
-          (tx.transactionType === 'INVEST_COLLECT' ||
-            tx.transactionType === 'REDEEM_COLLECT' ||
-            tx.transactionType === 'INVEST_LP_COLLECT' ||
-            tx.transactionType === 'REDEEM_LP_COLLECT' ||
-            tx.transactionType === 'TRANSFER_IN' ||
-            tx.transactionType === 'TRANSFER_OUT')
-        ) {
-          return true
-        }
-
-        return false
-      })
-      .filter((tx) => {
-        if (!network || network === 'all') return true
-        return network === (tx.chainId || 'centrifuge')
-      })
       .map((tx) => {
         const token = pool.tranches.find((t) => t.id === tx.trancheTokenId)!
         return {
