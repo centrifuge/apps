@@ -40,6 +40,7 @@ export const Inner = styled(Grid)`
   bottom: 0;
   overflow-y: auto;
   padding-right: 12px;
+  overflow-x: hidden;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['M']}) and (max-width: ${({ theme }) =>
       theme.breakpoints['L']}) {
