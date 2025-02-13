@@ -55,7 +55,6 @@ export function PoolDetailAssets() {
     return (
       <Shelf p={4} gap={2}>
         <Text>No assets have been originated yet</Text>
-        <CreateAssetButton poolId={poolId} />
       </Shelf>
     )
   }
