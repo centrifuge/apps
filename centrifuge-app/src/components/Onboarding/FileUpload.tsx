@@ -3,7 +3,7 @@ import {
   Button,
   Flex,
   IconAlertCircle,
-  IconFileText,
+  IconFile,
   IconX,
   Shelf,
   Spinner,
@@ -167,7 +167,7 @@ export function FileUpload({
                   ) : errorMessage ? (
                     <IconAlertCircle color={disabled ? 'textDisabled' : 'textPrimary'} />
                   ) : (
-                    <IconFileText color={disabled ? 'textDisabled' : 'textPrimary'} />
+                    <IconFile color={disabled ? 'textDisabled' : 'textPrimary'} />
                   )}
                 </Flex>
 
