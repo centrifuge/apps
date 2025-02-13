@@ -13,8 +13,8 @@ import { DataTable, FilterableTableHeader, SortableTableHeader } from '../../Dat
 import { LoanLabel, getLoanLabelStatus } from '../../LoanLabel'
 import { Amount, getAmount } from '../../LoanList'
 import { Spinner } from '../../Spinner'
-import { CreateAssetsDrawer } from '../CreateAssetsDrawer'
 import { TransformedLoan, usePoolMetadataMap } from '../utils'
+import { CreateAssetsDrawer } from './CreateAssetsDrawer'
 
 const StyledButton = styled(AnchorButton)`
   & > span {
