@@ -111,7 +111,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
-  }, [pool.currency.displayName, poolStates])
+  }, [currency, poolStates])
 
   const trancheRecords: Row[] = React.useMemo(() => {
     return [
@@ -167,7 +167,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
-  }, [poolStates, pool])
+  }, [poolStates, pool, currency])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 

@@ -22,12 +22,7 @@ import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { LoanTemplate } from '../../../types'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useMetadata } from '../../../utils/useMetadata'
-import {
-  useFilterPoolsByUserRole,
-  usePoolAccess,
-  usePoolAdmin,
-  useSuitableAccounts,
-} from '../../../utils/usePermissions'
+import { useFilterPoolsByUserRole, usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
 import { LoadBoundary } from '../../LoadBoundary'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
@@ -266,8 +261,6 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       setIsLoading(false)
     },
   })
-
-  const poolAdmin = usePoolAdmin(form.values.selectedPool?.id ?? '')
 
   const resetToDefault = () => {
     setOpen(false)

@@ -22,6 +22,7 @@ import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
 import { Tooltips, tooltipText } from '../../Tooltips'
 import { AssetTemplateSection } from './AssetTemplateSection'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
+import { PricingSection } from './PricingSection'
 
 const assetTypes = [
   { label: 'Cash', tooltip: 'cashAsset', id: 'cash' },

@@ -9,7 +9,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { BackButton, Box, Button, Card, Drawer, Grid, Shelf, Spinner, Stack, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { AssetSummary } from '../../../src/components/AssetSummary'
 import { SimpleLineChart } from '../../../src/components/Charts/SimpleLineChart'
 import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
@@ -26,7 +26,6 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, truncateText } from '../../utils/formatting'
-import { useBasePath } from '../../utils/useBasePath'
 import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
@@ -104,8 +103,6 @@ function ActionButtons({ loan }: { loan: LoanType }) {
 function Loan() {
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
   if (!poolId || !loanId) throw new Error('Loan no found')
-  const basePath = useBasePath()
-  const navigate = useNavigate()
   const isTinlakePool = poolId?.startsWith('0x')
   const pool = usePool(poolId)
   const loan = useLoan(poolId, loanId)

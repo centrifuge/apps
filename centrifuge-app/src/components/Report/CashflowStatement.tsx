@@ -28,7 +28,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
 
   React.useEffect(() => {
     setReportData(data)
-  }, [data])
+  }, [data, setReportData])
 
   const columns = React.useMemo(() => {
     if (!data.length && !isLoading) {
@@ -69,7 +69,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [data, groupBy])
+  }, [data, groupBy, isLoading])
 
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [

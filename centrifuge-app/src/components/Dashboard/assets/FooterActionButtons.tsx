@@ -60,7 +60,7 @@ export const FooterActionButtons = ({
         <Box width="100%">
           <Button
             loading={isTemplatesTxLoading || isUploadingTemplates}
-            disabled={form.values.uploadedTemplates.length === 0 || !poolAdmin}
+            disabled={form.values.uploadedTemplates.length === 0 || !isAdmin}
             style={{ width: '100%', marginBottom: 8 }}
             onClick={uploadTemplates}
           >

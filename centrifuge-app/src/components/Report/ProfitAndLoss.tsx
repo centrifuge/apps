@@ -213,7 +213,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
     })
 
     return rows
-  }, [data, pool.currency.displayName])
+  }, [data, pool.currency.displayName, pool.currency.decimals])
 
   const totalProfitRecords: Row[] = React.useMemo(() => {
     return [
@@ -224,7 +224,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         formatter: (v: any) => `${formatBalance(v, 2, pool.currency.displayName)}`,
       },
     ]
-  }, [data, poolMetadata?.pool?.asset.class, pool.currency.displayName])
+  }, [data, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
