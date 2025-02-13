@@ -130,7 +130,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       csvOnly: false,
       width: '100px',
       formatter: (v: any, values: any) => {
-        const chainId = values.at(-1)
+        const chainId = values.at(-1) === 1 ? values.at(-1) : 'centrifuge'
         return (
           <IconAnchor
             href={explorer.tx(v, chainId)}
