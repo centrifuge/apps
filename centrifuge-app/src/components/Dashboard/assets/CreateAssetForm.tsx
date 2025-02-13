@@ -14,15 +14,14 @@ import {
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
-import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
-import { Tooltips, tooltipText } from '../../../../src/components/Tooltips'
-import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
-import { LoanTemplate } from '../../../../src/types'
-import { useMetadata } from '../../../../src/utils/useMetadata'
-import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
+import { validate } from '../../../pages/IssuerCreatePool/validate'
+import { LoanTemplate } from '../../../types'
+import { useMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
+import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
+import { Tooltips, tooltipText } from '../../Tooltips'
 import { AssetTemplateSection } from './AssetTemplateSection'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
-import { PricingSection } from './PricingSection'
 
 const assetTypes = [
   { label: 'Cash', tooltip: 'cashAsset', id: 'cash' },

@@ -3,7 +3,7 @@ import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconWarning, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useCallback, useMemo } from 'react'
-import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
+import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
 export const FooterActionButtons = ({
@@ -60,7 +60,7 @@ export const FooterActionButtons = ({
         <Box width="100%">
           <Button
             loading={isTemplatesTxLoading || isUploadingTemplates}
-            disabled={form.values.uploadedTemplates.length === 0}
+            disabled={form.values.uploadedTemplates.length === 0 || !poolAdmin}
             style={{ width: '100%', marginBottom: 8 }}
             onClick={uploadTemplates}
           >

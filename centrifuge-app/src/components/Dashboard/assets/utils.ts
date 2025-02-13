@@ -1,6 +1,6 @@
 import { CurrencyBalance, Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useMemo } from 'react'
-import { LoanTemplate } from '../../../../src/types'
+import { LoanTemplate } from '../../../types'
 import { Dec } from '../../../utils/Decimal'
 import { usePoolMetadataMulti } from '../../../utils/usePools'
 import { getAmount } from '../../LoanList'

@@ -1,10 +1,10 @@
 import { CurrencyInput, DateInput, Grid, NumberInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useTheme } from 'styled-components'
-import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
-import { Tooltips } from '../../../../src/components/Tooltips'
-import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
-import { combine, max, nonNegativeNumber, positiveNumber, required } from '../../../../src/utils/validation'
+import { validate } from '../../../pages/IssuerCreatePool/validate'
+import { combine, max, nonNegativeNumber, positiveNumber, required } from '../../../utils/validation'
+import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
+import { Tooltips } from '../../Tooltips'
 import { CreateAssetFormValues } from './CreateAssetsDrawer'
 
 export function PricingSection() {

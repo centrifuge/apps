@@ -19,16 +19,16 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useMemo, useState } from 'react'
 import { Navigate } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
-import { LoadBoundary } from '../../../../src/components/LoadBoundary'
-import { LoanTemplate } from '../../../../src/types'
-import { getFileDataURI } from '../../../../src/utils/getFileDataURI'
-import { useMetadata } from '../../../../src/utils/useMetadata'
+import { LoanTemplate } from '../../../types'
+import { getFileDataURI } from '../../../utils/getFileDataURI'
+import { useMetadata } from '../../../utils/useMetadata'
 import {
   useFilterPoolsByUserRole,
   usePoolAccess,
   usePoolAdmin,
   useSuitableAccounts,
 } from '../../../utils/usePermissions'
+import { LoadBoundary } from '../../LoadBoundary'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
@@ -311,7 +311,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
               </Field>
             </Box>
             {type === 'create-asset' && <CreateAssetsForm />}
-            {type === 'upload-template' && !!poolAdmin && (
+            {type === 'upload-template' && (
               <UploadAssetTemplateForm setIsUploadingTemplates={setIsUploadingTemplates} />
             )}
             <FooterActionButtons

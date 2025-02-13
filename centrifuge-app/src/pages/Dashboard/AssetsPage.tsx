@@ -1,14 +1,14 @@
 import { Box, Checkbox, Text } from '@centrifuge/fabric'
 import { useEffect } from 'react'
-import { PoolCard } from '../../../src/components/Dashboard/PoolCard'
 import { PageSummary } from '../../../src/components/PageSummary'
 import { Spinner } from '../../../src/components/Spinner'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsContext'
 import { formatBalance } from '../../../src/utils/formatting'
 import { useLoans } from '../../../src/utils/useLoans'
-import AssetsTable from '../../components/Dashboard/assets/AssetsTable'
-import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/assets/utils'
+import AssetsTable from '../../components/Dashboard/Assets/AssetsTable'
+import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/Assets/utils'
+import { PoolSelector } from '../../components/Dashboard/PoolSelector'
 
 export default function AssetsPage() {
   const { selectedPools, togglePoolSelection, setSelectedPools, pools = [] } = useSelectedPools()
@@ -66,14 +66,16 @@ export default function AssetsPage() {
     },
   ]
 
-  if (isLoading || !loans || !pools.length) return <Spinner />
+  if (!pools.length || !loans) return <Text variant="heading4">No data available</Text>
+
+  if (isLoading) return <Spinner />
 
   return (
     <Box py={4} px={3}>
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         {pools.map((pool, index) => (
-          <PoolCard
+          <PoolSelector
             key={index}
             pool={pool}
             active={selectedPools.includes(pool.id)}

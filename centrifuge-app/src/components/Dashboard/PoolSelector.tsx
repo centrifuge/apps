@@ -2,9 +2,9 @@ import { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Text, Thumbnail } from '@centrifuge/fabric'
 import { useTheme } from 'styled-components'
-import { usePoolMetadata } from '../../../src/utils/usePools'
+import { usePoolMetadata } from '../../utils/usePools'
 
-export const PoolCard = ({
+export const PoolSelector = ({
   children,
   active,
   onClick,
@@ -36,6 +36,7 @@ export const PoolCard = ({
       style={{ cursor: 'pointer' }}
       mr={2}
       flexShrink={0}
+      as="label"
     >
       <Box display="flex" alignItems="center">
         {poolUri ? (

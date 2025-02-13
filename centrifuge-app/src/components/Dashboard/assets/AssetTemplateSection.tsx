@@ -1,7 +1,7 @@
 import { CurrencyInput, DateInput, NumberInput, Select, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps } from 'formik'
-import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
-import { combine, max, min, positiveNumber, required } from '../../../../src/utils/validation'
+import { combine, max, min, positiveNumber, required } from '../../../utils/validation'
+import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
 
 export function AssetTemplateSection({ label, input, name }: { label: string; input: any; name: string }) {
   switch (input.type) {
