@@ -6,13 +6,17 @@ import { LabelWithDeleteButton } from './IssuerCategories'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
 
-export const PoolRatingsSection = () => {
+export const PoolRatingsSection = ({ hideTitle }: { hideTitle?: boolean }) => {
   const form = useFormikContext<PoolMetadataInput>()
 
   return (
-    <Box mt={4} mb={3}>
-      <Text variant="heading2">Pool rating</Text>
-      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} mt={3}>
+    <Box mt={hideTitle ? 0 : 4} mb={hideTitle ? 0 : 3}>
+      {hideTitle ? <></> : <Text variant="heading2">Pool rating</Text>}
+      <StyledGrid
+        gridTemplateColumns={hideTitle ? ['1fr'] : ['1fr', '1fr 1fr']}
+        mt={hideTitle ? 0 : 3}
+        style={hideTitle ? { padding: 20 } : { padding: 40 }}
+      >
         <FieldArray name="poolRatings">
           {({ push, remove }) => (
             <>
