@@ -18,6 +18,7 @@ import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMes
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
 import { IssuerCategoriesSection } from './IssuerCategories'
+import { PoolAnalysisSection } from './PoolAnalysisSection'
 import { PoolRatingsSection } from './PoolRatings'
 import { StyledGrid } from './PoolStructureSection'
 import { validate } from './validate'
@@ -273,46 +274,8 @@ export const PoolDetailsSection = () => {
       {/* pool ratings section */}
       <PoolRatingsSection />
 
-      <Box mt={4} mb={3}>
-        <Text variant="heading2">Pool analysis</Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <FieldWithErrorMessage
-            name="reportUrl"
-            label="Report URL"
-            placeholder="Type here..."
-            validate={validate.websiteNotRequired()}
-            as={URLInput}
-          />
-          <FieldWithErrorMessage
-            name="reportAuthorName"
-            as={TextInput}
-            label="Rewiewer name"
-            placeholder="Type here..."
-          />
-          <FieldWithErrorMessage
-            name="reportAuthorTitle"
-            as={TextInput}
-            label="Rewiewer job title"
-            placeholder="Type here..."
-          />
-
-          <Field name="reportAuthorAvatar">
-            {({ field, meta, form }: FieldProps) => (
-              <FileUpload
-                file={field.value}
-                onFileChange={(file) => {
-                  form.setFieldValue('reportAuthorAvatar', file)
-                }}
-                label="Reviewer avatar"
-                placeholder="Choose file"
-                accept="image/png, image/jpeg, image/jpg"
-                onClear={() => form.setFieldValue('reportAuthorAvatar', null)}
-                small
-              />
-            )}
-          </Field>
-        </StyledGrid>
-      </Box>
+      {/* pool analysis section */}
+      <PoolAnalysisSection />
     </Box>
   )
 }

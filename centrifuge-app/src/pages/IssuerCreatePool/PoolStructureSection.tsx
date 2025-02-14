@@ -51,7 +51,7 @@ export const Line = () => {
   return <Box border={`.5px solid ${theme.colors.borderPrimary}`} width="100%" />
 }
 
-const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
+export const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   label: key,
   value: key,
 }))
