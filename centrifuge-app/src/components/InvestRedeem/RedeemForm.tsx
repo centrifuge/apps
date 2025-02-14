@@ -140,7 +140,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                         `~${formatBalance(
                           form.values.amount instanceof Decimal
                             ? form.values.amount
-                            : Dec(form.values.amount).div(state.tokenPrice),
+                            : Dec(form.values.amount).mul(state.tokenPrice),
                           state.poolCurrency?.displayName
                         )}`}
                     </Text>
