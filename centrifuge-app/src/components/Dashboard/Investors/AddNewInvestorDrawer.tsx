@@ -12,6 +12,13 @@ type AddNewInvestorDrawerProps = {
   onClose: () => void
 }
 
+type NewInvestorFormValues = {
+  poolId: string
+  trancheId: string
+  investorAddress: string
+  network: string
+}
+
 export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
   const { pools } = useSelectedPools(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
@@ -26,7 +33,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
       trancheId: '',
       investorAddress: '',
       network: '',
-    },
+    } as NewInvestorFormValues,
     onSubmit: (values) => {
       const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
       const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
@@ -103,7 +110,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
   )
 }
 
-function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<any>; poolId: string }) {
+function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<NewInvestorFormValues>; poolId: string }) {
   const {
     evm: { chains },
   } = useWallet()
