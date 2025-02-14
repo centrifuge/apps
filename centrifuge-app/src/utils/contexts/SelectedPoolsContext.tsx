@@ -12,11 +12,18 @@ interface SelectedPoolsContextProps {
 
 const SelectedPoolsContext = createContext<SelectedPoolsContextProps | undefined>(undefined)
 
-export const useSelectedPools = (): SelectedPoolsContextProps => {
+export const useSelectedPools = (defaultSelectAll: boolean = false): SelectedPoolsContextProps => {
   const context = useContext(SelectedPoolsContext)
   if (!context) {
     throw new Error('useSelectedPools must be used within a SelectedPoolsProvider')
   }
+
+  React.useEffect(() => {
+    if (defaultSelectAll && context.pools?.length && context.selectedPools.length === 0) {
+      context.setSelectedPools(context.pools.map((pool) => pool.id))
+    }
+  }, [defaultSelectAll, context.pools])
+
   return context
 }
 

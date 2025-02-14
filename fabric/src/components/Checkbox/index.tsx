@@ -105,13 +105,11 @@ const StyledCheckbox = styled.input<{ variant: 'primary' | 'secondary' }>`
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
-
   ${({ theme, variant }) => `
       &:checked {
         border-color: ${variant === 'primary' ? theme.colors.borderSecondary : theme.colors.textPrimary};
         background-color: ${variant === 'primary' ? theme.colors.textGold : 'white'};
       }
-
       &:checked::after {
         content: '';
         position: absolute;
