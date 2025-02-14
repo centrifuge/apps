@@ -58,23 +58,27 @@ function ActionButtons({ loan }: { loan: LoanType }) {
   if (!loan || !canBorrow || isTinlakeLoan(loan) || !canBorrow || loan.status === 'Closed') return null
   return (
     <Box marginLeft="auto">
-      <Drawer isOpen={financeShown} onClose={() => setFinanceShown(false)} innerPaddingTop={2}>
+      <Drawer
+        isOpen={financeShown}
+        onClose={() => setFinanceShown(false)}
+        title={isExternalLoan(loan) ? 'Purchase' : isCashLoan(loan) ? 'Deposit' : 'Finance'}
+      >
         <LoadBoundary>
           <FinanceForm loan={loan} />
         </LoadBoundary>
       </Drawer>
-      <Drawer isOpen={repayShown} onClose={() => setRepayShown(false)} innerPaddingTop={2}>
+      <Drawer
+        isOpen={repayShown}
+        onClose={() => setRepayShown(false)}
+        title={isExternalLoan(loan) ? 'Sell' : isCashLoan(loan) ? 'Withdraw' : 'Repay'}
+      >
         <LoadBoundary>
-          <Stack gap={2}>
-            <RepayForm loan={loan} />
-          </Stack>
+          <RepayForm loan={loan} />
         </LoadBoundary>
       </Drawer>
-      <Drawer isOpen={correctionShown} onClose={() => setCorrectionShown(false)} innerPaddingTop={2}>
+      <Drawer isOpen={correctionShown} onClose={() => setCorrectionShown(false)} title="Correction">
         <LoadBoundary>
-          <Stack gap={2}>
-            <CorrectionForm loan={loan as ActiveLoan} />
-          </Stack>
+          <CorrectionForm loan={loan as ActiveLoan} />
         </LoadBoundary>
       </Drawer>
 
