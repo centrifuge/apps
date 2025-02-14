@@ -1,16 +1,17 @@
-import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { SupportedNetworksDrawer } from '../..//components/Dashboard/Investors/SupportedNetworksDrawer'
 import { AddNewInvestorDrawer } from '../../components/Dashboard/Investors/AddNewInvestorDrawer'
 import { InvestorTable } from '../../components/Dashboard/Investors/InvestorTable'
 import { OnboardingSettingsDrawer } from '../../components/Dashboard/Investors/OnboardingSettingsDrawer'
+import { PoolSelector } from '../../components/Dashboard/PoolSelector'
 import { useSelectedPools } from '../../utils/contexts/SelectedPoolsContext'
 import { useInvestorListMulti } from '../../utils/usePools'
 
 export default function InvestorsPage() {
   const theme = useTheme()
-  const { pools, selectedPools, togglePoolSelection } = useSelectedPools(true)
+  const { pools, selectedPools } = useSelectedPools(true)
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
   const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
   const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(false)
@@ -27,18 +28,8 @@ export default function InvestorsPage() {
         isOpen={isOnboardingSettingsDrawerOpen}
         onClose={() => setIsOnboardingSettingsDrawerOpen(false)}
       />
-      <Shelf gap={1}>
-        {pools?.map((p) => (
-          <Checkbox
-            key={p.id}
-            label={p.id}
-            checked={selectedPools.includes(p.id)}
-            onChange={() => {
-              togglePoolSelection(p.id)
-            }}
-          />
-        ))}
-      </Shelf>
+      <Text variant="heading1">Dashboard</Text>
+      <PoolSelector />
       <Shelf justifyContent="space-between">
         <Shelf gap={1}>
           <Box
