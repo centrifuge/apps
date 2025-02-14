@@ -1,7 +1,10 @@
-import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { FileType, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Accordion, Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
+import { IssuerCategoriesSection } from '../../../../src/pages/IssuerCreatePool/IssuerCategories'
+import { PoolAnalysisSection } from '../../../../src/pages/IssuerCreatePool/PoolAnalysisSection'
+import { PoolRatingsSection } from '../../../../src/pages/IssuerCreatePool/PoolRatings'
 import { useCanBorrow, usePoolAdmin } from '../../../../src/utils/usePermissions'
 import { IssuerDetailsSection } from './IssuerDetailsSection'
 import { PoolDescriptionSection } from './PoolDescriptionSection'
@@ -25,7 +28,24 @@ export type CreatePoolFormValues = {
     subAssetClass: string
     issuerName: string
     repName: string
+    issuerLogo: string
+    issuerShortDescription: string
+    issuerDescription: string
   }
+  issuerCategories: {
+    type?: string
+    description?: string
+  }[]
+  poolRatings: {
+    agency?: string
+    value?: string
+    reportUrl?: string
+    reportFile?: FileType | null
+  }[]
+  reportUrl: string
+  reportAuthorName: string
+  reportAuthorTitle: string
+  reportAuthorAvatar: string
 }
 
 export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurationDrawerProps) {
@@ -41,7 +61,16 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         subAssetClass: pools?.[0]?.meta?.pool?.asset.subClass ?? '',
         issuerName: pools?.[0]?.meta?.pool?.issuer?.name ?? '',
         repName: pools?.[0]?.meta?.pool?.issuer?.repName ?? '',
+        issuerLogo: pools?.[0]?.meta?.pool?.issuer?.logo?.uri ?? '',
+        issuerShortDescription: pools?.[0]?.meta?.pool?.issuer?.shortDescription ?? '',
+        issuerDescription: pools?.[0]?.meta?.pool?.issuer?.description ?? '',
       },
+      issuerCategories: pools?.[0]?.meta?.pool?.issuer?.categories ?? [{ type: '', description: '' }],
+      poolRatings: pools?.[0]?.meta?.pool?.poolRatings ?? [{ agency: '', value: '', reportUrl: '', reportFile: null }],
+      reportUrl: pools?.[0]?.meta?.pool?.reports?.[0]?.uri ?? '',
+      reportAuthorName: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.name ?? '',
+      reportAuthorTitle: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.title ?? '',
+      reportAuthorAvatar: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.avatar?.uri ?? '',
     },
     onSubmit: (values) => {
       console.log(values)
@@ -83,13 +112,28 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                         subAssetClass: selectedPool?.meta?.pool?.asset.subClass ?? '',
                         issuerName: selectedPool?.meta?.pool?.issuer?.name ?? '',
                         repName: selectedPool?.meta?.pool?.issuer?.repName ?? '',
+                        issuerLogo: selectedPool?.meta?.pool?.issuer?.logo?.uri ?? '',
+                        issuerShortDescription: selectedPool?.meta?.pool?.issuer?.shortDescription ?? '',
+                        issuerDescription: selectedPool?.meta?.pool?.issuer?.description ?? '',
                       })
+                      form.setFieldValue('issuerCategories', selectedPool?.meta?.pool?.issuer?.categories ?? [])
+                      form.setFieldValue('poolRatings', selectedPool?.meta?.pool?.poolRatings ?? [])
+                      form.setFieldValue('reportUrl', selectedPool?.meta?.pool?.reports?.[0]?.uri ?? '')
+                      form.setFieldValue('reportAuthorName', selectedPool?.meta?.pool?.reports?.[0]?.author?.name ?? '')
+                      form.setFieldValue(
+                        'reportAuthorTitle',
+                        selectedPool?.meta?.pool?.reports?.[0]?.author?.title ?? ''
+                      )
+                      form.setFieldValue(
+                        'reportAuthorAvatar',
+                        selectedPool?.meta?.pool?.reports?.[0]?.author?.avatar?.uri ?? ''
+                      )
                     }}
                   />
                 )}
               </Field>
             </Box>
-            {isPoolAdmin && isBorrower && (
+            {isPoolAdmin && (
               <Box mt={2}>
                 <Accordion
                   items={[
@@ -100,6 +144,18 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                     {
                       title: 'Issuer details',
                       body: <IssuerDetailsSection />,
+                    },
+                    {
+                      title: 'Service providers',
+                      body: <IssuerCategoriesSection hideTitle />,
+                    },
+                    {
+                      title: 'Pool ratings',
+                      body: <PoolRatingsSection hideTitle />,
+                    },
+                    {
+                      title: 'Pool analysis',
+                      body: <PoolAnalysisSection hideTitle />,
                     },
                   ]}
                 />

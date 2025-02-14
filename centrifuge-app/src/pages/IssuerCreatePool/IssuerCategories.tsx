@@ -39,12 +39,12 @@ export const LabelWithDeleteButton = ({
   )
 }
 
-export const IssuerCategoriesSection = () => {
+export const IssuerCategoriesSection = ({ hideTitle }: { hideTitle?: boolean }) => {
   const form = useFormikContext<PoolMetadataInput>()
   return (
-    <Box mt={4} mb={3}>
-      <Text variant="heading2">Service providers</Text>
-      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} mt={3}>
+    <Box mt={hideTitle ? 0 : 4} mb={hideTitle ? 0 : 3}>
+      {hideTitle ? <></> : <Text variant="heading2">Service providers</Text>}
+      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} style={hideTitle ? { padding: 20 } : { padding: 40 }}>
         <FieldArray name="issuerCategories">
           {({ push, remove }) => (
             <>
