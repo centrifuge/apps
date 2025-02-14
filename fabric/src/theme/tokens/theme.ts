@@ -102,7 +102,7 @@ const colors = {
   backgroundButtonInvertedFocus: grayScale[100],
   backgroundButtonInvertedHover: grayScale[100],
   backgroundButtonInvertedPressed: grayScale[100],
-  backgroundButtonInvertedDisabled: grayScale[100],
+  backgroundButtonInvertedDisabled: grayScale[50],
   textButtonInverted: black,
   textButtonInvertedFocus: black,
   textButtonInvertedHover: black,

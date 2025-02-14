@@ -61,7 +61,6 @@ const CollectionsPage = React.lazy(() => import('../pages/Collections'))
 const InvestmentDisclaimerPage = React.lazy(() => import('../pages/InvestmentDisclaimer'))
 const IssuerCreatePoolPage = React.lazy(() => import('../pages/IssuerCreatePool'))
 const IssuerPoolPage = React.lazy(() => import('../pages/IssuerPool'))
-const IssuerCreateLoanPage = React.lazy(() => import('../pages/IssuerPool/Assets/CreateLoan'))
 const LoanPage = React.lazy(() => import('../pages/Loan'))
 const MintNFTPage = React.lazy(() => import('../pages/MintNFT'))
 const MultisigApprovalPage = React.lazy(() => import('../pages/MultisigApproval'))
@@ -123,11 +122,6 @@ const router = createHashRouter([
         path: '/pools/:pid/transactions',
         element: <PoolTransactionsPage />,
         handle: { component: PoolTransactionsPage },
-      },
-      {
-        path: '/issuer/:pid/assets/create',
-        element: <IssuerCreateLoanPage />,
-        handle: { component: IssuerCreateLoanPage },
       },
       { path: '/portfolio', element: <PortfolioPage />, handle: { component: PortfolioPage } },
       { path: '/prime/:dao', element: <PrimeDetailPage />, handle: { component: PrimeDetailPage } },

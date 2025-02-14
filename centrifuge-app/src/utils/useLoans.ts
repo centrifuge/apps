@@ -2,20 +2,20 @@ import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { Dec } from './Decimal'
 import { useTinlakeLoans } from './tinlake/useTinlakePools'
 
-export function useLoans(poolId: string) {
-  const isTinlakePool = poolId?.startsWith('0x')
-  const [centLoans, isLoading] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
+export function useLoans(poolIds: string[]) {
+  const isTinlakePool = poolIds.length === 1 && poolIds[0]?.startsWith('0x')
+
+  const { data: tinlakeLoans, isLoading: isLoadingTinlake } = useTinlakeLoans(poolIds[0])
+
+  const [centLoans, isLoading] = useCentrifugeQuery(['loans', poolIds], (cent) => cent.pools.getLoans({ poolIds }), {
     suspense: true,
     enabled: !isTinlakePool,
   })
-
-  const { data: tinlakeLoans } = useTinlakeLoans(poolId)
-
-  return { data: isTinlakePool ? tinlakeLoans : centLoans, isLoading }
+  return { data: isTinlakePool ? tinlakeLoans : centLoans, isLoading: isTinlakePool ? isLoadingTinlake : isLoading }
 }
 
 export function useLoan(poolId: string, assetId: string | undefined) {
-  const { data: loans } = useLoans(poolId || '')
+  const { data: loans } = useLoans([poolId])
   return loans?.find((loan) => loan.id === assetId)
 }
 

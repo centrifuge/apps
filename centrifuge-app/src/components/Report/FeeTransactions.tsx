@@ -79,7 +79,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
       ],
       heading: false,
     }))
-  }, [transactions, txType, poolMetadata, pool.currency.symbol])
+  }, [transactions, poolMetadata, pool.currency.symbol])
 
   const columns = columnConfig
     .map((col, index) => ({

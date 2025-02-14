@@ -20,7 +20,7 @@ export function DashboardMenu() {
         </PageLink>
       ) : (
         pages.map(({ href, label }) => (
-          <Box width="100%">
+          <Box width="100%" key={href}>
             <PageLink to={`/dashboard/${href}`} stacked={!isLarge}>
               <IconDashboard size={['iconMedium', 'iconMedium', 'iconSmall']} />
               {label}

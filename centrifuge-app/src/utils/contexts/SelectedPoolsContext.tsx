@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import React, { ReactNode, createContext, useContext, useState } from 'react'
-import { usePools } from '../usePools'
+import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../usePermissions'
 
 interface SelectedPoolsContextProps {
   selectedPools: string[]
@@ -32,9 +32,7 @@ interface SelectedPoolsProviderProps {
 }
 
 export const SelectedPoolsProvider = ({ children }: SelectedPoolsProviderProps) => {
-  // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor()
-  // FOR TESTING ONLY
-  const pools = usePools()
+  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor()
   const [selectedPools, setSelectedPools] = useState<string[]>([])
 
   const togglePoolSelection = (poolId: string) => {

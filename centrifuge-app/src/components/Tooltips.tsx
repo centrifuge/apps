@@ -378,6 +378,30 @@ export const tooltipText = {
     label: '',
     body: 'You can directly whitelist the addresses that can invest in the pool.',
   },
+  cashAsset: {
+    label: '',
+    body: 'Offchain funds held in a traditional bank account or custody account',
+  },
+  liquidAsset: {
+    label: '',
+    body: 'Identical assets that can be exchanged. E.g. stocks, bonds, commodities',
+  },
+  fundShares: {
+    label: '',
+    body: 'Invest in a portfolio of funds, rather than directly in individual securities or assets',
+  },
+  customAsset: {
+    label: '',
+    body: 'Unique assets that cannot be exchanged, have value specific to the asset. E.g. real estate, art, NFTs',
+  },
+  atPar: {
+    label: '',
+    body: 'Valuing the asset at its face value or nominal value, without accounting for any discounts, premiums, or adjustments for time value of money.',
+  },
+  discountedCashFlow: {
+    label: '',
+    body: 'Valuing the asset at its face value or nominal value, without accounting for any discounts, premiums, or adjustments for time value of money',
+  },
 }
 
 export type TooltipsProps = {
@@ -386,17 +410,30 @@ export type TooltipsProps = {
   props?: any
   size?: 'med' | 'sm' | 'xs'
   color?: string
+  placement?: 'top' | 'bottom' | 'left' | 'right'
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export function Tooltips({ type, label: labelOverride, size = 'sm', props, color, ...textProps }: TooltipsProps) {
+export function Tooltips({
+  type,
+  label: labelOverride,
+  size = 'sm',
+  props,
+  color,
+  placement,
+  ...textProps
+}: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   return (
-    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
+    <FabricTooltip
+      body={React.isValidElement(body) ? React.cloneElement(body, props) : body}
+      placement={placement}
+      {...textProps}
+    >
       {typeof label === 'string' ? (
         <Text
           textAlign="left"
           variant={size === 'sm' ? 'label2' : size === 'xs' ? 'body4' : 'label1'}
-          color={size === 'sm' && !color ? 'textPrimary' : 'textSecondary'}
+          color={size === 'sm' && !color ? 'textPrimary' : color || 'textSecondary'}
           fontWeight={size === 'sm' ? 'inherit' : 400}
         >
           {labelOverride || label}

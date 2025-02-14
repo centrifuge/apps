@@ -8,12 +8,14 @@ import { IconX } from '../../icon'
 import { Box, BoxProps } from '../Box'
 import { Button } from '../Button'
 import { Stack } from '../Stack'
+import { Text } from '../Text'
 
 export type DrawerProps = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
   width?: string | number
   innerPaddingTop?: number
+  title?: string
 }> &
   BoxProps
 
@@ -23,7 +25,7 @@ const DrawerCard = styled(Box)(
   })
 )
 
-function DrawerInner({ children, isOpen, onClose, width = 'drawer', ...props }: DrawerProps) {
+function DrawerInner({ children, isOpen, onClose, width = 'drawer', title, ...props }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const animation = React.useRef<Animation | undefined>(undefined)
@@ -111,9 +113,16 @@ function DrawerInner({ children, isOpen, onClose, width = 'drawer', ...props }: 
           {...props}
         >
           <Stack gap={3}>
-            <Box position="absolute" right="8px" top="8px">
-              <Button variant="tertiary" icon={IconX} onClick={() => handleClose()} />
-            </Box>
+            {title ? (
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Text variant="heading2">{title}</Text>
+                <Button variant="tertiary" icon={IconX} onClick={() => handleClose()} />
+              </Box>
+            ) : (
+              <Box position="absolute" right="8px" top="8px">
+                <Button variant="tertiary" icon={IconX} onClick={() => handleClose()} />
+              </Box>
+            )}
             {children}
           </Stack>
         </DrawerCard>

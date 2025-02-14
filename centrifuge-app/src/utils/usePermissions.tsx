@@ -71,6 +71,31 @@ export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
   return filtered
 }
 
+export const useFilterPoolsByUserRole = (roles: PoolRoles['roles'][0][]) => {
+  const {
+    substrate: { combinedAccounts, proxiesAreLoading },
+  } = useWallet()
+  const actingAddresses = [...new Set(combinedAccounts?.map((acc) => acc.actingAddress))]
+  const permissionsResult = useUserPermissionsMulti(actingAddresses, { enabled: !proxiesAreLoading })
+
+  const ids = new Set(
+    permissionsResult
+      ?.map((permissions) =>
+        Object.entries(permissions?.pools || {})
+          .filter(([poolId, rolesObj]) => {
+            const rolesArray = rolesObj.roles || []
+            return roles.some((role) => rolesArray.includes(role))
+          })
+          .map(([poolId]) => poolId)
+      )
+      .flat()
+  )
+  const pools = usePools(false)
+  const filtered = pools?.filter((p) => ids.has(p.id))
+
+  return filtered
+}
+
 // Returns whether the connected address can borrow from a pool in principle
 export function useCanBorrow(poolId: string) {
   const [account] = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] })
