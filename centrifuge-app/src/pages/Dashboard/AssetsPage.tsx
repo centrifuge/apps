@@ -1,4 +1,4 @@
-import { Box, Checkbox, Text } from '@centrifuge/fabric'
+import { Box, Text } from '@centrifuge/fabric'
 import { useEffect } from 'react'
 import { PageSummary } from '../../../src/components/PageSummary'
 import { Spinner } from '../../../src/components/Spinner'
@@ -11,7 +11,7 @@ import { PoolSelector } from '../../components/Dashboard/PoolSelector'
 import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/utils'
 
 export default function AssetsPage() {
-  const { selectedPools, togglePoolSelection, setSelectedPools, pools = [] } = useSelectedPools()
+  const { selectedPools, setSelectedPools, pools = [] } = useSelectedPools()
   const ids = pools.map((pool) => pool.id)
   const { data: loans, isLoading } = useLoans(pools ? ids : [])
 
@@ -75,22 +75,7 @@ export default function AssetsPage() {
     <Box py={4} px={3}>
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
-        {pools.map((pool, index) => (
-          <PoolSelector
-            key={index}
-            pool={pool}
-            active={selectedPools.includes(pool.id)}
-            children={
-              <Checkbox
-                variant="secondary"
-                onChange={() => togglePoolSelection(pool.id)}
-                onClick={(e) => e.stopPropagation()}
-                checked={selectedPools.includes(pool.id)}
-              />
-            }
-            onClick={() => togglePoolSelection(pool.id)}
-          />
-        ))}
+        <PoolSelector multiple />
       </Box>
       <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
       <AssetsTable loans={loansWithPool as TransformedLoan[]} />
