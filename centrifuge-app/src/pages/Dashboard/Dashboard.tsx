@@ -1,6 +1,7 @@
 import { Box, Grid, IconArrowDown, IconArrowUp, Select, Text } from '@centrifuge/fabric'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { DashboardTable } from '../../../src/components/Dashboard/LandingPage/DashboardTable'
 import { PoolSelector } from '../../../src/components/Dashboard/PoolSelector'
 import { PageSummary } from '../../../src/components/PageSummary'
 import { Spinner } from '../../../src/components/Spinner'
@@ -8,7 +9,6 @@ import { Dec } from '../../../src/utils/Decimal'
 import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsContext'
 import { formatBalance, formatPercentage } from '../../../src/utils/formatting'
 import { useLiquidityMulti } from '../../../src/utils/useLiquidity'
-import { DashboardTable } from '../../components/Dashboard/DashboardTable'
 import { useNavGrowth, useTotalNAV } from '../../components/Dashboard/utils'
 
 const aumOptions = [
@@ -19,19 +19,13 @@ const aumOptions = [
 
 export default function Dashboard() {
   const theme = useTheme()
-  const { selectedPools, togglePoolSelection, pools = [], setSelectedPools } = useSelectedPools()
+  const { selectedPools, pools = [] } = useSelectedPools()
   const filteredPools = useMemo(() => pools.filter((pool) => selectedPools.includes(pool.id)), [pools, selectedPools])
   const poolIds = useMemo(() => filteredPools.map((pool) => pool.id), [filteredPools])
   const totalNAV = useTotalNAV(filteredPools)
   const { liquidityData, isLoading } = useLiquidityMulti(poolIds)
   const [selectedAumOption, setSelectedAumOption] = useState(aumOptions[0])
   const { growth } = useNavGrowth(filteredPools, selectedAumOption.value as 'YTD' | '180d' | '90d')
-
-  useEffect(() => {
-    if (selectedPools.length === 0 && pools.length > 0) {
-      setSelectedPools(pools.map((pool) => pool.id))
-    }
-  }, [pools.length, selectedPools.length, setSelectedPools, pools])
 
   const { aggregatedLockedInvestments, aggregatedLockedRedemptions } = useMemo(() => {
     return Object.values(liquidityData).reduce(
