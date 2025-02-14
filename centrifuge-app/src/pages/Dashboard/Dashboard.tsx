@@ -1,4 +1,4 @@
-import { Box, Checkbox, Grid, IconArrowDown, IconArrowUp, Select, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconArrowDown, IconArrowUp, Select, Text } from '@centrifuge/fabric'
 import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { PoolSelector } from '../../../src/components/Dashboard/PoolSelector'
@@ -110,22 +110,7 @@ export default function Dashboard() {
     <Box py={4} px={3}>
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
-        {pools.map((pool, index) => (
-          <PoolSelector
-            key={index}
-            pool={pool}
-            active={selectedPools.includes(pool.id)}
-            children={
-              <Checkbox
-                variant="secondary"
-                onChange={() => togglePoolSelection(pool.id)}
-                onClick={(e) => e.stopPropagation()}
-                checked={selectedPools.includes(pool.id)}
-              />
-            }
-            onClick={() => togglePoolSelection(pool.id)}
-          />
-        ))}
+        <PoolSelector multiple />
       </Box>
       <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
       <DashboardTable filteredPools={filteredPools} />
