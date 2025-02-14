@@ -410,12 +410,25 @@ export type TooltipsProps = {
   props?: any
   size?: 'med' | 'sm' | 'xs'
   color?: string
+  placement?: 'top' | 'bottom' | 'left' | 'right'
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export function Tooltips({ type, label: labelOverride, size = 'sm', props, color, ...textProps }: TooltipsProps) {
+export function Tooltips({
+  type,
+  label: labelOverride,
+  size = 'sm',
+  props,
+  color,
+  placement,
+  ...textProps
+}: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   return (
-    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
+    <FabricTooltip
+      body={React.isValidElement(body) ? React.cloneElement(body, props) : body}
+      placement={placement}
+      {...textProps}
+    >
       {typeof label === 'string' ? (
         <Text
           textAlign="left"

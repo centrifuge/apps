@@ -101,6 +101,7 @@ export function CreateAssetsForm() {
                 <Tooltips
                   type={asset.tooltip as keyof typeof tooltipText}
                   label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                  placement="left"
                 />
               }
               onChange={() => form.setFieldValue('assetType', asset.id)}

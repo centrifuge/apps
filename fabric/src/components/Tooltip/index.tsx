@@ -89,6 +89,7 @@ export function Tooltip({
   bodyWidth,
   bodyPadding,
   triggerStyle,
+  placement = 'top',
   ...textProps
 }: TooltipProps) {
   const triggerRef = React.useRef<HTMLButtonElement>(null)
@@ -110,7 +111,7 @@ export function Tooltip({
           isShown
           targetRef={triggerRef}
           overlayRef={overlayRef}
-          placement="top"
+          placement={placement}
           render={({ pointer, ...rest }) => (
             <Container
               {...tooltipElementProps}
