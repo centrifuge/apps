@@ -4,10 +4,6 @@ import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { useCanBorrow, usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
-import { OnboardingSettings } from '../Investors/OnboardingSettings'
-import { Details } from './Details'
-import { EpochAndTranches } from './EpochAndTranches'
-import { Issuer } from './Issuer'
 import { PoolConfig } from './PoolConfig'
 
 export function IssuerPoolConfigurationPage() {
@@ -30,17 +26,5 @@ function IssuerPoolConfiguration() {
   const isPoolAdmin = !!usePoolAdmin(poolId)
   const isBorrower = useCanBorrow(poolId)
 
-  return (
-    <Stack>
-      {(isPoolAdmin || isBorrower) && (
-        <>
-          <Details />
-          <Issuer />
-          <EpochAndTranches />
-          {isPoolAdmin && <OnboardingSettings />}
-          {editPoolConfig && <PoolConfig poolId={poolId} />}
-        </>
-      )}
-    </Stack>
-  )
+  return <Stack>{(isPoolAdmin || isBorrower) && <>{editPoolConfig && <PoolConfig poolId={poolId} />}</>}</Stack>
 }

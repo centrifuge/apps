@@ -135,7 +135,7 @@ export function Admins({ poolId }: { poolId: string }) {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="pool" variant="secondary" />,
+                      header: <Tooltips type="pool" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.PoolAdmin`}
@@ -147,7 +147,7 @@ export function Admins({ poolId }: { poolId: string }) {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="borrower" variant="secondary" />,
+                      header: <Tooltips type="borrower" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.Borrower`}
@@ -159,7 +159,7 @@ export function Admins({ poolId }: { poolId: string }) {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="whitelist" variant="secondary" />,
+                      header: <Tooltips type="whitelist" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.InvestorAdmin`}
@@ -171,7 +171,7 @@ export function Admins({ poolId }: { poolId: string }) {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="asset" variant="secondary" />,
+                      header: <Tooltips type="asset" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.LoanAdmin`}
@@ -183,7 +183,7 @@ export function Admins({ poolId }: { poolId: string }) {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="liquidity" variant="secondary" />,
+                      header: <Tooltips type="liquidity" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.LiquidityAdmin`}

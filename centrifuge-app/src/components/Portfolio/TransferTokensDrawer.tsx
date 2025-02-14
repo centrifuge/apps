@@ -1,6 +1,7 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import {
   getChainInfo,
+  Network,
   useCentEvmChainId,
   useCentrifuge,
   useCentrifugeConsts,
@@ -29,19 +30,19 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { isAddress as isEvmAddress } from 'ethers'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useQuery } from 'react-query'
 import { useLocation, useMatch, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
-import { useInvestorStatus } from '../../pages/IssuerPool/Investors/InvestorStatus'
-import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
 import { useActiveDomains, useLiquidityPools } from '../../utils/useLiquidityPools'
+import { usePermissions } from '../../utils/usePermissions'
 import { combine, max, positiveNumber, required } from '../../utils/validation'
 import { truncate } from '../../utils/web3'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
@@ -482,3 +483,30 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
 
   return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
 })
+
+export function useInvestorStatus(poolId: string, address: string, network: Network = 'centrifuge') {
+  const {
+    substrate: { evmChainId: substrateEvmChainId },
+  } = useWallet()
+  const validator = typeof network === 'number' ? isEvmAddress : isAddress
+  const validAddress = validator(address) ? address : undefined
+  const utils = useCentrifugeUtils()
+  const centAddress =
+    validAddress && typeof network === 'number'
+      ? utils.evmToSubstrateAddress(address, network)
+      : substrateEvmChainId && isEvmAddress(address)
+      ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
+      : validAddress
+  const permissions = usePermissions(centAddress)
+
+  const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
+  const allowedTranches = useMemo(
+    () =>
+      Object.entries(permissions?.pools[poolId]?.tranches ?? {})
+        .filter(([, t]) => new Date(t.permissionedTill).getTime() - Date.now() > SevenDaysMs)
+        .map(([tid]) => tid),
+    [permissions, poolId]
+  )
+
+  return { allowedTranches, permissions, centAddress, validAddress }
+}

@@ -138,33 +138,51 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       poolId: string,
       chainId: number,
       currencyKeysToAdd: CurrencyKey[],
-      tokenPricesToUpdate: [string, CurrencyKey][],
-      domainChainId: number
-    ],
+      tokenPricesToUpdate: [string, CurrencyKey][]
+    ][],
     options?: TransactionOptions
   ) {
-    const [poolId, chainId, currencyKeysToAdd, tokenPricesToUpdate, domainChainId] = args
     const $api = inst.getApi()
+    const uniqueChainIds = [...new Set(args.map(([, chainId]) => chainId))]
 
-    return getDomainCurrencies([chainId]).pipe(
+    return from(Promise.all(uniqueChainIds.map((chainId) => firstValueFrom(getDomainCurrencies([chainId]))))).pipe(
       combineLatestWith($api),
-      switchMap(([currencies, api]) => {
-        return api.query.poolSystem.pool(poolId).pipe(
-          switchMap((rawPool) => {
-            const pool = rawPool.toPrimitive() as any
-            const tx = api.tx.utility.batchAll([
-              api.tx.liquidityPoolsGateway.startBatchMessage({ EVM: chainId }),
-              ...(currencyKeysToAdd?.map((key) => api.tx.liquidityPools.addCurrency(key)) ?? []),
-              api.tx.liquidityPools.addPool(poolId, { EVM: chainId }),
-              ...pool.tranches.ids.flatMap((trancheId: string) => [
-                api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
-              ]),
-              ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
-              ...tokenPricesToUpdate.map(([tid, curKey]) => {
-                return api.tx.liquidityPools.updateTokenPrice(poolId, tid, curKey, { EVM: domainChainId })
-              }),
-              api.tx.liquidityPoolsGateway.endBatchMessage({ EVM: chainId }),
-            ])
+      switchMap(([currenciesByChain, api]) => {
+        const chainIdToCurrencies = Object.fromEntries(
+          uniqueChainIds.map((chainId, i) => [chainId, currenciesByChain[i]])
+        )
+
+        return from(Promise.all(args.map(([poolId]) => firstValueFrom(api.query.poolSystem.pool(poolId))))).pipe(
+          switchMap((rawPools) => {
+            // Group args by chainId
+            const argsByChainId = args.reduce((acc, arg, index) => {
+              const [poolId, chainId, currencyKeysToAdd, tokenPricesToUpdate] = arg
+              const pool = rawPools[index].toPrimitive() as any
+              const currencies = chainIdToCurrencies[chainId]
+
+              if (!acc[chainId]) acc[chainId] = []
+              acc[chainId].push({ poolId, currencyKeysToAdd, tokenPricesToUpdate, pool, currencies })
+              return acc
+            }, {} as Record<number, { poolId: string; currencyKeysToAdd: CurrencyKey[]; tokenPricesToUpdate: [string, CurrencyKey][]; pool: any; currencies: any[] }[]>)
+
+            // Create batch for each chainId
+            const tx = api.tx.utility.batchAll(
+              Object.entries(argsByChainId).flatMap(([chainId, chainArgs]) => [
+                api.tx.liquidityPoolsGateway.startBatchMessage({ EVM: Number(chainId) }),
+                ...chainArgs.flatMap(({ poolId, currencyKeysToAdd, tokenPricesToUpdate, pool, currencies }) => [
+                  ...(currencyKeysToAdd?.map((key) => api.tx.liquidityPools.addCurrency(key)) ?? []),
+                  api.tx.liquidityPools.addPool(poolId, { EVM: Number(chainId) }),
+                  ...pool.tranches.ids.flatMap((trancheId: string) => [
+                    api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: Number(chainId) }),
+                  ]),
+                  ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
+                  ...tokenPricesToUpdate.map(([tid, curKey]) =>
+                    api.tx.liquidityPools.updateTokenPrice(poolId, tid, curKey, { EVM: Number(chainId) })
+                  ),
+                ]),
+                api.tx.liquidityPoolsGateway.endBatchMessage({ EVM: Number(chainId) }),
+              ])
+            )
             return inst.wrapSignAndSend(api, tx, options)
           })
         )
@@ -575,6 +593,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       trancheTokens: Record<string, string | null>
       liquidityPools: Record<string, Record<string, string | null>>
       currencyNeedsAdding: Record<string, boolean>
+      isAllowedAsset: Record<string, boolean>
     }>(
       [
         ...trancheIds.flatMap(
@@ -613,11 +632,20 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           call: ['function isPoolActive(uint64) view returns (bool)', poolId],
           returns: [['isActive']],
         },
-        ...(currencies.flatMap((currency) => ({
-          target: poolManager,
-          call: ['function assetToId(address) view returns (uint128)', currency.address],
-          returns: [[`currencyNeedsAdding[${currency.address}]`, (id: bigint) => id === 0n]],
-        })) as Call[]),
+        ...(currencies.flatMap((currency) => {
+          return [
+            {
+              target: poolManager,
+              call: ['function assetToId(address) view returns (uint128)', currency.address],
+              returns: [[`currencyNeedsAdding[${currency.address}]`, (id: bigint) => id === 0n]],
+            },
+            {
+              target: poolManager,
+              call: ['function isAllowedAsset(uint64,address) view returns (bool)', poolId, currency.address],
+              returns: [[`isAllowedAsset[${currency.address}]`]],
+            },
+          ]
+        }) as Call[]),
       ],
       {
         rpcProvider: getProvider(options)!,
@@ -627,6 +655,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     poolData.trancheTokens ??= {}
     poolData.liquidityPools ??= {}
     poolData.currencyNeedsAdding ??= {}
+    poolData.isAllowedAsset ??= {}
+
     trancheIds.forEach((tid) => {
       currencies.forEach((cur) => {
         set(poolData, `liquidityPools[${tid}][${cur.address}]`, poolData.liquidityPools?.[tid]?.[cur.address] || null)
@@ -863,6 +893,39 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pool
   }
 
+  async function getRestrictions(args: [trancheTokenAddress: string, address: string], options?: EvmQueryOptions) {
+    const [trancheTokenAddress, user] = args
+    const calls: Call[] = [
+      {
+        target: trancheTokenAddress,
+        call: ['function hook() view returns (address)'],
+        returns: [['hook']],
+      },
+    ]
+    const trancheTokenHook = await multicall<{ hook: string }>(calls, {
+      rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
+    })
+
+    const data = await multicall<{ isFrozen: boolean; isMember: boolean }>(
+      [
+        {
+          target: trancheTokenHook.hook,
+          call: ['function isFrozen(address, address) view returns (bool)', trancheTokenAddress, user],
+          returns: [['isFrozen']],
+        },
+        {
+          target: trancheTokenHook.hook,
+          call: ['function isMember(address, address) view returns (bool)', trancheTokenAddress, user],
+          returns: [['isMember']],
+        },
+      ],
+      {
+        rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
+      }
+    )
+    return data
+  }
+
   return {
     transferTrancheTokens,
     enablePoolOnDomain,
@@ -888,5 +951,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     getRecentLPEvents,
     getCentrifugeRouterAllowance,
     enableCentrifugeRouter,
+    getRestrictions,
   }
 }

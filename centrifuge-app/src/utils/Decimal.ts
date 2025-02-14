@@ -18,3 +18,5 @@ export function min(...nums: Decimal[]) {
 export function max(...nums: Decimal[]) {
   return nums.reduce((a, b) => (a.greaterThan(b) ? a : b))
 }
+
+export { Decimal }

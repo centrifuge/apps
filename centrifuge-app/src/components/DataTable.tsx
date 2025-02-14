@@ -1,13 +1,16 @@
 import {
   Box,
+  Button,
   Checkbox,
   Divider,
   Grid,
   IconChevronDown,
   IconChevronUp,
   IconFilter,
+  IconSearch,
   Menu,
   Popover,
+  SearchInput,
   Shelf,
   Stack,
   Text,
@@ -51,6 +54,7 @@ export type DataTableProps<T = any> = {
   pageSize?: number
   page?: number
   hideHeader?: boolean
+  headerBackgroundColor?: string
   hideBorder?: boolean
 } & GroupedProps
 
@@ -101,6 +105,7 @@ export const DataTable = <T extends Record<string, any>>({
   pageSize = Infinity,
   page = 1,
   hideHeader,
+  headerBackgroundColor,
   scrollable = false,
   hideBorder,
 }: DataTableProps<T>) => {
@@ -156,7 +161,9 @@ export const DataTable = <T extends Record<string, any>>({
                   border: 'transparent',
                   borderBottom: `1px solid ${theme.colors.backgroundInverted}`,
                 }
-              : {}
+              : {
+                  backgroundColor: headerBackgroundColor ?? 'backgroundSecondary',
+                }
           }
           scrollable={scrollable}
           hideBorder={hideBorder}
@@ -397,7 +404,7 @@ export function FilterableTableHeader({
 }: {
   filterKey: string
   label: string
-  options: string[] | Record<string, string>
+  options: string[] | Record<string, string | React.ReactElement<any, string | React.JSXElementConstructor<any>>>
   filters: FiltersState
   tooltip?: string
 }) {
@@ -463,21 +470,21 @@ export function FilterableTableHeader({
                         value={option}
                         onChange={handleChange}
                         checked={checked}
-                        label={<Text variant="body3">{label}</Text>}
+                        label={label}
                         extendedClickArea
                       />
                     )
                   })}
                 </Stack>
 
-                <Divider color="textDisabled" />
+                <Divider borderColor="textPrimary" />
 
                 {selectedOptions?.size === optionKeys.length ? (
-                  <QuickAction variant="body3" forwardedAs="button" type="button" onClick={() => deselectAll()}>
+                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => deselectAll()}>
                     Deselect all
                   </QuickAction>
                 ) : (
-                  <QuickAction variant="body3" forwardedAs="button" type="button" onClick={() => selectAll()}>
+                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => selectAll()}>
                     Select all
                   </QuickAction>
                 )}
@@ -501,3 +508,61 @@ const StyledHeader = styled(Text)`
     cursor: pointer;
   }
 `
+
+export function SearchableTableHeader({
+  label,
+  value,
+  onSubmit,
+}: {
+  label: string
+  value: string
+  onSubmit: (searchValue: string) => void
+}) {
+  const [searchValue, setSearchValue] = React.useState(value)
+
+  React.useEffect(() => {
+    if (!searchValue) {
+      onSubmit('')
+    }
+  }, [searchValue])
+
+  return (
+    <Box position="relative">
+      <Popover
+        placement="bottom left"
+        renderTrigger={(props, ref, state) => {
+          return (
+            <Box ref={ref}>
+              <FilterButton forwardedAs="button" type="button" variant="body3" {...props}>
+                {label}
+                <IconSearch color={'currentColor'} size="1em" />
+              </FilterButton>
+            </Box>
+          )
+        }}
+        renderContent={(props, ref, state) => (
+          <Box {...props} ref={ref}>
+            <Menu width={300}>
+              <Stack
+                as="form"
+                p={[2, 3]}
+                gap={2}
+                onSubmit={() => {
+                  onSubmit(searchValue)
+                  state.close()
+                }}
+              >
+                <Stack borderWidth={0} gap={2}>
+                  <SearchInput label={label} value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+                  <Button variant="inverted" small type="submit">
+                    Search
+                  </Button>
+                </Stack>
+              </Stack>
+            </Menu>
+          </Box>
+        )}
+      />
+    </Box>
+  )
+}
