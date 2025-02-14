@@ -4075,8 +4075,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const { poolIds } = args
     const $api = inst.getApi()
 
-    const sanitizedPoolIds = poolIds.map((id) => id.replace(/\D/g, ''))
-    const poolIdSet = new Set(sanitizedPoolIds)
+    const poolIdSet = new Set(poolIds)
 
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {

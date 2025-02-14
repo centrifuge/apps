@@ -15,6 +15,7 @@ export default function AssetsPage() {
   const ids = pools.map((pool) => pool.id)
   const { data: loans, isLoading } = useLoans(pools ? ids : [])
 
+  // TODO - replace with Sophia's code once merged
   useEffect(() => {
     if (selectedPools.length === 0 && pools.length > 0) {
       setSelectedPools(pools.map((pool) => pool.id))

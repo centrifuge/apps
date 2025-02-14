@@ -34,7 +34,7 @@ export const PoolSelector = ({
       justifyContent="space-between"
       onClick={onClick}
       style={{ cursor: 'pointer' }}
-      mr={2}
+      mr={1}
       flexShrink={0}
       as="label"
     >

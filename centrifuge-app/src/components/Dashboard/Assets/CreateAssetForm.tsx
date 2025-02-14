@@ -1,6 +1,7 @@
 import {
   Accordion,
   Box,
+  Button,
   Divider,
   IconHelpCircle,
   ImageUpload,
@@ -106,6 +107,7 @@ export function CreateAssetsForm() {
               checked={form.values.assetType === asset.id}
               styles={{ padding: '0px 8px', margin: '8px 0px' }}
               border
+              disabled={!canCreateAssets}
             />
           ))}
         </Box>
@@ -130,38 +132,44 @@ export function CreateAssetsForm() {
             <Box mt={2} mb={2}>
               <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
                 <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
-                  <Field name="customType">
-                    {({ field, form }: FieldProps) => (
-                      <Box display="flex" alignItems="center" onClick={() => form.setFieldValue('customType', 'atPar')}>
-                        <Text>At par</Text>
-                        <Tooltips
-                          type="atPar"
-                          label={
-                            <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
-                          }
-                        />
-                      </Box>
-                    )}
-                  </Field>
+                  <Button
+                    iconRight={
+                      <Tooltips
+                        type="atPar"
+                        label={
+                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                        }
+                      />
+                    }
+                    type="button"
+                    variant="tertiary"
+                    onClick={() => {
+                      form.setFieldValue('customType', 'atPar', false)
+                    }}
+                    small
+                  >
+                    At par
+                  </Button>
                 </TabsItem>
                 <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
-                  <Field name="customType">
-                    {({ field, form }: FieldProps) => (
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        onClick={() => form.setFieldValue('customType', 'discountedCashFlow')}
-                      >
-                        <Text>Discounted cash flow</Text>
-                        <Tooltips
-                          type="discountedCashFlow"
-                          label={
-                            <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
-                          }
-                        />
-                      </Box>
-                    )}
-                  </Field>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      form.setFieldValue('customType', 'discountedCashFlow', false)
+                    }}
+                    small
+                    variant="tertiary"
+                    iconRight={
+                      <Tooltips
+                        type="discountedCashFlow"
+                        label={
+                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                        }
+                      />
+                    }
+                  >
+                    Discounted cash flow
+                  </Button>
                 </TabsItem>
               </Tabs>
             </Box>

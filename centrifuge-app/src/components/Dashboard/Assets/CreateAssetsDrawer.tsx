@@ -284,7 +284,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       >
         <Divider color="backgroundSecondary" />
         <FormikProvider value={form}>
-          <Form>
+          <Form noValidate>
             <Box mb={2}>
               <Field name="poolId">
                 {({ field, form }: FieldProps) => (

@@ -28,6 +28,10 @@ export const FooterActionButtons = ({
   const loanTemplates = pool?.meta?.loanTemplates || []
   const [account] = useSuitableAccounts({ poolId: pool?.id ?? '', poolRole: ['PoolAdmin'] })
 
+  const canCreateAssets =
+    useSuitableAccounts({ poolId: pool?.id, poolRole: ['Borrower', 'PoolAdmin'], proxyType: ['Borrow', 'PoolAdmin'] })
+      .length > 0
+
   const hasTemplates = loanTemplates.length > 0
   const isAdmin = !!poolAdmin
 
@@ -75,7 +79,7 @@ export const FooterActionButtons = ({
       return (
         <Button
           style={{ width: '100%' }}
-          disabled={!form.values.assetName}
+          disabled={!form.values.assetName || !canCreateAssets}
           loading={isLoading}
           onClick={() => {
             form.submitForm()
@@ -92,7 +96,7 @@ export const FooterActionButtons = ({
       return (
         <Button
           style={{ width: '100%' }}
-          disabled={!form.values.assetName}
+          disabled={!form.values.assetName || !canCreateAssets}
           loading={isLoading}
           onClick={() => {
             form.submitForm()

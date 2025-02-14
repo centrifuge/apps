@@ -153,7 +153,7 @@ export function PricingSection() {
           label={<Tooltips type="advanceRate" label={<Text variant="heading4">Advance rate*</Text>} />}
           placeholder="0.00"
           symbol="%"
-          name="pricing.advanceRate"
+          name="advanceRate"
           validate={validate.advanceRate}
         />
       )}
