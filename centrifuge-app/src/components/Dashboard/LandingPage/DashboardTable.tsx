@@ -2,12 +2,13 @@ import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Button, Divider, Grid, IconSettings, IconUsers, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { Dec } from '../../../src/utils/Decimal'
-import { formatBalance } from '../../../src/utils/formatting'
-import { DataTable, SortableTableHeader } from '../DataTable'
-import { calculateApyPerToken, useGetPoolsMetadata } from './utils'
+import { Dec } from '../../../../src/utils/Decimal'
+import { formatBalance } from '../../../../src/utils/formatting'
+import { DataTable, SortableTableHeader } from '../../DataTable'
+import { calculateApyPerToken, useGetPoolsMetadata } from '../utils'
+import { PoolConfigurationDrawer } from './PoolConfigurationDrawer'
 
 export type Row = {
   poolIcon: string
@@ -20,6 +21,7 @@ export type Row = {
 }
 
 export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
+  const [open, setOpen] = useState(false)
   const theme = useTheme()
   const cent = useCentrifuge()
   const pools = useGetPoolsMetadata(filteredPools || [])
@@ -85,7 +87,7 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
         <Button variant="inverted" small icon={IconUsers} onClick={() => {}}>
           Access
         </Button>
-        <Button variant="inverted" small icon={IconSettings} onClick={() => {}}>
+        <Button variant="inverted" small icon={IconSettings} onClick={() => setOpen(true)}>
           Configuration
         </Button>
       </Grid>
@@ -98,6 +100,7 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
         onRowClicked={(row) => `/pools/${row.poolId}`}
       />
       <Divider color={theme.colors.backgroundSecondary} />
+      <PoolConfigurationDrawer open={open} setOpen={setOpen} pools={pools} />
     </Box>
   )
 }
