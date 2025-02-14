@@ -1,5 +1,6 @@
 import { Stack } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
+import { AccessDrawer } from '../../../components/Dashboard/AccessDrawer'
 import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PendingMultisigs } from '../../../components/PendingMultisigs'
@@ -29,6 +30,7 @@ function IssuerPoolAccess() {
 
   return (
     <Stack>
+      <AccessDrawer isOpen onClose={() => {}} poolIds={[poolId]} />
       <PendingMultisigs poolId={poolId} />
       {!!usePoolAdmin(poolId) && (
         <>

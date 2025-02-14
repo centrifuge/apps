@@ -1,5 +1,5 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { useCentEvmChainId, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentEvmChainId, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Checkbox,
@@ -7,20 +7,19 @@ import {
   Grid,
   IconButton,
   IconHelpCircle,
-  IconInfo,
   IconTrash,
   NumberInput,
   Select,
   Text,
   TextInput,
 } from '@centrifuge/fabric'
-import { isAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { useEffect } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { feeCategories } from '../../../src/config'
-import { isEvmAddress } from '../../../src/utils/address'
+import { MultisigForm } from '../IssuerPool/Access/MultisigForm'
 import { FormAddressInput } from './FormAddressInput'
 import { AddButton } from './PoolDetailsSection'
 import { CheckboxOption, Line, StyledGrid } from './PoolStructureSection'
@@ -67,9 +66,13 @@ export const PoolSetupSection = () => {
   const chainId = useCentEvmChainId()
   const form = useFormikContext<CreatePoolValues>()
   const { values } = form
-  const utils = useCentrifugeUtils()
   const ctx = useWallet()
-  const { substrate, connectedType } = ctx
+  const { substrate } = ctx
+
+  useEffect(() => {
+    form.setFieldValue('adminMultisig.signers[0]', substrate.selectedAddress)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [substrate.selectedAddress])
 
   return (
     <Box>
@@ -82,132 +85,10 @@ export const PoolSetupSection = () => {
         <Text variant="body2" color="textSecondary">
           Pool managers can individually add/block investors and manage the liquidity reserve of the pool.
         </Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <Box>
-            <Text variant="body2">Security requirement</Text>
-            <CheckboxOption
-              height={40}
-              name="adminMultisigEnabled"
-              label="Single"
-              icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-              onChange={() => {
-                form.setFieldValue('adminMultisigEnabled', false)
-                form.setFieldValue('adminMultisig.signers', [substrate.selectedAddress])
-              }}
-              isChecked={!values.adminMultisigEnabled}
-              id="singleMultisign"
-            />
-            <CheckboxOption
-              height={40}
-              name="adminMultisigEnabled"
-              label="Multi-sig"
-              icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-              onChange={() => {
-                form.setFieldValue('adminMultisigEnabled', true)
-                form.setFieldValue('adminMultisig.signers', [form.values.adminMultisig.signers[0], ''])
-              }}
-              isChecked={values.adminMultisigEnabled}
-              id="multiMultisign"
-            />
-          </Box>
-          <Box>
-            <Text variant="body2">Wallet addresses</Text>
-            <FieldArray name="adminMultisig.signers">
-              {({ push, remove }) => (
-                <>
-                  {values.adminMultisigEnabled ? (
-                    values.adminMultisig?.signers?.map((_, index) => (
-                      <Box key={index} mt={2}>
-                        <Field name={`adminMultisig.signers.${index}`} validate={validate.addressValidate}>
-                          {() => (
-                            <Grid gridTemplateColumns={['1fr 24px']} alignItems="center">
-                              <FormAddressInput
-                                name={`adminMultisig.signers.${index}`}
-                                placeholder="Type address..."
-                                chainId={chainId}
-                              />
-                              {values.adminMultisig.signers.length >= 3 && index >= 2 && (
-                                <IconButton onClick={() => remove(index)}>
-                                  <IconTrash color="textSecondary" />
-                                </IconButton>
-                              )}
-                            </Grid>
-                          )}
-                        </Field>
-                      </Box>
-                    ))
-                  ) : (
-                    <Field name={`adminMultisig.signers.0`} validate={validate.addressValidate}>
-                      {({ field, form }: FieldProps) => {
-                        const isValidAddress =
-                          connectedType === 'evm' ? isEvmAddress(field.value) : isAddress(field.value)
-
-                        return (
-                          <Box mt={2}>
-                            <FieldWithErrorMessage
-                              {...field}
-                              as={TextInput}
-                              placeholder="Type address..."
-                              value={isValidAddress ? utils.formatAddress(field.value) : field.value}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                form.setFieldValue(field.name, e.target.value)
-                              }
-                            />
-                          </Box>
-                        )
-                      }}
-                    </Field>
-                  )}
-                  {values.adminMultisigEnabled && (
-                    <Box display="flex" justifyContent="flex-end" mt={2}>
-                      <AddButton
-                        onClick={() => {
-                          if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
-                            push('')
-                          }
-                        }}
-                      />
-                    </Box>
-                  )}
-                </>
-              )}
-            </FieldArray>
-          </Box>
-        </StyledGrid>
-      </Box>
-      {values.adminMultisigEnabled && (
-        <Box mt={2} mb={2}>
-          <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-            <Field name="adminMultisig.threshold">
-              {({ field, meta, form }: FieldProps) => (
-                <Select
-                  name="adminMultisig.threshold"
-                  label={`Configuration change threshold (${values?.adminMultisig?.threshold} out of ${Math.max(
-                    values?.adminMultisig?.signers?.length ?? 0,
-                    1
-                  )} managers)`}
-                  onChange={(event) => form.setFieldValue('adminMultisig.threshold', event.target.value)}
-                  onBlur={field.onBlur}
-                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                  value={field.value}
-                  options={values.adminMultisig?.signers.map((_: string | number, i: any) => ({
-                    label: i + 1,
-                    value: i + 1,
-                  }))}
-                  placeholder="Select..."
-                />
-              )}
-            </Field>
-            <Grid display="flex" gap={1}>
-              <IconInfo size="iconSmall" color={theme.colors.textSecondary} />
-              <Text color="textSecondary" variant="body2">
-                For added security, changes to the pool configuration (e.g., tranche structure or write-off policy) may
-                require multiple signers and confirmation from the above.
-              </Text>
-            </Grid>
-          </StyledGrid>
+        <Box mt={3}>
+          <MultisigForm canEditFirst={false} cardProps={{ p: ['12px', 5] }} />
         </Box>
-      )}
+      </Box>
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Pool delegates</Text>
@@ -228,7 +109,7 @@ export const PoolSetupSection = () => {
                       {() => (
                         <FormAddressInput
                           name={`assetOriginators.${index}`}
-                          placeholder="Type address..."
+                          placeholder="Enter address..."
                           chainId={chainId}
                         />
                       )}
