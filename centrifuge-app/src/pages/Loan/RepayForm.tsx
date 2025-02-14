@@ -89,7 +89,7 @@ function InternalRepayForm({
   const account = useBorrower(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const muxRepay = useMuxRepay(loan.poolId, loan.id)
-  const { data: loans } = useLoans(loan.poolId)
+  const { data: loans } = useLoans([loan.poolId])
   const api = useCentrifugeApi()
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'

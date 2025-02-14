@@ -380,7 +380,7 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
   )
 }
 
-export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean, isPresentValue?: boolean) {
+export function getAmount(l: Row | Loan, pool: Pool | TinlakePool, format?: boolean, isPresentValue?: boolean) {
   switch (l.status) {
     case 'Closed':
       return format ? formatBalance(l.totalRepaid) : l.totalRepaid
@@ -409,7 +409,7 @@ export function getAmount(l: Row, pool: Pool | TinlakePool, format?: boolean, is
   }
 }
 
-function Amount({ loan }: { loan: Row }) {
+export function Amount({ loan, style }: { loan: Row | Loan; style?: React.CSSProperties }) {
   const pool = usePool(loan.poolId)
-  return <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{getAmount(loan, pool, true)}</Text>
+  return <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis', ...style }}>{getAmount(loan, pool, true)}</Text>
 }

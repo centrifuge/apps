@@ -10,15 +10,22 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string | React.ReactElement
   errorMessage?: string
   extendedClickArea?: boolean
+  variant?: 'primary' | 'secondary'
 }
 
-export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxProps }: CheckboxProps) {
+export function Checkbox({
+  label,
+  errorMessage,
+  extendedClickArea,
+  variant = 'primary',
+  ...checkboxProps
+}: CheckboxProps) {
   return (
     <Box position="relative">
       <StyledLabel $extendedClickArea={!!extendedClickArea}>
         <Shelf as={Text} gap={1} alignItems="flex-start" position="relative">
           <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
-            <StyledCheckbox type="checkbox" {...checkboxProps} />
+            <StyledCheckbox type="checkbox" {...checkboxProps} variant={variant} />
             <StyledOutline />
           </StyledWrapper>
           {label && (
@@ -88,30 +95,29 @@ const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
   }
 `
 
-const StyledCheckbox = styled.input`
-  width: 18px;
-  height: 18px;
+const StyledCheckbox = styled.input<{ variant: 'primary' | 'secondary' }>`
+  width: 16px;
+  height: 16px;
   appearance: none;
-  border-radius: 2px;
-  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
+  border-radius: 4px;
+  border: 1px solid
+    ${({ theme, variant }) => (variant === 'primary' ? theme.colors.borderPrimary : theme.colors.textPrimary)};
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
-
-  ${({ theme }) => `
+  ${({ theme, variant }) => `
       &:checked {
-        border-color: ${theme.colors.borderSecondary};
-        background-color: ${theme.colors.textGold};
+        border-color: ${variant === 'primary' ? theme.colors.borderSecondary : theme.colors.textPrimary};
+        background-color: ${variant === 'primary' ? theme.colors.textGold : 'white'};
       }
-
       &:checked::after {
         content: '';
         position: absolute;
         top: 2px;
         left: 5px;
-        width: 6px;
-        height: 10px;
-        border: solid white;
+        width: 4px;
+        height: 8px;
+        border: solid ${variant === 'primary' ? 'white' : 'black'};
         border-width: 0 2px 2px 0;
         transform: rotate(45deg);
       }

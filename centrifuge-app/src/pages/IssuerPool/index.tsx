@@ -4,8 +4,6 @@ import LoanPage from '../Loan'
 import { IssuerPoolAccessPage } from './Access'
 import { IssuerPoolAssetPage } from './Assets'
 import { IssuerPoolConfigurationPage } from './Configuration'
-import { IssuerPoolCreateLoanTemplatePage } from './Configuration/CreateLoanTemplate'
-import { IssuerPoolViewLoanTemplatePage } from './Configuration/ViewLoanTemplate'
 import { IssuerPoolInvestorsPage } from './Investors'
 import { IssuerPoolLiquidityPage } from './Liquidity'
 import { IssuerPoolOverviewPage } from './Overview'
@@ -22,8 +20,6 @@ export default function IssuerPoolPage() {
     <>
       <Routes>
         <Route path="/" element={<IssuerPoolOverviewPage />} />
-        <Route path="configuration/view-asset-template/:sid" element={<IssuerPoolViewLoanTemplatePage />} />
-        <Route path="configuration/create-asset-template" element={<IssuerPoolCreateLoanTemplatePage />} />
         <Route path="configuration" element={<IssuerPoolConfigurationPage />} />
         <Route path="investors" element={<IssuerPoolInvestorsPage />} />
         <Route path="access" element={<IssuerPoolAccessPage />} />

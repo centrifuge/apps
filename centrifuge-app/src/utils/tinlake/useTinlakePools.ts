@@ -150,12 +150,11 @@ export function useTinlakePools(suspense = false) {
   )
 }
 export function useTinlakeLoans(poolId: string) {
-  const tinlakePools = useTinlakePools(poolId.startsWith('0x'))
-
-  const pool = tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
+  const tinlakePools = useTinlakePools(poolId?.startsWith('0x'))
+  const pool = tinlakePools?.data?.pools?.find((p) => p?.id?.toLowerCase() === poolId?.toLowerCase())
 
   return useQuery(
-    ['tinlakePoolLoans', poolId.toLowerCase()],
+    ['tinlakePoolLoans', poolId?.toLowerCase()],
     async () => {
       const loans = await getTinlakeLoans(poolId)
       const writeOffPercentages = await getWriteOffPercentages(pool!, loans)

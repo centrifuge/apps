@@ -11,7 +11,7 @@ type Props = {
   children?: React.ReactNode
 }
 
-export function PageSummary({ data, children }: Props) {
+export function PageSummary({ data, children, ...props }: Props) {
   const theme = useTheme()
   return (
     <Shelf
@@ -23,6 +23,7 @@ export function PageSummary({ data, children }: Props) {
       borderRadius={10}
       justifyContent="space-between"
       flexWrap="wrap"
+      {...props}
     >
       {data?.map(({ label, value, heading }, index) => (
         <Stack gap="4px" key={`${value}-${label}-${index}`}>

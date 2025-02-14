@@ -59,7 +59,7 @@ const StyledTabsItem = styled.button<{
       boxShadow: $active
         ? `inset 0 -2px 0 ${variant === 'secondary' ? theme.colors.textPrimary : theme.colors.textGold}`
         : showBorder
-        ? `inset 0 -2px 0 ${theme.colors.textDisabled}`
+        ? `inset 0 -2px 0 ${theme.colors.backgroundTertiary}`
         : 'none',
       fontWeight: 400,
 

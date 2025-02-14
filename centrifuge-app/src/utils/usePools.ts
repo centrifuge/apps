@@ -1,4 +1,4 @@
-import Centrifuge, { Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { AssetSnapshot, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect, useMemo } from 'react'
@@ -172,6 +172,25 @@ export function useAllPoolAssetSnapshots(poolId: string, date: string) {
   return { data: result, isLoading }
 }
 
+export function useAllPoolAssetSnapshotsMulti(pools: Pool[], date: string) {
+  return useCentrifugeQuery(
+    ['allAssetSnapshotsMulti', pools.map((p) => p.id), date],
+    (cent) =>
+      combineLatest(pools.map((pool) => cent.pools.getAllPoolAssetSnapshots([pool.id, new Date(date)]))).pipe(
+        map((snapshotsArray) => {
+          const result: Record<string, AssetSnapshot[]> = {}
+          pools.forEach((pool, index) => {
+            result[pool.id] = snapshotsArray[index]
+          })
+          return result
+        })
+      ),
+    {
+      enabled: !!date && pools.length > 0,
+    }
+  )
+}
+
 export function usePoolFees(poolId: string) {
   const [result] = useCentrifugeQuery(['poolFees', poolId], (cent) => cent.pools.getPoolFees([poolId]), {
     enabled: !poolId.startsWith('0x'),
@@ -204,7 +223,7 @@ export function useOracleTransactions(from?: Date, to?: Date) {
 
 export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
+  const { data: loans } = useLoans([poolId])
 
   if (!loans?.length || !pool) return new BN(0)
 

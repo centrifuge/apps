@@ -1,5 +1,5 @@
 import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
-import { Box, IconChevronRight, IconPlus, Shelf, Text } from '@centrifuge/fabric'
+import { Box, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
@@ -8,17 +8,15 @@ import { useBasePath } from '../../../../src/utils/useBasePath'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList, getAmount } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
-import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { Tooltips } from '../../../components/Tooltips'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
-import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { OffchainMenu } from './OffchainMenu'
 
-const StyledRouterTextLink = styled(RouterTextLink)`
+export const StyledRouterTextLink = styled(RouterTextLink)`
   text-decoration: unset;
   display: flex;
   align-items: center;
@@ -44,7 +42,7 @@ export function PoolDetailAssets() {
   if (!poolId) throw new Error('Pool not found')
 
   const pool = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
+  const { data: loans } = useLoans([poolId])
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(
@@ -57,7 +55,6 @@ export function PoolDetailAssets() {
     return (
       <Shelf p={4} gap={2}>
         <Text>No assets have been originated yet</Text>
-        <CreateAssetButton poolId={poolId} />
       </Shelf>
     )
   }
@@ -124,22 +121,10 @@ export function PoolDetailAssets() {
 
   return (
     <>
-      <PageSummary data={pageSummaryData}>
-        <CreateAssetButton poolId={poolId} />
-      </PageSummary>
+      <PageSummary data={pageSummaryData} />
       <Box paddingX={3}>
         <LoanList loans={loans} />
       </Box>
     </>
   )
-}
-
-function CreateAssetButton({ poolId }: { poolId: string }) {
-  const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
-
-  return canCreateAssets ? (
-    <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small icon={<IconPlus />}>
-      Create assets
-    </RouterLinkButton>
-  ) : null
 }

@@ -79,6 +79,7 @@ export function FileUpload({
   id,
   fileTypeText,
   small,
+  accept,
   ...inputProps
 }: FileUploadProps) {
   const defaultId = React.useId()
@@ -177,7 +178,7 @@ export function FileUpload({
             <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
               <Text color={curFile && typeof curFile !== 'string' && curFile.name ? 'textPrimary' : 'textSecondary'}>
                 {' '}
-                {(curFile && typeof curFile !== 'string' && curFile.name) || 'Click to upload'}
+                {(curFile && typeof curFile !== 'string' && curFile.name) || placeholder || 'Click to upload'}
               </Text>
               {curFile && typeof curFile !== 'string' && curFile.name ? (
                 <IconButton
@@ -209,7 +210,7 @@ export function FileUpload({
               </Box>
               <Box>
                 <Text variant="heading4">
-                  {(curFile && typeof curFile !== 'string' && curFile.name) || 'Click to upload'}
+                  {(curFile && typeof curFile !== 'string' && curFile.name) || placeholder || 'Click to upload'}
                 </Text>
                 {curFile && typeof curFile !== 'string' && curFile.name ? (
                   ''

@@ -103,7 +103,7 @@ function PoolPerformanceChart() {
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
-  const { data: loans } = useLoans(poolId)
+  const { data: loans } = useLoans([poolId])
 
   const firstOriginationDate = loans?.reduce((acc, cur) => {
     if ('originationDate' in cur) {

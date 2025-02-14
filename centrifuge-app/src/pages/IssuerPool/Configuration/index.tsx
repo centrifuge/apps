@@ -8,7 +8,6 @@ import { OnboardingSettings } from '../Investors/OnboardingSettings'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
-import { LoanTemplates } from './LoanTemplates'
 import { PoolConfig } from './PoolConfig'
 
 export function IssuerPoolConfigurationPage() {
@@ -38,7 +37,6 @@ function IssuerPoolConfiguration() {
           <Details />
           <Issuer />
           <EpochAndTranches />
-          <LoanTemplates />
           {isPoolAdmin && <OnboardingSettings />}
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>

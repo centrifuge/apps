@@ -106,7 +106,7 @@ function InternalFinanceForm({
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
-  const { data: loans } = useLoans(loan.poolId)
+  const { data: loans } = useLoans([loan.poolId])
   const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
