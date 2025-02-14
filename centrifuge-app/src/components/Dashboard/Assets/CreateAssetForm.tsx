@@ -128,118 +128,118 @@ export function CreateAssetsForm() {
         </Box>
       </Box>
       {hasTemplates && canCreateAssets && form.values.assetType !== 'cash' && (
-        <Box mt={3}>
-          {form.values.assetType === 'custom' && (
-            <Box mt={2} mb={2}>
-              <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
-                <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
-                  <Button
-                    iconRight={
-                      <Tooltips
-                        type="atPar"
-                        label={
-                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
-                        }
-                      />
-                    }
-                    type="button"
-                    variant="tertiary"
-                    onClick={() => {
-                      form.setFieldValue('customType', 'atPar', false)
-                    }}
-                    small
-                  >
-                    At par
-                  </Button>
-                </TabsItem>
-                <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      form.setFieldValue('customType', 'discountedCashFlow', false)
-                    }}
-                    small
-                    variant="tertiary"
-                    iconRight={
-                      <Tooltips
-                        type="discountedCashFlow"
-                        label={
-                          <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
-                        }
-                      />
-                    }
-                  >
-                    Discounted cash flow
-                  </Button>
-                </TabsItem>
-              </Tabs>
-            </Box>
-          )}
-          <Accordion
-            items={[
-              {
-                title: 'Pricing',
-                body: <PricingSection />,
-              },
-              ...(sectionsName &&
-                sectionsName.map((section, index) => ({
-                  title: section,
-                  body: renderBody(index),
-                }))),
-            ]}
-          />
-          {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
-            <Box mb={2}>
-              <Divider color="backgroundSecondary" />
-            </Box>
-          )}
-          {templateMetadata?.options?.image && (
-            <Box
-              backgroundColor="backgroundSecondary"
-              borderRadius={8}
-              border={`1px solid ${theme.colors.borderPrimary}`}
-              padding={2}
-              mb={2}
-            >
-              <Field name="image" validate={validate.nftImage}>
-                {({ field, meta, form }: FieldProps) => (
-                  <ImageUpload
-                    file={field.value}
-                    onFileChange={(file) => {
-                      form.setFieldTouched('image', true, false)
-                      form.setFieldValue('image', file)
-                    }}
-                    accept="JPG/PNG/SVG, max 1MB"
-                    label="Asset image"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                  />
-                )}
-              </Field>
-            </Box>
-          )}
-          {templateMetadata?.options?.description && (
-            <Box
-              backgroundColor="backgroundSecondary"
-              borderRadius={8}
-              border={`1px solid ${theme.colors.borderPrimary}`}
-              padding={2}
-              mb={2}
-            >
-              <FieldWithErrorMessage
-                name="description"
-                as={TextAreaInput}
-                label="Description"
-                placeholder="Add asset description paragraph..."
-                maxLength={100}
-              />
-            </Box>
-          )}
-        </Box>
-      )}
-      {form.values.assetType !== 'cash' && (
-        <Box mb={2}>
-          <Divider color="backgroundSecondary" />
-        </Box>
+        <>
+          <Box mt={3}>
+            {form.values.assetType === 'custom' && (
+              <Box mt={2} mb={2}>
+                <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+                  <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+                    <Button
+                      iconRight={
+                        <Tooltips
+                          type="atPar"
+                          label={
+                            <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                          }
+                        />
+                      }
+                      type="button"
+                      variant="tertiary"
+                      onClick={() => {
+                        form.setFieldValue('customType', 'atPar', false)
+                      }}
+                      small
+                    >
+                      At par
+                    </Button>
+                  </TabsItem>
+                  <TabsItem styleOverrides={{ padding: '8px' }} showBorder>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        form.setFieldValue('customType', 'discountedCashFlow', false)
+                      }}
+                      small
+                      variant="tertiary"
+                      iconRight={
+                        <Tooltips
+                          type="discountedCashFlow"
+                          label={
+                            <Box ml={1}>{<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}</Box>
+                          }
+                        />
+                      }
+                    >
+                      Discounted cash flow
+                    </Button>
+                  </TabsItem>
+                </Tabs>
+              </Box>
+            )}
+            <Accordion
+              items={[
+                {
+                  title: 'Pricing',
+                  body: <PricingSection />,
+                },
+                ...(sectionsName &&
+                  sectionsName.map((section, index) => ({
+                    title: section,
+                    body: renderBody(index),
+                  }))),
+              ]}
+            />
+            {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
+              <Box mb={2}>
+                <Divider color="backgroundSecondary" />
+              </Box>
+            )}
+            {templateMetadata?.options?.image && (
+              <Box
+                backgroundColor="backgroundSecondary"
+                borderRadius={8}
+                border={`1px solid ${theme.colors.borderPrimary}`}
+                padding={2}
+                mb={2}
+              >
+                <Field name="image" validate={validate.nftImage}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <ImageUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('image', true, false)
+                        form.setFieldValue('image', file)
+                      }}
+                      accept="JPG/PNG/SVG, max 1MB"
+                      label="Asset image"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                    />
+                  )}
+                </Field>
+              </Box>
+            )}
+            {templateMetadata?.options?.description && (
+              <Box
+                backgroundColor="backgroundSecondary"
+                borderRadius={8}
+                border={`1px solid ${theme.colors.borderPrimary}`}
+                padding={2}
+                mb={2}
+              >
+                <FieldWithErrorMessage
+                  name="description"
+                  as={TextAreaInput}
+                  label="Description"
+                  placeholder="Add asset description paragraph..."
+                  maxLength={100}
+                />
+              </Box>
+            )}
+          </Box>
+          <Box mb={2}>
+            <Divider color="backgroundSecondary" />
+          </Box>
+        </>
       )}
     </Box>
   )
