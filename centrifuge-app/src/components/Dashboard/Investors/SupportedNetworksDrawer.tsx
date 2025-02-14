@@ -190,7 +190,11 @@ function SupportedNetworks({
     <Accordion
       items={[
         {
-          title: getNetworkName(chainId || 'centrifuge'),
+          title: (
+            <Box pl={2}>
+              <Text variant="heading3">{getNetworkName(chainId || 'centrifuge')}</Text>
+            </Box>
+          ),
           body: (
             <>
               <Box px={2}>
