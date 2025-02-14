@@ -12,6 +12,7 @@ import { diffPermissions } from '../Configuration/Admins'
 import { MultisigForm } from './MultisigForm'
 
 export type PoolManagersInput = {
+  adminMultisigEnabled: boolean
   adminMultisig: {
     signers: string[]
     threshold: number
@@ -26,15 +27,16 @@ export function PoolManagers({ poolId }: { poolId: string }) {
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
   const { data: metadata } = usePoolMetadata(pool)
 
-  const initialValues: PoolManagersInput = React.useMemo(
-    () => ({
+  const initialValues: PoolManagersInput = React.useMemo(() => {
+    const signers = access.multisig?.signers || access.adminDelegates?.map((d) => d.delegatee) || []
+    return {
+      adminMultisigEnabled: signers.length > 1,
       adminMultisig: {
-        signers: access.multisig?.signers || access.adminDelegates?.map((d) => d.delegatee) || [],
+        signers,
         threshold: access.multisig?.threshold || 1,
       },
-    }),
-    [access?.multisig, access?.adminDelegates]
-  )
+    }
+  }, [access?.multisig, access?.adminDelegates])
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update pool managers',
@@ -161,7 +163,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
             )
           }
         >
-          <MultisigForm isEditing={isEditing} isLoading={isLoading} />
+          <MultisigForm />
         </PageSection>
       </Form>
     </FormikProvider>

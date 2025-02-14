@@ -23,7 +23,7 @@ import { StyledGrid } from './PoolStructureSection'
 import { validate } from './validate'
 
 export const AddButton = ({ onClick }: { onClick: () => void }) => (
-  <Button variant="secondary" small style={{ width: 163, height: 36 }} onClick={onClick}>
+  <Button variant="secondary" small style={{ width: 163 }} onClick={onClick}>
     Add another
   </Button>
 )
