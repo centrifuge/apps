@@ -24,6 +24,10 @@ interface StyledButtonProps {
   selected?: boolean
 }
 
+type ReportFilterProps = {
+  poolId: string
+}
+
 const StyledButton = styled(Button)<StyledButtonProps>`
   margin-bottom: 12px;
   margin-right: 12px;
@@ -40,10 +44,6 @@ const StyledButton = styled(Button)<StyledButtonProps>`
   }
 `
 
-type ReportFilterProps = {
-  poolId: string
-}
-
 export function ReportFilter({ poolId }: ReportFilterProps) {
   const { csvData, setStartDate, startDate, endDate, setEndDate, groupBy, setGroupBy, report, reportData } =
     React.useContext(ReportContext)
@@ -55,12 +55,12 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
     if (!reportData.length) return
     if (report === 'balance-sheet') {
       return (reportData as BalanceSheetReport[]).map((data) => ({
-        name: data.timestamp,
+        name: data?.timestamp,
         yAxis: data.totalCapital?.toDecimal(),
       }))
     } else if (report === 'profit-and-loss') {
       return (reportData as ProfitAndLossReport[]).map((data) => ({
-        name: data.timestamp,
+        name: data?.timestamp,
         yAxis: data.totalProfitAndLoss?.toDecimal(),
       }))
     } else {
@@ -68,12 +68,23 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
         .filter((data) => !data.totalCashflow?.isZero())
         .map((data) => {
           return {
-            name: data.timestamp,
+            name: data?.timestamp,
             yAxis: data.totalCashflow?.toDecimal(),
           }
         })
     }
   }, [report, reportData])
+
+  const changeTab = (tab: string) => {
+    const base = `${basePath}/${pool.id}/reporting/${tab}`
+
+    const params = new URLSearchParams()
+    if (startDate) params.append('from', startDate)
+    if (endDate) params.append('to', endDate)
+    if (groupBy) params.append('groupBy', groupBy)
+
+    navigate(`${base}?${params.toString()}`)
+  }
 
   return (
     <Shelf
@@ -91,7 +102,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
             selected={report === 'balance-sheet'}
             variant={report === 'balance-sheet' ? 'secondary' : 'tertiary'}
             icon={<IconBalanceSheet size={18} />}
-            onClick={() => navigate(`${basePath}/${pool.id}/reporting/balance-sheet`)}
+            onClick={() => changeTab('balance-sheet')}
           >
             Balance sheet
           </StyledButton>
@@ -99,7 +110,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
             selected={report === 'profit-and-loss'}
             variant={report === 'profit-and-loss' ? 'secondary' : 'tertiary'}
             icon={<IconProfitAndLoss size={18} />}
-            onClick={() => navigate(`${basePath}/${pool.id}/reporting/profit-and-loss`)}
+            onClick={() => changeTab('profit-and-loss')}
           >
             Profit & loss
           </StyledButton>
@@ -107,7 +118,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
             selected={report === 'cash-flow-statement'}
             variant={report === 'cash-flow-statement' ? 'secondary' : 'tertiary'}
             icon={<IconCashflow size={18} />}
-            onClick={() => navigate(`${basePath}/${pool.id}/reporting/cash-flow-statement`)}
+            onClick={() => changeTab('cash-flow-statement')}
           >
             Cash flow
           </StyledButton>
