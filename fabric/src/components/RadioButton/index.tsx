@@ -40,7 +40,7 @@ export const RadioButton = ({
   return (
     // @ts-expect-error
     <Box
-      backgroundColor="white"
+      backgroundColor={theme.colors.backgroundPrimary}
       borderRadius={8}
       border={border ? `1px solid ${theme.colors.borderPrimary}` : 'none'}
       display="flex"
@@ -62,9 +62,18 @@ export const RadioButton = ({
 }
 
 export function RadioButtonInput({ label, errorMessage, textStyle, ...radioProps }: RadioButtonProps) {
+  const theme = useTheme()
   return (
-    <label>
-      <Shelf as={Text} gap={1} alignItems="baseline" backgroundColor="white" px={1} py={1} borderRadius={8}>
+    <label htmlFor={radioProps.id}>
+      <Shelf
+        as={Text}
+        gap={1}
+        alignItems="baseline"
+        backgroundColor={theme.colors.backgroundPrimary}
+        px={1}
+        py={1}
+        borderRadius={8}
+      >
         <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px">
           <StyledRadioButton type="radio" {...radioProps} />
           <StyledOutline />
