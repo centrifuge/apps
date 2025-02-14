@@ -48,8 +48,8 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       .concat(
         poolStates.map((state, index) => ({
           align: 'left',
-          timestamp: state.timestamp,
-          header: new Date(state.timestamp).toLocaleDateString('en-US', {
+          timestamp: state?.timestamp,
+          header: new Date(state?.timestamp).toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
@@ -111,7 +111,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
-  }, [pool.currency.displayName, poolStates])
+  }, [poolStates, currency])
 
   const trancheRecords: Row[] = React.useMemo(() => {
     return [

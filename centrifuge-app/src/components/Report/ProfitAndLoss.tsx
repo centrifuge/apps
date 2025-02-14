@@ -52,8 +52,8 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       .concat(
         data.map((state, index) => ({
           align: 'right',
-          timestamp: state.timestamp,
-          header: getColumnHeader(state.timestamp, groupBy),
+          timestamp: state?.timestamp,
+          header: getColumnHeader(state?.timestamp, groupBy),
           cell: (row: Row) => (
             <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>
               {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}
