@@ -1,29 +1,23 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Grid, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Grid, ImageUpload, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../../src/components/Tooltips'
-import { config } from '../../../../src/config'
 import { CreatePoolFormValues } from './PoolConfigurationDrawer'
 
 export function IssuerDetailsSection() {
   const form = useFormikContext<CreatePoolFormValues>()
   const theme = useTheme()
   const cent = useCentrifuge()
-  const [icon, setIcon] = useState<File | null>(null)
+  const [logo, setLogo] = useState<File | null>(null)
 
-  const iconUrl = cent.metadata.parseMetadataUrl(form.values.pool.poolIcon)
-
-  const subAssetClasses =
-    config.assetClasses[form.values.pool.assetClass as keyof typeof config.assetClasses]?.map((label) => ({
-      label,
-      value: label,
-    })) ?? []
+  const logoUrl = cent.metadata.parseMetadataUrl(form.values.pool.issuerLogo)
 
   useEffect(() => {
-    if (iconUrl) {
-      fetch(iconUrl)
+    if (logoUrl) {
+      fetch(logoUrl)
         .then((response) => {
           if (!response.ok) {
             throw new Error('Network response was not ok')
@@ -33,13 +27,13 @@ export function IssuerDetailsSection() {
         .then((blob) => {
           // Create a File object. Adjust the filename as needed.
           const newFile = new File([blob], 'icon.svg', { type: blob.type })
-          setIcon(newFile)
+          setLogo(newFile)
         })
         .catch((error) => {
           console.error('Error converting URL to file:', error)
         })
     }
-  }, [iconUrl])
+  }, [logoUrl])
 
   return (
     <Grid
@@ -80,6 +74,41 @@ export function IssuerDetailsSection() {
               maxLength={100}
             />
           </Box>
+        )}
+      </Field>
+      <ImageUpload
+        file={logo}
+        onFileChange={(file) => form.setFieldValue('pool.issuerLogo', file)}
+        accept="image/png, image/jpeg, image/jpg"
+        placeholder="SVG, PNG, or JPG (max. 1MB; 480x480px)"
+        label="Issuer logo"
+        id="issuerLogo"
+        height={144}
+      />
+      <Field name="pool.issuerShortDescription">
+        {({ field }: FieldProps) => (
+          <FieldWithErrorMessage
+            name="pool.issuerShortDescription"
+            label="Landing page description (50-100 characters)*"
+            onChange={(event: any) => form.setFieldValue('pool.issuerShortDescription', event.target.value)}
+            onBlur={field.onBlur}
+            value={field.value}
+            as={TextAreaInput}
+            placeholder="Type here..."
+            maxLength={100}
+          />
+        )}
+      </Field>
+      <Field name="pool.issuerDescription">
+        {({ field }: FieldProps) => (
+          <FieldWithErrorMessage
+            name="pool.issuerDescription"
+            as={TextAreaInput}
+            label="Overview page description (100-3000 characters)*"
+            placeholder="Type here..."
+            maxLength={1000}
+            value={field.value}
+          />
         )}
       </Field>
     </Grid>
