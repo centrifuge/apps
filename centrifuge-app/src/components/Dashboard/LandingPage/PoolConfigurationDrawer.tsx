@@ -1,11 +1,12 @@
-import { FileType, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, FileType, Pool, PoolMetadata, TrancheFormValues } from '@centrifuge/centrifuge-js'
 import { Accordion, Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
 import { IssuerCategoriesSection } from '../../../../src/pages/IssuerCreatePool/IssuerCategories'
 import { PoolAnalysisSection } from '../../../../src/pages/IssuerCreatePool/PoolAnalysisSection'
 import { PoolRatingsSection } from '../../../../src/pages/IssuerCreatePool/PoolRatings'
-import { useCanBorrow, usePoolAdmin } from '../../../../src/utils/usePermissions'
+import { TranchesSection } from '../../../../src/pages/IssuerCreatePool/TranchesSection'
+import { usePoolAdmin } from '../../../../src/utils/usePermissions'
 import { IssuerDetailsSection } from './IssuerDetailsSection'
 import { PoolDescriptionSection } from './PoolDescriptionSection'
 
@@ -46,6 +47,7 @@ export type CreatePoolFormValues = {
   reportAuthorName: string
   reportAuthorTitle: string
   reportAuthorAvatar: string
+  tranches: TrancheFormValues[]
 }
 
 export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurationDrawerProps) {
@@ -71,6 +73,21 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
       reportAuthorName: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.name ?? '',
       reportAuthorTitle: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.title ?? '',
       reportAuthorAvatar: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.avatar?.uri ?? '',
+      tranches:
+        pools?.[0]?.tranches.map((tranche) => {
+          const trancheMetadata = pools?.[0]?.meta?.tranches?.[tranche.id]
+          return {
+            tokenName: tranche.currency.name,
+            symbolName: tranche.currency.symbol,
+            minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? '',
+            minInvestment: trancheMetadata?.minInitialInvestment
+              ? new CurrencyBalance(trancheMetadata.minInitialInvestment, tranche.currency.decimals).toFloat()
+              : '',
+            apy: trancheMetadata?.apy ? trancheMetadata?.apy : '',
+            interestRate: tranche.interestRatePerSec?.toAprPercent().toNumber() ?? '',
+            apyPercentage: trancheMetadata?.apyPercentage ?? null,
+          }
+        }) ?? [],
     },
     onSubmit: (values) => {
       console.log(values)
@@ -78,7 +95,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
   })
 
   const isPoolAdmin = !!usePoolAdmin(form.values.pool.id)
-  const isBorrower = useCanBorrow(form.values.pool.id)
 
   const resetToDefault = () => {
     form.resetForm()
@@ -128,6 +144,26 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                         'reportAuthorAvatar',
                         selectedPool?.meta?.pool?.reports?.[0]?.author?.avatar?.uri ?? ''
                       )
+                      form.setFieldValue(
+                        'tranches',
+                        selectedPool?.tranches.map((tranche) => {
+                          const trancheMetadata = selectedPool?.meta?.tranches?.[tranche.id]
+                          return {
+                            tokenName: tranche.currency.name,
+                            symbolName: tranche.currency.symbol,
+                            minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? '',
+                            minInvestment: trancheMetadata?.minInitialInvestment
+                              ? new CurrencyBalance(
+                                  trancheMetadata.minInitialInvestment,
+                                  tranche.currency.decimals
+                                ).toFloat()
+                              : '',
+                            apy: trancheMetadata?.apy ? trancheMetadata?.apy : '',
+                            interestRate: tranche.interestRatePerSec?.toAprPercent().toNumber() ?? '',
+                            apyPercentage: trancheMetadata?.apyPercentage ?? null,
+                          }
+                        })
+                      )
                     }}
                   />
                 )}
@@ -156,6 +192,10 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                     {
                       title: 'Pool analysis',
                       body: <PoolAnalysisSection hideTitle />,
+                    },
+                    {
+                      title: 'Tranche structure',
+                      body: <TranchesSection hideTitle />,
                     },
                   ]}
                 />
