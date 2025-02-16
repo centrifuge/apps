@@ -204,16 +204,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                 />
               </Box>
             )}
-            <Grid
-              gridTemplateColumns={['1fr', '1fr 1fr']}
-              gap={2}
-              display="flex"
-              justifyContent="flex-end"
-              width="90%"
-              flexDirection="column"
-              position="absolute"
-              bottom={0}
-            >
+            <Grid gap={2} display="flex" justifyContent="flex-end" flexDirection="column" marginTop="30%">
               <Button>Update</Button>
               <Button variant="inverted">Cancel</Button>
             </Grid>
