@@ -660,7 +660,7 @@ export type PoolReport = {
   }
   uri: string
 }
-interface TrancheFormValues {
+export interface TrancheFormValues {
   tokenName: string
   symbolName: string
   interestRate: number | ''
