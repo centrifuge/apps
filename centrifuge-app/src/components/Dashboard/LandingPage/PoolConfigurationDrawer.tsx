@@ -1,5 +1,5 @@
 import { CurrencyBalance, FileType, Pool, PoolMetadata, TrancheFormValues } from '@centrifuge/centrifuge-js'
-import { Accordion, Box, Divider, Drawer, Select } from '@centrifuge/fabric'
+import { Accordion, Box, Button, Divider, Drawer, Grid, Select } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
 import { IssuerCategoriesSection } from '../../../../src/pages/IssuerCreatePool/IssuerCategories'
@@ -68,7 +68,10 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         issuerDescription: pools?.[0]?.meta?.pool?.issuer?.description ?? '',
       },
       issuerCategories: pools?.[0]?.meta?.pool?.issuer?.categories ?? [{ type: '', description: '' }],
-      poolRatings: pools?.[0]?.meta?.pool?.poolRatings ?? [{ agency: '', value: '', reportUrl: '', reportFile: null }],
+      poolRatings:
+        (pools?.[0]?.meta?.pool?.poolRatings?.length ?? 0) > 0
+          ? pools![0]!.meta!.pool!.poolRatings!
+          : [{ agency: '', value: '', reportUrl: '', reportFile: null }],
       reportUrl: pools?.[0]?.meta?.pool?.reports?.[0]?.uri ?? '',
       reportAuthorName: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.name ?? '',
       reportAuthorTitle: pools?.[0]?.meta?.pool?.reports?.[0]?.author?.title ?? '',
@@ -201,6 +204,19 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                 />
               </Box>
             )}
+            <Grid
+              gridTemplateColumns={['1fr', '1fr 1fr']}
+              gap={2}
+              display="flex"
+              justifyContent="flex-end"
+              width="90%"
+              flexDirection="column"
+              position="absolute"
+              bottom={0}
+            >
+              <Button>Update</Button>
+              <Button variant="inverted">Cancel</Button>
+            </Grid>
           </Form>
         </FormikProvider>
       </Drawer>

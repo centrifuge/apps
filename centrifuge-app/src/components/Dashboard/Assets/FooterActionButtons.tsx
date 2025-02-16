@@ -155,7 +155,7 @@ export const FooterActionButtons = ({
   ])
 
   return (
-    <Box display="flex" flexDirection="column" mt={3}>
+    <Box display="flex" flexDirection="column" mt={3} width="90%" position="absolute" bottom={0}>
       <Box flexGrow={1}>{createButton}</Box>
       <Box mt={2} flexGrow={1}>
         <Button variant="inverted" onClick={() => setOpen(false)} style={{ width: '100%' }}>
