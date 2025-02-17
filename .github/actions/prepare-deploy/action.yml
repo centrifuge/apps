@@ -60,11 +60,6 @@ runs:
           echo "front_url=app.staging.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT
           # env_name is production because it needs to use the prod variable files inside each app
-        elif  ${{ inputs.deploy_to == 'catalyst' }}; then
-          # CATALYST
-          echo "function_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
-          echo "front_url=app-catalyst.k-f.dev" >> $GITHUB_OUTPUT
-          echo "env_name=catalyst" >> $GITHUB_OUTPUT
         elif ${{ inputs.deploy_to == 'demo' }}; then
           # DEMO
           echo "function_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
@@ -74,19 +69,19 @@ runs:
           if ${{ github.event_name == 'pull_request' }}; then
             # FF-PRODUCTION-PR
             # A build from the DEV env that points to prod
-            echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
+            # echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
             echo "front_url=pr${{ github.event.number }}-app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
             echo "env_name=ff-prod" >> $GITHUB_OUTPUT 
           elif ${{ github.ref == 'refs/heads/main' }}; then
             # FF-PRODUCTION-MAIN
             # A build from the DEV env that points to prod
-            echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
+            # echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
             echo "front_url=app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
             echo "env_name=ff-prod" >> $GITHUB_OUTPUT 
           fi
         elif  ${{ github.ref == 'refs/heads/main' }}; then
           # DEV
-          echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
+          # echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
           echo "front_url=app-dev.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=development" >> $GITHUB_OUTPUT                  
         elif ${{ github.event_name == 'pull_request' }}; then

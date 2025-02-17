@@ -1,27 +1,32 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, Text } from '@centrifuge/fabric'
+import {
+  AssetListReport,
+  AssetListReportPrivateCredit,
+  AssetListReportPublicCredit,
+} from '@centrifuge/sdk/dist/types/reports'
 import { useContext, useEffect, useMemo } from 'react'
+import { formatBalance, formatPercentage } from '../../../src/utils/formatting-sdk'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAllPoolAssetSnapshots, usePoolMetadata } from '../../utils/usePools'
+import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { RouterTextLink } from '../TextLink'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 
 const noop = (v: any) => v
 
-const valuationLabels = {
-  discountedCashFlow: 'Non-fungible asset - DCF',
-  outstandingDebt: 'Non-fungible asset - at par',
-  oracle: 'Fungible asset - external pricing',
+type AssetSnapshot = AssetListReport & {
+  transactionType: 'ACTIVE' | string
+  name: string
 }
 
-function getColumnConfig(isPrivate: boolean, symbol: string) {
+function getColumnConfig(isPrivate: boolean, symbol: string, decimals: number) {
   if (isPrivate) {
     return [
       { header: 'Name', align: 'left', csvOnly: false, formatter: noop },
@@ -30,42 +35,42 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Principal outstanding',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Interest outstanding',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Principal repaid',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Interest repaid',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Additional repaid',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Origination date',
@@ -92,31 +97,31 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         header: 'Advance rate',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatPercentage(v, true, {}, 2) : '-'),
+        formatter: (v: any) => (v ? formatPercentage(v, 2, true, {}) : '-'),
       },
       {
         header: 'Collateral value',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Probability of default (PD)',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Loss given default (LGD)',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Discount rate',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
     ]
   } else {
@@ -127,28 +132,28 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Face value',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Quantity',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, undefined, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, '') : '-'),
       },
       {
         header: 'Market price',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Maturity date',
@@ -162,14 +167,14 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
       {
         header: 'Realized profit',
         align: 'left',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatBalance(v, 2, symbol) : '-'),
       },
     ]
   }
@@ -177,13 +182,23 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
 
 export function AssetList({ pool }: { pool: Pool }) {
   const basePath = useBasePath()
-  const { loanStatus, startDate, setCsvData } = useContext(ReportContext)
+  const { loanStatus, startDate, setCsvData, endDate } = useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const { symbol } = pool.currency
+  const { symbol, decimals } = pool.currency
   const poolCreditType = poolMetadata?.pool?.asset.class || 'privateCredit'
-  const { data: snapshots } = useAllPoolAssetSnapshots(pool.id, startDate)
   const isPrivate = poolCreditType === 'Private credit' || poolCreditType === 'privateCredit'
-  const columnConfig = getColumnConfig(isPrivate, symbol)
+  const columnConfig = getColumnConfig(isPrivate, symbol, decimals)
+
+  const { data: snapshots = [], isLoading } = useReport(
+    'assetList',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    undefined,
+    {
+      ...(loanStatus && { status: loanStatus }),
+    }
+  )
 
   const columns = useMemo(
     () =>
@@ -210,19 +225,20 @@ export function AssetList({ pool }: { pool: Pool }) {
         .filter((col) => !col.csvOnly),
     [columnConfig, basePath, pool.id]
   )
+
   const data = useMemo((): any[] => {
     if (!snapshots) return []
 
-    return snapshots
-      .filter((snapshot) => snapshot?.valuationMethod?.toLowerCase() !== 'cash')
+    return (snapshots as AssetSnapshot[])
+      .filter((snapshot) =>
+        isPrivate ? 'valuationMethod' in snapshot && snapshot?.valuationMethod?.toLowerCase() !== 'cash' : true
+      )
       .filter((snapshot) => {
-        const isMaturityDatePassed = snapshot?.actualMaturityDate
-          ? new Date() > new Date(snapshot.actualMaturityDate)
-          : false
-        const isDebtZero = snapshot?.outstandingDebt?.isZero()
+        const isMaturityDatePassed = snapshot?.maturityDate ? new Date() > new Date(snapshot.maturityDate) : false
+        const isDebtZero = 'outstandingQuantity' in snapshot ? snapshot.outstandingQuantity?.isZero() : false
 
         if (loanStatus === 'ongoing') {
-          return snapshot.status === 'ACTIVE' && !isMaturityDatePassed && !isDebtZero
+          return snapshot.transactionType === 'ACTIVE' && !isMaturityDatePassed && !isDebtZero
         } else if (loanStatus === 'repaid') {
           return isMaturityDatePassed && isDebtZero
         } else if (loanStatus === 'overdue') {
@@ -231,47 +247,49 @@ export function AssetList({ pool }: { pool: Pool }) {
       })
       .sort((a, b) => {
         // Sort by actualMaturityDate in descending order
-        const dateA = new Date(a.actualMaturityDate || 0).getTime()
-        const dateB = new Date(b.actualMaturityDate || 0).getTime()
+        const dateA = new Date(a.maturityDate || 0).getTime()
+        const dateB = new Date(b.maturityDate || 0).getTime()
         return dateB - dateA
       })
       .map((snapshot) => {
-        const valuationMethod = snapshot?.valuationMethod as keyof typeof valuationLabels
         if (isPrivate) {
+          const privateSnapshot = snapshot as AssetSnapshot & AssetListReportPrivateCredit
           return {
             name: '',
             value: [
-              snapshot?.name,
-              snapshot?.presentValue,
-              snapshot?.outstandingPrincipal,
-              snapshot?.outstandingInterest,
-              snapshot?.totalRepaidPrincipal,
-              snapshot?.totalRepaidInterest,
-              snapshot?.totalRepaidUnscheduled,
-              snapshot?.actualOriginationDate,
-              snapshot?.actualMaturityDate,
-              valuationMethod || snapshot?.valuationMethod,
-              snapshot?.advanceRate,
-              snapshot?.collateralValue,
-              snapshot?.probabilityOfDefault,
-              snapshot?.lossGivenDefault,
-              snapshot?.discountRate,
+              privateSnapshot.name,
+              privateSnapshot.presentValue,
+              privateSnapshot.outstandingPrincipal,
+              privateSnapshot.outstandingInterest,
+              privateSnapshot.repaidPrincipal,
+              privateSnapshot.repaidInterest,
+              privateSnapshot.repaidUnscheduled,
+              privateSnapshot.originationDate,
+              privateSnapshot.maturityDate,
+              privateSnapshot.valuationMethod,
+              privateSnapshot.advanceRate,
+              privateSnapshot.collateralValue,
+              privateSnapshot.probabilityOfDefault,
+              privateSnapshot.lossGivenDefault,
+              privateSnapshot.discountRate,
             ],
             heading: false,
             id: snapshot?.assetId,
           }
         } else {
+          const publicSnapshot = snapshot as AssetSnapshot & AssetListReportPublicCredit
+
           return {
             name: '',
             value: [
-              snapshot?.name,
-              snapshot?.presentValue,
-              snapshot?.faceValue,
-              snapshot?.outstandingQuantity,
-              snapshot?.currentPrice,
-              snapshot?.actualMaturityDate,
-              snapshot?.unrealizedProfitAtMarketPrice,
-              snapshot?.sumRealizedProfitFifo,
+              publicSnapshot.name,
+              publicSnapshot.presentValue,
+              publicSnapshot.faceValue,
+              publicSnapshot.outstandingQuantity,
+              publicSnapshot.currentPrice,
+              publicSnapshot.maturityDate,
+              publicSnapshot.unrealizedProfit,
+              publicSnapshot.realizedProfit,
             ],
             heading: false,
             id: snapshot?.assetId,
@@ -304,7 +322,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  if (!snapshots) {
+  if (isLoading) {
     return <Spinner />
   }
 

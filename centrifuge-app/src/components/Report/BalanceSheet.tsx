@@ -1,18 +1,16 @@
-import { Price } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Dec } from '../../utils/Decimal'
+import { formatBalance } from '../../../src/utils/formatting-sdk'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { usePoolStatesByGroup } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 
 type Row = TableDataRow & {
   formatter?: (v: any) => any
@@ -21,41 +19,14 @@ type Row = TableDataRow & {
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
+  const currency = pool.currency.displayName
 
-  const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
-    const today = new Date()
-    today.setDate(today.getDate())
-    today.setHours(0, 0, 0, 0)
-    if (groupBy === 'day') {
-      const from = new Date(startDate ?? today)
-      from.setHours(0, 0, 0, 0)
-      const to = new Date(startDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [from, to]
-    } else if (groupBy === 'daily') {
-      const from = new Date(startDate ?? today)
-      from.setHours(0, 0, 0, 0)
-      const to = new Date(endDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [from, to]
-    } else if (groupBy === 'quarter' || groupBy === 'year') {
-      const from = pool.createdAt ? new Date(pool.createdAt) : today
-      return [from, today]
-    } else {
-      const to = new Date(endDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [new Date(startDate), to]
-    }
-  }, [groupBy, startDate, endDate, pool.createdAt])
-
-  const poolStates = usePoolStatesByGroup(
-    pool.id,
-    adjustedStartDate,
-    adjustedEndDate,
-    groupBy === 'daily' ? 'day' : groupBy
+  const { data: poolStates = [], isLoading } = useReport(
+    'balanceSheet',
+    pool,
+    new Date(startDate),
+    new Date(endDate),
+    groupBy
   )
 
   const columns = React.useMemo(() => {
@@ -77,8 +48,8 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       .concat(
         poolStates.map((state, index) => ({
           align: 'left',
-          timestamp: state.timestamp,
-          header: new Date(state.timestamp).toLocaleDateString('en-US', {
+          timestamp: state?.timestamp,
+          header: new Date(state?.timestamp).toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
@@ -111,36 +82,36 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       },
       {
         name: '\u00A0 \u00A0 Asset valuation',
-        value: poolStates?.map(({ poolState }) => poolState.portfolioValuation.toDecimal()) || [],
+        value: poolStates?.map((poolState) => poolState.assetValuation.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: '\u00A0 \u00A0 Onchain reserve',
-        value: poolStates?.map(({ poolState }) => poolState.totalReserve.toDecimal()) || [],
+        value: poolStates?.map((poolState) => poolState.onchainReserve.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: '\u00A0 \u00A0 Offchain cash',
-        value: poolStates?.map(({ poolState }) => poolState.offchainCashValue.toDecimal()) || [],
+        value: poolStates?.map((poolState) => poolState.offchainCash.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: '\u00A0 \u00A0 Accrued fees',
-        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPendingAmount.toDecimal().neg()) || [],
+        value: poolStates?.map((poolState) => poolState.accruedFees.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => (v ? `${formatBalance(v, pool.currency.displayName, 2)}` : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Net Asset Value (NAV)',
-        value: poolStates?.map(({ poolState }) => poolState.netAssetValue.toDecimal()) || [],
+        value: poolStates?.map((poolState) => poolState.netAssetValue.toDecimal()) || [],
         heading: true,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
-  }, [pool.currency.displayName, poolStates])
+  }, [poolStates, currency])
 
   const trancheRecords: Row[] = React.useMemo(() => {
     return [
@@ -157,44 +128,43 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
           return [
             {
               name: `\u00A0 \u00A0 ${token.currency.displayName} token supply`,
-              value: poolStates?.map((poolState) => poolState.tranches[token.id].tokenSupply || ('' as any)) || [],
+              value:
+                poolStates?.map((poolState) => {
+                  const tokenSupply = poolState?.tranches?.find((state) => state.tokenId === token.id)?.tokenSupply
+                  return tokenSupply || ('' as any)
+                }) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName, 2) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, 2, token.currency.displayName) : ''),
             },
             {
               name: `\u00A0 \u00A0 * ${token.currency.displayName} token price`,
-              value: poolStates?.map((poolState) => poolState.tranches[token.id].price || ('' as any)) || [],
+              value:
+                poolStates?.map((poolState) => {
+                  const tokenPrice = poolState?.tranches?.find((state) => state.tokenId === token.id)?.tokenPrice
+                  return tokenPrice || ('' as any)
+                }) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 6) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, 6, token.currency.displayName) : ''),
             },
             {
               name: `\u00A0 \u00A0 = ${token.currency.displayName} tranche value`,
               value:
-                poolStates?.map(
-                  (poolState) =>
-                    poolState.tranches[token.id].price
-                      ?.toDecimal()
-                      .mul(poolState.tranches[token.id].tokenSupply.toDecimal()) || ('' as any)
-                ) || [],
+                poolStates?.map((poolState) => {
+                  const trancheVal = poolState?.tranches?.find((state) => state.tokenId === token.id)?.trancheValue
+                  return trancheVal || ('' as any)
+                }) || [],
               heading: false,
               bold: true,
-              formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, 2, token.currency.displayName) : ''),
             },
           ]
         })
         .flat() || []),
       {
         name: 'Total capital',
-        value:
-          poolStates?.map((poolState) =>
-            Object.values(poolState.tranches).reduce((acc, tranche) => {
-              const price = tranche.price || new Price(0)
-              const supply = tranche.tokenSupply
-              return acc.add(price.toDecimal().mul(supply.toDecimal()))
-            }, Dec(0))
-          ) || [],
+        value: poolStates?.map((poolState) => poolState.totalCapital?.toDecimal() || ('' as any)) || [],
         heading: true,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
   }, [poolStates, pool])
@@ -248,7 +218,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     }
   }, [poolStates, setReportData])
 
-  if (!poolStates) {
+  if (isLoading) {
     return <Spinner mt={2} />
   }
 

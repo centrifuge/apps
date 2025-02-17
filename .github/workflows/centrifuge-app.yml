@@ -26,7 +26,8 @@ jobs:
         working-directory: centrifuge-app
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@v4
+
       - name: prepare env logic
         id: prepare
         uses: ./.github/actions/prepare-deploy
@@ -35,9 +36,9 @@ jobs:
           deploy_to: ${{ inputs.deploy_env }}
 
       - name: Setup Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
-          node-version: '16'
+          node-version: '20'
           cache: yarn
 
       - name: set PR function values
@@ -103,7 +104,7 @@ jobs:
     environment: ${{ needs.build-app.outputs.gh_env }}
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@v4
         with:
           path: apps
 
@@ -129,17 +130,20 @@ jobs:
     steps:
       - name: PR comment with preview URL
         id: prcomment
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
+          PINNING_URL: https:\/\/${{ vars.GCLOUD_REGION  }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/pinning-api-pr${{ github.event.number }}
+          ONBOARDING_URL: https:\/\/${{ vars.GCLOUD_REGION  }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/onboarding-api-pr${{ github.event.number }}
         with:
-          comment_tag: pr_preview_url${{ inputs.deploy_env }}
+          comment-tag: pr_preview_url${{ inputs.deploy_env }}
           mode: upsert
           message: |
             PR deployed in Google Cloud
             URL: https://${{ needs.deploy-app.outputs.bucket_url }}
+            PINNING_URL: ${{ env.PINNING_URL }}
+            ONBOARDING_URL: ${{ env.ONBOARDING_URL }}
             Commit #: ${{ env.pull_sha }}   
-            To access the functions directly check the corresponding deploy Action
       - name: Check notify outputs
         run: |
           echo "id : ${{ steps.prcomment.outputs.id }}"

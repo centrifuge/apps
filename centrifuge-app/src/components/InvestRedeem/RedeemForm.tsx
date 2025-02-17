@@ -1,5 +1,5 @@
 import { Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { Box, Button, CurrencyInput, SelectInner, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import React from 'react'
@@ -60,20 +60,18 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
       amount: '',
     },
     onSubmit: (values, formActions) => {
-      const amountTokens =
-        values.amount instanceof Decimal ? values.amount : Dec(values.amount || 0).div(state.tokenPrice)
-      actions.redeem(TokenBalance.fromFloat(amountTokens, state.poolCurrency?.decimals ?? 18))
+      const amountTokens = values.amount instanceof Decimal ? values.amount : Dec(values.amount || 0)
+      actions.redeem(TokenBalance.fromFloat(amountTokens, state.trancheCurrency?.decimals ?? 18))
       formActions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<RedeemValues> = {}
-      const amountTokens =
-        values.amount instanceof Decimal ? values.amount : Dec(values.amount || 0).div(state.tokenPrice)
+      const amountTokens = values.amount instanceof Decimal ? values.amount : Dec(values.amount || 0)
       if (validateNumberInput(amountTokens, 0, maxRedeemTokens)) {
         errors.amount = validateNumberInput(amountTokens, 0, maxRedeemTokens)
       } else if (hasPendingOrder && amountTokens.eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
-      } else if (Dec(values.amount || 0).lt(state.minOrder)) {
+      } else if (amountTokens.lt(state.minOrder)) {
         errors.amount = 'Order amount too low'
       }
 
@@ -117,34 +115,16 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                 {({ field, meta }: FieldProps) => (
                   <CurrencyInput
                     {...field}
-                    // when the value is a decimal we assume the user clicked the max button
-                    // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
-                    value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
+                    value={field.value}
                     errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
                     label="Amount"
                     disabled={isRedeeming}
                     onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
                     onChange={(value) => form.setFieldValue('amount', value)}
-                    currency={
-                      state?.poolCurrencies.length > 1 ? (
-                        <SelectInner
-                          {...field}
-                          onChange={(e) => {
-                            actions.selectPoolCurrency(e.target.value)
-                          }}
-                          value={state.poolCurrency?.symbol}
-                          options={state?.poolCurrencies
-                            .sort((_, b) => (b.displayName.toLowerCase().includes('usdc') ? 1 : -1))
-                            .map((c) => ({ value: c.symbol, label: c.displayName }))}
-                          style={{ textAlign: 'right' }}
-                        />
-                      ) : (
-                        state.poolCurrency?.displayName
-                      )
-                    }
+                    currency={state.trancheCurrency?.displayName}
                     secondaryLabel={`${formatBalance(
-                      roundDown(maxRedeemCurrency),
-                      state.poolCurrency?.displayName,
+                      roundDown(maxRedeemTokens),
+                      state.trancheCurrency?.displayName,
                       2
                     )} available`}
                     autoFocus={autoFocus}
@@ -160,8 +140,8 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                         `~${formatBalance(
                           form.values.amount instanceof Decimal
                             ? form.values.amount
-                            : Dec(form.values.amount).div(state.tokenPrice),
-                          tokenSymbol
+                            : Dec(form.values.amount).mul(state.tokenPrice),
+                          state.poolCurrency?.displayName
                         )}`}
                     </Text>
                   </Text>

@@ -1,21 +1,19 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { formatBalance } from '@centrifuge/centrifuge-react'
+import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text, Tooltip } from '@centrifuge/fabric'
+import { Currency } from '@centrifuge/sdk'
+import { ProfitAndLossReport } from '@centrifuge/sdk/dist/types/reports'
 import * as React from 'react'
-import { formatDate } from '../../utils/date'
-import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import {
-  useAggregatedPoolFeeStatesByGroup,
-  useAggregatedPoolStatesByGroup,
-  usePoolMetadata,
-} from '../../utils/usePools'
+import { formatDate } from '../../../src/utils/date'
+import { formatBalance } from '../../../src/utils/formatting-sdk'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
+import { usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+import { useReport } from './useReportsQuery'
 import { getColumnHeader } from './utils'
 
 type Row = TableDataRow & {
@@ -27,52 +25,11 @@ type Row = TableDataRow & {
 export function ProfitAndLoss({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData, setReportData } = React.useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
-
-  const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
-    const today = new Date()
-    today.setDate(today.getDate())
-    today.setHours(0, 0, 0, 0)
-    if (groupBy === 'day') {
-      const from = new Date(startDate ?? today)
-      from.setHours(0, 0, 0, 0)
-      const to = new Date(startDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [from, to]
-    } else if (groupBy === 'daily') {
-      const from = new Date(startDate ?? today)
-      from.setHours(0, 0, 0, 0)
-      const to = new Date(endDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [from, to]
-    } else if (groupBy === 'quarter' || groupBy === 'year') {
-      const from = pool.createdAt ? new Date(pool.createdAt) : today
-      return [from, today]
-    } else {
-      const to = new Date(endDate ?? today)
-      to.setDate(to.getDate() + 1)
-      to.setHours(0, 0, 0, 0)
-      return [new Date(startDate), to]
-    }
-  }, [groupBy, startDate, endDate, pool.createdAt])
-
-  const poolStates = useAggregatedPoolStatesByGroup(
-    pool.id,
-    adjustedStartDate,
-    adjustedEndDate,
-    groupBy === 'daily' ? 'day' : groupBy
-  )
-
-  const poolFeeStates = useAggregatedPoolFeeStatesByGroup(
-    pool.id,
-    adjustedStartDate,
-    adjustedEndDate,
-    groupBy === 'daily' ? 'day' : groupBy
-  )
+  const { data = [], isLoading } = useReport('profitAndLoss', pool, new Date(startDate), new Date(endDate), groupBy)
+  const currency = pool.currency.displayName
 
   const columns = React.useMemo(() => {
-    if (!poolStates || !poolStates.length) {
+    if (!data.length) {
       return []
     }
 
@@ -93,10 +50,10 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       },
     ]
       .concat(
-        poolStates.map((state, index) => ({
+        data.map((state, index) => ({
           align: 'right',
-          timestamp: state.timestamp,
-          header: getColumnHeader(state.timestamp, groupBy),
+          timestamp: state?.timestamp,
+          header: getColumnHeader(state?.timestamp, groupBy),
           cell: (row: Row) => (
             <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>
               {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}
@@ -113,186 +70,161 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         width: '1fr',
         isLabel: false,
       })
-  }, [poolStates, groupBy])
+  }, [data, groupBy])
 
   const profitAndLossPublicRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'Income',
-        value: poolStates?.map(() => '' as any) || [],
+        value: data?.map(() => '' as any) || [],
         heading: false,
         bold: true,
       },
       {
         name: 'Profit / loss from assets',
         nameTooltip: 'Based on selling the assets in the pool at the current market price',
-        value: poolStates?.map(({ poolState }) => poolState.sumUnrealizedProfitByPeriod.toDecimal()) || [],
+        value: data?.map((report) => report.profitAndLossFromAsset.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Interest payments',
-        value: poolStates?.map(({ poolState }) => poolState.sumInterestRepaidAmountByPeriod.toDecimal()) || [],
+        value: data?.map((report) => report.interestPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Other payments',
-        value: poolStates?.map(({ poolState }) => poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal()) || [],
+        value: data?.map((report) => report.otherPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Total income ',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumUnrealizedProfitByPeriod
-              .toDecimal()
-              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-          ) || [],
+        value: data.map((report) => {
+          if (report.subtype === 'publicCredit') {
+            return report.totalIncome.toDecimal()
+          }
+          return 0
+        }),
         heading: false,
         bold: true,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
-  }, [pool.currency.displayName, poolStates])
+  }, [currency, data])
 
   const profitAndLossPrivateRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'Income',
-        value: poolStates?.map(() => '' as any) || [],
+        value: data?.map(() => '' as any) || [],
         heading: false,
         bold: true,
       },
       {
         name: 'Interest payments',
-        value: poolStates?.map(({ poolState }) => poolState?.sumInterestRepaidAmountByPeriod.toDecimal()) || [],
+        value: data?.map((report) => report.interestPayments?.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Interest accrued',
-        value: poolStates?.map(({ poolState }) => poolState.sumInterestAccruedByPeriod.toDecimal()) || [],
+        value: data?.map((report) => report.interestPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, 2, currency)}`,
       },
       {
         name: 'Other payments',
-        value: poolStates?.map(({ poolState }) => poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal()) || [],
+        value: data?.map((report) => report.otherPayments.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
       {
         name: 'Asset write-offs',
-        value: poolStates?.map(({ poolState }) => poolState.sumDebtWrittenOffByPeriod.toDecimal().neg()) || [],
+        value:
+          data?.map((report) => {
+            if (report.subtype !== 'privateCredit') {
+              return 0
+            }
+            return report.assetWriteOffs.toDecimal()
+          }) || [],
         heading: false,
-        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => (v ? `-${formatBalance(v, 2, currency)}` : ''),
       },
       {
         name: 'Profit / loss from assets ',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumInterestRepaidAmountByPeriod
-              .toDecimal()
-              .add(poolState.sumInterestAccruedByPeriod.toDecimal())
-              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-              .sub(poolState.sumDebtWrittenOffByPeriod.toDecimal())
-          ) || [],
+        value: data.map((report) => report.totalProfitAndLoss.toDecimal()),
         heading: false,
         bold: true,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, 2, currency) : ''),
       },
     ]
-  }, [pool.currency.displayName, poolStates])
+  }, [currency, data])
 
   const profitAndLossRecords =
     poolMetadata?.pool?.asset.class === 'Private credit' ? profitAndLossPrivateRecords : profitAndLossPublicRecords
 
   const feesRecords = React.useMemo(() => {
-    return [
+    if (!data?.length) return []
+
+    const rows: Row[] = [
       {
         name: 'Expenses',
-        value: poolStates?.map(() => '' as any) || [],
+        value: data.map(() => ''),
         heading: false,
         bold: true,
-      },
-      ...(poolFeeStates
-        ?.map((poolFeeStateByPeriod) => {
-          return Object.values(poolFeeStateByPeriod)
-            ?.map((feeState) => {
-              // some fee data may be incomplete since fees may have been added sometime after pool creation
-              // this fill the nonexistant fee data with zero values
-              let missingStates: {
-                timestamp: string
-                sumAccruedAmountByPeriod: CurrencyBalance
-                sumChargedAmountByPeriod: CurrencyBalance
-              }[] = []
-              if (feeState.length !== poolStates?.length) {
-                const missingTimestamps = poolStates
-                  ?.map((state) => state.timestamp)
-                  .filter((timestamp) => !feeState.find((state) => state.timestamp === timestamp))
-                missingStates =
-                  missingTimestamps?.map((timestamp) => {
-                    return {
-                      timestamp,
-                      sumAccruedAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
-                      sumChargedAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
-                    }
-                  }) || []
-              }
-              return {
-                name: feeState[0].poolFee.name,
-                value: [...missingStates, ...feeState].map((state) =>
-                  state.sumAccruedAmountByPeriod.toDecimal().add(state.sumChargedAmountByPeriod.toDecimal()).neg()
-                ),
-                formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
-              }
-            })
-            .flat()
-        })
-        .flat() || []),
-      {
-        name: 'Total expenses ',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumPoolFeesChargedAmountByPeriod
-              .toDecimal()
-              .sub(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
-          ) || [],
-        heading: false,
-        bold: true,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates, pool, poolFeeStates])
+
+    const feeMap: Record<string, { name: string; amount: Currency[] }> = {}
+
+    data.forEach((report, periodIndex) => {
+      const zeroCurrency = Currency.fromFloat(0, pool.currency.decimals)
+      report.fees.forEach((fee) => {
+        if (!feeMap[fee.feeId]) {
+          feeMap[fee.feeId] = {
+            name: fee.name,
+            amount: new Array(data.length).fill(zeroCurrency),
+          }
+        }
+        feeMap[fee.feeId].amount[periodIndex] = feeMap[fee.feeId].amount[periodIndex].add(fee.amount)
+      })
+    })
+
+    Object.entries(feeMap).forEach(([feeId, { name, amount }]) => {
+      rows.push({
+        name,
+        value: amount.map((amt) => amt.toDecimal()),
+        heading: false,
+        bold: false,
+        formatter: (v: Currency) => {
+          return `-${formatBalance(v, 2, pool.currency.displayName)}`
+        },
+      })
+    })
+
+    rows.push({
+      name: 'Total expenses',
+      value: data.map((report) => report.totalExpenses.toDecimal()),
+      heading: false,
+      bold: true,
+      formatter: (val: any) => (val ? formatBalance(val, 2, pool.currency.displayName) : ''),
+    })
+
+    return rows
+  }, [data, pool.currency.displayName])
 
   const totalProfitRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'Total profit / loss',
-        value:
-          poolStates?.map(({ poolState }) =>
-            (poolMetadata?.pool?.asset.class === 'Private credit'
-              ? poolState.sumInterestRepaidAmountByPeriod
-                  .toDecimal()
-                  .add(poolState.sumInterestAccruedByPeriod.toDecimal())
-                  .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-                  .sub(poolState.sumDebtWrittenOffByPeriod.toDecimal())
-              : poolState.sumUnrealizedProfitByPeriod
-                  .toDecimal()
-                  .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-                  .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
-            )
-              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
-              .sub(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
-          ) || [],
+        value: data?.map((report) => report.totalProfitAndLoss.toDecimal()) || [],
         heading: true,
-        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, 2, pool.currency.displayName)}`,
       },
     ]
-  }, [poolStates, poolMetadata?.pool?.asset.class, pool.currency.displayName])
+  }, [data, poolMetadata?.pool?.asset.class, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
@@ -338,22 +270,18 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   }, [profitAndLossRecords, feesRecords, totalProfitRecords])
 
   React.useEffect(() => {
-    if (poolStates && Object.keys(poolStates).length > 0) {
-      const fullPoolStates: DailyPoolState[] = Object.values(poolStates).map((partialState) => {
-        return {
-          ...partialState,
-        } as DailyPoolState
-      })
+    if (data && data.length > 0) {
+      const fullPoolStates: ProfitAndLossReport[] = data.map((partialState) => ({
+        ...partialState,
+      })) as ProfitAndLossReport[]
 
       setReportData(fullPoolStates)
     }
-  }, [poolStates, setReportData])
+  }, [data, setReportData])
 
-  if (!poolStates) {
-    return <Spinner mt={2} />
-  }
+  if (isLoading) return <Spinner />
 
-  return poolStates?.length > 0 ? (
+  return data?.length > 0 ? (
     <DataTableGroup>
       <DataTable data={profitAndLossRecords} columns={columns} hoverable />
       <DataTable data={feesRecords} columns={columns} hoverable />
