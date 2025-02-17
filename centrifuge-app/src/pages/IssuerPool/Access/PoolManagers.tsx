@@ -5,11 +5,11 @@ import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { MultisigForm } from '../../../components/MultisigForm'
 import { PageSection } from '../../../components/PageSection'
 import { usePoolAccess, usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { diffPermissions } from '../Configuration/Admins'
-import { MultisigForm } from './MultisigForm'
 
 export type PoolManagersInput = {
   adminMultisigEnabled: boolean

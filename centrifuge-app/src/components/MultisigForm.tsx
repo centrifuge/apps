@@ -14,18 +14,16 @@ import {
   Text,
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
-import { address, combine, required } from '../../../utils/validation'
-import { FormAddressInput } from '../../IssuerCreatePool/FormAddressInput'
-import { AddButton } from '../../IssuerCreatePool/PoolDetailsSection'
-import { CheckboxOption } from '../../IssuerCreatePool/PoolStructureSection'
-import type { PoolManagersInput } from './PoolManagers'
+import { FormAddressInput } from '../pages/IssuerCreatePool/FormAddressInput'
+import { AddButton } from '../pages/IssuerCreatePool/PoolDetailsSection'
+import { CheckboxOption } from '../pages/IssuerCreatePool/PoolStructureSection'
+import type { PoolManagersInput } from '../pages/IssuerPool/Access/PoolManagers'
+import { address, combine, required } from '../utils/validation'
 
 export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?: boolean; cardProps?: CardProps }) {
   const chainId = useCentEvmChainId()
   const form = useFormikContext<PoolManagersInput>()
   const { values } = form
-
-  console.log('values.adminMultisig.signers', values.adminMultisig.signers)
 
   return (
     <Stack gap={2}>
@@ -134,73 +132,4 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
       )}
     </Stack>
   )
-
-  // return (
-  //   <FieldArray name="adminMultisig.signers">
-  //     {(fldArr) => (
-  //       <Stack gap={4}>
-  //         <Stack gap={2}>
-  //           <Text as="p" variant="body2" color="textSecondary">
-  //             Add or remove addresses to manage the pool. Each manager can individually add investors and manage the
-  //             reserve of the pool.
-  //           </Text>
-  //           <DataTable
-  //             data={rows}
-  //             columns={[
-  //               {
-  //                 align: 'left',
-  //                 header: 'Address',
-  //                 cell: (row: Row) => (
-  //                   <Text variant="body2">
-  //                     <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
-  //                   </Text>
-  //                 ),
-  //               },
-  //               {
-  //                 header: '',
-  //                 cell: (row: Row, i) =>
-  //                   (
-  //                     <Button
-  //                       variant="tertiary"
-  //                       icon={IconMinusCircle}
-  //                       onClick={() => {
-  //                         if (adminMultisig.threshold >= adminMultisig.signers.length) {
-  //                           form.setFieldValue('adminMultisig.threshold', adminMultisig.signers.length - 1, false)
-  //                         }
-  //                         fldArr.remove(row.index)
-  //                       }}
-  //                       disabled={isLoading || (i === 0 && !canRemoveFirst)}
-  //                     />
-  //                   ),
-  //                 width: '72px',
-  //               },
-  //             ]}
-  //           />
-  //           {(
-  //             <AddAddressInput
-  //               existingAddresses={adminMultisig.signers}
-  //               onAdd={(address) => {
-  //                 if (adminMultisig.signers.length < minThreshold) {
-  //                   form.setFieldValue('adminMultisig.threshold', minThreshold, false)
-  //                 }
-  //                 fldArr.push(isEvmAddress(address) ? evmToSubstrateAddress(address, chainId ?? 0) : address)
-  //               }}
-  //             />
-  //           )}
-  //         </Stack>
-  //         <Stack gap={2}>
-  //           <ChangeThreshold
-  //             secondaryText="For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
-  //       can require multiple signers. Any such change will require the confirmation of:"
-  //             primaryText="Configuration change threshold"
-  //             isEditing={isEditing}
-  //             fieldName="adminMultisig.threshold"
-  //             signersFieldName="adminMultisig.signers"
-  //             type="managers"
-  //           />
-  //         </Stack>
-  //       </Stack>
-  //     )}
-  //   </FieldArray>
-  // )
 }

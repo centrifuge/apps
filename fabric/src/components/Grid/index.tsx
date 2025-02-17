@@ -42,6 +42,7 @@ export const Grid = React.forwardRef<any, GridProps>(
         gridTemplateColumns={templateColumns}
         gridAutoRows={equalRows ? '1fr' : undefined}
         {...rest}
+        // @ts-ignore
         style={{ '--grid-gap': gapPx }}
         ref={ref}
       />
