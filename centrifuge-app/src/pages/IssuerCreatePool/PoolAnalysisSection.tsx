@@ -4,15 +4,15 @@ import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMes
 import { StyledGrid } from './PoolStructureSection'
 import { validate } from './validate'
 
-export function PoolAnalysisSection({ hideTitle }: { hideTitle?: boolean }) {
+export function PoolAnalysisSection({ isUpdating }: { isUpdating?: boolean }) {
   return (
-    <Box mt={hideTitle ? 0 : 4} mb={hideTitle ? 0 : 3}>
-      {!hideTitle && <Text variant="heading2">Pool analysis</Text>}
+    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+      {!isUpdating && <Text variant="heading2">Pool analysis</Text>}
       <StyledGrid
-        gridTemplateColumns={hideTitle ? ['1fr'] : ['1fr', '1fr 1fr']}
+        gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
         gap={3}
-        mt={hideTitle ? 0 : 3}
-        style={{ padding: hideTitle ? 20 : 40 }}
+        mt={isUpdating ? 0 : 3}
+        style={{ padding: isUpdating ? 20 : 40 }}
       >
         <FieldWithErrorMessage
           name="reportUrl"

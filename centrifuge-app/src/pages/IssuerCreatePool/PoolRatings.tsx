@@ -1,26 +1,76 @@
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, FileUpload, Text, TextInput, URLInput } from '@centrifuge/fabric'
-import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { Box, FileUpload, FileUploadProps, Text, TextInput, URLInput } from '@centrifuge/fabric'
+import { Field, FieldArray, FieldProps, useField, useFormikContext } from 'formik'
+import { useEffect, useState } from 'react'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { LabelWithDeleteButton } from './IssuerCategories'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
 
-export const PoolRatingsSection = ({ hideTitle }: { hideTitle?: boolean }) => {
-  const form = useFormikContext<PoolMetadataInput>()
+interface ReportFileUploadProps extends FileUploadProps {
+  name: string
+}
+
+function ReportFileUpload({ name, ...props }: ReportFileUploadProps) {
+  const { setFieldValue } = useFormikContext<any>()
+  const [field, meta] = useField(name)
+  const [file, setFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    if (typeof field.value === 'string' && field.value) {
+      fetch(field.value)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          return response.blob()
+        })
+        .then((blob) => {
+          const fileFromUrl = new File([blob], 'report.pdf', { type: blob.type })
+          setFile(fileFromUrl)
+          if (!(field.value instanceof File)) {
+            setFieldValue(name, fileFromUrl)
+          }
+        })
+        .catch((error) => {
+          console.error('Error converting URL to file:', error)
+        })
+    } else if (field.value instanceof File) {
+      setFile(field.value)
+    }
+  }, [field.value, name, setFieldValue])
 
   return (
-    <Box mt={hideTitle ? 0 : 4} mb={hideTitle ? 0 : 3}>
-      {hideTitle ? <></> : <Text variant="heading2">Pool rating</Text>}
+    <FileUpload
+      file={file}
+      onFileChange={(newFile) => {
+        setFile(newFile)
+        setFieldValue(name, newFile)
+      }}
+      onClear={() => {
+        setFile(null)
+        setFieldValue(name, null)
+      }}
+      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+      {...props}
+    />
+  )
+}
+
+export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => {
+  const form = useFormikContext<any>()
+
+  return (
+    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+      {isUpdating ? <></> : <Text variant="heading2">Pool rating</Text>}
       <StyledGrid
-        gridTemplateColumns={hideTitle ? ['1fr'] : ['1fr', '1fr 1fr']}
-        mt={hideTitle ? 0 : 3}
-        style={hideTitle ? { padding: 20 } : { padding: 40 }}
+        gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
+        mt={isUpdating ? 0 : 3}
+        style={isUpdating ? { padding: 20 } : { padding: 40 }}
       >
         <FieldArray name="poolRatings">
           {({ push, remove }) => (
             <>
-              {form.values.poolRatings.map((_, index) => (
+              {form.values.poolRatings.map((_: any, index: number) => (
                 <>
                   <Field name={`poolRatings.${index}.agency`}>
                     {({ field, meta }: FieldProps) => (
@@ -62,19 +112,13 @@ export const PoolRatingsSection = ({ hideTitle }: { hideTitle?: boolean }) => {
                   </Field>
 
                   <Field name={`poolRatings.${index}.reportFile`}>
-                    {({ field, form, meta }: FieldProps) => (
-                      <FileUpload
-                        file={field.value}
-                        onFileChange={(file) => {
-                          form.setFieldTouched(`poolRatings.${index}.reportFile`, true, false)
-                          form.setFieldValue(`poolRatings.${index}.reportFile`, file)
-                        }}
+                    {() => (
+                      <ReportFileUpload
+                        name={`poolRatings.${index}.reportFile`}
                         accept="application/pdf"
                         label="Rating report PDF"
                         placeholder="Choose file"
                         small
-                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                        onClear={() => form.setFieldValue(`poolRatings.${index}.reportFile`, null)}
                       />
                     )}
                   </Field>
