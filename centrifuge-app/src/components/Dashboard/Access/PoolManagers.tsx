@@ -3,9 +3,9 @@ import { CombinedSubstrateAccount, useCentrifugeApi, wrapProxyCallsForAccount } 
 import { useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, map, of } from 'rxjs'
-import { MultisigForm } from '../../../pages/IssuerPool/Access/MultisigForm'
 import { diffPermissions } from '../../../pages/IssuerPool/Configuration/Admins'
 import { usePoolAccess } from '../../../utils/usePermissions'
+import { MultisigForm } from '../../MultisigForm'
 import type { FormHandle } from '../AccessDrawer'
 
 export type PoolManagersFormValues = {
