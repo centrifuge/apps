@@ -32,7 +32,7 @@ export const Line = () => {
   return <Box border={`.5px solid ${theme.colors.borderPrimary}`} width="100%" />
 }
 
-export const TranchesSection = ({ hideTitle }: { hideTitle?: boolean }) => {
+export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
 
@@ -63,13 +63,13 @@ export const TranchesSection = ({ hideTitle }: { hideTitle?: boolean }) => {
   }
 
   return (
-    <Box mt={hideTitle ? 0 : 4} mb={3}>
-      {hideTitle ? <></> : <Text>Tranches</Text>}
+    <Box mt={isUpdating ? 0 : 4} mb={3}>
+      {isUpdating ? <></> : <Text>Tranches</Text>}
       {values.tranches.map((_, index) => (
-        <StyledGrid key={index} mt={3} style={{ padding: hideTitle ? 20 : 40 }}>
+        <StyledGrid key={index} mt={3} style={{ padding: isUpdating ? 20 : 40 }}>
           <Text variant="heading3">Tranche {index + 1}</Text>
           <Line />
-          <Grid gridTemplateColumns={hideTitle ? ['1fr'] : ['1fr', '1fr 1fr']} gap={3}>
+          <Grid gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']} gap={3}>
             <Box>
               <Field name={`tranches.${index}.tokenName`}>
                 {({ field, form }: FieldProps) => (
@@ -80,7 +80,7 @@ export const TranchesSection = ({ hideTitle }: { hideTitle?: boolean }) => {
                     maxLength={30}
                     name={`tranches.${index}.tokenName`}
                     disabled
-                    value={hideTitle ? getTrancheName(index, field.value) : getTrancheName(index)}
+                    value={isUpdating ? getTrancheName(index, field.value) : getTrancheName(index)}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleTrancheNameChange(e, index, form)}
                   />
                 )}

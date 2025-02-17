@@ -5,6 +5,7 @@ import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 
 export function PoolRatingInput() {
   const form = useFormikContext<PoolMetadataInput>()
+
   return (
     <FieldArray name="poolRatings">
       {({ push, remove }) => (
