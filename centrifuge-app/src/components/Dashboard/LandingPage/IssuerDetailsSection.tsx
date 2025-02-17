@@ -5,15 +5,15 @@ import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../../src/components/Tooltips'
-import { CreatePoolFormValues } from './PoolConfigurationDrawer'
+import { UpdatePoolFormValues } from './PoolConfigurationDrawer'
 
 export function IssuerDetailsSection() {
-  const form = useFormikContext<CreatePoolFormValues>()
+  const form = useFormikContext<UpdatePoolFormValues>()
   const theme = useTheme()
   const cent = useCentrifuge()
   const [logo, setLogo] = useState<File | null>(null)
 
-  const logoUrl = cent.metadata.parseMetadataUrl(form.values.pool.issuerLogo)
+  const logoUrl = cent.metadata.parseMetadataUrl(form.values.issuerLogo)
 
   useEffect(() => {
     if (logoUrl) {
@@ -25,7 +25,6 @@ export function IssuerDetailsSection() {
           return response.blob()
         })
         .then((blob) => {
-          // Create a File object. Adjust the filename as needed.
           const newFile = new File([blob], 'icon.svg', { type: blob.type })
           setLogo(newFile)
         })
@@ -44,13 +43,15 @@ export function IssuerDetailsSection() {
       mb={2}
       gap={2}
     >
-      <Field name="pool.issuerName">
+      <Field name="issuerName">
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
             <Field
-              name="pool.issuerName"
+              name="issuerName"
               label={<Tooltips type="issuerName" label={<Text variant="heading4">Legal name of the issuer*</Text>} />}
-              onChange={(event: any) => form.setFieldValue('pool.issuerName', event.target.value)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                form.setFieldValue('issuerName', event.target.value)
+              }
               onBlur={field.onBlur}
               value={field.value}
               as={TextInput}
@@ -60,13 +61,15 @@ export function IssuerDetailsSection() {
           </Box>
         )}
       </Field>
-      <Field name="pool.repName">
+      <Field name="repName">
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
             <Field
-              name="pool.repName"
+              name="repName"
               label={<Text variant="heading4">Legal name of the issuer representative*</Text>}
-              onChange={(event: any) => form.setFieldValue('pool.repName', event.target.value)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                form.setFieldValue('repName', event.target.value)
+              }
               onBlur={field.onBlur}
               value={field.value}
               as={TextInput}
@@ -78,35 +81,39 @@ export function IssuerDetailsSection() {
       </Field>
       <ImageUpload
         file={logo}
-        onFileChange={(file) => form.setFieldValue('pool.issuerLogo', file)}
+        onFileChange={(file) => form.setFieldValue('issuerLogo', file)}
         accept="image/png, image/jpeg, image/jpg"
         placeholder="SVG, PNG, or JPG (max. 1MB; 480x480px)"
         label="Issuer logo"
         id="issuerLogo"
         height={144}
       />
-      <Field name="pool.issuerShortDescription">
+      <Field name="issuerShortDescription">
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
-            name="pool.issuerShortDescription"
+            name="issuerShortDescription"
             label="Landing page description (50-100 characters)*"
-            onChange={(event: any) => form.setFieldValue('pool.issuerShortDescription', event.target.value)}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              form.setFieldValue('issuerShortDescription', event.target.value)
+            }
             onBlur={field.onBlur}
             value={field.value}
             as={TextAreaInput}
             placeholder="Type here..."
             maxLength={100}
+            minLength={50}
           />
         )}
       </Field>
-      <Field name="pool.issuerDescription">
+      <Field name="issuerDescription">
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
-            name="pool.issuerDescription"
+            name="issuerDescription"
             as={TextAreaInput}
             label="Overview page description (100-3000 characters)*"
             placeholder="Type here..."
-            maxLength={1000}
+            maxLength={3000}
+            minLength={100}
             value={field.value}
           />
         )}

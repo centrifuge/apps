@@ -7,18 +7,18 @@ import { FieldWithErrorMessage } from '../../../../src/components/FieldWithError
 import { Tooltips } from '../../../../src/components/Tooltips'
 import { config } from '../../../../src/config'
 import { ASSET_CLASSES } from '../../../../src/pages/IssuerCreatePool/PoolStructureSection'
-import { CreatePoolFormValues } from './PoolConfigurationDrawer'
+import { UpdatePoolFormValues } from './PoolConfigurationDrawer'
 
 export function PoolDescriptionSection() {
-  const form = useFormikContext<CreatePoolFormValues>()
+  const form = useFormikContext<UpdatePoolFormValues>()
   const theme = useTheme()
   const cent = useCentrifuge()
   const [icon, setIcon] = useState<File | null>(null)
 
-  const iconUrl = cent.metadata.parseMetadataUrl(form.values.pool.poolIcon)
+  const iconUrl = cent.metadata.parseMetadataUrl(form.values.poolIcon)
 
   const subAssetClasses =
-    config.assetClasses[form.values.pool.assetClass as keyof typeof config.assetClasses]?.map((label) => ({
+    config.assetClasses[form.values.assetClass as keyof typeof config.assetClasses]?.map((label) => ({
       label,
       value: label,
     })) ?? []
@@ -33,7 +33,6 @@ export function PoolDescriptionSection() {
           return response.blob()
         })
         .then((blob) => {
-          // Create a File object. Adjust the filename as needed.
           const newFile = new File([blob], 'icon.svg', { type: blob.type })
           setIcon(newFile)
         })
@@ -53,20 +52,20 @@ export function PoolDescriptionSection() {
       gap={2}
     >
       <FieldWithErrorMessage
-        name="pool.poolName"
+        name="poolName"
         as={TextInput}
         label="Pool name*"
         placeholder="Type here..."
         maxLength={100}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('pool.poolName', e.target.value)}
-        value={form.values.pool.poolName}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('poolName', e.target.value)}
+        value={form.values.poolName}
       />
-      <Field name="pool.investorType">
+      <Field name="investorType">
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
-            name="pool.investorType"
+            name="investorType"
             label={<Tooltips type="investorType" label={<Text variant="heading4">Investor type*</Text>} size="sm" />}
-            onChange={(event: any) => form.setFieldValue('pool.investorType', event.target.value)}
+            onChange={(event: any) => form.setFieldValue('investorType', event.target.value)}
             onBlur={field.onBlur}
             value={field.value}
             as={TextInput}
@@ -76,11 +75,11 @@ export function PoolDescriptionSection() {
         )}
       </Field>
       <ImageUpload
-        name="pool.poolIcon"
+        name="poolIcon"
         file={icon}
         onFileChange={async (file) => {
-          form.setFieldTouched('pool.poolIcon', true, false)
-          form.setFieldValue('pool.poolIcon', file)
+          form.setFieldTouched('poolIcon', true, false)
+          form.setFieldValue('poolIcon', file)
         }}
         label="Pool icon*"
         accept="image/svg+xml"
@@ -89,35 +88,33 @@ export function PoolDescriptionSection() {
         height={144}
       />
       <Field
-        name="pool.poolStructure"
+        name="poolStructure"
         as={TextInput}
         label="Pool structure"
         maxLength={100}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('pool.poolStructure', e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('poolStructure', e.target.value)}
         value="Revolving"
         disabled
       />
       <Field
-        name="pool.assetDenomination"
+        name="assetDenomination"
         as={TextInput}
         label="Asset denomination"
         maxLength={100}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          form.setFieldValue('pool.assetDenomination', e.target.value)
-        }
-        value={form.values.pool.assetDenomination}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('assetDenomination', e.target.value)}
+        value={form.values.assetDenomination}
         disabled
       />
-      <Field name="pool.assetClass">
+      <Field name="assetClass">
         {({ field }: FieldProps) => (
           <Select
-            name="pool.assetClass"
+            name="assetClass"
             label={
               <Tooltips type="assetClass" label={<Text variant="heading4">Primary asset class*</Text>} size="sm" />
             }
             onChange={(event) => {
-              form.setFieldValue('pool.assetClass', event.target.value)
-              form.setFieldValue('pool.subAssetClass', '', false)
+              form.setFieldValue('assetClass', event.target.value)
+              form.setFieldValue('subAssetClass', '', false)
             }}
             value={field.value}
             options={ASSET_CLASSES}
@@ -125,12 +122,12 @@ export function PoolDescriptionSection() {
           />
         )}
       </Field>
-      <Field name="pool.subAssetClass">
+      <Field name="subAssetClass">
         {({ field, meta, form }: FieldProps) => (
           <Select
-            name="pool.subAssetClass"
+            name="subAssetClass"
             label="Secondary asset class*"
-            onChange={(event) => form.setFieldValue('pool.subAssetClass', event.target.value)}
+            onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
             onBlur={field.onBlur}
             value={field.value}
             options={subAssetClasses}
