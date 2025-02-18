@@ -320,7 +320,7 @@ const IssuerCreatePoolPage = () => {
         poolIcon: values.poolIcon,
         issuerLogo: values.issuerLogo,
         executiveSummary: values.executiveSummary,
-        authorAvatar: values.reportAuthorAvatar,
+        authorAvatar: values.report.author.avatar,
       }
 
       const pinnedFiles = await pinFiles(centrifuge, filesToPin)
