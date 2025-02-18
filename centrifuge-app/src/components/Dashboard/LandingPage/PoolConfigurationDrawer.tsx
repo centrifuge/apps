@@ -139,12 +139,12 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         return { uri: pinned.uri, mime: (file as File).type }
       }
 
-      if (values.pool.icon && values.pool.icon instanceof File) {
+      if (values.pool.icon instanceof File) {
         poolIcon = (await pinFile(values.pool.icon)).uri
         prefetchMetadata(poolIcon)
       }
 
-      if (values?.pool?.issuer?.logo && values?.pool?.issuer?.logo instanceof File) {
+      if (values?.pool?.issuer?.logo instanceof File) {
         logoUri = (await pinFile(values?.pool?.issuer?.logo)).uri
         prefetchMetadata(logoUri)
       }
@@ -153,6 +153,8 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         executiveSummary = (await pinFile(values?.pool?.links?.executiveSummary)).uri
         prefetchMetadata(executiveSummary)
       }
+
+      console.log(values)
 
       const newPoolMetadata: PoolMetadata = {
         pool: {
@@ -250,6 +252,8 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
           tokenSymbol: tranche.symbolName,
         })),
       ]
+
+      return
 
       execute([values.id, newPoolMetadata, tranches], { account })
       actions.setSubmitting(false)

@@ -1,5 +1,5 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Grid, ImageUpload, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import { Box, FileUpload, Grid, ImageUpload, Text, TextAreaInput, TextInput, URLInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -117,6 +117,62 @@ export function IssuerDetailsSection() {
             placeholder="Type here..."
             maxLength={3000}
             minLength={100}
+            value={field.value}
+          />
+        )}
+      </Field>
+      <FieldWithErrorMessage
+        name="pool.links.website"
+        label="Website URL"
+        placeholder="www.example.com"
+        as={URLInput}
+      />
+      <FieldWithErrorMessage
+        name="pool.links.forum"
+        label="Governance forum"
+        placeholder="www.example.com"
+        as={URLInput}
+      />
+      <Field name="pool.links.executiveSummary">
+        {({ field, meta, form }: FieldProps) => (
+          <FileUpload
+            file={field.value}
+            onFileChange={(file) => {
+              form.setFieldValue('pool.links.executiveSummary', file)
+            }}
+            label="Executive summary PDF"
+            placeholder="Click to upload"
+            accept="application/pdf"
+            onClear={() => form.setFieldValue('pool.links.executiveSummary', null)}
+            small
+          />
+        )}
+      </Field>
+      <Field name="pool.details.title">
+        {({ field, meta, form }: FieldProps) => (
+          <Box position="relative">
+            <Field
+              name="pool.details.title"
+              label={<Text variant="heading4">Additional information</Text>}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                form.setFieldValue('pool.details.title', event.target.value)
+              }
+              onBlur={field.onBlur}
+              value={field.value}
+              as={TextInput}
+              placeholder="Title"
+              maxLength={100}
+            />
+          </Box>
+        )}
+      </Field>
+      <Field name="pool.details.description">
+        {({ field }: FieldProps) => (
+          <FieldWithErrorMessage
+            name="pool.details.description"
+            as={TextAreaInput}
+            placeholder="Description"
+            maxLength={3000}
             value={field.value}
           />
         )}
