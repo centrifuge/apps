@@ -279,16 +279,14 @@ const IssuerCreatePoolPage = () => {
       forum: '',
       email: '',
       details: [],
-      reports: [
-        {
-          author: {
-            name: '',
-            title: '',
-          },
-          url: '',
-          file: null,
+      report: {
+        author: {
+          name: '',
+          title: '',
+          avatar: null,
         },
-      ],
+        url: '',
+      },
       assetOriginators: [''],
       adminMultisig: {
         signers: [substrate?.selectedAddress ?? ''],
