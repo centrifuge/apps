@@ -3,59 +3,77 @@ import {
   Box,
   Card,
   CardProps,
+  Divider,
   Grid,
   IconButton,
   IconHelpCircle,
   IconInfo,
   IconTrash,
+  RadioButton,
   Select,
   Shelf,
   Stack,
   Text,
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { useTheme } from 'styled-components'
 import { FormAddressInput } from '../pages/IssuerCreatePool/FormAddressInput'
 import { AddButton } from '../pages/IssuerCreatePool/PoolDetailsSection'
-import { CheckboxOption } from '../pages/IssuerCreatePool/PoolStructureSection'
 import type { PoolManagersInput } from '../pages/IssuerPool/Access/PoolManagers'
 import { address, combine, required } from '../utils/validation'
+import { Tooltips } from './Tooltips'
 
 export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?: boolean; cardProps?: CardProps }) {
+  const theme = useTheme()
   const chainId = useCentEvmChainId()
   const form = useFormikContext<PoolManagersInput>()
   const { values } = form
 
   return (
-    <Stack gap={2}>
+    <Stack gap={2} mb={2}>
       <FieldArray name="adminMultisig.signers">
         {({ push, remove }) => (
           <Card variant="secondary" p={2} {...cardProps}>
             <Grid minColumnWidth={250} maxColumns={2} gap={3} equalColumns>
               <Box>
                 <Text variant="body2">Security requirement</Text>
-                <CheckboxOption
+                <RadioButton
                   height={40}
                   name="adminMultisigEnabled"
                   label="Single"
-                  icon={<IconHelpCircle size="iconSmall" color="textSecondary" />}
+                  icon={
+                    <Tooltips
+                      type="singleMultisign"
+                      label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                      placement="left"
+                    />
+                  }
                   onChange={() => {
                     form.setFieldValue('adminMultisigEnabled', false)
                     form.setFieldValue('adminMultisig.signers', [values.adminMultisig.signers[0]])
                   }}
-                  isChecked={!values.adminMultisigEnabled}
-                  id="singleMultisign"
+                  checked={!values.adminMultisigEnabled}
+                  styles={{ padding: '0px 8px', margin: '8px 0px' }}
+                  border
                 />
-                <CheckboxOption
+                <RadioButton
                   height={40}
                   name="adminMultisigEnabled"
                   label="Multi-sig"
-                  icon={<IconHelpCircle size="iconSmall" color="textSecondary" />}
+                  icon={
+                    <Tooltips
+                      type="multiMultisign"
+                      label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                      placement="left"
+                    />
+                  }
                   onChange={() => {
                     form.setFieldValue('adminMultisigEnabled', true)
                     push('')
                   }}
-                  isChecked={values.adminMultisigEnabled}
-                  id="multiMultisign"
+                  checked={values.adminMultisigEnabled}
+                  styles={{ padding: '0px 8px', margin: '8px 0px' }}
+                  border
                 />
               </Box>
               <Stack gap={2}>
@@ -100,6 +118,14 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
       {values.adminMultisigEnabled && (
         <Card variant="secondary" p={2} {...cardProps}>
           <Grid minColumnWidth={250} maxColumns={2} gap={3} equalColumns>
+            <Shelf alignItems="flex-start" gap={1}>
+              <IconInfo size="iconSmall" />
+              <Text variant="body2">
+                For added security, changes to the pool configuration (e.g., tranche structure or write-off policy) may
+                require multiple signers and confirmation from the above.
+              </Text>
+            </Shelf>
+            <Divider color="textSecondary" />
             <Field name="adminMultisig.threshold">
               {({ field, meta, form }: FieldProps) => (
                 <Select
@@ -120,13 +146,6 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
                 />
               )}
             </Field>
-            <Shelf alignItems="flex-start" gap={1}>
-              <IconInfo size="iconSmall" color="textSecondary" />
-              <Text color="textSecondary" variant="body2">
-                For added security, changes to the pool configuration (e.g., tranche structure or write-off policy) may
-                require multiple signers and confirmation from the above.
-              </Text>
-            </Shelf>
           </Grid>
         </Card>
       )}

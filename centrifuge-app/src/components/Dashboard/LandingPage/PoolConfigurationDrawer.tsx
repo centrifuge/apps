@@ -8,7 +8,7 @@ import {
   Rate,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Accordion, Box, Button, Divider, Drawer, Grid, Select, Text } from '@centrifuge/fabric'
+import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
@@ -375,67 +375,70 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
             <Spinner />
           ) : (
             <Form noValidate>
-              <Box px={1}>
-                <Select
-                  label="Select pool"
-                  options={pools.map((pool) => ({
-                    label: pool.meta?.pool?.name,
-                    value: pool.id,
-                  }))}
-                  value={pool.id}
-                  onChange={(event) => {
-                    const selectedPool = pools.find((pool: PoolWithMetadata) => pool.id === event.target.value)
-                    if (selectedPool) {
-                      setPool(selectedPool)
-                    }
-                  }}
-                />
-              </Box>
-              {isPoolAdmin && (
-                <Box mt={2}>
-                  <Accordion
-                    items={[
-                      {
-                        title: 'Pool description',
-                        body: <PoolDescriptionSection />,
-                      },
-                      {
-                        title: 'Issuer details',
-                        body: <IssuerDetailsSection />,
-                      },
-                      {
-                        title: 'Service providers',
-                        body: <IssuerCategoriesSection isUpdating />,
-                      },
-                      {
-                        title: 'Pool ratings',
-                        body: <PoolRatingsSection isUpdating />,
-                      },
-                      {
-                        title: 'Pool analysis',
-                        body: <PoolAnalysisSection isUpdating />,
-                      },
-                      {
-                        title: 'Tranche structure',
-                        body: <TranchesSection isUpdating />,
-                      },
-                    ]}
+              <Stack>
+                <Box px={1}>
+                  <Select
+                    label="Select pool"
+                    options={pools.map((pool) => ({
+                      label: pool.meta?.pool?.name,
+                      value: pool.id,
+                    }))}
+                    value={pool.id}
+                    onChange={(event) => {
+                      const selectedPool = pools.find((pool: PoolWithMetadata) => pool.id === event.target.value)
+                      if (selectedPool) {
+                        setPool(selectedPool)
+                      }
+                    }}
                   />
                 </Box>
-              )}
-              {!isPoolAdmin && (
-                <Box mt={2} padding={1}>
-                  <Text variant="heading4" color="statusCritical">
-                    Only pool admins can edit the pool
-                  </Text>
-                </Box>
-              )}
-              <Grid
+                {isPoolAdmin && (
+                  <Box mt={2}>
+                    <Accordion
+                      items={[
+                        {
+                          title: 'Pool description',
+                          body: <PoolDescriptionSection />,
+                        },
+                        {
+                          title: 'Issuer details',
+                          body: <IssuerDetailsSection />,
+                        },
+                        {
+                          title: 'Service providers',
+                          body: <IssuerCategoriesSection isUpdating />,
+                        },
+                        {
+                          title: 'Pool ratings',
+                          body: <PoolRatingsSection isUpdating />,
+                        },
+                        {
+                          title: 'Pool analysis',
+                          body: <PoolAnalysisSection isUpdating />,
+                        },
+                        {
+                          title: 'Tranche structure',
+                          body: <TranchesSection isUpdating />,
+                        },
+                      ]}
+                    />
+                  </Box>
+                )}
+
+                {!isPoolAdmin && (
+                  <Box mt={2} padding={1}>
+                    <Text variant="heading4" color="statusCritical">
+                      Only pool admins can edit the pool
+                    </Text>
+                  </Box>
+                )}
+              </Stack>
+              <Stack
                 gap={2}
                 display="flex"
                 justifyContent="flex-end"
                 flexDirection="column"
-                marginTop={isPoolAdmin ? '30%' : '100%'}
+                marginTop={isPoolAdmin ? '40%' : '100%'}
               >
                 <Button
                   onClick={form.submitForm}
@@ -448,7 +451,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                 <Button variant="inverted" onClick={resetToDefault}>
                   Cancel
                 </Button>
-              </Grid>
+              </Stack>
             </Form>
           )}
         </FormikProvider>
