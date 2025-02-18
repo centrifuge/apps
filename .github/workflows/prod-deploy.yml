@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   get-release-artifacts:
+    name: download-${{ matrix.artifact.name }}
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -46,7 +47,7 @@ jobs:
         run: |
           ls -la
           unzip $ZIPFILE 1> /dev/null
-          ls -la $ZIPFILE
+          ls -la
       
       - name: Upload webpack files
         uses: actions/upload-artifact@v4
