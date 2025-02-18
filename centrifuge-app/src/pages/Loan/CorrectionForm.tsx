@@ -117,8 +117,7 @@ export function CorrectionForm({ loan }: { loan: ActiveLoan }) {
 
   return (
     <FormikProvider value={correctionForm}>
-      <Stack as={Form} gap={2} p={1} noValidate ref={correctionFormRef}>
-        <Text variant="heading2">Correction</Text>
+      <Stack as={Form} gap={2} noValidate ref={correctionFormRef}>
         <Box
           px={3}
           py={2}

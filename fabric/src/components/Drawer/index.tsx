@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { IconX } from '../../icon'
 import { Box, BoxProps } from '../Box'
 import { Button } from '../Button'
+import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
@@ -15,7 +16,7 @@ export type DrawerProps = React.PropsWithChildren<{
   onClose: () => void
   width?: string | number
   innerPaddingTop?: number
-  title?: string
+  title?: React.ReactNode
 }> &
   BoxProps
 
@@ -25,22 +26,18 @@ const DrawerCard = styled(Box)(
   })
 )
 
-function DrawerInner({ children, isOpen, onClose, width = 'drawer', title, ...props }: DrawerProps) {
+function DrawerInner({ title, children, isOpen, onClose, width = 'drawer', ...props }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const animation = React.useRef<Animation | undefined>(undefined)
 
-  const { overlayProps, underlayProps } = useOverlay({ isOpen, onClose: handleClose, isDismissable: true }, ref)
+  const { overlayProps, underlayProps } = useOverlay({ isOpen, onClose, isDismissable: true }, ref)
   const { modalProps } = useModal()
   const { dialogProps } = useDialog({}, ref)
 
   React.useLayoutEffect(() => {
     animate(isOpen)
   }, [isOpen])
-
-  function handleClose() {
-    animate(false)
-  }
 
   function animate(open: boolean) {
     if (!ref.current) return
@@ -97,9 +94,7 @@ function DrawerInner({ children, isOpen, onClose, width = 'drawer', title, ...pr
       <FocusScope contain restoreFocus autoFocus>
         <DrawerCard
           position="relative"
-          px={3}
-          pt={props.innerPaddingTop ?? 6}
-          pb={4}
+          p={3}
           width={width}
           maxWidth="100%"
           maxHeight="100dvh"
@@ -109,20 +104,14 @@ function DrawerInner({ children, isOpen, onClose, width = 'drawer', title, ...pr
           {...dialogProps}
           {...modalProps}
           ref={ref}
-          style={{ pointerEvents: 'auto' }}
+          style={{ pointerEvents: 'auto', containerType: 'size' }}
           {...props}
         >
           <Stack gap={3}>
-            {title ? (
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Text variant="heading2">{title}</Text>
-                <Button variant="tertiary" icon={IconX} onClick={() => handleClose()} />
-              </Box>
-            ) : (
-              <Box position="absolute" right="8px" top="8px">
-                <Button variant="tertiary" icon={IconX} onClick={() => handleClose()} />
-              </Box>
-            )}
+            <Shelf justifyContent="space-between">
+              <Text variant="heading2">{title}</Text>
+              <Button variant="tertiary" icon={IconX} onClick={() => onClose()} />
+            </Shelf>
             {children}
           </Stack>
         </DrawerCard>
