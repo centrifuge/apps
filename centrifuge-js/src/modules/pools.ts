@@ -787,8 +787,7 @@ export type PoolMetadata = {
   tranches: Record<
     string,
     {
-      icon?: FileType | null
-      minInitialInvestment?: string
+      minInitialInvestment: string
       apy: string
       apyPercentage: number | null
     }

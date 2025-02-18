@@ -17,11 +17,12 @@ export function PoolDescriptionSection() {
 
   const iconUrl = cent.metadata.parseMetadataUrl(form.values?.pool?.icon?.uri ?? '')
 
-  const subAssetClasses =
-    config.assetClasses[form.values.pool.asset.class as keyof typeof config.assetClasses]?.map((label) => ({
-      label,
-      value: label,
-    })) ?? []
+  const subAssetClasses = form.values?.pool?.asset?.class
+    ? config.assetClasses[form.values?.pool?.asset?.class as keyof typeof config.assetClasses]?.map((label) => ({
+        label,
+        value: label,
+      }))
+    : []
 
   useEffect(() => {
     if (iconUrl) {
