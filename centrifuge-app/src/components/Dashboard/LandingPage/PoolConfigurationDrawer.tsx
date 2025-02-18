@@ -241,7 +241,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         prefetchMetadata(executiveSummary)
       }
 
-
       const newPoolMetadata: PoolMetadata = {
         pool: {
           ...values.pool,
@@ -339,7 +338,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         })),
       ]
 
-
       execute([values.id, newPoolMetadata, tranches], { account })
       actions.setSubmitting(false)
     },
@@ -373,8 +371,8 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
             <Spinner />
           ) : (
             <Form noValidate>
-              <Stack>
-                <Box px={1}>
+              <Stack mb={3}>
+                <Box>
                   <Select
                     label="Select pool"
                     options={pools.map((pool) => ({
@@ -391,36 +389,58 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                   />
                 </Box>
                 {isPoolAdmin && (
-                  <Box mt={2}>
-                    <Accordion
-                      items={[
-                        {
-                          title: 'Pool description',
-                          body: <PoolDescriptionSection />,
-                        },
-                        {
-                          title: 'Issuer details',
-                          body: <IssuerDetailsSection />,
-                        },
-                        {
-                          title: 'Service providers',
-                          body: <IssuerCategoriesSection isUpdating />,
-                        },
-                        {
-                          title: 'Pool ratings',
-                          body: <PoolRatingsSection isUpdating />,
-                        },
-                        {
-                          title: 'Pool analysis',
-                          body: <PoolAnalysisSection isUpdating />,
-                        },
-                        {
-                          title: 'Tranche structure',
-                          body: <TranchesSection isUpdating />,
-                        },
-                      ]}
-                    />
-                  </Box>
+                  <Accordion
+                    items={[
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Pool description</Text>
+                          </Box>
+                        ),
+                        body: <PoolDescriptionSection />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Issuer details</Text>
+                          </Box>
+                        ),
+                        body: <IssuerDetailsSection />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Service providers</Text>
+                          </Box>
+                        ),
+                        body: <IssuerCategoriesSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Pool ratings</Text>
+                          </Box>
+                        ),
+                        body: <PoolRatingsSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Pool analysis</Text>
+                          </Box>
+                        ),
+                        body: <PoolAnalysisSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Tranche structure</Text>
+                          </Box>
+                        ),
+                        body: <TranchesSection isUpdating />,
+                      },
+                    ]}
+                  />
                 )}
 
                 {!isPoolAdmin && (
@@ -436,7 +456,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                 display="flex"
                 justifyContent="flex-end"
                 flexDirection="column"
-                marginTop={isPoolAdmin ? '40%' : '100%'}
+                // marginTop={isPoolAdmin ? '40%' : '100%'}
               >
                 <Button
                   onClick={form.submitForm}

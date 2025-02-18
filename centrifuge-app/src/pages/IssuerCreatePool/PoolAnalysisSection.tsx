@@ -13,7 +13,8 @@ export function PoolAnalysisSection({ isUpdating }: { isUpdating?: boolean }) {
         gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
         gap={3}
         mt={isUpdating ? 0 : 3}
-        style={{ padding: isUpdating ? 20 : 40 }}
+        px={isUpdating ? 2 : 5}
+        py={isUpdating ? 3 : 5}
       >
         <FieldWithErrorMessage
           name={`${formName}.report.url`}

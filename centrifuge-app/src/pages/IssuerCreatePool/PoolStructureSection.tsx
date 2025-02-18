@@ -12,7 +12,6 @@ import { validate } from './validate'
 
 export const StyledGrid = styled(Grid)`
   background-color: ${({ theme }) => theme.colors.backgroundSecondary};
-  padding: 40px;
   border: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
   border-radius: 8px;
   gap: 24px;
@@ -139,7 +138,7 @@ export const PoolStructureSection = () => {
       <Text variant="heading2" fontWeight={700}>
         Pool Structure
       </Text>
-      <StyledGrid gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={3} mt={2}>
+      <StyledGrid gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={3} mt={2} p={5}>
         <Box>
           <Text variant="heading4">Pool structure*</Text>
           <CheckboxOption
