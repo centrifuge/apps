@@ -10,7 +10,7 @@ interface ReportFileUploadProps extends FileUploadProps {
   name: string
 }
 
-function ReportFileUpload({ name, ...props }: ReportFileUploadProps) {
+export function ReportFileUpload({ name, ...props }: ReportFileUploadProps) {
   const { setFieldValue } = useFormikContext<any>()
   const [field, meta] = useField(name)
   const [file, setFile] = useState<File | null>(null)
@@ -58,6 +58,8 @@ function ReportFileUpload({ name, ...props }: ReportFileUploadProps) {
 
 export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   const form = useFormikContext<any>()
+  const ratings = isUpdating ? form.values.pool.poolRatings : form.values.poolRatings
+  const formName = isUpdating ? 'pool.poolRatings' : 'poolRatings'
 
   return (
     <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
@@ -67,12 +69,12 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
         mt={isUpdating ? 0 : 3}
         style={isUpdating ? { padding: 20 } : { padding: 40 }}
       >
-        <FieldArray name="poolRatings">
+        <FieldArray name={formName}>
           {({ push, remove }) => (
             <>
-              {form.values.poolRatings.map((_: any, index: number) => (
+              {ratings.map((_: any, index: number) => (
                 <>
-                  <Field name={`poolRatings.${index}.agency`}>
+                  <Field name={`${formName}.${index}.agency`}>
                     {({ field, meta }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
@@ -83,7 +85,7 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
                     )}
                   </Field>
 
-                  <Field name={`poolRatings.${index}.value`}>
+                  <Field name={`${formName}.${index}.value`}>
                     {({ field, meta }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
@@ -92,7 +94,7 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
                         label={
                           <LabelWithDeleteButton
                             onDelete={() => remove(index)}
-                            hideButton={form.values.poolRatings.length === 1}
+                            hideButton={ratings?.length === 1}
                             label="Rating value"
                           />
                         }
@@ -100,7 +102,7 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
                     )}
                   </Field>
 
-                  <Field name={`poolRatings.${index}.reportUrl`}>
+                  <Field name={`${formName}.${index}.reportUrl`}>
                     {({ field }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
@@ -111,10 +113,10 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
                     )}
                   </Field>
 
-                  <Field name={`poolRatings.${index}.reportFile`}>
+                  <Field name={`${formName}.${index}.reportFile`}>
                     {() => (
                       <ReportFileUpload
-                        name={`poolRatings.${index}.reportFile`}
+                        name={`${formName}.${index}.reportFile`}
                         accept="application/pdf"
                         label="Rating report PDF"
                         placeholder="Choose file"

@@ -15,10 +15,10 @@ export function PoolDescriptionSection() {
   const cent = useCentrifuge()
   const [icon, setIcon] = useState<File | null>(null)
 
-  const iconUrl = cent.metadata.parseMetadataUrl(form.values.poolIcon)
+  const iconUrl = cent.metadata.parseMetadataUrl(form.values?.pool?.icon?.uri ?? '')
 
   const subAssetClasses =
-    config.assetClasses[form.values.assetClass as keyof typeof config.assetClasses]?.map((label) => ({
+    config.assetClasses[form.values.pool.asset.class as keyof typeof config.assetClasses]?.map((label) => ({
       label,
       value: label,
     })) ?? []
@@ -52,20 +52,19 @@ export function PoolDescriptionSection() {
       gap={2}
     >
       <FieldWithErrorMessage
-        name="poolName"
+        name="pool.name"
         as={TextInput}
         label="Pool name*"
         placeholder="Type here..."
         maxLength={100}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('poolName', e.target.value)}
-        value={form.values.poolName}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('name', e.target.value)}
       />
-      <Field name="investorType">
+      <Field name="pool.investorType">
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
-            name="investorType"
+            name="pool.investorType"
             label={<Tooltips type="investorType" label={<Text variant="heading4">Investor type*</Text>} size="sm" />}
-            onChange={(event: any) => form.setFieldValue('investorType', event.target.value)}
+            onChange={(event: any) => form.setFieldValue('pool.investorType', event.target.value)}
             onBlur={field.onBlur}
             value={field.value}
             as={TextInput}
@@ -75,11 +74,12 @@ export function PoolDescriptionSection() {
         )}
       </Field>
       <ImageUpload
-        name="poolIcon"
+        name="pool.icon"
         file={icon}
         onFileChange={async (file) => {
-          form.setFieldTouched('poolIcon', true, false)
-          form.setFieldValue('poolIcon', file)
+          form.setFieldTouched('pool.icon', true, false)
+          form.setFieldValue('pool.icon', file)
+          setIcon(file)
         }}
         label="Pool icon*"
         accept="image/svg+xml"
@@ -102,19 +102,19 @@ export function PoolDescriptionSection() {
         label="Asset denomination"
         maxLength={100}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('assetDenomination', e.target.value)}
-        value={form.values.assetDenomination}
+        value={form.values.currency.symbol}
         disabled
       />
-      <Field name="assetClass">
+      <Field name="pool.asset.class">
         {({ field }: FieldProps) => (
           <Select
-            name="assetClass"
+            name="pool.asset.class"
             label={
               <Tooltips type="assetClass" label={<Text variant="heading4">Primary asset class*</Text>} size="sm" />
             }
             onChange={(event) => {
-              form.setFieldValue('assetClass', event.target.value)
-              form.setFieldValue('subAssetClass', '', false)
+              form.setFieldValue('pool.asset.class', event.target.value)
+              form.setFieldValue('pool.asset.subClass', '', false)
             }}
             value={field.value}
             options={ASSET_CLASSES}
@@ -122,12 +122,12 @@ export function PoolDescriptionSection() {
           />
         )}
       </Field>
-      <Field name="subAssetClass">
+      <Field name="pool.asset.subClass">
         {({ field, meta, form }: FieldProps) => (
           <Select
-            name="subAssetClass"
+            name="pool.asset.subClass"
             label="Secondary asset class*"
-            onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
+            onChange={(event) => form.setFieldValue('pool.asset.subClass', event.target.value)}
             onBlur={field.onBlur}
             value={field.value}
             options={subAssetClasses}

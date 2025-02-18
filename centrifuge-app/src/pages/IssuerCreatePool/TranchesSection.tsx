@@ -35,6 +35,7 @@ export const Line = () => {
 export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
+  const tranches = form.values.tranches
 
   const getTrancheName = (index: number, value?: string) => {
     switch (index) {
@@ -65,7 +66,7 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   return (
     <Box mt={isUpdating ? 0 : 4} mb={3}>
       {isUpdating ? <></> : <Text>Tranches</Text>}
-      {values.tranches.map((_, index) => (
+      {tranches.map((_, index) => (
         <StyledGrid key={index} mt={3} style={{ padding: isUpdating ? 20 : 40 }}>
           <Text variant="heading3">Tranche {index + 1}</Text>
           <Line />
