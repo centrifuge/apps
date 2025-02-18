@@ -48,7 +48,8 @@ export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }
       {isUpdating ? <></> : <Text variant="heading2">Service providers</Text>}
       <StyledGrid
         gridTemplateColumns={['1fr', '1fr 1fr']}
-        style={isUpdating ? { padding: 20 } : { padding: 40 }}
+        px={isUpdating ? 2 : 5}
+        py={isUpdating ? 3 : 5}
         mt={isUpdating ? 0 : 3}
       >
         <FieldArray name={formName}>
