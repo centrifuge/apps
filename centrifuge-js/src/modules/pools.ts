@@ -774,7 +774,7 @@ export type PoolMetadata = {
     details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
-    reports?: PoolReport
+    report?: PoolReport
     poolRatings?: {
       agency?: string
       value?: string
