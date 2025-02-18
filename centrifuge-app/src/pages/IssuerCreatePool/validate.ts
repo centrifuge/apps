@@ -114,17 +114,6 @@ export const validateValues = (values: CreatePoolValues) => {
     })
   }
 
-  if (values.issuerCategories.length > 1) {
-    values.issuerCategories.forEach((category, i) => {
-      if (category.type === '') {
-        errors = setIn(errors, `issuerCategories.${i}.type`, 'Field is required')
-      }
-      if (category.value === '') {
-        errors = setIn(errors, `issuerCategories.${i}.value`, 'Field is required')
-      }
-    })
-  }
-
   if (values.poolRatings.length > 1) {
     values.poolRatings.forEach((rating, i) => {
       if (rating.agency === '') {
@@ -197,21 +186,21 @@ export const validateValues = (values: CreatePoolValues) => {
       }
       prevRiskBuffer = t.minRiskBuffer
     }
-
-    if (values.assetOriginators.length >= 2) {
-      values.assetOriginators.forEach((val, idx) => {
-        const isDuplicated = values.assetOriginators.indexOf(val) !== idx
-        if (isDuplicated) errors = setIn(errors, `assetOriginators.${idx}`, 'Address already exists')
-      })
-    }
-
-    if (values.adminMultisig.signers.length >= 2) {
-      values.adminMultisig.signers.forEach((val, idx) => {
-        const isDuplicated = values.adminMultisig.signers.indexOf(val) !== idx
-        if (isDuplicated) errors = setIn(errors, `adminMultisig.signers.${idx}`, 'Address already exists')
-      })
-    }
   })
+
+  if (values.assetOriginators.length >= 2) {
+    values.assetOriginators.forEach((val, idx) => {
+      const isDuplicated = values.assetOriginators.indexOf(val) !== idx
+      if (isDuplicated) errors = setIn(errors, `assetOriginators.${idx}`, 'Address already exists')
+    })
+  }
+
+  if (values.adminMultisig.signers.length >= 2) {
+    values.adminMultisig.signers.forEach((val, idx) => {
+      const isDuplicated = values.adminMultisig.signers.indexOf(val) !== idx
+      if (isDuplicated) errors = setIn(errors, `adminMultisig.signers.${idx}`, 'Address already exists')
+    })
+  }
 
   return errors
 }

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../../src/components/Tooltips'
+import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
 import { UpdatePoolFormValues } from './PoolConfigurationDrawer'
 
 export function IssuerDetailsSection() {
@@ -43,10 +44,10 @@ export function IssuerDetailsSection() {
       mb={2}
       gap={2}
     >
-      <Field name="pool.issuer.name">
+      <Field name="pool.issuer.name" validate={validate.issuerName}>
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
-            <Field
+            <FieldWithErrorMessage
               name="pool.issuer.name"
               label={<Tooltips type="issuerName" label={<Text variant="heading4">Legal name of the issuer*</Text>} />}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -61,10 +62,10 @@ export function IssuerDetailsSection() {
           </Box>
         )}
       </Field>
-      <Field name="pool.issuer.repName">
+      <Field name="pool.issuer.repName" validate={validate.issuerRepName}>
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
-            <Field
+            <FieldWithErrorMessage
               name="pool.issuer.repName"
               label={<Text variant="heading4">Legal name of the issuer representative*</Text>}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -91,7 +92,7 @@ export function IssuerDetailsSection() {
         id="issuerLogo"
         height={144}
       />
-      <Field name="pool.issuer.shortDescription">
+      <Field name="pool.issuer.shortDescription" validate={validate.issuerShortDescription}>
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
             name="pool.issuer.shortDescription"
@@ -108,7 +109,7 @@ export function IssuerDetailsSection() {
           />
         )}
       </Field>
-      <Field name="pool.issuer.description">
+      <Field name="pool.issuer.description" validate={validate.issuerDescription}>
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
             name="pool.issuer.description"
@@ -118,21 +119,12 @@ export function IssuerDetailsSection() {
             maxLength={3000}
             minLength={100}
             value={field.value}
+            onBlur={field.onBlur}
           />
         )}
       </Field>
-      <FieldWithErrorMessage
-        name="pool.links.website"
-        label="Website URL"
-        placeholder="www.example.com"
-        as={URLInput}
-      />
-      <FieldWithErrorMessage
-        name="pool.links.forum"
-        label="Governance forum"
-        placeholder="www.example.com"
-        as={URLInput}
-      />
+      <Field name="pool.links.website" label="Website URL" placeholder="www.example.com" as={URLInput} />
+      <Field name="pool.links.forum" label="Governance forum" placeholder="www.example.com" as={URLInput} />
       <Field name="pool.links.executiveSummary">
         {({ field, meta, form }: FieldProps) => (
           <FileUpload
@@ -168,7 +160,7 @@ export function IssuerDetailsSection() {
       </Field>
       <Field name="pool.details.description">
         {({ field }: FieldProps) => (
-          <FieldWithErrorMessage
+          <Field
             name="pool.details.description"
             as={TextAreaInput}
             placeholder="Description"
