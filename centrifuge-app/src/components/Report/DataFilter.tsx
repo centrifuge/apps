@@ -85,10 +85,21 @@ export function DataFilter({ poolId }: ReportFilterProps) {
           options={reportOptions}
           value={report}
           onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-            const { value } = event.target
-            if (value) {
-              navigate(`${basePath}/${pool.id}/data/${value}`)
+            const newReport = event.target.value
+            let path = `${basePath}/${pool.id}/data/${newReport}`
+
+            if (newReport !== 'orders') {
+              const params = new URLSearchParams()
+              if (startDate) params.append('from', startDate)
+              if (endDate) params.append('to', endDate)
+              if (groupBy) params.append('groupBy', groupBy)
+
+              const queryString = params.toString()
+              if (queryString) {
+                path = `${path}?${queryString}`
+              }
             }
+            navigate(path)
           }}
         />
 

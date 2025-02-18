@@ -73,20 +73,10 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
 
   if (isExternalLoan(loan)) {
-    return (
-      <Stack gap={2} p={1}>
-        <Text variant="heading2">Purchase</Text>
-        <ExternalFinanceForm loan={loan} source={source} setSource={setSource} />
-      </Stack>
-    )
+    return <ExternalFinanceForm loan={loan} source={source} setSource={setSource} />
   }
 
-  return (
-    <Stack gap={2} p={1}>
-      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
-      <InternalFinanceForm loan={loan} source={source} onChange={setSource} />
-    </Stack>
-  )
+  return <InternalFinanceForm loan={loan} source={source} onChange={setSource} />
 }
 
 /**

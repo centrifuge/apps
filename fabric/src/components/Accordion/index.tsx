@@ -51,7 +51,7 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
         type="button"
         id={`accordion-control-${id}`}
         width="100%"
-        p={2}
+        py={2}
         justifyContent="space-between"
         alignItems="center"
         onClick={() => setOpen(!open)}

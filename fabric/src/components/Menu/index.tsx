@@ -61,10 +61,11 @@ export function MenuItem({
   icon: IconComp,
   iconRight: IconRightComp,
   minHeight = '48px',
+  disabled,
   ...buttonProps
 }: MenuItemProps) {
   return (
-    <MenuItemButton {...buttonProps}>
+    <MenuItemButton {...buttonProps} disabled={disabled} style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
       <Shelf gap={1} px={2} py={1} minHeight={minHeight}>
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">

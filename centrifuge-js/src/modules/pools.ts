@@ -90,6 +90,7 @@ const AdminRoleBits = {
   InvestorAdmin: 0b00010000,
   LoanAdmin: 0b00100000,
   PODReadAccess: 0b01000000,
+  FrozenTrancheInvestor: 0b10000000,
 }
 
 // const CurrencyRoleBits = {
@@ -99,7 +100,7 @@ const AdminRoleBits = {
 
 export type PoolRoles = {
   roles: AdminRole[]
-  tranches: { [key: string]: string } // trancheId -> permissionedTill
+  tranches: { [key: string]: { permissionedTill: string; isFrozen: boolean } } // trancheId -> permissionedTill
 }
 
 export type LoanInfoInput =
@@ -940,10 +941,14 @@ export type OracleTransaction = {
 }
 
 type Holder = {
+  poolId: string
   accountId: string
   chainId: number
   trancheId: string
   evmAddress?: string
+  initialisedAt: string
+  unrealizedProfit: CurrencyBalance
+  realizedProfit: CurrencyBalance
   balance: CurrencyBalance
   pendingInvestCurrency: CurrencyBalance
   claimableTrancheTokens: CurrencyBalance
@@ -1600,7 +1605,10 @@ export function getPoolsModule(inst: Centrifuge) {
                     permissions.trancheInvestor.info
                       .filter((info: any) => info.permissionedTill * 1000 > Date.now())
                       .forEach((info: any) => {
-                        roles.tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                        roles.tranches[info.trancheId] = {
+                          permissionedTill: new Date(info.permissionedTill * 1000).toISOString(),
+                          isFrozen: info.isFrozen,
+                        }
                       })
 
                     setPoolRoles(account, poolId, roles)
@@ -1675,7 +1683,10 @@ export function getPoolsModule(inst: Centrifuge) {
               permissions.trancheInvestor.info
                 .filter((info: any) => info.permissionedTill * 1000 > Date.now())
                 .forEach((info: any) => {
-                  roles[account].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                  roles[account].tranches[info.trancheId] = {
+                    permissionedTill: new Date(info.permissionedTill * 1000).toISOString(),
+                    isFrozen: info.isFrozen,
+                  }
                 })
             })
             return roles
@@ -3089,6 +3100,12 @@ export function getPoolsModule(inst: Centrifuge) {
               tokenAmount
               tokenPrice
               currencyAmount
+              pool {
+                currency {
+                  symbol
+                  decimals
+                }
+              }
             }
           }
         }
@@ -3100,32 +3117,21 @@ export function getPoolsModule(inst: Centrifuge) {
     )
 
     return $query.pipe(
-      switchMap((data) => {
-        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId) ?? [])
-        if (!poolIds.size) {
-          return of({
-            investorTransactions: [],
-          })
+      map((data) => {
+        const txs = data?.investorTransactions.nodes.map((tx) => {
+          const poolCurrency = tx.pool.currency
+          return {
+            ...tx,
+            tokenAmount: new TokenBalance(tx.tokenAmount || 0, poolCurrency.decimals),
+            tokenPrice: new Price(tx.tokenPrice || 0),
+            currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
+            trancheId: tx.trancheId.split('-')[1],
+            poolCurrency: poolCurrency.symbol,
+          }
+        })
+        return {
+          investorTransactions: txs || [],
         }
-        const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
-        return combineLatest($poolCurrencies).pipe(
-          map((currencies) => {
-            const txs = data?.investorTransactions.nodes.map((tx) => {
-              const currencyIndex = Array.from(poolIds).indexOf(tx.poolId)
-              const poolCurrency = currencies[currencyIndex]
-              return {
-                ...tx,
-                tokenAmount: new TokenBalance(tx.tokenAmount || 0, poolCurrency.decimals),
-                tokenPrice: new Price(tx.tokenPrice || 0),
-                currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
-                trancheId: tx.trancheId.split('-')[1],
-              }
-            })
-            return {
-              investorTransactions: txs || [],
-            }
-          })
-        )
       })
     )
   }
@@ -3595,11 +3601,19 @@ export function getPoolsModule(inst: Centrifuge) {
                 trancheId: { startsWith: $trancheId }
               }) {
             nodes {
+              poolId
               accountId
+              initialisedAt
               trancheId
               account {
                 chainId
                 evmAddress
+              }
+              tranche {
+                pool{
+                  sumUnrealizedProfitAtMarketPrice
+                  sumRealizedProfitFifoByPeriod
+                }
               }
               pendingInvestCurrency
               claimableTrancheTokens
@@ -3648,12 +3662,22 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.trancheBalances.nodes.map(
           (balance) =>
             ({
+              poolId: balance.poolId,
               accountId: balance.accountId,
+              initialisedAt: balance.initialisedAt,
               chainId: Number(balance.account?.chainId ?? 0),
               trancheId: balance.trancheId.split('-')[1],
               evmAddress: balance.account?.evmAddress,
               balance: new CurrencyBalance(
                 currencyBalancesByAccountId[`${balance.accountId}-${balance.trancheId.split('-')[1]}`]?.amount ?? 0,
+                currency.decimals
+              ),
+              unrealizedProfit: new CurrencyBalance(
+                balance.tranche.pool.sumUnrealizedProfitAtMarketPrice,
+                currency.decimals
+              ),
+              realizedProfit: new CurrencyBalance(
+                balance.tranche.pool.sumRealizedProfitFifoByPeriod,
                 currency.decimals
               ),
               pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),

@@ -86,6 +86,12 @@ export type SubqueryInvestorTransaction = {
   tokenAmount?: CurrencyBalance | null
   tokenPrice?: Price | null
   transactionFee?: string | null
+  pool: {
+    currency: {
+      symbol: string
+      decimals: number
+    }
+  }
 }
 
 export type AssetTransactionType =
@@ -246,12 +252,19 @@ export type SubqueryTrancheBalances = {
   }
   poolId: string
   trancheId: string
+  initialisedAt: string
   pendingInvestCurrency: string
   claimableTrancheTokens: string
   sumClaimedTrancheTokens: string
   pendingRedeemTrancheTokens: string
   claimableCurrency: string
   sumClaimedCurrency: string
+  tranche: {
+    pool: {
+      sumUnrealizedProfitAtMarketPrice: string
+      sumRealizedProfitFifoByPeriod: string
+    }
+  }
 }
 
 export type SubqueryCurrencyBalances = {

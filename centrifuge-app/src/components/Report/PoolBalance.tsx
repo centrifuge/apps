@@ -46,7 +46,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       .concat(
         poolStates.map((state, index) => ({
           align: 'right',
-          timestamp: state.timestamp,
+          timestamp: state?.timestamp,
           header:
             groupBy === 'day'
               ? new Date(state.timestamp).toLocaleDateString('en-US', {
