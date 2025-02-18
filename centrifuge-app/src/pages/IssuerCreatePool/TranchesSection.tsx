@@ -67,7 +67,7 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
     <Box mt={isUpdating ? 0 : 4} mb={3}>
       {isUpdating ? <></> : <Text>Tranches</Text>}
       {tranches.map((_, index) => (
-        <StyledGrid key={index} mt={3} style={{ padding: isUpdating ? 20 : 40 }}>
+        <StyledGrid key={index} mt={isUpdating ? 0 : 3} style={{ padding: isUpdating ? 20 : 40 }}>
           <Text variant="heading3">Tranche {index + 1}</Text>
           <Line />
           <Grid gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']} gap={3}>

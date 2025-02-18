@@ -9,7 +9,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Grid, Select, Text } from '@centrifuge/fabric'
-import { Form, FormikProvider, useFormik } from 'formik'
+import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
@@ -126,6 +126,93 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
   const form = useFormik<UpdatePoolFormValues>({
     enableReinitialize: true,
     initialValues: createPoolValues(pool),
+    validateOnBlur: true,
+    validate: (values) => {
+      let errors: FormikErrors<any> = {}
+      const tokenNames = new Set<string>()
+      const commonTokenSymbolStart = values.tranches[0].symbolName.slice(0, 3)
+      const tokenSymbols = new Set<string>()
+      let prevInterest = Infinity
+      let prevRiskBuffer = 0
+
+      const juniorInterestRate =
+        values.tranches[0].apyPercentage !== null ? parseFloat(values.tranches[0].apyPercentage.toString()) : 0
+
+      if (values.pool.issuer.categories.length > 1) {
+        values.pool.issuer.categories.forEach((category, i) => {
+          if (category.type === '') {
+            errors = setIn(errors, `pool.issuer.categories.${i}.type`, 'Field is required')
+          }
+          if (category.value === '') {
+            errors = setIn(errors, `pool.issuer.categories.${i}.value`, 'Field is required')
+          }
+          if (category.type === 'other' && category.customType === '') {
+            errors = setIn(errors, `pool.issuer.categories.${i}.customType`, 'Field is required')
+          }
+        })
+      }
+
+      if (values.pool?.poolRatings?.length && values.pool?.poolRatings?.length > 1) {
+        values.pool.poolRatings?.forEach((rating, i) => {
+          if (rating.agency === '') {
+            errors = setIn(errors, `pool.poolRatings.${i}.agency`, 'Field is required')
+          }
+          if (rating.value === '') {
+            errors = setIn(errors, `pool.poolRatings.${i}.value`, 'Field is required')
+          }
+          if (rating.reportUrl === '') {
+            errors = setIn(errors, `pool.poolRatings.${i}.reportUrl`, 'Field is required')
+          }
+          if (rating.reportFile === null) {
+            errors = setIn(errors, `pool.poolRatings.${i}.reportFile`, 'Field is required')
+          }
+        })
+      }
+
+      values.tranches.forEach((t, i) => {
+        if (tokenNames.has(t.tokenName)) {
+          errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
+        }
+        tokenNames.add(t.tokenName)
+
+        // matches any character thats not alphanumeric or -
+        if (/[^a-z^A-Z^0-9^-]+/.test(t.symbolName)) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Invalid character detected')
+        }
+
+        if (tokenSymbols.has(t.symbolName)) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
+        }
+        tokenSymbols.add(t.symbolName)
+
+        if (t.symbolName.slice(0, 3) !== commonTokenSymbolStart) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must all start with the same 3 characters')
+        }
+
+        if (i > 0 && t.interestRate) {
+          if (t.interestRate > juniorInterestRate) {
+            errors = setIn(
+              errors,
+              `tranches.${i}.interestRate`,
+              "Interest rate can't be higher than the junior tranche's target APY"
+            )
+          }
+          if (t.interestRate > prevInterest) {
+            errors = setIn(errors, `tranches.${i}.interestRate`, "Can't be higher than a more junior tranche")
+          }
+          prevInterest = t.interestRate
+        }
+
+        if (t.minRiskBuffer) {
+          if (t.minRiskBuffer < prevRiskBuffer) {
+            errors = setIn(errors, `tranches.${i}.minRiskBuffer`, "Can't be lower than a more junior tranche")
+          }
+          prevRiskBuffer = t.minRiskBuffer
+        }
+      })
+
+      return errors
+    },
     onSubmit: async (values, actions) => {
       setIsEditing(true)
       let logoUri
@@ -260,7 +347,8 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
     },
   })
 
-  // Force reinitialize Formik when the pool changes this is so we can use the formik (dirty) to enable/disable the update button.
+  // Force reinitialize Formik when the pool changes this is so we
+  // can use the formik (dirty) to enable/disable the update button.
   useEffect(() => {
     form.resetForm()
   }, [pool])
@@ -349,7 +437,12 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                 flexDirection="column"
                 marginTop={isPoolAdmin ? '30%' : '100%'}
               >
-                <Button onClick={form.submitForm} loading={isEditing || isLoading} type="submit" disabled={!form.dirty}>
+                <Button
+                  onClick={form.submitForm}
+                  loading={isEditing || isLoading}
+                  type="submit"
+                  disabled={!form.dirty || Object.keys(form.errors).length > 0}
+                >
                   Update
                 </Button>
                 <Button variant="inverted" onClick={resetToDefault}>
