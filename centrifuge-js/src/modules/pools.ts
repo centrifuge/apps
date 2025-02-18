@@ -656,9 +656,9 @@ export type PoolReport = {
   author: {
     name: string
     title: string
-    avatar: FileType | null
   }
-  uri: string
+  url: string
+  file: FileType | null
 }
 export interface TrancheFormValues {
   tokenName: string
@@ -701,12 +701,14 @@ export interface PoolMetadataInput {
     reportUrl?: string
     reportFile?: FileType | null
   }[]
-  poolReport?: {
-    authorName: string
-    authorTitle: string
-    authorAvatar: FileType | null
+  poolReports?: {
+    author: {
+      name: string
+      title: string
+    }
     url: string
-  }
+    file: FileType | null
+  }[]
 
   // setup
   adminMultisig?: {
@@ -758,7 +760,7 @@ export type PoolMetadata = {
       repName: string
       name: string
       description: string
-      email: string
+      email?: string
       logo?: FileType | null
       shortDescription: string
       categories: { type: string; value: string; customType?: string }[]
@@ -1171,17 +1173,15 @@ export function getPoolsModule(inst: Centrifuge) {
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
         poolRatings: metadata.poolRatings.length > 0 ? metadata.poolRatings : [],
-        reports: metadata.poolReport
-          ? [
-              {
-                author: {
-                  name: metadata.poolReport.authorName,
-                  title: metadata.poolReport.authorTitle,
-                  avatar: metadata.poolReport.authorAvatar,
-                },
-                uri: metadata.poolReport.url,
+        reports: !!metadata.poolReports?.length
+          ? metadata.poolReports.map((report) => ({
+              author: {
+                name: report.author.name,
+                title: report.author.title,
               },
-            ]
+              url: report.url,
+              file: report.file,
+            }))
           : undefined,
       },
       pod: {},

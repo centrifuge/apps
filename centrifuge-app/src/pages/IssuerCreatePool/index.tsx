@@ -279,10 +279,16 @@ const IssuerCreatePoolPage = () => {
       forum: '',
       email: '',
       details: [],
-      reportAuthorName: '',
-      reportAuthorTitle: '',
-      reportAuthorAvatar: null,
-      reportUrl: '',
+      reports: [
+        {
+          author: {
+            name: '',
+            title: '',
+          },
+          url: '',
+          file: null,
+        },
+      ],
       assetOriginators: [''],
       adminMultisig: {
         signers: [substrate?.selectedAddress ?? ''],
@@ -323,16 +329,6 @@ const IssuerCreatePoolPage = () => {
       if (pinnedFiles.poolIcon) metadataValues.poolIcon = pinnedFiles.poolIcon as FileType
       if (pinnedFiles.issuerLogo) metadataValues.issuerLogo = pinnedFiles.issuerLogo as FileType
       if (pinnedFiles.executiveSummary) metadataValues.executiveSummary = pinnedFiles.executiveSummary
-
-      // Pool report
-      if (values.reportUrl) {
-        metadataValues.poolReport = {
-          authorAvatar: pinnedFiles.authorAvatar,
-          authorName: values.reportAuthorName,
-          authorTitle: values.reportAuthorTitle,
-          url: values.reportUrl,
-        }
-      }
 
       // Pool ratings
       if (values.poolRatings[0].agency === '') {
