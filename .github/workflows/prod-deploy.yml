@@ -52,7 +52,7 @@ jobs:
       - name: Upload webpack files
         uses: actions/upload-artifact@v4
         with:
-          name: webpack
+          name: ${{ matrix.artifact.name }}
           path: ${{ matrix.artifact.path }}
   
   deploy-app:
