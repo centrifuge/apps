@@ -38,7 +38,6 @@ jobs:
           # version: ${{ github.event_name == 'release' && github.event.release.id || format('tags/centrifuge-app/{0}', inputs.tag) }}
           version: 'tags/centrifuge-app/v2.83.4'
           file: "${{ matrix.artifact.name }}.zip"
-          regex: true
 
       - name: Unzip release files
         env:
