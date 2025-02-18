@@ -63,9 +63,9 @@ const createPoolSkeleton = (pool: PoolWithMetadata) => {
       poolRatings: !!pool?.meta?.pool?.poolRatings?.length
         ? pool.meta.pool.poolRatings
         : [{ agency: '', value: '', reportUrl: '' }],
-      reports: !!pool?.meta?.pool?.reports?.length
-        ? pool.meta.pool.reports
-        : [{ author: { name: '', title: '' }, url: '', file: null }],
+      report: !!pool?.meta?.pool?.report
+        ? pool.meta.pool.report
+        : { author: { name: '', title: '', avatar: null }, url: '' },
     },
     tranches: pool.tranches.map((tranche) => {
       const trancheMeta = pool?.meta?.tranches[tranche.id]
@@ -216,7 +216,8 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         newPoolMetadata.tranches = Object.fromEntries(tranches.map((tranche) => [tranche.id, tranche]))
       }
 
-      console.log(newPoolMetadata)
+      console.log('new metadata', newPoolMetadata)
+      return
 
       execute([values.id, newPoolMetadata], { account })
       actions.setSubmitting(false)
