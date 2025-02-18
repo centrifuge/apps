@@ -1,6 +1,6 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Drawer, Select, Stack } from '@centrifuge/fabric'
+import { Accordion, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
@@ -146,15 +146,31 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
         <Stack gap={3} mb={3}>
-          <PoolManagers poolId={poolId} handle={poolManagersRef} account={adminDelegateAccount} />
-          <AssetOriginators poolId={poolId} handle={aoRef} account={aoDelegateAccount} />
-          <OracleFeeders poolId={poolId} handle={feedersRef} account={adminDelegateAccount} />
+          <Accordion
+            items={[
+              {
+                title: 'Pool managers',
+                body: <PoolManagers poolId={poolId} handle={poolManagersRef} account={adminDelegateAccount} />,
+                sublabel: 'Pool managers can manage investors and the liquidity reserve of the pool.',
+              },
+              {
+                title: 'Pool delegates',
+                body: (
+                  <Stack>
+                    <AssetOriginators poolId={poolId} handle={aoRef} account={aoDelegateAccount} />
+                    <OracleFeeders poolId={poolId} handle={feedersRef} account={adminDelegateAccount} />
+                  </Stack>
+                ),
+                sublabel: 'Pool delegates are authorized to perform designated pool actions by the pool manager.',
+              },
+            ]}
+          />
         </Stack>
         <Stack gap={1} position="sticky" bottom="-24px" mb="-24px" bg="backgroundPrimary" pb={3}>
           <Button type="submit" loading={isLoading}>
             Update
           </Button>
-          <Button variant="secondary" onClick={() => onClose()}>
+          <Button variant="inverted" onClick={() => onClose()}>
             Cancel
           </Button>
         </Stack>
