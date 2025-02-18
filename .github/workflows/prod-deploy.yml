@@ -27,7 +27,7 @@ jobs:
       matrix:
         artifact:
           - name: webpack
-            path: webpack/centrifuge-app/build/
+            path: centrifuge-app/build/
           - name: pinning-api
             path: pinning-api/dist/
           - name: onboarding-api
@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: webpack
-          path: webpack/centrifuge-app/build/
+          path: ${{ matrix.artifact.path }}
   
   deploy-app:
     name: app-prod-deploy
