@@ -42,10 +42,10 @@ jobs:
 
       - name: Unzip release files
         env:
-          ZIPFILE: ${{ matrix.artifact.path }}
+          ZIPFILE: ${{ matrix.artifact.name }}
         run: |
           ls -la
-          unzip $ZIPFILE.zip 1> /dev/null
+          unzip $ZIPFILE 1> /dev/null
           ls -la $ZIPFILE
       
       - name: Upload webpack files
