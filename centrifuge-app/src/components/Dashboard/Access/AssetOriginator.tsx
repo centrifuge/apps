@@ -1,7 +1,5 @@
 import Centrifuge, {
-  addressToHex,
   computeTrancheId,
-  evmToSubstrateAddress,
   getCurrencyLocation,
   PoolMetadata,
   TransactionOptions,
@@ -17,9 +15,11 @@ import {
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
 import {
+  Box,
   Button,
   Card,
-  IconMinusCircle,
+  Divider,
+  IconInfo,
   InputErrorMessage,
   SelectInner,
   Stack,
@@ -32,8 +32,8 @@ import { isAddress as isEvmAddress } from 'ethers'
 import { ErrorMessage, Field, FieldArray, FieldProps, FormikErrors, setIn, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, firstValueFrom, switchMap } from 'rxjs'
+import { FormAddressInput } from '../../../../src/pages/IssuerCreatePool/FormAddressInput'
 import { parachainNames } from '../../../config'
-import { AddAddressInput } from '../../../pages/IssuerPool/Configuration/AddAddressInput'
 import { diffPermissions } from '../../../pages/IssuerPool/Configuration/Admins'
 import { looksLike } from '../../../utils/helpers'
 import { useIdentity } from '../../../utils/useIdentity'
@@ -41,9 +41,7 @@ import { useDomainRouters } from '../../../utils/useLiquidityPools'
 import { getKeyForReceiver, usePoolAccess, usePoolAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { address } from '../../../utils/validation'
-import { DataTable } from '../../DataTable'
 import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
-import { Identity } from '../../Identity'
 import type { FormHandle } from '../AccessDrawer'
 
 export type AOFormValues = {
@@ -302,15 +300,12 @@ function AOForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
-  const rows = React.useMemo(
-    () => form.values.delegates.map((a, i) => ({ address: a, index: i })),
-    [form.values.delegates]
-  )
-
   const { add: addedWithdraw, remove: removedWithdraw } = diffWithdrawAddresses(
     initialValues.withdrawAddresses.filter((w) => !!w.location),
     form.values.withdrawAddresses.filter((w) => !!w.location)
   )
+
+  console.log('form.values.delegates', form.values.delegates)
 
   return (
     <Stack gap={3}>
@@ -319,104 +314,104 @@ function AOForm({
           <Text variant="body2" color="textSecondary">
             Add or remove addresses which can: <br />
             <Text color="textPrimary">
-              <b>originate</b> assets and <b>invest</b> in the junior tranche.
+              <b>originate</b> assets and <b>invest</b> in the pool.
             </Text>
           </Text>
-          <Text as="p" variant="body2" color="textSecondary">
-            Add
-          </Text>
           <FieldArray name="delegates">
-            {(fldArr) => (
-              <Stack gap={3}>
-                <DataTable
-                  data={rows}
-                  columns={[
-                    {
-                      align: 'left',
-                      header: 'Address(es)',
-                      cell: (row: Row) => (
-                        <Text variant="body2">
-                          <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
-                        </Text>
-                      ),
-                    },
-                    {
-                      header: '',
-                      cell: (row: Row) => (
-                        <Button variant="tertiary" icon={IconMinusCircle} onClick={() => fldArr.remove(row.index)} />
-                      ),
-                      width: '72px',
-                    },
-                  ]}
-                />
-
-                <AddAddressInput
-                  existingAddresses={[...form.values.delegates, ao.address]}
-                  onAdd={(address) => {
-                    fldArr.push(
-                      isEvmAddress(address) ? evmToSubstrateAddress(address, chainId ?? 0) : addressToHex(address)
-                    )
-                  }}
-                />
+            {({ push }) => (
+              <Stack gap={2}>
+                <Stack gap={3}>
+                  {form.values.delegates.map((_, index) => (
+                    <Field name={`delegates.${index}`} key={index}>
+                      {() => (
+                        <FormAddressInput
+                          name={`delegates.${index}`}
+                          placeholder="Enter address..."
+                          chainId={chainId}
+                        />
+                      )}
+                    </Field>
+                  ))}
+                </Stack>
+                <Box mt={2}>
+                  <Button
+                    variant="inverted"
+                    onClick={() => {
+                      push('')
+                    }}
+                    small
+                  >
+                    Add another
+                  </Button>
+                </Box>
               </Stack>
             )}
           </FieldArray>
         </Stack>
       </Card>
-      <Stack gap={2}>
-        <Text as="h3" variant="heading4">
-          Trusted address
-        </Text>
-        <Text as="p" variant="body2" color="textSecondary">
-          Paste the address to receive your funds after financing an asset. Be sure to select the right address and
-          network. Receiving your funds on another address or network will result in loss of funds.
-        </Text>
-        <Stack gap={1}>
-          {form.values.withdrawAddresses.map((value, index) => (
-            <FieldWithErrorMessage
-              name={`withdrawAddresses.${index}.address`}
-              validate={address()}
-              label="Address"
-              as={TextInput}
-              onChange={(event: any) => {
-                form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
-              }}
-              placeholder={''}
-              secondaryLabel={
-                <ErrorMessage
-                  name={`withdrawAddresses.${index}.location`}
-                  render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
-                />
-              }
-              symbol={
-                <Field name={`withdrawAddresses.${index}.location`}>
-                  {({ field, form }: FieldProps) => (
-                    <SelectInner
-                      name={`withdrawAddresses.${index}.location`}
-                      onChange={(event) =>
-                        form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
-                      }
-                      onBlur={field.onBlur}
-                      value={field.value ? JSON.stringify(field.value) : ''}
-                      options={destinations.map((dest) => ({
-                        value: JSON.stringify(dest),
-                        label:
-                          typeof dest === 'string'
-                            ? getName(dest as any)
-                            : 'parachain' in dest
-                            ? parachainNames[dest.parachain]
-                            : getName(dest.evm),
-                      }))}
-                      placeholder="Select..."
-                    />
-                  )}
-                </Field>
-              }
-            />
-          ))}
+      <Card variant="secondary" px={2} py={2}>
+        <Stack gap={2}>
+          <Box display="flex">
+            <IconInfo size={20} />
+            <Text style={{ marginLeft: 8 }}>
+              Please select the right address and network. Choosing the wrong address or network will result in loss of
+              funds.
+            </Text>
+          </Box>
+          <Divider color="textSecondary" />
+          <Text variant="body2" color="textSecondary">
+            Add or remove addresses that can: <br />
+            <Text color="textPrimary">
+              <b>receive funds</b> from the pool.
+            </Text>
+          </Text>
+          <Stack gap={1}>
+            {form.values.withdrawAddresses.map((value, index) => (
+              <FieldWithErrorMessage
+                name={`withdrawAddresses.${index}.address`}
+                validate={address()}
+                label="Address"
+                as={TextInput}
+                onChange={(event: any) => {
+                  form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
+                  form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
+                }}
+                placeholder={''}
+                secondaryLabel={
+                  <ErrorMessage
+                    name={`withdrawAddresses.${index}.location`}
+                    render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
+                  />
+                }
+                symbol={
+                  <Field name={`withdrawAddresses.${index}.location`}>
+                    {({ field, form }: FieldProps) => (
+                      <SelectInner
+                        name={`withdrawAddresses.${index}.location`}
+                        onChange={(event) =>
+                          form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
+                        }
+                        onBlur={field.onBlur}
+                        value={field.value ? JSON.stringify(field.value) : ''}
+                        options={destinations.map((dest) => ({
+                          value: JSON.stringify(dest),
+                          label:
+                            typeof dest === 'string'
+                              ? getName(dest as any)
+                              : 'parachain' in dest
+                              ? parachainNames[dest.parachain]
+                              : getName(dest.evm),
+                        }))}
+                        placeholder="Select..."
+                      />
+                    )}
+                  </Field>
+                }
+              />
+            ))}
+          </Stack>
         </Stack>
-      </Stack>
+      </Card>
     </Stack>
   )
 }
