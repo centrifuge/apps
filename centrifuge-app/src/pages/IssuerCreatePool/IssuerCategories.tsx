@@ -43,7 +43,6 @@ export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }
   const categories = isUpdating ? form.values.pool.issuer.categories : form.values.issuerCategories
   const formName = isUpdating ? 'pool.issuer.categories' : 'issuerCategories'
 
-  console.log(form.values)
   return (
     <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
       {isUpdating ? <></> : <Text variant="heading2">Service providers</Text>}

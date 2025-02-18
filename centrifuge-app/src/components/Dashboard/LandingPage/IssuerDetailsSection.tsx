@@ -1,10 +1,11 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Grid, ImageUpload, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import { Box, FileUpload, Grid, ImageUpload, Text, TextAreaInput, TextInput, URLInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { FieldWithErrorMessage } from '../../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../../src/components/Tooltips'
+import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
 import { UpdatePoolFormValues } from './PoolConfigurationDrawer'
 
 export function IssuerDetailsSection() {
@@ -43,10 +44,10 @@ export function IssuerDetailsSection() {
       mb={2}
       gap={2}
     >
-      <Field name="pool.issuer.name">
+      <Field name="pool.issuer.name" validate={validate.issuerName}>
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
-            <Field
+            <FieldWithErrorMessage
               name="pool.issuer.name"
               label={<Tooltips type="issuerName" label={<Text variant="heading4">Legal name of the issuer*</Text>} />}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -61,10 +62,10 @@ export function IssuerDetailsSection() {
           </Box>
         )}
       </Field>
-      <Field name="pool.issuer.repName">
+      <Field name="pool.issuer.repName" validate={validate.issuerRepName}>
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
-            <Field
+            <FieldWithErrorMessage
               name="pool.issuer.repName"
               label={<Text variant="heading4">Legal name of the issuer representative*</Text>}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -91,7 +92,7 @@ export function IssuerDetailsSection() {
         id="issuerLogo"
         height={144}
       />
-      <Field name="pool.issuer.shortDescription">
+      <Field name="pool.issuer.shortDescription" validate={validate.issuerShortDescription}>
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
             name="pool.issuer.shortDescription"
@@ -108,7 +109,7 @@ export function IssuerDetailsSection() {
           />
         )}
       </Field>
-      <Field name="pool.issuer.description">
+      <Field name="pool.issuer.description" validate={validate.issuerDescription}>
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
             name="pool.issuer.description"
@@ -117,6 +118,53 @@ export function IssuerDetailsSection() {
             placeholder="Type here..."
             maxLength={3000}
             minLength={100}
+            value={field.value}
+            onBlur={field.onBlur}
+          />
+        )}
+      </Field>
+      <Field name="pool.links.website" label="Website URL" placeholder="www.example.com" as={URLInput} />
+      <Field name="pool.links.forum" label="Governance forum" placeholder="www.example.com" as={URLInput} />
+      <Field name="pool.links.executiveSummary">
+        {({ field, meta, form }: FieldProps) => (
+          <FileUpload
+            file={field.value}
+            onFileChange={(file) => {
+              form.setFieldValue('pool.links.executiveSummary', file)
+            }}
+            label="Executive summary PDF"
+            placeholder="Click to upload"
+            accept="application/pdf"
+            onClear={() => form.setFieldValue('pool.links.executiveSummary', null)}
+            small
+          />
+        )}
+      </Field>
+      <Field name="pool.details.title">
+        {({ field, meta, form }: FieldProps) => (
+          <Box position="relative">
+            <Field
+              name="pool.details.title"
+              label={<Text variant="heading4">Additional information</Text>}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                form.setFieldValue('pool.details.title', event.target.value)
+              }
+              onBlur={field.onBlur}
+              value={field.value}
+              as={TextInput}
+              placeholder="Title"
+              maxLength={100}
+            />
+          </Box>
+        )}
+      </Field>
+      <Field name="pool.details.description">
+        {({ field }: FieldProps) => (
+          <Field
+            name="pool.details.description"
+            as={TextAreaInput}
+            placeholder="Description"
+            maxLength={3000}
             value={field.value}
           />
         )}

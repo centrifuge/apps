@@ -7,6 +7,7 @@ import { FieldWithErrorMessage } from '../../../../src/components/FieldWithError
 import { Tooltips } from '../../../../src/components/Tooltips'
 import { config } from '../../../../src/config'
 import { ASSET_CLASSES } from '../../../../src/pages/IssuerCreatePool/PoolStructureSection'
+import { validate } from '../../../../src/pages/IssuerCreatePool/validate'
 import { UpdatePoolFormValues } from './PoolConfigurationDrawer'
 
 export function PoolDescriptionSection() {
@@ -17,11 +18,12 @@ export function PoolDescriptionSection() {
 
   const iconUrl = cent.metadata.parseMetadataUrl(form.values?.pool?.icon?.uri ?? '')
 
-  const subAssetClasses =
-    config.assetClasses[form.values.pool.asset.class as keyof typeof config.assetClasses]?.map((label) => ({
-      label,
-      value: label,
-    })) ?? []
+  const subAssetClasses = form.values?.pool?.asset?.class
+    ? config.assetClasses[form.values?.pool?.asset?.class as keyof typeof config.assetClasses]?.map((label) => ({
+        label,
+        value: label,
+      }))
+    : []
 
   useEffect(() => {
     if (iconUrl) {
@@ -57,36 +59,42 @@ export function PoolDescriptionSection() {
         label="Pool name*"
         placeholder="Type here..."
         maxLength={100}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('name', e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('pool.name', e.target.value)}
+        validate={validate.poolName}
       />
-      <Field name="pool.investorType">
+      <Field name="pool.investorType" validate={validate.investorType}>
         {({ field }: FieldProps) => (
           <FieldWithErrorMessage
+            {...field}
             name="pool.investorType"
             label={<Tooltips type="investorType" label={<Text variant="heading4">Investor type*</Text>} size="sm" />}
             onChange={(event: any) => form.setFieldValue('pool.investorType', event.target.value)}
-            onBlur={field.onBlur}
-            value={field.value}
             as={TextInput}
             placeholder="Type here..."
             maxLength={30}
+            onBlur={field.onBlur}
           />
         )}
       </Field>
-      <ImageUpload
-        name="pool.icon"
-        file={icon}
-        onFileChange={async (file) => {
-          form.setFieldTouched('pool.icon', true, false)
-          form.setFieldValue('pool.icon', file)
-          setIcon(file)
-        }}
-        label="Pool icon*"
-        accept="image/svg+xml"
-        placeholder="SVG (in square size)"
-        id="poolIcon"
-        height={144}
-      />
+      <Field name="pool.icon" validate={validate.poolIcon}>
+        {({ field, meta, form }: FieldProps) => (
+          <ImageUpload
+            name="pool.icon"
+            file={icon}
+            onFileChange={async (file) => {
+              form.setFieldTouched('pool.icon', true, false)
+              form.setFieldValue('pool.icon', file)
+              setIcon(file)
+            }}
+            label="Pool icon*"
+            accept="image/svg+xml"
+            placeholder="SVG (in square size)"
+            id="poolIcon"
+            height={144}
+            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+          />
+        )}
+      </Field>
       <Field
         name="poolStructure"
         as={TextInput}
@@ -105,8 +113,8 @@ export function PoolDescriptionSection() {
         value={form.values.currency.symbol}
         disabled
       />
-      <Field name="pool.asset.class">
-        {({ field }: FieldProps) => (
+      <Field name="pool.asset.class" validate={validate.assetClass}>
+        {({ field, meta, form }: FieldProps) => (
           <Select
             name="pool.asset.class"
             label={
@@ -119,6 +127,8 @@ export function PoolDescriptionSection() {
             value={field.value}
             options={ASSET_CLASSES}
             placeholder="Please select..."
+            onBlur={field.onBlur}
+            errorMessage={meta.touched && meta.error ? meta.error : undefined}
           />
         )}
       </Field>
@@ -132,6 +142,7 @@ export function PoolDescriptionSection() {
             value={field.value}
             options={subAssetClasses}
             placeholder="Select..."
+            errorMessage={meta.touched && meta.error ? meta.error : undefined}
           />
         )}
       </Field>

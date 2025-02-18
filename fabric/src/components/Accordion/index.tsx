@@ -6,7 +6,7 @@ import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
 export type AccordionProps = BoxProps & {
-  items: { title: React.ReactNode; body: React.ReactNode }[]
+  items: { title: React.ReactNode; body: React.ReactNode; sublabel?: string }[]
 }
 
 const Root = styled(Box)`
@@ -30,7 +30,7 @@ const Toggle = styled(Shelf)`
   }
 `
 
-export function Accordion({ items, ...boxProps }: AccordionProps) {
+export function Accordion({ items, sublabel, ...boxProps }: AccordionProps) {
   return (
     <Root as="ul" pl={0} aria-label="Accordion Control Group Buttons" role="list" {...boxProps}>
       {items.map((entry, index) => (
@@ -40,7 +40,7 @@ export function Accordion({ items, ...boxProps }: AccordionProps) {
   )
 }
 
-function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][number] & BoxProps) {
+function AccordionEntry({ title, body, sublabel, ...boxProps }: AccordionProps['items'][number] & BoxProps) {
   const [open, setOpen] = React.useState(false)
   const id = React.useId()
 
@@ -58,9 +58,17 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
         aria-controls={`content-${id}`}
         aria-expanded={open}
       >
-        <Text as="strong" variant="heading3">
-          {title}
-        </Text>
+        <Box>
+          <Text as="strong" variant="heading3">
+            {title}
+          </Text>
+          {sublabel && (
+            <Text variant="body2" color="textSecondary">
+              {sublabel}
+            </Text>
+          )}
+        </Box>
+
         <CollapsibleChevron open={open} />
       </Toggle>
       <Collapsible id={`content-${id}`} open={open}>

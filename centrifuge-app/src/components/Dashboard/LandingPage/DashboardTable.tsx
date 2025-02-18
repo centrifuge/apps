@@ -7,6 +7,7 @@ import { useTheme } from 'styled-components'
 import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../../DataTable'
+import { AccessDrawer } from '../AccessDrawer'
 import { calculateApyPerToken, useGetPoolsMetadata } from '../utils'
 import { PoolConfigurationDrawer } from './PoolConfigurationDrawer'
 
@@ -22,6 +23,7 @@ export type Row = {
 
 export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
   const [open, setOpen] = useState(false)
+  const [accessDrawerOpen, setAccessDrawerOpen] = useState(false)
   const theme = useTheme()
   const cent = useCentrifuge()
   const pools = useGetPoolsMetadata(filteredPools || [])
@@ -84,7 +86,7 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
   return (
     <Box>
       <Grid display="flex" justifyContent="flex-end" gap={2} mb={2}>
-        <Button variant="inverted" small icon={IconUsers} onClick={() => {}}>
+        <Button variant="inverted" small icon={IconUsers} onClick={() => setAccessDrawerOpen(true)}>
           Access
         </Button>
         <Button variant="inverted" small icon={IconSettings} onClick={() => setOpen(true)}>
@@ -101,6 +103,11 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
       />
       <Divider color={theme.colors.backgroundSecondary} />
       <PoolConfigurationDrawer open={open} setOpen={setOpen} pools={pools} />
+      <AccessDrawer
+        isOpen={accessDrawerOpen}
+        onClose={() => setAccessDrawerOpen(false)}
+        poolIds={filteredPools.map((pool) => pool.id)}
+      />
     </Box>
   )
 }

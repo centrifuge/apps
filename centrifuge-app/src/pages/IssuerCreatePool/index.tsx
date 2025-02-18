@@ -279,16 +279,14 @@ const IssuerCreatePoolPage = () => {
       forum: '',
       email: '',
       details: [],
-      reports: [
-        {
-          author: {
-            name: '',
-            title: '',
-          },
-          url: '',
-          file: null,
+      report: {
+        author: {
+          name: '',
+          title: '',
+          avatar: null,
         },
-      ],
+        url: '',
+      },
       assetOriginators: [''],
       adminMultisig: {
         signers: [substrate?.selectedAddress ?? ''],
@@ -322,7 +320,7 @@ const IssuerCreatePoolPage = () => {
         poolIcon: values.poolIcon,
         issuerLogo: values.issuerLogo,
         executiveSummary: values.executiveSummary,
-        authorAvatar: values.reportAuthorAvatar,
+        authorAvatar: values.report.author.avatar,
       }
 
       const pinnedFiles = await pinFiles(centrifuge, filesToPin)
