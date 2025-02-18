@@ -241,7 +241,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         prefetchMetadata(executiveSummary)
       }
 
-      console.log(values)
 
       const newPoolMetadata: PoolMetadata = {
         pool: {
@@ -340,7 +339,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         })),
       ]
 
-      return
 
       execute([values.id, newPoolMetadata, tranches], { account })
       actions.setSubmitting(false)
