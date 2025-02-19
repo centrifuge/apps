@@ -167,7 +167,7 @@ jobs:
 
   slack-notify-success:
     needs: [deploy-app, deploy-functions]
-    if: success()
+    if: success() && ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify prod deploy success
