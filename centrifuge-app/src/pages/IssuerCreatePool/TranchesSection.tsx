@@ -1,5 +1,15 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, CurrencyInput, Grid, InputErrorMessage, NumberInput, Select, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  CurrencyInput,
+  Grid,
+  InputErrorMessage,
+  NumberInput,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -35,6 +45,7 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
   const tranches = form.values.tranches
+  console.log('🚀 ~ tranches:', tranches)
 
   const getTrancheName = (index: number, value?: string) => {
     switch (index) {
@@ -63,7 +74,7 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   }
 
   return (
-    <Box mt={isUpdating ? 0 : 4} mb={3}>
+    <Stack mt={isUpdating ? 0 : 4} mb={3} gap={3}>
       {isUpdating ? <></> : <Text>Tranches</Text>}
       {tranches.map((_, index) => (
         <StyledGrid key={index} mt={isUpdating ? 0 : 3} px={isUpdating ? 2 : 5} py={isUpdating ? 3 : 5}>
@@ -129,17 +140,19 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
                 {index === 0 ? (
                   <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
                     <Field name={`tranches.${index}.apy`} validate={validate.apy}>
-                      {({ field, meta, form }: FieldProps) => (
-                        <Select
-                          label={<Tooltips type="apy" label={<Text variant="heading4">APY</Text>} />}
-                          onChange={(event) => form.setFieldValue(field.name, event.target.value)}
-                          onBlur={field.onBlur}
-                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                          value={field.value}
-                          options={apyOptions}
-                          placeholder="Select..."
-                        />
-                      )}
+                      {({ field, meta, form }: FieldProps) => {
+                        return (
+                          <Select
+                            label={<Tooltips type="apy" label={<Text variant="heading4">APY</Text>} />}
+                            onChange={(event) => form.setFieldValue(field.name, event.target.value)}
+                            onBlur={field.onBlur}
+                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                            value={field.value}
+                            options={apyOptions}
+                            placeholder="Select..."
+                          />
+                        )
+                      }}
                     </Field>
                     <Box mt={[0, 3]}>
                       <FieldWithErrorMessage
@@ -215,6 +228,6 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
           </Grid>
         </StyledGrid>
       ))}
-    </Box>
+    </Stack>
   )
 }
