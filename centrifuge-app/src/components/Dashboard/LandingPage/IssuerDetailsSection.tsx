@@ -62,7 +62,7 @@ export function IssuerDetailsSection() {
           </Box>
         )}
       </Field>
-      <Field name="pool.issuer.repName" validate={validate.issuerRepName}>
+      <Field name="pool.issuer.repName">
         {({ field, meta, form }: FieldProps) => (
           <Box position="relative">
             <FieldWithErrorMessage

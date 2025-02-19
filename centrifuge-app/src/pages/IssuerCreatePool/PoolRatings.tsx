@@ -62,7 +62,7 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
   const formName = isUpdating ? 'pool.poolRatings' : 'poolRatings'
 
   return (
-    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+    <Box mt={isUpdating ? 0 : 4} mb={3}>
       {isUpdating ? <></> : <Text variant="heading2">Pool rating</Text>}
       <StyledGrid
         gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
