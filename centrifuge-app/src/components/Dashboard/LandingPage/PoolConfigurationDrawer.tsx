@@ -1,12 +1,4 @@
-import {
-  CurrencyBalance,
-  CurrencyMetadata,
-  FileType,
-  Perquintill,
-  Pool,
-  PoolMetadata,
-  Rate,
-} from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, FileType, Perquintill, Pool, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
@@ -71,6 +63,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
     },
     tranches: pool.tranches.map((tranche) => {
       const trancheMeta = pool?.meta?.tranches[tranche.id]
+
       return {
         id: tranche.id,
         index: tranche.index,
@@ -250,7 +243,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         },
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
-            minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, values.currency.decimals).toString(),
+            minInitialInvestment: tranche.minInvestment,
             apy: tranche.apy,
             apyPercentage: tranche.apyPercentage,
           }
@@ -335,6 +328,9 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
           minRiskBuffer: tranche.minRiskBuffer ? Perquintill.fromPercent(tranche.minRiskBuffer) : null,
           tokenName: tranche.tokenName,
           tokenSymbol: tranche.symbolName,
+          minInitialInvestment: tranche.minInvestment,
+          apy: tranche.apy.toString(),
+          apyPercentage: tranche.apyPercentage,
         })),
       ]
 
@@ -397,7 +393,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                             <Text variant="heading3">Pool description</Text>
                           </Box>
                         ),
-                        body: <PoolDescriptionSection />,
+                        body: <PoolDescriptionSection isUpdating />,
                       },
                       {
                         title: (
@@ -405,7 +401,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                             <Text variant="heading3">Issuer details</Text>
                           </Box>
                         ),
-                        body: <IssuerDetailsSection />,
+                        body: <IssuerDetailsSection isUpdating />,
                       },
                       {
                         title: (

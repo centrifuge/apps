@@ -92,7 +92,7 @@ export function IssuerDetailsSection({ isUpdating }: { isUpdating?: boolean }) {
           id="issuerLogo"
           height={144}
         />
-        <Field name="pool.issuer.shortDescription" validate={validate.issuerShortDescription}>
+        <Field name="pool.issuer.shortDescription" validate={!isUpdating ? validate.issuerShortDescription : undefined}>
           {({ field }: FieldProps) => (
             <FieldWithErrorMessage
               name="pool.issuer.shortDescription"
@@ -109,7 +109,7 @@ export function IssuerDetailsSection({ isUpdating }: { isUpdating?: boolean }) {
             />
           )}
         </Field>
-        <Field name="pool.issuer.description" validate={validate.issuerDescription}>
+        <Field name="pool.issuer.description" validate={!isUpdating ? validate.issuerDescription : undefined}>
           {({ field }: FieldProps) => (
             <FieldWithErrorMessage
               name="pool.issuer.description"
