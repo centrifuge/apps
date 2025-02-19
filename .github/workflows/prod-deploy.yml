@@ -85,7 +85,6 @@ jobs:
     name: ${{ matrix.function.name }}-prod-deploy
     runs-on: ubuntu-latest
     environment: production
-    if: ${{ github.event_name != 'pull_request' }}
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -95,11 +94,18 @@ jobs:
         function:
           - name: pinning-api
             handler: pinningApi
-            service_account: ${{ vars.PINNING_API_FUNCT_SA }}
           - name: onboarding-api
             handler: onboarding
-            service_account: ${{ vars.ONBOARDING_FUNCT_SA }}
     steps:
+
+      - name: Set service account
+        id: set-sa
+        run: |
+          if [ "${{ matrix.function.name }}" = "pinning-api" ]; then
+            echo "SERVICE_ACCOUNT=${{ vars.PINNING_API_FUNCT_SA }}" >> $GITHUB_ENV
+          elif [ "${{ matrix.function.name }}" = "onboarding-api" ]; then
+            echo "SERVICE_ACCOUNT=${{ vars.ONBOARDING_FUNCT_SA }}" >> $GITHUB_ENV
+          fi
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -108,9 +114,22 @@ jobs:
           sparse-checkout: |
             .github/actions/deploy-gfunction
 
+      - name: Debug deployment variables
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "App Name: ${{ matrix.function.name }}-production"
+          echo "Artifact Name: ${{ matrix.function.name }}"
+          echo "GWIP: ${{ secrets.GWIP }}"
+          echo "GSA: ${{ secrets.GSA }}"
+          echo "Target: ${{ matrix.function.handler }}"
+          echo "Gcloud Region: ${{ vars.GCLOUD_REGION }}"
+          echo "Service Account: ${{ env.SERVICE_ACCOUNT }}"
+          echo "Deploy Environment: production"
+
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           app_name: "${{ matrix.function.name }}-production"
           artifact_name: ${{ matrix.function.name }}
@@ -118,7 +137,7 @@ jobs:
           GSA: ${{ secrets.GSA }}
           target: ${{ matrix.function.handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
-          service_account: '${{ matrix.function.service_account }}'
+          service_account: ${{ env.SERVICE_ACCOUNT }}
           deploy_env: production
 
   slack-notify-success:
