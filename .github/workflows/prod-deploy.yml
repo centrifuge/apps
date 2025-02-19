@@ -37,21 +37,30 @@ jobs:
         id: version
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "version=${{ github.event.release.id }}" >> $GITHUB_OUTPUT
+            # For releases, use the tag name
+            TAG="${{ github.event.release.tag_name }}"
+            echo "Using release tag: $TAG"
+            echo "version=tags/centrifuge-app/$TAG" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version=tags/centrifuge-app/${{ inputs.tag }}" >> $GITHUB_OUTPUT
+            # For manual triggers, format the tag
+            TAG="${{ inputs.tag }}"
+            echo "Using manual trigger tag: $TAG"
+            echo "version=tags/centrifuge-app/$TAG" >> $GITHUB_OUTPUT
           else
             # For PR events, get the latest release tag
             LATEST_TAG=$(curl -s -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/centrifuge/apps/releases/latest" | \
               jq -r '.tag_name')
+            echo "Using latest release tag: $LATEST_TAG"
             echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
           fi
+          
+          echo "Final version output: $(cat $GITHUB_OUTPUT | grep version)"
       
       - uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # v1.1.2
         with:
           repo: 'centrifuge/apps'
-          version: "${{ steps.version.outputs.version }}"
+          version: '${{ steps.version.outputs.version }}'
           file: "${{ matrix.artifact.name }}.zip"
           target: "${{ matrix.artifact.name }}.zip"
 
