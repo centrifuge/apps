@@ -36,45 +36,47 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
           <Card variant="secondary" p={2} {...cardProps}>
             <Grid minColumnWidth={250} maxColumns={2} gap={3} equalColumns>
               <Box>
-                <Text variant="body2">Security requirement</Text>
-                <RadioButton
-                  height={40}
-                  name="adminMultisigEnabled"
-                  label="Single"
-                  icon={
-                    <Tooltips
-                      type="singleMultisign"
-                      label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-                      placement="left"
-                    />
-                  }
-                  onChange={() => {
-                    form.setFieldValue('adminMultisigEnabled', false)
-                    form.setFieldValue('adminMultisig.signers', [values.adminMultisig.signers[0]])
-                  }}
-                  checked={!values.adminMultisigEnabled}
-                  styles={{ padding: '0px 8px', margin: '8px 0px' }}
-                  border
-                />
-                <RadioButton
-                  height={40}
-                  name="adminMultisigEnabled"
-                  label="Multi-sig"
-                  icon={
-                    <Tooltips
-                      type="multiMultisign"
-                      label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-                      placement="left"
-                    />
-                  }
-                  onChange={() => {
-                    form.setFieldValue('adminMultisigEnabled', true)
-                    push('')
-                  }}
-                  checked={values.adminMultisigEnabled}
-                  styles={{ padding: '0px 8px', margin: '8px 0px' }}
-                  border
-                />
+                <Stack gap={2}>
+                  <Text variant="body2">Security requirement</Text>
+                  <RadioButton
+                    height={40}
+                    name="adminMultisigEnabled"
+                    label="Single"
+                    icon={
+                      <Tooltips
+                        type="singleMultisign"
+                        label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                        placement="left"
+                      />
+                    }
+                    onChange={() => {
+                      form.setFieldValue('adminMultisigEnabled', false)
+                      form.setFieldValue('adminMultisig.signers', [values.adminMultisig.signers[0]])
+                    }}
+                    checked={!values.adminMultisigEnabled}
+                    border
+                    styles={{ padding: '0px 8px' }}
+                  />
+                  <RadioButton
+                    height={40}
+                    name="adminMultisigEnabled"
+                    label="Multi-sig"
+                    icon={
+                      <Tooltips
+                        type="multiMultisign"
+                        label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                        placement="left"
+                      />
+                    }
+                    onChange={() => {
+                      form.setFieldValue('adminMultisigEnabled', true)
+                      push('')
+                    }}
+                    checked={values.adminMultisigEnabled}
+                    border
+                    styles={{ padding: '0px 8px' }}
+                  />
+                </Stack>
               </Box>
               <Stack gap={2}>
                 <Text variant="body2">Wallet addresses</Text>
@@ -101,6 +103,7 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
                   {values.adminMultisigEnabled && (
                     <Box alignSelf="flex-end">
                       <AddButton
+                        variant={canEditFirst ? 'inverted' : 'secondary'}
                         onClick={() => {
                           if (values.adminMultisig && values.adminMultisig.signers?.length <= 10) {
                             push('')

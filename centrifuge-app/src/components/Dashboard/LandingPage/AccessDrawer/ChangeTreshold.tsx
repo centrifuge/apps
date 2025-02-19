@@ -1,6 +1,6 @@
 import { Box, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { ErrorMessage, Field, FieldProps, getIn, useFormikContext } from 'formik'
-import { min } from '../../../utils/validation'
+import { min } from '../../../../utils/validation'
 
 type ChangeThresholdProps = {
   primaryText: string

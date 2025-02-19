@@ -23,8 +23,14 @@ import { PoolRatingsSection } from './PoolRatings'
 import { StyledGrid } from './PoolStructureSection'
 import { validate } from './validate'
 
-export const AddButton = ({ onClick }: { onClick: () => void }) => (
-  <Button variant="secondary" small style={{ width: 163 }} onClick={onClick}>
+export const AddButton = ({
+  onClick,
+  variant = 'secondary',
+}: {
+  onClick: () => void
+  variant?: 'inverted' | 'secondary'
+}) => (
+  <Button variant={variant} small style={{ width: 163 }} onClick={onClick}>
     Add another
   </Button>
 )

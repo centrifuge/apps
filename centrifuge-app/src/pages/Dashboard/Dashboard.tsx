@@ -106,7 +106,7 @@ export default function Dashboard() {
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         <PoolSelector multiple />
       </Box>
-      <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
+      <PageSummary data={pageSummaryData} />
       <DashboardTable filteredPools={filteredPools} />
     </Box>
   )
