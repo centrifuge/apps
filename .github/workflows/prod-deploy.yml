@@ -178,7 +178,7 @@ jobs:
 
   slack-notify-failure:
     needs: [deploy-app, deploy-functions]
-    if: failure()
+    if: failure() && ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify prod deploy failure
