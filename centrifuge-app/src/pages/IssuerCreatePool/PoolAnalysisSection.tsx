@@ -7,7 +7,7 @@ import { validate } from './validate'
 export function PoolAnalysisSection({ isUpdating }: { isUpdating?: boolean }) {
   const formName = isUpdating ? 'pool.report' : 'report'
   return (
-    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+    <Box mt={isUpdating ? 0 : 4} mb={3}>
       {!isUpdating && <Text variant="heading2">Pool analysis</Text>}
       <StyledGrid
         gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}

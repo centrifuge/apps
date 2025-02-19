@@ -97,7 +97,7 @@ export const PoolSetupSection = () => {
         </Text>
         <FieldArray name="assetOriginators">
           {({ push }) => (
-            <StyledGrid gridTemplateColumns={['3fr 1fr']} gap={2} mt={3}>
+            <StyledGrid gridTemplateColumns={['3fr 1fr']} gap={2} mt={3} p={5}>
               <Box gridColumn="1 / span 1">
                 <Text color="textSecondary" variant="body3">
                   Add or remove addresses that can:
@@ -131,7 +131,7 @@ export const PoolSetupSection = () => {
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Fee setup</Text>
-        <StyledGrid mt={3} gap={1}>
+        <StyledGrid mt={3} gap={1} p={5}>
           <Text variant="heading3">Protocol fees</Text>
           <Line />
           <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3}>
@@ -176,7 +176,7 @@ export const PoolSetupSection = () => {
               if (index === 0) return null
               return (
                 <Box mt={4} mb={3} key={index}>
-                  <StyledGrid mt={3} gap={1}>
+                  <StyledGrid mt={3} gap={1} p={5}>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                       <Text variant="heading3">Pool fees {index + 1}</Text>
                       <IconButton onClick={() => remove(index)}>
@@ -269,7 +269,7 @@ export const PoolSetupSection = () => {
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Investor onboarding</Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
+        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3} p={5}>
           <Box>
             <Text variant="heading4">Onboarding experience</Text>
             <CheckboxOption

@@ -20,6 +20,7 @@ import { isTestEnv } from '../../../src/config'
 import { IssuerCategoriesSection } from './IssuerCategories'
 import { PoolAnalysisSection } from './PoolAnalysisSection'
 import { PoolRatingsSection } from './PoolRatings'
+import { StyledGrid } from './PoolStructureSection'
 import { validate } from './validate'
 
 export const AddButton = ({ onClick }: { onClick: () => void }) => (
@@ -37,17 +38,7 @@ export const PoolDetailsSection = () => {
       <Text variant="heading2" fontWeight={700}>
         Pool Details
       </Text>
-      <Grid
-        gridTemplateColumns={['1fr']}
-        gap={3}
-        mt={0}
-        px={2}
-        py={3}
-        backgroundColor="backgroundSecondary"
-        border="1px solid"
-        borderColor="borderPrimary"
-        borderRadius="8px"
-      >
+      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={2} p={5}>
         <Grid gap={2}>
           <Field name="investorType" validate={validate.investorType}>
             {({ field, meta, form }: FieldProps) => (
@@ -114,21 +105,11 @@ export const PoolDetailsSection = () => {
             />
           )}
         </Field>
-      </Grid>
+      </StyledGrid>
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Issuer</Text>
-        <Grid
-          gridTemplateColumns={['1fr']}
-          gap={3}
-          mt={0}
-          px={2}
-          py={3}
-          backgroundColor="backgroundSecondary"
-          border="1px solid"
-          borderColor="borderPrimary"
-          borderRadius="8px"
-        >
+        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3} p={5}>
           <Grid gap={2}>
             <Field name="issuerName" validate={validate.issuerName}>
               {({ field, meta, form }: FieldProps) => (
@@ -285,7 +266,7 @@ export const PoolDetailsSection = () => {
               </Text>
             </Box>
           </Grid>
-        </Grid>
+        </StyledGrid>
       </Box>
       {/* service providers section */}
       <IssuerCategoriesSection />

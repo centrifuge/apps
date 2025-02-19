@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, IconTrash, Select, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Grid, IconButton, IconTrash, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { AddButton } from './PoolDetailsSection'
@@ -44,19 +44,14 @@ export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }
   const formName = isUpdating ? 'pool.issuer.categories' : 'issuerCategories'
 
   return (
-    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+    <Box mt={isUpdating ? 0 : 4} mb={3}>
       {isUpdating ? <></> : <Text variant="heading2">Service providers</Text>}
-      <StyledGrid
-        gridTemplateColumns={['1fr', '1fr 1fr']}
-        px={isUpdating ? 2 : 5}
-        py={isUpdating ? 3 : 5}
-        mt={isUpdating ? 0 : 3}
-      >
+      <StyledGrid gridTemplateColumns={['1fr']} px={isUpdating ? 2 : 5} py={isUpdating ? 3 : 5} mt={isUpdating ? 0 : 3}>
         <FieldArray name={formName}>
           {({ push, remove }) => (
             <>
               {categories.map((category: { type: string; value: string; description: string }, index: number) => (
-                <>
+                <Stack gap={1}>
                   <Grid gridTemplateColumns={['1fr', category?.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
                     <Field name={`${formName}.${index}.type`}>
                       {({ field, meta }: FieldProps) => (
@@ -105,7 +100,7 @@ export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }
                       />
                     )}
                   </Field>
-                </>
+                </Stack>
               ))}
               <Box gridColumn="span 2">
                 <AddButton onClick={() => push({ type: '', value: '' })} />

@@ -187,7 +187,7 @@ export const PoolStructureSection = () => {
       </StyledGrid>
       <Box mt={4} mb={3}>
         <Text>Asset setup</Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
+        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3} p={5}>
           <Box>
             <Field name="assetClass" validate={validate.assetClass}>
               {({ field, meta, form }: FieldProps) => (

@@ -116,7 +116,7 @@ const Prefix = styled(Box)`
   padding: 0.5rem;
   color: ${({ theme }) => theme.colors.textSecondary};
   background-color: transparent;
-  font-size: 16px;
+  font-size: 14px;
   pointer-events: none;
   border-right: 1px solid ${({ theme }) => theme.colors.borderPrimary};
 `
