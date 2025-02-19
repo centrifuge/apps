@@ -19,7 +19,9 @@ import {
   Button,
   Card,
   Divider,
+  IconButton,
   IconInfo,
+  IconTrash,
   InputErrorMessage,
   SelectInner,
   Stack,
@@ -32,17 +34,17 @@ import { isAddress as isEvmAddress } from 'ethers'
 import { ErrorMessage, Field, FieldArray, FieldProps, FormikErrors, setIn, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, firstValueFrom, switchMap } from 'rxjs'
-import { FormAddressInput } from '../../../../src/pages/IssuerCreatePool/FormAddressInput'
-import { parachainNames } from '../../../config'
-import { diffPermissions } from '../../../pages/IssuerPool/Configuration/Admins'
-import { looksLike } from '../../../utils/helpers'
-import { useIdentity } from '../../../utils/useIdentity'
-import { useDomainRouters } from '../../../utils/useLiquidityPools'
-import { getKeyForReceiver, usePoolAccess, usePoolAdmin } from '../../../utils/usePermissions'
-import { usePool } from '../../../utils/usePools'
-import { address } from '../../../utils/validation'
-import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
-import type { FormHandle } from '../AccessDrawer'
+import type { FormHandle } from '.'
+import { parachainNames } from '../../../../config'
+import { FormAddressInput } from '../../../../pages/IssuerCreatePool/FormAddressInput'
+import { diffPermissions } from '../../../../pages/IssuerPool/Configuration/Admins'
+import { looksLike } from '../../../../utils/helpers'
+import { useIdentity } from '../../../../utils/useIdentity'
+import { useDomainRouters } from '../../../../utils/useLiquidityPools'
+import { getKeyForReceiver, usePoolAccess, usePoolAdmin } from '../../../../utils/usePermissions'
+import { usePool } from '../../../../utils/usePools'
+import { address } from '../../../../utils/validation'
+import { FieldWithErrorMessage } from '../../../FieldWithErrorMessage'
 
 export type AOFormValues = {
   withdrawAddresses: WithdrawAddress[]
@@ -318,7 +320,7 @@ function AOForm({
             </Text>
           </Text>
           <FieldArray name="delegates">
-            {({ push }) => (
+            {({ push, remove }) => (
               <Stack gap={2}>
                 <Stack gap={3}>
                   {form.values.delegates.map((_, index) => (
@@ -328,6 +330,13 @@ function AOForm({
                           name={`delegates.${index}`}
                           placeholder="Enter address..."
                           chainId={chainId}
+                          symbol={
+                            index >= 2 && (
+                              <IconButton onClick={() => remove(index)}>
+                                <IconTrash color="textSecondary" />
+                              </IconButton>
+                            )
+                          }
                         />
                       )}
                     </Field>

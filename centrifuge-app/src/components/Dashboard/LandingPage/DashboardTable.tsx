@@ -7,8 +7,8 @@ import { useTheme } from 'styled-components'
 import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../../DataTable'
-import { AccessDrawer } from '../AccessDrawer'
 import { calculateApyPerToken, useGetPoolsMetadata } from '../utils'
+import { AccessDrawer } from './AccessDrawer'
 import { PoolConfigurationDrawer } from './PoolConfigurationDrawer'
 
 export type Row = {

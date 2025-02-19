@@ -11,11 +11,11 @@ import { blake2AsHex } from '@polkadot/util-crypto'
 import { FieldArray, useFormikContext } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
-import { FormAddressInput } from '../../../pages/IssuerCreatePool/FormAddressInput'
-import { AddButton } from '../../../pages/IssuerCreatePool/PoolDetailsSection'
-import { address, combine, positiveNumber, required } from '../../../utils/validation'
-import { ChangeThreshold } from '../Access/ChangeTreshold'
-import type { FormHandle } from '../AccessDrawer'
+import type { FormHandle } from '.'
+import { FormAddressInput } from '../../../../pages/IssuerCreatePool/FormAddressInput'
+import { AddButton } from '../../../../pages/IssuerCreatePool/PoolDetailsSection'
+import { address, combine, positiveNumber, required } from '../../../../utils/validation'
+import { ChangeThreshold } from './ChangeTreshold'
 
 export type FeedersFormValues = {
   feeders: string[]
@@ -58,7 +58,7 @@ export function OracleFeeders({
     [storedInfo]
   )
 
-  console.log('initialValues', initialValues, storedInfo)
+  console.log('🚀 ~ initialValues:', initialValues, storedInfo)
 
   async function getBatch(_: Centrifuge, values: FeedersFormValues, metadata: PoolMetadata) {
     const oldFeeders = new Set(initialValues.feeders)

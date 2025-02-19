@@ -4,13 +4,13 @@ import { Accordion, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
-import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { usePoolAccess, useSuitableAccounts } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
-import { LoadBoundary } from '../LoadBoundary'
-import { AOFormValues, AssetOriginators } from './Access/AssetOriginator'
-import { FeedersFormValues, OracleFeeders } from './Access/OracleFeeders'
-import { PoolManagers, PoolManagersFormValues } from './Access/PoolManagers'
+import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
+import { usePoolAccess, useSuitableAccounts } from '../../../../utils/usePermissions'
+import { usePool, usePoolMetadata } from '../../../../utils/usePools'
+import { LoadBoundary } from '../../../LoadBoundary'
+import { AOFormValues, AssetOriginators } from './AssetOriginator'
+import { FeedersFormValues, OracleFeeders } from './OracleFeeders'
+import { PoolManagers, PoolManagersFormValues } from './PoolManagers'
 
 type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues
 
@@ -156,7 +156,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
               {
                 title: 'Pool delegates',
                 body: (
-                  <Stack>
+                  <Stack gap={3}>
                     <AssetOriginators poolId={poolId} handle={aoRef} account={aoDelegateAccount} />
                     <OracleFeeders poolId={poolId} handle={feedersRef} account={adminDelegateAccount} />
                   </Stack>
@@ -166,7 +166,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
             ]}
           />
         </Stack>
-        <Stack gap={1} position="sticky" bottom="-24px" mb="-24px" bg="backgroundPrimary" pb={3}>
+        <Stack gap={1} bg="backgroundPrimary" pb={3}>
           <Button type="submit" loading={isLoading}>
             Update
           </Button>
