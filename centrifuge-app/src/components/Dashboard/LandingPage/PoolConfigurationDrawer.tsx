@@ -4,15 +4,17 @@ import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@c
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
-import { LoadBoundary } from '../../../../src/components/LoadBoundary'
-import { Spinner } from '../../../../src/components/Spinner'
-import { IssuerCategoriesSection } from '../../../../src/pages/IssuerCreatePool/IssuerCategories'
-import { PoolAnalysisSection } from '../../../../src/pages/IssuerCreatePool/PoolAnalysisSection'
-import { PoolRatingsSection } from '../../../../src/pages/IssuerCreatePool/PoolRatings'
-import { TranchesSection } from '../../../../src/pages/IssuerCreatePool/TranchesSection'
-import { getFileDataURI } from '../../../../src/utils/getFileDataURI'
-import { usePrefetchMetadata } from '../../../../src/utils/useMetadata'
-import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
+import { IssuerCategoriesSection } from '../../../pages/IssuerCreatePool/IssuerCategories'
+import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
+import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
+import { TranchesSection } from '../../../pages/IssuerCreatePool/TranchesSection'
+import { getFileDataURI } from '../../../utils/getFileDataURI'
+import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
+import { useDebugFlags } from '../../DebugFlags'
+import { LoadBoundary } from '../../LoadBoundary'
+import { Spinner } from '../../Spinner'
+import { DebugPoolConfig } from './DebugPoolConfig'
 import { IssuerDetailsSection } from './IssuerDetailsSection'
 import { PoolDescriptionSection } from './PoolDescriptionSection'
 
@@ -84,6 +86,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
 
 export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurationDrawerProps) {
   const cent = useCentrifuge()
+  const { editPoolConfig } = useDebugFlags()
   const prefetchMetadata = usePrefetchMetadata()
   const [isEditing, setIsEditing] = useState(false)
   const [pool, setPool] = useState<PoolWithMetadata>(pools[0])
@@ -435,6 +438,23 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                         ),
                         body: <TranchesSection isUpdating />,
                       },
+                      ...(isPoolAdmin
+                        ? [
+                            {
+                              title: (
+                                <Box py={2}>
+                                  <Text variant="heading3">Configuration</Text>
+                                </Box>
+                              ),
+                              sublabel: 'Debug flag to manually access to pool configuration',
+                              body: (
+                                <Stack overflowX="auto">
+                                  {isPoolAdmin && <>{editPoolConfig && <DebugPoolConfig poolId={pool.id} />}</>}
+                                </Stack>
+                              ),
+                            },
+                          ]
+                        : []),
                     ]}
                   />
                 )}

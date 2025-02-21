@@ -3,7 +3,6 @@ import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../components/DebugFlags'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
@@ -70,7 +69,6 @@ export function IssuerPoolHeader({ actions }: Props) {
   if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const basePath = useBasePath()
-  const { editPoolConfig } = useDebugFlags()
   const isTinlakePool = pool.id.startsWith('0x')
 
   return (
@@ -81,10 +79,6 @@ export function IssuerPoolHeader({ actions }: Props) {
         <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
         {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reports</NavigationTabsItem>}
         {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/data`}>Data</NavigationTabsItem>}
-        {editPoolConfig && (
-          <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
-        )}
-        <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>
         {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/pricing`}>Pricing</NavigationTabsItem>}
         {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/fees`}>Fees</NavigationTabsItem>}
       </NavigationTabs>
