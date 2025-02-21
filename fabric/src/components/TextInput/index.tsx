@@ -56,10 +56,11 @@ export const StyledTextInput = styled.input`
     margin: 0;
   }
 `
-export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean; disabled?: boolean }>`
+export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean; disabled?: boolean; background?: string }>`
   width: 100%;
   position: relative;
-  background: ${({ theme, disabled }) => (disabled ? 'transparent' : theme.colors.backgroundPage)};
+  background: ${({ theme, disabled, background }) =>
+    disabled ? 'transparent' : background || theme.colors.backgroundPage};
   border: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `1px solid ${theme.colors.borderPrimary}`)};
   border-radius: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `${theme.radii.input}px`)};
 
@@ -115,7 +116,7 @@ const Prefix = styled(Box)`
   padding: 0.5rem;
   color: ${({ theme }) => theme.colors.textSecondary};
   background-color: transparent;
-  font-size: 16px;
+  font-size: 14px;
   pointer-events: none;
   border-right: 1px solid ${({ theme }) => theme.colors.borderPrimary};
 `

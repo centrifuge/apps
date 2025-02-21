@@ -300,6 +300,25 @@ export function usePoolOrders(poolId: string) {
   return result
 }
 
+export function usePoolOrdersMulti(poolIds: string[]) {
+  return useCentrifugeQuery(
+    ['poolOrdersMulti', poolIds],
+    (cent) =>
+      combineLatest(poolIds.map((poolId) => cent.pools.getPoolOrders([poolId]))).pipe(
+        map((ordersArray) => {
+          const result: Record<string, any> = {}
+          poolIds.forEach((poolId, index) => {
+            result[poolId] = ordersArray[index]
+          })
+          return result
+        })
+      ),
+    {
+      enabled: poolIds.length > 0,
+    }
+  )
+}
+
 export function usePoolOrdersByPoolId(poolId: string) {
   const [result] = useCentrifugeQuery(['poolOrdersByPoolId', poolId], (cent) => cent.pools.getPoolOrdersById([poolId]))
   return result
