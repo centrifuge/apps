@@ -6,13 +6,12 @@ import {
   useCentrifugeQuery,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Card, IconButton, IconTrash, Stack, Text } from '@centrifuge/fabric'
+import { AddressInput, Box, Card, Flex, IconTrash, Stack, Text } from '@centrifuge/fabric'
 import { blake2AsHex } from '@polkadot/util-crypto'
-import { FieldArray, useFormikContext } from 'formik'
+import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
 import type { FormHandle } from '.'
-import { FormAddressInput } from '../../../../pages/IssuerCreatePool/FormAddressInput'
 import { AddButton } from '../../../../pages/IssuerCreatePool/PoolDetailsSection'
 import { address, combine, positiveNumber, required } from '../../../../utils/validation'
 import { ChangeThreshold } from './ChangeTreshold'
@@ -123,23 +122,35 @@ export function OracleFeeders({
           {({ push, remove }) => (
             <Stack gap={2}>
               {form.values.feeders?.map((_, index) => (
-                <FormAddressInput
-                  name={`feeders.${index}`}
+                <Field
+                  name={`feeders.${index}.address`}
                   validate={combine(address(), index === 0 ? () => '' : required())}
-                  placeholder="Enter address..."
-                  chainId={chainId}
-                  symbol={
-                    index >= 1 && (
-                      <IconButton onClick={() => remove(index)}>
-                        <IconTrash color="textSecondary" />
-                      </IconButton>
-                    )
-                  }
-                  key={index}
-                />
+                >
+                  {({ field }: FieldProps) => (
+                    <AddressInput
+                      {...field}
+                      iconOverride={
+                        <Flex
+                          as="button"
+                          border="none"
+                          backgroundColor="transparent"
+                          alignItems="center"
+                          justifyContent="center"
+                          onClick={() => remove(index)}
+                          pr={1}
+                        >
+                          {index >= 1 && <IconTrash color="textSecondary" />}
+                        </Flex>
+                      }
+                      placeholder="Enter address..."
+                      key={index}
+                    />
+                  )}
+                </Field>
               ))}
               <Box alignSelf="flex-end">
                 <AddButton
+                  variant="inverted"
                   onClick={() => {
                     if (form.values.feeders?.length <= 10) {
                       push('')
