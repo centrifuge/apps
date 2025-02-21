@@ -4,8 +4,7 @@ import { useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, map, of } from 'rxjs'
 import type { FormHandle } from '.'
-import { diffPermissions } from '../../../../pages/IssuerPool/Configuration/Admins'
-import { usePoolAccess } from '../../../../utils/usePermissions'
+import { diffPermissions, usePoolAccess } from '../../../../utils/usePermissions'
 import { MultisigForm } from '../../../MultisigForm'
 
 export type PoolManagersFormValues = {
