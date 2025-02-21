@@ -34,7 +34,7 @@ export function IssuerHeader({ actions, children }: Props) {
             as="img"
             width="iconLarge"
             height="iconLarge"
-            src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)}
+            src={cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)!}
           />
         ) : (
           <Shelf
