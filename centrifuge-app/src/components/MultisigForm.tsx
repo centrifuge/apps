@@ -38,44 +38,52 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
               <Box>
                 <Stack gap={2}>
                   <Text variant="body2">Security requirement</Text>
-                  <RadioButton
-                    height={40}
-                    name="adminMultisigEnabled"
-                    label="Single"
-                    icon={
-                      <Tooltips
-                        type="singleMultisign"
-                        label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-                        placement="left"
-                      />
-                    }
-                    onChange={() => {
-                      form.setFieldValue('adminMultisigEnabled', false)
-                      form.setFieldValue('adminMultisig.signers', [values.adminMultisig.signers[0]])
-                    }}
-                    checked={!values.adminMultisigEnabled}
-                    border
-                    styles={{ padding: '0px 8px' }}
-                  />
-                  <RadioButton
-                    height={40}
-                    name="adminMultisigEnabled"
-                    label="Multi-sig"
-                    icon={
-                      <Tooltips
-                        type="multiMultisign"
-                        label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
-                        placement="left"
-                      />
-                    }
-                    onChange={() => {
-                      form.setFieldValue('adminMultisigEnabled', true)
-                      push('')
-                    }}
-                    checked={values.adminMultisigEnabled}
-                    border
-                    styles={{ padding: '0px 8px' }}
-                  />
+                  <Field name="adminMultisigEnabled">
+                    {({ field }: FieldProps) => (
+                      <>
+                        <RadioButton
+                          {...field}
+                          height={40}
+                          name="adminMultisigEnabled"
+                          label="Single"
+                          icon={
+                            <Tooltips
+                              type="singleMultisign"
+                              label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                              placement="left"
+                            />
+                          }
+                          onChange={() => {
+                            form.setFieldValue('adminMultisigEnabled', false)
+                            form.setFieldValue('adminMultisig.signers', [values.adminMultisig.signers[0]])
+                          }}
+                          checked={!values.adminMultisigEnabled}
+                          border
+                          styles={{ padding: '0px 8px' }}
+                        />
+                        <RadioButton
+                          {...field}
+                          checked={values.adminMultisigEnabled}
+                          height={40}
+                          name="adminMultisigEnabled"
+                          label="Multi-sig"
+                          icon={
+                            <Tooltips
+                              type="multiMultisign"
+                              label={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
+                              placement="left"
+                            />
+                          }
+                          onChange={() => {
+                            form.setFieldValue('adminMultisigEnabled', true)
+                            push('')
+                          }}
+                          border
+                          styles={{ padding: '0px 8px' }}
+                        />
+                      </>
+                    )}
+                  </Field>
                 </Stack>
               </Box>
               <Stack gap={2}>
