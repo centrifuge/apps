@@ -19,9 +19,16 @@ import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { useTheme } from 'styled-components'
 import { FormAddressInput } from '../pages/IssuerCreatePool/FormAddressInput'
 import { AddButton } from '../pages/IssuerCreatePool/PoolDetailsSection'
-import type { PoolManagersInput } from '../pages/IssuerPool/Access/PoolManagers'
 import { address, combine, required } from '../utils/validation'
 import { Tooltips } from './Tooltips'
+
+type PoolManagersInput = {
+  adminMultisigEnabled: boolean
+  adminMultisig: {
+    signers: string[]
+    threshold: number
+  }
+}
 
 export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?: boolean; cardProps?: CardProps }) {
   const theme = useTheme()
