@@ -398,8 +398,8 @@ function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: With
     return (
       <ErrorMessage type="warning" condition={!withdrawAddresses.length}>
         <Stack gap={1}>
-          To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
-          <RouterTextLink to={`/issuer/${poolId}/access`}>Add trusted addresses</RouterTextLink>
+          To purchase/finance this asset, the pool must set addresses which can receive the funds from the pool.
+          <RouterTextLink to={`/dashboard`}>To Dashboard</RouterTextLink>
         </Stack>
       </ErrorMessage>
     )
@@ -441,8 +441,8 @@ function Mux({
       {!withdrawAmounts.length ? (
         <ErrorMessage type="warning" condition={!withdrawAmounts.length}>
           <Stack gap={1}>
-            To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
-            <RouterTextLink to={`/issuer/${poolId}/access`}>Add trusted addresses</RouterTextLink>
+            To purchase/finance this asset, the pool must addresses which can receive the funds from the pool.
+            <RouterTextLink to={`/dashboard`}>To Dashboard</RouterTextLink>
           </Stack>
         </ErrorMessage>
       ) : (
