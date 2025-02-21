@@ -123,7 +123,7 @@ export function MultisigForm({ canEditFirst = true, cardProps }: { canEditFirst?
           <Grid minColumnWidth={250} maxColumns={2} gap={3} equalColumns>
             <Shelf alignItems="flex-start" gap={1}>
               <IconInfo size="iconSmall" />
-              <Text variant="body2">
+              <Text variant="body2" lineHeight={1.4}>
                 For added security, changes to the pool configuration (e.g., tranche structure or write-off policy) may
                 require multiple signers and confirmation from the above.
               </Text>
