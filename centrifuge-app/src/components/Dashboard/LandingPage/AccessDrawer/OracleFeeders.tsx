@@ -6,15 +6,15 @@ import {
   useCentrifugeQuery,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { AddressInput, Box, Card, Flex, IconTrash, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, IconButton, IconTrash, Select, Stack, Text } from '@centrifuge/fabric'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
 import type { FormHandle } from '.'
+import { FormAddressInput } from '../../../../pages/IssuerCreatePool/FormAddressInput'
 import { AddButton } from '../../../../pages/IssuerCreatePool/PoolDetailsSection'
-import { address, combine, positiveNumber, required } from '../../../../utils/validation'
-import { ChangeThreshold } from './ChangeTreshold'
+import { address, combine, min, positiveNumber, required } from '../../../../utils/validation'
 
 export type FeedersFormValues = {
   feeders: string[]
@@ -115,7 +115,7 @@ export function OracleFeeders({
         <Text variant="body2" color="textSecondary">
           Add or remove addresses that can: <br />
           <Text color="textPrimary">
-            <b>provide oracle pricing updates</b> for the onchain NAV.
+            <b>provide oracle pricing updates</b> for the onchain NAV*
           </Text>
         </Text>
         <FieldArray name="feeders">
@@ -127,23 +127,18 @@ export function OracleFeeders({
                   validate={combine(address(), index === 0 ? () => '' : required())}
                 >
                   {({ field }: FieldProps) => (
-                    <AddressInput
-                      {...field}
-                      iconOverride={
-                        <Flex
-                          as="button"
-                          border="none"
-                          backgroundColor="transparent"
-                          alignItems="center"
-                          justifyContent="center"
-                          onClick={() => remove(index)}
-                          pr={1}
-                        >
-                          {index >= 1 && <IconTrash color="textSecondary" />}
-                        </Flex>
-                      }
+                    <FormAddressInput
+                      key={field.name}
+                      name={`feeders.${index}.address`}
                       placeholder="Enter address..."
-                      key={index}
+                      chainId={chainId}
+                      symbol={
+                        index >= 1 && (
+                          <IconButton onClick={() => remove(index)}>
+                            <IconTrash color="textSecondary" />
+                          </IconButton>
+                        )
+                      }
                     />
                   )}
                 </Field>
@@ -162,16 +157,22 @@ export function OracleFeeders({
           )}
         </FieldArray>
         <Box>
-          <ChangeThreshold
-            primaryText="Oracle update threshold"
-            secondaryText="Determine how many oracle providers are required before a pricing update is finalized and will become reflected in the NAV."
-            isEditing
-            fieldName="minFeeders"
-            signersFieldName="feeders"
-            validate={positiveNumber()}
-            minThreshold={1}
-            type="providers"
-          />
+          <Field name="minFeeders" validate={combine(positiveNumber(), min(1, `Needs at least 1 provider`))}>
+            {({ field, form }: FieldProps) => (
+              <Select
+                label="How many addresses are needed to update asset pricing for the onchain NAV*"
+                name="minFeeders"
+                onChange={(event) => form.setFieldValue('minFeeders', Number(event.target.value))}
+                onBlur={field.onBlur}
+                value={field.value}
+                options={form.values.feeders.map((_: any, i: number) => ({
+                  value: `${i + 1}`,
+                  label: `${i + 1}`,
+                }))}
+                placeholder="Select..."
+              />
+            )}
+          </Field>
         </Box>
       </Stack>
     </Card>
