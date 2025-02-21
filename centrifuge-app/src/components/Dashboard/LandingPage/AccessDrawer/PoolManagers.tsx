@@ -119,6 +119,7 @@ export function PoolManagers({
 
   React.useEffect(() => {
     form.setFieldValue('adminMultisig', initialValues.adminMultisig, false)
+    form.setFieldValue('adminMultisigEnabled', initialValues.adminMultisigEnabled, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
