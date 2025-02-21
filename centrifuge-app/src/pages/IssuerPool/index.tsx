@@ -1,13 +1,11 @@
 import { Route, Routes, useParams } from 'react-router-dom'
 import { PoolChangesBanner } from '../../components/PoolChangesBanner'
 import LoanPage from '../Loan'
-import { IssuerPoolAccessPage } from './Access'
 import { IssuerPoolAssetPage } from './Assets'
 import { IssuerPoolConfigurationPage } from './Configuration'
 import { IssuerPoolLiquidityPage } from './Liquidity'
 import { IssuerPoolOverviewPage } from './Overview'
 import { IssuerPoolFeesPage } from './PoolFees'
-import { IssuerPoolPricingPage } from './Pricing'
 import { IssuerPoolReportingPage } from './Reporting'
 
 export default function IssuerPoolPage() {
@@ -20,7 +18,6 @@ export default function IssuerPoolPage() {
       <Routes>
         <Route path="/" element={<IssuerPoolOverviewPage />} />
         <Route path="configuration" element={<IssuerPoolConfigurationPage />} />
-        <Route path="access" element={<IssuerPoolAccessPage />} />
         <Route path="assets/:aid" element={<LoanPage />} />
         <Route path="assets" element={<IssuerPoolAssetPage />} />
         <Route path="liquidity" element={<IssuerPoolLiquidityPage />} />
@@ -28,7 +25,6 @@ export default function IssuerPoolPage() {
         <Route path="reporting/:report" element={<IssuerPoolReportingPage />} />
         <Route path="data" element={<IssuerPoolReportingPage />} />
         <Route path="data/:report" element={<IssuerPoolReportingPage />} />
-        <Route path="pricing" element={<IssuerPoolPricingPage />} />
         <Route path="fees" element={<IssuerPoolFeesPage />} />
       </Routes>
       <PoolChangesBanner poolId={poolId} />
