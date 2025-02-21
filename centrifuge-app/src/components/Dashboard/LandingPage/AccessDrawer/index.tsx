@@ -2,7 +2,7 @@ import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
 import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
 import { usePoolAccess, useSuitableAccounts } from '../../../../utils/usePermissions'
@@ -32,25 +32,21 @@ export function AccessDrawer({
   isOpen: boolean
   poolIds: string[]
 }) {
-  const [poolId, setPoolId] = useState<string>('')
-
-  useEffect(() => {
-    if (poolIds.includes(poolId)) return
-    setPoolId(poolIds[0] || '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [poolIds.length])
+  const [selectedPoolId, setSelectedPoolId] = useState<string>(poolIds?.[0] ?? '')
 
   return (
     <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose}>
       <Select
         label="Select pool"
         onChange={(event) => {
-          setPoolId(event.target.value)
+          setSelectedPoolId(event.target.value)
         }}
-        value={poolId}
+        value={selectedPoolId}
         options={poolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
       />
-      <LoadBoundary>{poolId && <AccessDrawerInner poolId={poolId} key={poolId} onClose={onClose} />}</LoadBoundary>
+      <LoadBoundary>
+        {selectedPoolId && <AccessDrawerInner poolId={selectedPoolId} key={selectedPoolId} onClose={onClose} />}
+      </LoadBoundary>
     </Drawer>
   )
 }

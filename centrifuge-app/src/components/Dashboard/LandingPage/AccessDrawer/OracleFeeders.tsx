@@ -52,12 +52,10 @@ export function OracleFeeders({
   const initialValues = React.useMemo(
     () => ({
       feeders: storedInfo?.feeders.length ? storedInfo.feeders : [''],
-      minFeeders: storedInfo?.feeders ?? 1,
+      minFeeders: storedInfo?.feeders.length ?? 1,
     }),
     [storedInfo]
   )
-
-  console.log('🚀 ~ initialValues:', initialValues, storedInfo)
 
   async function getBatch(_: Centrifuge, values: FeedersFormValues, metadata: PoolMetadata) {
     const oldFeeders = new Set(initialValues.feeders)
@@ -70,7 +68,7 @@ export function OracleFeeders({
 
     const info = {
       minFeeders: values.minFeeders,
-      feeders: values.feeders.map((addr) => ({ system: { Signed: addr } })),
+      feeders: values.feeders.map((address) => ({ system: { Signed: address } })),
     }
     const change = api.createType('RuntimeCommonChangesRuntimeChange', {
       OracleCollection: { CollectionInfo: info },
@@ -122,25 +120,24 @@ export function OracleFeeders({
           {({ push, remove }) => (
             <Stack gap={2}>
               {form.values.feeders?.map((_, index) => (
-                <Field
-                  name={`feeders.${index}.address`}
-                  validate={combine(address(), index === 0 ? () => '' : required())}
-                >
-                  {({ field }: FieldProps) => (
-                    <FormAddressInput
-                      key={field.name}
-                      name={`feeders.${index}.address`}
-                      placeholder="Enter address..."
-                      chainId={chainId}
-                      symbol={
-                        index >= 1 && (
-                          <IconButton onClick={() => remove(index)}>
-                            <IconTrash color="textSecondary" />
-                          </IconButton>
-                        )
-                      }
-                    />
-                  )}
+                <Field name={`feeders.${index}`} validate={combine(address(), index === 0 ? () => '' : required())}>
+                  {({ field }: FieldProps) => {
+                    return (
+                      <FormAddressInput
+                        key={field.name}
+                        name={`feeders.${index}`}
+                        placeholder="Enter address..."
+                        chainId={chainId}
+                        symbol={
+                          index >= 1 && (
+                            <IconButton onClick={() => remove(index)}>
+                              <IconTrash color="textSecondary" />
+                            </IconButton>
+                          )
+                        }
+                      />
+                    )
+                  }}
                 </Field>
               ))}
               <Box alignSelf="flex-end">
