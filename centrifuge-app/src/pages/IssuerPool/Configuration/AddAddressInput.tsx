@@ -27,7 +27,7 @@ export function AddAddressInput({
   return (
     <Grid columns={2} equalColumns gap={4} alignItems="center">
       <AddressInput
-        clearIcon
+        withClearIcon
         placeholder="Search to add address..."
         value={address}
         onChange={(e) => setAddress(e.target.value)}

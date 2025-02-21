@@ -22,8 +22,8 @@ import {
   IconButton,
   IconInfo,
   IconTrash,
-  InputErrorMessage,
-  SelectInner,
+  Select,
+  Shelf,
   Stack,
   Text,
   TextInput,
@@ -31,7 +31,7 @@ import {
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
 import { isAddress as isEvmAddress } from 'ethers'
-import { ErrorMessage, Field, FieldArray, FieldProps, FormikErrors, setIn, useFormikContext } from 'formik'
+import { Field, FieldArray, FieldProps, FormikErrors, setIn, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, firstValueFrom, switchMap } from 'rxjs'
 import type { FormHandle } from '.'
@@ -307,8 +307,6 @@ function AOForm({
     form.values.withdrawAddresses.filter((w) => !!w.location)
   )
 
-  console.log('form.values.delegates', form.values.delegates)
-
   return (
     <Stack gap={3}>
       <Card variant="secondary" px={2} py={2}>
@@ -374,32 +372,31 @@ function AOForm({
               <b>receive funds</b> from the pool.
             </Text>
           </Text>
-          <Stack gap={1}>
+          <Stack gap={2}>
             {form.values.withdrawAddresses.map((value, index) => (
-              <FieldWithErrorMessage
-                name={`withdrawAddresses.${index}.address`}
-                validate={address()}
-                label="Address"
-                as={TextInput}
-                onChange={(event: any) => {
-                  form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                  form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
-                }}
-                placeholder={''}
-                secondaryLabel={
-                  <ErrorMessage
-                    name={`withdrawAddresses.${index}.location`}
-                    render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
+              <Shelf gap={1} width="100%">
+                <Box width="100%" flex={3}>
+                  <FieldWithErrorMessage
+                    name={`withdrawAddresses.${index}.address`}
+                    validate={address()}
+                    label="Address"
+                    as={TextInput}
+                    onChange={(event: any) => {
+                      form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
+                      form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
+                    }}
+                    placeholder={''}
                   />
-                }
-                symbol={
+                </Box>
+                <Box width="100%" flex={2}>
                   <Field name={`withdrawAddresses.${index}.location`}>
                     {({ field, form }: FieldProps) => (
-                      <SelectInner
+                      <Select
                         name={`withdrawAddresses.${index}.location`}
                         onChange={(event) =>
                           form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
                         }
+                        label="Network"
                         onBlur={field.onBlur}
                         value={field.value ? JSON.stringify(field.value) : ''}
                         options={destinations.map((dest) => ({
@@ -415,8 +412,8 @@ function AOForm({
                       />
                     )}
                   </Field>
-                }
-              />
+                </Box>
+              </Shelf>
             ))}
           </Stack>
         </Stack>
