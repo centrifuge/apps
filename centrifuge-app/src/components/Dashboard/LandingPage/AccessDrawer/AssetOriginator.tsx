@@ -320,7 +320,7 @@ function AOForm({
           <FieldArray name="delegates">
             {({ push, remove }) => (
               <Stack gap={2}>
-                <Stack gap={3}>
+                <Stack gap={2}>
                   {form.values.delegates.map((_, index) => (
                     <Field name={`delegates.${index}`} key={index}>
                       {() => (
@@ -329,7 +329,7 @@ function AOForm({
                           placeholder="Enter address..."
                           chainId={chainId}
                           symbol={
-                            index >= 2 && (
+                            index >= 1 && (
                               <IconButton onClick={() => remove(index)}>
                                 <IconTrash color="textSecondary" />
                               </IconButton>
