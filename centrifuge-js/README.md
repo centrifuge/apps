@@ -20,7 +20,7 @@ const centrifuge = new Centrifuge({
 })
 ```
 
-The following config options can be passed on initilization of CentrifugeJS:
+The following config options can be passed on initialization of CentrifugeJS:
 
 #### `network`
 
@@ -108,7 +108,7 @@ centrifuge.pools.getPools().subscribe({
 })
 ```
 
-Some cases don't require a subscription. We find it easist to use a helper from `rxjs` to convert the observable into a promise. You'll have to install `rxjs`
+Some cases don't require a subscription. We find it easiest to use a helper from `rxjs` to convert the observable into a promise. You'll have to install `rxjs`
 
 ```sh
 yarn add --save rxjs
@@ -128,7 +128,7 @@ const pools = await firstValueFrom(cenrtifuge.pools.getPools()) // Pool[]
 
 Transactions/extrinsics require a little more configuration because they need to be signed. Please note that this does not cover how to sign transactions with a proxy.
 
-By connecting the `centrifuge` instance with a `signer`, the sourced wallet extension will be triggered to ask for a signature. The `signer` can be any signer that's compatible with the polkadot API. We use [@subwallet/wallet-connect](https://openbase.com/js/@subwallet/wallet-connect) to source mutliple wallets.
+By connecting the `centrifuge` instance with a `signer`, the sourced wallet extension will be triggered to ask for a signature. The `signer` can be any signer that's compatible with the polkadot API. We use [@subwallet/wallet-connect](https://openbase.com/js/@subwallet/wallet-connect) to source multiple wallets.
 
 ```js
 // wallet setup imported from @subwallet/wallet-connect/dotsama/wallets
@@ -158,7 +158,7 @@ Creating a pool requires a series of extrinsics to be executed sequentially. Usi
 
 1. No restrictions, pools is ready and available after tx is confirmed. Usually used in dev environments.
 2. Pool requires democracy but can be fast-tracked (noting the preimage). Usually used in staging environments, e.g Altair.
-3. Pool requires democracy and must go through the regular voting process (pool proposal). Offical POP (pool onboarding process).
+3. Pool requires democracy and must go through the regular voting process (pool proposal). Official POP (pool onboarding process).
 
 The method also uploads metadata using the `pinFile()` method should be defined when creating the `centrifuge` instance.
 
@@ -208,8 +208,8 @@ Along with the regular tx options the `createPool()` supports an additional opti
 | createType     | Description                                                                                                                          |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `immediate`    | Sign the tx, no further actions required                                                                                             |
-| `notePreimage` | Signing the tx will create a fast tracked democracy proposal. Voting will be required. Pool must be initiliazed after voting period. |
-| `propose`      | Signing the tx will create a regular democracy proposal. Voting will be required. Pool must be initiliazed after voting period.      |
+| `notePreimage` | Signing the tx will create a fast tracked democracy proposal. Voting will be required. Pool must be initialized after voting period. |
+| `propose`      | Signing the tx will create a regular democracy proposal. Voting will be required. Pool must be initialized after voting period.      |
 
 ## Minting assets on Centrifuge Chain
 
