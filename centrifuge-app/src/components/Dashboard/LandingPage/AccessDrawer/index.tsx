@@ -5,16 +5,16 @@ import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
 import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
-import { usePoolAccess, useSuitableAccounts } from '../../../../utils/usePermissions'
+import { usePoolAccess, usePoolAdmin, useSuitableAccounts } from '../../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../../utils/usePools'
 import { useDebugFlags } from '../../../DebugFlags'
 import { LoadBoundary } from '../../../LoadBoundary'
 import { AOFormValues, AssetOriginators } from './AssetOriginator'
-import { DebugAdmins } from './DebugAdmins'
+import { DebugAdmins, DebugAdminsFormValues } from './DebugAdmins'
 import { FeedersFormValues, OracleFeeders } from './OracleFeeders'
 import { PoolManagers, PoolManagersFormValues } from './PoolManagers'
 
-type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues
+type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues & DebugAdminsFormValues
 
 export type FormHandle = {
   getBatch: (
@@ -68,7 +68,9 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   const poolManagersRef = useRef<FormHandle>(null)
   const aoRef = useRef<FormHandle>(null)
   const feedersRef = useRef<FormHandle>(null)
-  const refs = [aoRef, feedersRef, poolManagersRef]
+  const debugAdminsRef = useRef<FormHandle>(null)
+  const refs = [aoRef, feedersRef, poolManagersRef, debugAdminsRef]
+  const admin = usePoolAdmin(poolId)
 
   const access = usePoolAccess(poolId)
   const ao = access.assetOriginators[0]
@@ -78,7 +80,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   const adminDelegateAccounts = useSuitableAccounts({
     poolId,
     poolRole: ['PoolAdmin'],
-    actingAddress: [access.admin || ''],
+    actingAddress: [access.admin || admin?.signingAccount.address || ''],
   })
   const adminDelegateAccount = adminDelegateAccounts.find((a) => a.signingAccount === aoDelegateAccount?.signingAccount)
 
@@ -120,6 +122,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
       },
       withdrawAddresses: [],
       delegates: [],
+      admins: [],
     },
     validate: (values) => {
       const errors: any = {}
@@ -166,7 +169,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
                 ? [
                     {
                       title: 'Admin config',
-                      body: <DebugAdmins poolId={poolId} />,
+                      body: <DebugAdmins poolId={poolId} handle={debugAdminsRef} />,
                       sublabel: 'Debug flag access to admin config',
                     },
                   ]
