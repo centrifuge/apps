@@ -102,11 +102,6 @@ export function AssetOriginators({
   )
 }
 
-type Row = {
-  address: string
-  index: number
-}
-
 function AOForm({
   access,
   assetOriginator: ao,
