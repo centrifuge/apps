@@ -45,7 +45,6 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   const form = useFormikContext<PoolMetadataInput>()
   const { values } = form
   const tranches = form.values.tranches
-  console.log('🚀 ~ tranches:', tranches)
 
   const getTrancheName = (index: number, value?: string) => {
     switch (index) {

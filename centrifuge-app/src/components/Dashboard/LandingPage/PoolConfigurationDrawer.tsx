@@ -36,7 +36,7 @@ export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
     index: number
     apy: string
     apyPercentage: number | null
-    minInvestment: string
+    minInvestment: number
     minRiskBuffer: number | null
     interestRate: number | null
   }[]
@@ -72,7 +72,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
         tokenName: tranche.currency.name,
         symbolName: tranche.currency.symbol,
         minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? null,
-        minInvestment: trancheMeta?.minInitialInvestment,
+        minInvestment: Number(trancheMeta?.minInitialInvestment ?? 0),
         apy: trancheMeta?.apy,
         apyPercentage: trancheMeta?.apyPercentage ?? null,
         interestRate:
@@ -246,7 +246,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         },
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
-            minInitialInvestment: tranche.minInvestment,
+            minInitialInvestment: tranche.minInvestment.toString(),
             apy: tranche.apy,
             apyPercentage: tranche.apyPercentage,
           }
@@ -438,23 +438,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                         ),
                         body: <TranchesSection isUpdating />,
                       },
-                      ...(isPoolAdmin
-                        ? [
-                            {
-                              title: (
-                                <Box py={2}>
-                                  <Text variant="heading3">Configuration</Text>
-                                </Box>
-                              ),
-                              sublabel: 'Debug flag to manually access to pool configuration',
-                              body: (
-                                <Stack overflowX="auto">
-                                  {isPoolAdmin && <>{editPoolConfig && <DebugPoolConfig poolId={pool.id} />}</>}
-                                </Stack>
-                              ),
-                            },
-                          ]
-                        : []),
                     ]}
                   />
                 )}
@@ -489,6 +472,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
             </Form>
           )}
         </FormikProvider>
+        {isPoolAdmin && editPoolConfig && <DebugPoolConfig poolId={pool.id} />}
       </Drawer>
     </LoadBoundary>
   )

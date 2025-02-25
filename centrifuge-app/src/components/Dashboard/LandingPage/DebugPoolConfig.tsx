@@ -1,29 +1,29 @@
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, TextAreaInput } from '@centrifuge/fabric'
+import { Box, Button, Stack, TextAreaInput } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
+import { useDebugFlags } from '../../DebugFlags'
 import { FieldWithErrorMessage } from '../../FieldWithErrorMessage'
-import { PageSection } from '../../PageSection'
 
 type Props = {
   poolId: string
 }
 
 export function DebugPoolConfig({ poolId }: Props) {
-  const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
+  const poolAdmin = usePoolAdmin(poolId)
+  const { editPoolConfig } = useDebugFlags()
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
     'Update pool config',
     (cent) => cent.pools.setMetadata,
     {
       onSuccess: () => {
-        setIsEditing(false)
         form.setFieldValue('metadata', JSON.stringify(metadata, null, 2), false)
       },
     }
@@ -38,6 +38,7 @@ export function DebugPoolConfig({ poolId }: Props) {
     initialValues: {
       metadata: '',
     },
+
     validate: (values) => {
       let errors: FormikErrors<any> = {}
       if (!isValidJsonString(values.metadata)) {
@@ -54,38 +55,27 @@ export function DebugPoolConfig({ poolId }: Props) {
   return (
     <FormikProvider value={form}>
       <Form>
-        <PageSection
-          title="Pool config"
-          subtitle="Manually edit the pool config (JSON)"
-          headerRight={
-            isEditing ? (
-              <Button
-                type="submit"
-                small
-                loading={isLoading}
-                loadingMessage={isLoading ? 'Pending...' : undefined}
-                key="done"
-              >
-                Done
-              </Button>
-            ) : (
-              <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
-                Edit
-              </Button>
-            )
-          }
-        >
+        <Stack gap={2}>
           <Box gridColumn="span 6">
             <FieldWithErrorMessage
               name="metadata"
               as={TextAreaInput}
               loading={isLoading || form.isSubmitting}
               placeholder="Description..."
-              disabled={!isEditing}
+              disabled={!poolAdmin || !editPoolConfig}
               rows={20}
             />
           </Box>
-        </PageSection>
+          <Button
+            type="submit"
+            small
+            loading={isLoading}
+            disabled={!form.dirty}
+            loadingMessage={isLoading ? 'Pending...' : undefined}
+          >
+            Save metadata
+          </Button>
+        </Stack>
       </Form>
     </FormikProvider>
   )
