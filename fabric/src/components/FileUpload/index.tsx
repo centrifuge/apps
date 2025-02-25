@@ -241,6 +241,7 @@ export function FileUpload({
             disabled={disabled}
             tabIndex={-1}
             ref={inputRef}
+            accept={accept}
             {...inputProps}
           />
         </FileDragOverContainer>

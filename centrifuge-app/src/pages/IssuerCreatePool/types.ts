@@ -71,10 +71,15 @@ export type CreatePoolValues = Omit<
   issuerLogo: File | null
   executiveSummary: File | null
 
-  reportAuthorName: string
-  reportAuthorTitle: string
-  reportAuthorAvatar: File | null
-  reportUrl: string
+  // pool reports (analysis section)
+  report: {
+    author: {
+      name: string
+      title: string
+      avatar: File | null
+    }
+    url: string
+  }
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
   poolFees: PoolFee[]
