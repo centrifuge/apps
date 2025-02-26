@@ -1,5 +1,5 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, FileUpload, Grid, IconDownload, IconFile, IconWarning, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, FileUpload, IconDownload, IconFile, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useMemo, useState } from 'react'
 import { lastValueFrom } from 'rxjs'
@@ -166,12 +166,9 @@ export const UploadAssetTemplateForm = ({
             file={null}
           />
         ) : (
-          <Grid display="flex" alignItems="center" mb={1} gap={1}>
-            <IconWarning size={20} color={theme.colors.statusCritical} />
-            <Text variant="heading4" color={theme.colors.statusCritical}>
-              Only pool admins can upload asset templates.
-            </Text>
-          </Grid>
+          <Text variant="body2" color={theme.colors.textSecondary}>
+            Only pool admins can upload asset templates.
+          </Text>
         )}
       </Box>
     </Box>

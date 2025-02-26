@@ -104,11 +104,8 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
   })
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
+    <Drawer title="Supported Networks" isOpen={isOpen} onClose={onClose}>
       <Stack gap={2}>
-        <Text variant="heading2" fontWeight="600" fontSize="20px">
-          Supported Networks
-        </Text>
         <Text variant="body2" color="textSecondary">
           View liquidity on all blockchains that this pool is connected to, and enable investments on new blockchains.
         </Text>

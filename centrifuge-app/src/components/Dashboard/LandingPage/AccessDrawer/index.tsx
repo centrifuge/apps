@@ -1,6 +1,6 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Accordion, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
+import { Accordion, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
@@ -29,7 +29,7 @@ export type FormHandle = {
 export function AccessDrawer({ isOpen, onClose }: { onClose: () => void; isOpen: boolean }) {
   const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
   const [selectedPoolId, setSelectedPoolId] = useState<string>(selectedPoolsWithMetadata?.[0].id ?? '')
-
+  const isPoolAdmin = !!usePoolAdmin(selectedPoolId)
   return (
     <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose}>
       <Select
@@ -40,6 +40,11 @@ export function AccessDrawer({ isOpen, onClose }: { onClose: () => void; isOpen:
         value={selectedPoolId}
         options={selectedPoolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
       />
+      {!isPoolAdmin && (
+        <Text variant="body2" color="textSecondary">
+          Only pool admins can manage access.
+        </Text>
+      )}
       <LoadBoundary>
         {selectedPoolId && <AccessDrawerInner poolId={selectedPoolId} key={selectedPoolId} onClose={onClose} />}
       </LoadBoundary>
