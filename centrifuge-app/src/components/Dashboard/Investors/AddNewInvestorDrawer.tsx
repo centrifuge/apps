@@ -60,11 +60,8 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
   })
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
+    <Drawer isOpen={isOpen} onClose={onClose} title="New Investor">
       <Stack gap={4}>
-        <Text variant="heading2" fontWeight="600" fontSize="20px">
-          New Investor
-        </Text>
         <FormikProvider value={formik}>
           <Form>
             <Stack gap={4}>

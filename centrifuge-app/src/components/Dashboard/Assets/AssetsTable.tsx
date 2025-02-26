@@ -95,8 +95,6 @@ export function AssetsTable() {
     })
     .filter((pool) => selectedPoolIds.includes(pool.poolId))
 
-  console.log('🚀 ~ loansData:', loansData)
-
   const data = useMemo(
     () =>
       loansData.map((loan) => {
