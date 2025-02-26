@@ -1,6 +1,6 @@
 import { CurrencyBalance, CurrencyMetadata, Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, Button, Grid, IconDownload, IconPlus, Spinner, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button, Grid, IconDownload, IconInfo, IconPlus, Spinner, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useSelectedPools } from '../../..//utils/contexts/SelectedPoolsContext'
@@ -310,8 +310,20 @@ export function AssetsTable() {
             onRowClicked={(row) => `/pools/${row.poolId}/assets/${row.assetId}`}
           />
         ) : (
-          <Box display="flex" justifyContent="center" alignItems="center" height="100%" mt={5}>
-            <Text variant="heading4">No data available</Text>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            background={theme.colors.backgroundSecondary}
+            borderRadius={4}
+            p={2}
+            border={`1px solid ${theme.colors.borderPrimary}`}
+          >
+            <IconInfo size={14} style={{ marginRight: 8 }} />
+            <Text variant="body3" color="textSecondary">
+              No assets displayed yet
+            </Text>
           </Box>
         )}
       </Box>

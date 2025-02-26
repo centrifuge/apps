@@ -53,7 +53,7 @@ export function SelectInner({
   return (
     <Flex position="relative" width="100%">
       <IconChevronDown
-        color={disabled ? 'textSecondary' : variant === 'secondary' ? 'textDisabled' : 'textPrimary'}
+        color="textSecondary"
         size={small ? 'iconSmall' : 'iconMedium'}
         style={{
           position: 'absolute',
