@@ -1,4 +1,4 @@
-import { CurrencyBalance, FileType, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Stack, Text, truncate } from '@centrifuge/fabric'
 import { useState } from 'react'
@@ -11,10 +11,11 @@ import {
   SearchableTableHeader,
   SortableTableHeader,
 } from '../../../components/DataTable'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { formatDate } from '../../../utils/date'
 import { useFilters } from '../../../utils/useFilters'
-import { useInvestorListMulti, usePoolMetadataMulti } from '../../../utils/usePools'
+import { useInvestorListMulti } from '../../../utils/usePools'
 import { InvestorDrawer } from './InvestorDrawer'
 
 export type InvestorTableRow = {
@@ -34,29 +35,26 @@ export type InvestorTableRow = {
   realizedProfit: CurrencyBalance
 }
 
-export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
+export function InvestorTable() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const investorParam = searchParams.get('d_investor')
   const cent = useCentrifuge()
-  const poolMetadata = usePoolMetadataMulti(pools ?? [])
-  const investors = useInvestorListMulti(pools?.map((p) => p.id) ?? [])
+  const { poolsWithMetadata } = useSelectedPools()
+  const investors = useInvestorListMulti(poolsWithMetadata?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
 
   const data: InvestorTableRow[] =
     investors?.map((investor) => {
-      // match metadata to pool by trancheId since poolId doesnt exist in metadata
-      const metadata = poolMetadata.find((p) => Object.keys(p.data?.tranches ?? {}).includes(investor.trancheId))
-      const tokenName = pools
+      const tokenName = poolsWithMetadata
         ?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))
         ?.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
-      const poolCurrency = pools?.find((p) => p.id === investor.poolId)?.currency.displayName
       return {
         tokenName,
         trancheId: investor.trancheId,
         poolId: investor.poolId,
-        poolIcon: metadata?.data?.pool?.icon,
-        poolCurrency,
+        poolIcon: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.meta?.pool?.icon,
+        poolCurrency: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.currency.displayName,
         wallet: investor?.evmAddress || investor.accountId || '',
         network: investor.chainId,
         holdings: investor.balance,
@@ -80,7 +78,7 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
         const iconUri = row.poolIcon?.uri && cent.metadata.parseMetadataUrl(row.poolIcon?.uri)
         return (
           <Shelf gap={1}>
-            <Box as="img" width="iconMedium" height="iconMedium" src={iconUri} borderRadius={4} />
+            <Box as="img" width="iconMedium" height="iconMedium" src={iconUri || ''} borderRadius={4} />
             <Text variant="body3" fontWeight="500">
               {row.tokenName}
             </Text>

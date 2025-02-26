@@ -4,6 +4,7 @@ import { Accordion, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
+import { useSelectedPools } from '../../../../utils/contexts/SelectedPoolsContext'
 import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
 import { usePoolAccess, usePoolAdmin, useSuitableAccounts } from '../../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../../utils/usePools'
@@ -25,16 +26,9 @@ export type FormHandle = {
   validate?: (values: FormValues) => FormikErrors<any>
 }
 
-export function AccessDrawer({
-  isOpen,
-  onClose,
-  poolIds,
-}: {
-  onClose: () => void
-  isOpen: boolean
-  poolIds: string[]
-}) {
-  const [selectedPoolId, setSelectedPoolId] = useState<string>(poolIds?.[0] ?? '')
+export function AccessDrawer({ isOpen, onClose }: { onClose: () => void; isOpen: boolean }) {
+  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+  const [selectedPoolId, setSelectedPoolId] = useState<string>(selectedPoolsWithMetadata?.[0].id ?? '')
 
   return (
     <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose}>
@@ -44,7 +38,7 @@ export function AccessDrawer({
           setSelectedPoolId(event.target.value)
         }}
         value={selectedPoolId}
-        options={poolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
+        options={selectedPoolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
       />
       <LoadBoundary>
         {selectedPoolId && <AccessDrawerInner poolId={selectedPoolId} key={selectedPoolId} onClose={onClose} />}

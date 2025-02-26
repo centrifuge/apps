@@ -1,4 +1,4 @@
-import { CurrencyMetadata, FileType, Perquintill, Pool, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, FileType, Perquintill, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
@@ -8,22 +8,21 @@ import { IssuerCategoriesSection } from '../../../pages/IssuerCreatePool/IssuerC
 import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
 import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
 import { TranchesSection } from '../../../pages/IssuerCreatePool/TranchesSection'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useDebugFlags } from '../../DebugFlags'
 import { LoadBoundary } from '../../LoadBoundary'
 import { Spinner } from '../../Spinner'
+import { PoolWithMetadata } from '../utils'
 import { DebugPoolConfig } from './DebugPoolConfig'
 import { IssuerDetailsSection } from './IssuerDetailsSection'
 import { PoolDescriptionSection } from './PoolDescriptionSection'
 
-export type PoolWithMetadata = Pool & { meta: PoolMetadata }
-
 type PoolConfigurationDrawerProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  pools: PoolWithMetadata[]
 }
 
 export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
@@ -84,12 +83,13 @@ const createPoolValues = (pool: PoolWithMetadata) => {
   }
 }
 
-export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurationDrawerProps) {
+export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDrawerProps) {
   const cent = useCentrifuge()
   const { editPoolConfig } = useDebugFlags()
   const prefetchMetadata = usePrefetchMetadata()
   const [isEditing, setIsEditing] = useState(false)
-  const [pool, setPool] = useState<PoolWithMetadata>(pools[0])
+  const { poolsWithMetadata, selectedPoolsWithMetadata } = useSelectedPools()
+  const [pool, setPool] = useState<PoolWithMetadata>(selectedPoolsWithMetadata[0])
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update configuration',
@@ -356,10 +356,10 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
     form.resetForm()
     setOpen(false)
     setIsEditing(false)
-    setPool(pools[0])
+    setPool(selectedPoolsWithMetadata[0])
   }
 
-  if (!pools.length || !pool) return
+  if (!selectedPoolsWithMetadata.length || !pool) return
 
   return (
     <LoadBoundary>
@@ -374,13 +374,15 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                 <Box>
                   <Select
                     label="Select pool"
-                    options={pools.map((pool) => ({
+                    options={poolsWithMetadata.map((pool) => ({
                       label: pool.meta?.pool?.name,
                       value: pool.id,
                     }))}
                     value={pool.id}
                     onChange={(event) => {
-                      const selectedPool = pools.find((pool: PoolWithMetadata) => pool.id === event.target.value)
+                      const selectedPool = poolsWithMetadata.find(
+                        (pool: PoolWithMetadata) => pool.id === event.target.value
+                      )
                       if (selectedPool) {
                         setPool(selectedPool)
                       }
@@ -441,22 +443,8 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
                     ]}
                   />
                 )}
-
-                {!isPoolAdmin && (
-                  <Box mt={2} padding={1}>
-                    <Text variant="heading4" color="statusCritical">
-                      Only pool admins can edit the pool
-                    </Text>
-                  </Box>
-                )}
               </Stack>
-              <Stack
-                gap={2}
-                display="flex"
-                justifyContent="flex-end"
-                flexDirection="column"
-                // marginTop={isPoolAdmin ? '40%' : '100%'}
-              >
+              <Stack gap={2} display="flex" justifyContent="flex-end" flexDirection="column">
                 <Button
                   onClick={form.submitForm}
                   loading={isEditing || isLoading}
