@@ -1,41 +1,27 @@
+import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Box, Text } from '@centrifuge/fabric'
-import { useEffect } from 'react'
-import { PageSummary } from '../../../src/components/PageSummary'
 import { Spinner } from '../../../src/components/Spinner'
-import { Tooltips } from '../../../src/components/Tooltips'
-import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsContext'
-import { formatBalance } from '../../../src/utils/formatting'
 import { useLoans } from '../../../src/utils/useLoans'
-import AssetsTable from '../../components/Dashboard/Assets/AssetsTable'
+import { AssetsTable } from '../../components/Dashboard/Assets/AssetsTable'
 import { PoolSelector } from '../../components/Dashboard/PoolSelector'
 import { TransformedLoan, useLoanCalculations } from '../../components/Dashboard/utils'
+import { PageSummary } from '../../components/PageSummary'
+import { Tooltips } from '../../components/Tooltips'
+import { useSelectedPools } from '../../utils/contexts/SelectedPoolsContext'
 
 export default function AssetsPage() {
-  const { selectedPools, setSelectedPools, pools = [] } = useSelectedPools()
-  const ids = pools.map((pool) => pool.id)
-  const { data: loans, isLoading } = useLoans(pools ? ids : [])
-
-  // TODO - replace with Sophia's code once merged
-  useEffect(() => {
-    if (selectedPools.length === 0 && pools.length > 0) {
-      setSelectedPools(pools.map((pool) => pool.id))
-    }
-  }, [pools.length, selectedPools.length, setSelectedPools, pools])
-
-  const poolMap = pools.reduce<Record<string, (typeof pools)[number]>>((map, pool) => {
-    map[pool.id] = pool
-    return map
-  }, {})
+  const { selectedPoolIds, pools } = useSelectedPools()
+  const { data: loans, isLoading } = useLoans(selectedPoolIds.length ? selectedPoolIds : [])
 
   const loansWithPool = loans?.map((loan) => ({
     ...loan,
-    pool: poolMap[loan.poolId] || null,
+    pool: pools?.find((pool) => pool.id === loan.poolId) || null,
   }))
 
-  const filteredPools = loansWithPool?.filter((loan) => selectedPools.includes(loan.poolId)) ?? []
+  const filteredLoans = loansWithPool?.filter((loan) => selectedPoolIds.includes(loan.poolId)) ?? []
 
   const { totalAssets, offchainReserve, onchainReserve, pendingFees, totalNAV } = useLoanCalculations(
-    filteredPools as TransformedLoan[]
+    filteredLoans as TransformedLoan[]
   )
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
@@ -67,7 +53,7 @@ export default function AssetsPage() {
     },
   ]
 
-  if (!pools.length || !loans) return <Text variant="heading4">No data available</Text>
+  if (!pools || !pools.length || !loans) return <Text variant="heading4">No data available</Text>
 
   if (isLoading) return <Spinner />
 
@@ -77,8 +63,8 @@ export default function AssetsPage() {
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         <PoolSelector multiple />
       </Box>
-      <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
-      <AssetsTable loans={loansWithPool as TransformedLoan[]} />
+      <PageSummary data={pageSummaryData} />
+      <AssetsTable />
     </Box>
   )
 }

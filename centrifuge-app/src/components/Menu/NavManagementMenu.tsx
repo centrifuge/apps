@@ -75,8 +75,8 @@ export function NavManagementMenu({ stacked }: NavManagementMenuProps) {
             </Stack>
           ) : (
             <Menu backgroundColor={theme.colors.backgroundInverted}>
-              {allowedPools.map((pool) => (
-                <MenuItemGroup key={pool.id}>
+              {allowedPools.map((pool, index) => (
+                <MenuItemGroup key={`${index}-${pool.id}`}>
                   <Box px={2} py={1}>
                     <PoolLink pool={pool} />
                   </Box>

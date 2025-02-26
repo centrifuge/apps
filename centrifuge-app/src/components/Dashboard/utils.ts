@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Perquintill, Pool, PoolMetadata, Token } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { daysBetween } from '../../../src/utils/date'
@@ -125,7 +125,8 @@ export function usePoolMetadataMap(pools: Pool[]) {
   return poolMetadataMap
 }
 
-export function useGetPoolsMetadata(pools: Pool[]) {
+export type PoolWithMetadata = Pool & { meta: PoolMetadata }
+export function useGetPoolsMetadata(pools: Pool[]): PoolWithMetadata[] {
   const metas = usePoolMetadataMap(pools)
   return (
     pools?.map((pool) => {

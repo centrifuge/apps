@@ -20,11 +20,11 @@ import {
   truncate,
 } from '@centrifuge/fabric'
 import { Field, FieldArray, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { Domain, useActiveDomains, useDomainRouters } from '../../../utils/useLiquidityPools'
 import { usePoolAdmin } from '../../../utils/usePermissions'
-import { usePool, usePoolMetadataMulti } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 
 interface NetworkCurrency {
   checked: boolean
@@ -44,9 +44,15 @@ interface NetworkFormValues {
 export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const domains = useDomainRouters()
   const getNetworkName = useGetNetworkName()
-  const { selectedPools } = useSelectedPools(true)
-  const [selectedPool, setSelectedPool] = useState<string | null>(selectedPools?.[0] ?? null)
+  const { selectedPoolsWithMetadata } = useSelectedPools(true)
+  const [selectedPool, setSelectedPool] = useState<string | null>(selectedPoolsWithMetadata?.[0]?.id ?? null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (selectedPoolsWithMetadata.length > 0) {
+      setSelectedPool(selectedPoolsWithMetadata[0].id)
+    }
+  }, [selectedPoolsWithMetadata])
 
   const admin = usePoolAdmin(selectedPool ?? '')
 
@@ -180,125 +186,126 @@ function SupportedNetworks({
   setSelectedPool: (poolId: string) => void
 }) {
   const formik = useFormikContext<NetworkFormValues>()
-  const { pools } = useSelectedPools()
-  const poolMetadata = usePoolMetadataMulti(pools ?? [])
+  const { poolsWithMetadata } = useSelectedPools()
   const getNetworkName = useGetNetworkName()
   const { data: domains } = useActiveDomains(selectedPool ?? '')
   const domain = domains?.find((d) => d.chainId === chainId)
   const status = getDomainStatus(domain)
   return (
-    <Accordion
-      items={[
-        {
-          title: (
-            <Box pl={2}>
-              <Text variant="heading3">{getNetworkName(chainId || 'centrifuge')}</Text>
-            </Box>
-          ),
-          body: (
-            <>
-              <Box px={2}>
-                <Divider />
+    <Box pr={2}>
+      <Accordion
+        items={[
+          {
+            title: (
+              <Box pl={2}>
+                <Text variant="heading3">{getNetworkName(chainId || 'centrifuge')}</Text>
               </Box>
-              <Stack p={2} gap={2}>
-                <Select
-                  label="Select pool"
-                  options={
-                    pools?.map((pool) => ({
-                      label: poolMetadata.find((p) =>
-                        Object.keys(p.data?.tranches ?? {}).find((tId) => tId === pool.tranches[0].id)
-                      )?.data?.pool?.name,
-                      value: pool.id,
-                    })) ?? []
-                  }
-                  onChange={(event) => {
-                    setSelectedPool(event.target.value)
-                  }}
-                />
-                <Stack gap={2}>{selectedPool && <TrancheTokensInput chainId={chainId} poolId={selectedPool} />}</Stack>
-                <Text variant="label1" color="textPrimary">
-                  Tokens
-                </Text>
+            ),
+            body: (
+              <>
+                <Box px={2}>
+                  <Divider />
+                </Box>
+                <Stack p={2} gap={2}>
+                  <Select
+                    label="Select pool"
+                    options={
+                      poolsWithMetadata?.map((pool) => ({
+                        label: pool.meta?.pool?.name,
+                        value: pool.id,
+                      })) ?? []
+                    }
+                    onChange={(event) => {
+                      setSelectedPool(event.target.value)
+                    }}
+                  />
+                  <Stack gap={2}>
+                    {selectedPool && <TrancheTokensInput chainId={chainId} poolId={selectedPool} />}
+                  </Stack>
+                  <Text variant="label1" color="textPrimary">
+                    Tokens
+                  </Text>
 
-                <FieldArray name={`networks`}>
-                  {() => (
-                    <>
-                      {domain?.currencies.map((currency) => {
-                        return (
-                          <Field name={`networks[${index}]`}>
-                            {({ field }: { field: any }) => {
-                              return (
-                                <Checkbox
-                                  key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
-                                  label={
-                                    <Text variant="label2">
-                                      {currency.displayName} ({currency.symbol})
-                                    </Text>
-                                  }
-                                  checked={
-                                    field.value?.currencies?.[currency.address]?.checked ??
-                                    domain?.isAllowedAsset[currency.address]
-                                  }
-                                  // !isAllowedAsset[currency.address] means that the asset is already enabled, it cannot be disabled
-                                  disabled={
-                                    status === 'deployed' ||
-                                    status === 'deploying' ||
-                                    domain?.isAllowedAsset[currency.address]
-                                  }
-                                  onChange={(event) => {
-                                    if (event.target.checked) {
-                                      // Check if the network already exists
-                                      if (!formik.values.networks[index]) {
-                                        formik.setFieldValue(`networks[${index}]`, {
-                                          chainId,
-                                          poolId: selectedPool,
-                                          currencies: {
-                                            [currency.address]: {
-                                              currencyNeedsAdding: domain?.currencyNeedsAdding[currency.address],
-                                              checked: true,
+                  <FieldArray name={`networks`}>
+                    {() => (
+                      <>
+                        {domain?.currencies.map((currency) => {
+                          return (
+                            <Field name={`networks[${index}]`}>
+                              {({ field }: { field: any }) => {
+                                return (
+                                  <Checkbox
+                                    key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
+                                    label={
+                                      <Text variant="label2">
+                                        {currency.displayName} ({currency.symbol})
+                                      </Text>
+                                    }
+                                    checked={
+                                      field.value?.currencies?.[currency.address]?.checked ??
+                                      domain?.isAllowedAsset[currency.address]
+                                    }
+                                    // !isAllowedAsset[currency.address] means that the asset is already enabled, it cannot be disabled
+                                    disabled={
+                                      status === 'deployed' ||
+                                      status === 'deploying' ||
+                                      domain?.isAllowedAsset[currency.address]
+                                    }
+                                    onChange={(event) => {
+                                      if (event.target.checked) {
+                                        // Check if the network already exists
+                                        if (!formik.values.networks[index]) {
+                                          formik.setFieldValue(`networks[${index}]`, {
+                                            chainId,
+                                            poolId: selectedPool,
+                                            currencies: {
+                                              [currency.address]: {
+                                                currencyNeedsAdding: domain?.currencyNeedsAdding[currency.address],
+                                                checked: true,
+                                              },
                                             },
-                                          },
-                                        })
-                                      } else {
-                                        // Add currency to existing network
-                                        formik.setFieldValue(`networks[${index}].currencies.${currency.address}`, {
-                                          currencyNeedsAdding: domain?.currencyNeedsAdding[currency.address],
-                                          checked: true,
-                                        })
+                                          })
+                                        } else {
+                                          // Add currency to existing network
+                                          formik.setFieldValue(`networks[${index}].currencies.${currency.address}`, {
+                                            currencyNeedsAdding: domain?.currencyNeedsAdding[currency.address],
+                                            checked: true,
+                                          })
+                                        }
                                       }
-                                    }
-                                    if (!event.target.checked) {
-                                      const updatedCurrencies = {
-                                        ...formik.values.networks[index]?.currencies,
-                                      }
-                                      delete updatedCurrencies[currency.address]
+                                      if (!event.target.checked) {
+                                        const updatedCurrencies = {
+                                          ...formik.values.networks[index]?.currencies,
+                                        }
+                                        delete updatedCurrencies[currency.address]
 
-                                      // If no currencies left, remove the entire network
-                                      if (Object.keys(updatedCurrencies).length === 0) {
-                                        const updatedNetworks = [...formik.values.networks]
-                                        updatedNetworks.splice(index, 1)
-                                        formik.setFieldValue('networks', updatedNetworks)
-                                      } else {
-                                        // Otherwise just update currencies
-                                        formik.setFieldValue(`networks[${index}].currencies`, updatedCurrencies)
+                                        // If no currencies left, remove the entire network
+                                        if (Object.keys(updatedCurrencies).length === 0) {
+                                          const updatedNetworks = [...formik.values.networks]
+                                          updatedNetworks.splice(index, 1)
+                                          formik.setFieldValue('networks', updatedNetworks)
+                                        } else {
+                                          // Otherwise just update currencies
+                                          formik.setFieldValue(`networks[${index}].currencies`, updatedCurrencies)
+                                        }
                                       }
-                                    }
-                                  }}
-                                />
-                              )
-                            }}
-                          </Field>
-                        )
-                      })}
-                    </>
-                  )}
-                </FieldArray>
-              </Stack>
-            </>
-          ),
-        },
-      ]}
-    />
+                                    }}
+                                  />
+                                )
+                              }}
+                            </Field>
+                          )
+                        })}
+                      </>
+                    )}
+                  </FieldArray>
+                </Stack>
+              </>
+            ),
+          },
+        ]}
+      />
+    </Box>
   )
 }
 

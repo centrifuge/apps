@@ -1,11 +1,12 @@
 import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
-import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
+import { Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import { isEvmAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { usePoolMetadataMulti } from '../../../utils/usePools'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePool } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
   isOpen: boolean
@@ -20,8 +21,7 @@ type NewInvestorFormValues = {
 }
 
 export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
-  const { pools } = useSelectedPools(true)
-  const poolMetadata = usePoolMetadataMulti(pools ?? [])
+  const { pools, poolsWithMetadata } = useSelectedPools(true)
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
     (cent) => cent.pools.updatePoolRoles
@@ -41,13 +41,24 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
       const validAddress = validator(values.investorAddress) ? values.investorAddress : undefined
       const domains = values.network ? [[values.network, validAddress]] : undefined
 
-      execute([
-        values.poolId,
-        [[validAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]],
-        [],
-      ])
+      execute(
+        [
+          values.poolId,
+          [[validAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]],
+          [],
+        ],
+        {
+          account,
+        }
+      )
     },
   })
+
+  const [account] = useSuitableAccounts({
+    poolId: formik.values.poolId ?? pools?.[0]?.id ?? '',
+    poolRole: ['InvestorAdmin'],
+  })
+
   return (
     <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
       <Stack gap={4}>
@@ -61,10 +72,8 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                 <Select
                   label="Select pool"
                   options={
-                    pools?.map((pool) => ({
-                      label: poolMetadata.find((p) =>
-                        Object.keys(p.data?.tranches ?? {}).find((tId) => tId === pool.tranches[0].id)
-                      )?.data?.pool?.name,
+                    poolsWithMetadata.map((pool) => ({
+                      label: pool.meta?.pool?.name,
                       value: pool.id,
                     })) ?? []
                   }
@@ -78,26 +87,16 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                     formik.setFieldValue('trancheId', trancheId)
                   }}
                 />
-
-                <Select
-                  label="Select tranche token"
-                  id="trancheId"
-                  name="trancheId"
-                  disabled={pools?.find((pool) => pool.id === formik.values.poolId)?.tranches.length! === 1}
-                  value={formik.values.trancheId}
-                  options={
-                    pools
-                      ?.find((pool) => pool.id === formik.values.poolId)
-                      ?.tranches.map((t) => {
-                        return {
-                          label: t.currency.displayName,
-                          value: t.id,
-                        }
-                      }) ?? []
-                  }
-                  onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
-                />
-                <AddressNetworkInput formik={formik} poolId={formik.values.poolId} />
+                {account ? (
+                  <>
+                    <TrancheInput poolId={formik.values.poolId} />
+                    <AddressNetworkInput poolId={formik.values.poolId} />
+                  </>
+                ) : (
+                  <Text variant="body2" color="textSecondary">
+                    Only investor admins can add new investors
+                  </Text>
+                )}
               </Stack>
               <Button type="submit" loading={isTransactionPending}>
                 Add new investor
@@ -110,13 +109,46 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
   )
 }
 
-function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<NewInvestorFormValues>; poolId: string }) {
+function TrancheInput({ poolId }: { poolId: string }) {
+  const formik = useFormikContext<NewInvestorFormValues>()
+  const pool = usePool(poolId)
+  const [account] = useSuitableAccounts({
+    poolId,
+    poolRole: ['InvestorAdmin'],
+  })
+
+  return account ? (
+    <Select
+      label="Select tranche token"
+      id="trancheId"
+      name="trancheId"
+      disabled={pool?.tranches.length! === 1}
+      value={formik.values.trancheId}
+      options={
+        pool?.tranches.map((t) => {
+          return {
+            label: t.currency.displayName,
+            value: t.id,
+          }
+        }) ?? []
+      }
+      onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
+    />
+  ) : null
+}
+
+function AddressNetworkInput({ poolId }: { poolId: string }) {
   const {
     evm: { chains },
   } = useWallet()
   const { data: domains } = useActiveDomains(poolId)
+  const [account] = useSuitableAccounts({
+    poolId,
+    poolRole: ['InvestorAdmin'],
+  })
+  const formik = useFormikContext<NewInvestorFormValues>()
   const deployedLpChains = domains?.map((d) => d.chainId) ?? []
-  return (
+  return account ? (
     <Stack gap={2} backgroundColor="backgroundSecondary" borderRadius="10px" padding={2}>
       <AddressInput
         value={formik.values.investorAddress}
@@ -140,5 +172,5 @@ function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<New
         onChange={(event) => formik.setFieldValue('network', event.target.value)}
       />
     </Stack>
-  )
+  ) : null
 }

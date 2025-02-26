@@ -1,14 +1,16 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import React, { ReactNode, createContext, useContext, useState } from 'react'
-import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../usePermissions'
+import { PoolWithMetadata, useGetPoolsMetadata } from '../../components/Dashboard/utils'
 import { usePools } from '../usePools'
 
 interface SelectedPoolsContextProps {
-  selectedPools: string[]
-  togglePoolSelection: (poolId: string) => void
-  setSelectedPools: React.Dispatch<React.SetStateAction<string[]>>
-  clearSelectedPools: () => void
-  pools: Pool[] | undefined
+  selectedPoolIds: string[]
+  selectedPoolsWithMetadata: PoolWithMetadata[]
+  togglePoolIdSelection: (poolId: string) => void
+  setSelectedPoolIds: React.Dispatch<React.SetStateAction<string[]>>
+  clearSelectedPoolsIds: () => void
+  pools: Pool[] | undefined // pools that the user has permissions for
+  poolsWithMetadata: PoolWithMetadata[] // pools with metadata that the user has permissions for
 }
 
 const SelectedPoolsContext = createContext<SelectedPoolsContextProps | undefined>(undefined)
@@ -20,8 +22,8 @@ export const useSelectedPools = (defaultSelectAll: boolean = false): SelectedPoo
   }
 
   React.useEffect(() => {
-    if (defaultSelectAll && context.pools?.length && context.selectedPools.length === 0) {
-      context.setSelectedPools(context.pools.map((pool) => pool.id))
+    if (defaultSelectAll && context.pools?.length && context.selectedPoolIds.length === 0) {
+      context.setSelectedPoolIds(context.pools.map((pool) => pool.id))
     }
   }, [defaultSelectAll, context.pools])
 
@@ -33,23 +35,32 @@ interface SelectedPoolsProviderProps {
 }
 
 export const SelectedPoolsProvider = ({ children }: SelectedPoolsProviderProps) => {
-  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor()
-  const a = usePools()
-  const [selectedPools, setSelectedPools] = useState<string[]>([])
+  const pools = usePools()
+  const poolsWithMetadata = useGetPoolsMetadata(pools || [])
+  const [selectedPoolIds, setSelectedPoolIds] = useState<string[]>([])
+  const selectedPoolsWithMetadata = poolsWithMetadata.filter((pool) => selectedPoolIds.includes(pool.id))
 
-  const togglePoolSelection = (poolId: string) => {
-    setSelectedPools((prevSelected) =>
+  const togglePoolIdSelection = (poolId: string) => {
+    setSelectedPoolIds((prevSelected) =>
       prevSelected.includes(poolId) ? prevSelected.filter((id) => id !== poolId) : [...prevSelected, poolId]
     )
   }
 
-  const clearSelectedPools = () => {
-    setSelectedPools([])
+  const clearSelectedPoolsIds = () => {
+    setSelectedPoolIds([])
   }
 
   return (
     <SelectedPoolsContext.Provider
-      value={{ selectedPools, togglePoolSelection, setSelectedPools, clearSelectedPools, pools: pools ?? [] }}
+      value={{
+        selectedPoolIds,
+        togglePoolIdSelection,
+        setSelectedPoolIds,
+        clearSelectedPoolsIds,
+        pools: pools ?? [],
+        poolsWithMetadata,
+        selectedPoolsWithMetadata,
+      }}
     >
       {children}
     </SelectedPoolsContext.Provider>
