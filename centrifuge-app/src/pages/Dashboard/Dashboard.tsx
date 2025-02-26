@@ -12,8 +12,8 @@ import { useLiquidityMulti } from '../../../src/utils/useLiquidity'
 import { useNavGrowth, useTotalNAV } from '../../components/Dashboard/utils'
 
 const aumOptions = [
-  { label: 'YTD', value: 'YTD' },
   { label: '6M', value: '180d' },
+  { label: 'YTD', value: 'YTD' },
   { label: '3M', value: '90d' },
 ]
 
@@ -101,13 +101,13 @@ export default function Dashboard() {
   }
 
   return (
-    <Box py={4} px={3}>
+    <Box py={2} px={3}>
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         <PoolSelector multiple />
       </Box>
-      <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
-      <DashboardTable filteredPools={filteredPools} />
+      <PageSummary data={pageSummaryData} mx={0} />
+      <DashboardTable />
     </Box>
   )
 }

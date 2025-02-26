@@ -18,7 +18,7 @@ export default function InvestorsPage() {
   const investors = useInvestorListMulti(selectedPools)
 
   return (
-    <Stack gap={4} py={3} px={3}>
+    <Stack gap={4} py={2} px={3}>
       <AddNewInvestorDrawer isOpen={isAddNewInvestorDrawerOpen} onClose={() => setIsAddNewInvestorDrawerOpen(false)} />
       <SupportedNetworksDrawer
         isOpen={isSupportedNetworksDrawerOpen}

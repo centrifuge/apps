@@ -1,6 +1,6 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Accordion, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
+import { Accordion, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
@@ -41,7 +41,7 @@ export function AccessDrawer({
   }, [poolIds.length])
 
   return (
-    <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose}>
+    <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose} overflow="hidden">
       <Select
         label="Select pool"
         onChange={(event) => {
@@ -145,35 +145,46 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
-        <Stack gap={3} mb={3}>
-          <Accordion
-            items={[
-              {
-                title: 'Pool managers',
-                body: <PoolManagers poolId={poolId} handle={poolManagersRef} account={adminDelegateAccount} />,
-                sublabel: 'Pool managers can manage investors and the liquidity reserve of the pool.',
-              },
-              {
-                title: 'Pool delegates',
-                body: (
-                  <Stack>
-                    <AssetOriginators poolId={poolId} handle={aoRef} account={aoDelegateAccount} />
-                    <OracleFeeders poolId={poolId} handle={feedersRef} account={adminDelegateAccount} />
-                  </Stack>
-                ),
-                sublabel: 'Pool delegates are authorized to perform designated pool actions by the pool manager.',
-              },
-            ]}
-          />
-        </Stack>
-        <Stack gap={1} position="sticky" bottom="-24px" mb="-24px" bg="backgroundPrimary" pb={3}>
-          <Button type="submit" loading={isLoading}>
-            Update
-          </Button>
-          <Button variant="inverted" onClick={() => onClose()}>
-            Cancel
-          </Button>
-        </Stack>
+        <Box display="flex" flexDirection="column" height="75vh" mx={1}>
+          <Stack gap={3} flex={1} overflow="auto">
+            <Accordion
+              items={[
+                {
+                  title: 'Pool managers',
+                  body: <PoolManagers poolId={poolId} handle={poolManagersRef} account={adminDelegateAccount} />,
+                  sublabel: 'Pool managers can manage investors and the liquidity reserve of the pool.',
+                },
+                {
+                  title: 'Pool delegates',
+                  body: (
+                    <Stack gap={3}>
+                      <AssetOriginators poolId={poolId} handle={aoRef} account={aoDelegateAccount} />
+                      <OracleFeeders poolId={poolId} handle={feedersRef} account={adminDelegateAccount} />
+                    </Stack>
+                  ),
+                  sublabel: 'Pool delegates are authorized to perform designated pool actions by the pool manager.',
+                },
+                ...(editAdminConfig
+                  ? [
+                      {
+                        title: 'Admin config',
+                        body: <DebugAdmins poolId={poolId} handle={debugAdminsRef} />,
+                        sublabel: 'Debug flag access to admin config',
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </Stack>
+          <Stack gap={1} bg="backgroundPrimary" mt={3}>
+            <Button type="submit" loading={isLoading}>
+              Update
+            </Button>
+            <Button variant="inverted" onClick={() => onClose()}>
+              Cancel
+            </Button>
+          </Stack>
+        </Box>
       </Form>
     </FormikProvider>
   )

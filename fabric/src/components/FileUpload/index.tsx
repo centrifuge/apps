@@ -224,7 +224,9 @@ export function FileUpload({
               {curFile && typeof curFile !== 'string' && curFile.name ? (
                 ''
               ) : (
-                <Text variant="body3">{fileTypeText}</Text>
+                <Text variant="body3" color="textSecondary">
+                  {fileTypeText}
+                </Text>
               )}
               <StyledTextInput
                 readOnly

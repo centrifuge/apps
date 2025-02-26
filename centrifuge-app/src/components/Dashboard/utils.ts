@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Perquintill, Pool, PoolMetadata, Token } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { daysBetween } from '../../../src/utils/date'
@@ -22,7 +22,9 @@ export type TransformedLoan = Loan & {
   presentValue: CurrencyBalance
 }
 
-const hasValuationMethod = (pricing: any): pricing is { valuationMethod: string; presentValue: CurrencyBalance } => {
+export const hasValuationMethod = (
+  pricing: any
+): pricing is { valuationMethod: string; presentValue: CurrencyBalance } => {
   return pricing && typeof pricing.valuationMethod === 'string'
 }
 
@@ -81,8 +83,8 @@ export const useLoanCalculations = (transformedLoans: TransformedLoan[]) => {
 
   const pendingFees = useMemo(() => {
     return uniquePools.reduce((sum, loan) => {
-      const feeTotalPaid = loan.pool.fees?.totalPaid ? loan.pool.fees.totalPaid.toDecimal() : 0
-      return sum.add(Dec(feeTotalPaid))
+      const feeTotalPending = loan.pool.fees?.totalPending ? loan.pool.fees.totalPending.toDecimal() : 0
+      return sum.add(Dec(feeTotalPending))
     }, Dec(0))
   }, [uniquePools])
 
@@ -125,7 +127,8 @@ export function usePoolMetadataMap(pools: Pool[]) {
   return poolMetadataMap
 }
 
-export function useGetPoolsMetadata(pools: Pool[]) {
+export type PoolWithMetadata = Pool & { meta: PoolMetadata }
+export function useGetPoolsMetadata(pools: Pool[]): PoolWithMetadata[] {
   const metas = usePoolMetadataMap(pools)
   return (
     pools?.map((pool) => {

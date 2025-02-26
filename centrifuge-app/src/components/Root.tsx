@@ -11,6 +11,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { NavLinkProps, Navigate, RouterProvider, createHashRouter, matchRoutes } from 'react-router-dom'
 import { config, evmChains } from '../config'
+import { SelectedPoolsProvider } from '../utils/contexts/SelectedPoolsContext'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -60,7 +61,6 @@ const CollectionPage = React.lazy(() => import('../pages/Collection'))
 const CollectionsPage = React.lazy(() => import('../pages/Collections'))
 const InvestmentDisclaimerPage = React.lazy(() => import('../pages/InvestmentDisclaimer'))
 const IssuerCreatePoolPage = React.lazy(() => import('../pages/IssuerCreatePool'))
-const IssuerPoolPage = React.lazy(() => import('../pages/IssuerPool'))
 const LoanPage = React.lazy(() => import('../pages/Loan'))
 const MintNFTPage = React.lazy(() => import('../pages/MintNFT'))
 const MultisigApprovalPage = React.lazy(() => import('../pages/MultisigApproval'))
@@ -75,7 +75,6 @@ const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
 const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
-const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 const PoolsPage = React.lazy(() => import('../pages/Pools'))
@@ -105,17 +104,12 @@ const router = createHashRouter([
         element: <PoolDetailPage />,
         handle: { component: PoolDetailPage },
       },
-      {
-        path: '/issuer/:pid/*',
-        element: <IssuerPoolPage />,
-        handle: { component: IssuerPoolPage },
-      },
       { path: '/nfts/collection/:cid/object/mint', element: <MintNFTPage />, handle: { component: MintNFTPage } },
       { path: '/nfts/collection/:cid/object/:nftid', element: <NFTPage />, handle: { component: NFTPage } },
       { path: '/nfts/collection/:cid', element: <CollectionPage />, handle: { component: CollectionPage } },
       { path: '/nfts/account', element: <AccountNFTsPage />, handle: { component: AccountNFTsPage } },
       { path: '/nfts', element: <CollectionsPage />, handle: { component: CollectionsPage } },
-      { path: '/issuer/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
+      { path: '/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
       { path: '/history/:address', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
       { path: '/pools/:pid/assets/:aid', element: <LoanPage />, handle: { component: LoanPage } },
       {
@@ -141,7 +135,6 @@ const router = createHashRouter([
         element: <ConvertAddressPage />,
         handle: { component: ConvertAddressPage },
       },
-      { path: '/nav-management/:pid', element: <NavManagementPage />, handle: { component: NavManagementPage } },
       { path: '*', element: <NotFoundPage />, handle: { component: NotFoundPage } },
     ],
     errorElement: <NotFoundPage />,
@@ -195,15 +188,17 @@ export function Root() {
               <SupportedBrowserBanner />
               <OnboardingAuthProvider>
                 <OnboardingProvider>
-                  <DebugFlags onChange={(state) => setDebugState(state)}>
-                    <ExpiringCFGRewardsBanner />
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <LoadBoundary>
-                        <RouterProvider router={router} />
-                      </LoadBoundary>
-                    </TransactionProvider>
-                  </DebugFlags>
+                  <SelectedPoolsProvider>
+                    <DebugFlags onChange={(state) => setDebugState(state)}>
+                      <ExpiringCFGRewardsBanner />
+                      <TransactionProvider>
+                        <TransactionToasts />
+                        <LoadBoundary>
+                          <RouterProvider router={router} />
+                        </LoadBoundary>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </SelectedPoolsProvider>
                 </OnboardingProvider>
               </OnboardingAuthProvider>
             </WalletProvider>

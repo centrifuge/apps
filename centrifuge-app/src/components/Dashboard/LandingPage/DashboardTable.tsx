@@ -38,48 +38,49 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
         navPerToken: token.tokenPrice,
         valueLocked: token?.tokenPrice ? token.totalIssuance.toDecimal().mul(token.tokenPrice.toDecimal()) : Dec(0),
         poolId: pool.id,
+        rawAPY: Number(calculateApyPerToken(token, pool).split('%')[0]),
       }))
     )
-  }, [pools])
+  }, [selectedPoolsWithMetadata])
 
-  const columns = useMemo(() => {
-    return [
-      {
-        header: 'Pool',
-        align: 'left',
-        cell: ({ poolName, poolIcon }: Row) => {
-          return (
-            <Box display="flex" alignItems="center">
-              {poolIcon && <Box as="img" src={poolIcon} alt="" height={24} width={24} borderRadius={4} mr={1} />}
-              <Text style={{ fontWeight: 500 }} variant="body3">
-                {poolName}
-              </Text>
-            </Box>
-          )
-        },
+  const columns = [
+    {
+      header: 'Pool',
+      align: 'left',
+      cell: ({ poolName, poolIcon }: Row) => {
+        return (
+          <Box display="flex" alignItems="center">
+            {poolIcon && <Box as="img" src={poolIcon} alt="" height={24} width={24} borderRadius={4} mr={1} />}
+            <Text style={{ fontWeight: 500 }} variant="body3">
+              {poolName}
+            </Text>
+          </Box>
+        )
       },
-      {
-        header: 'Tranche',
-        sortKey: 'tranchetoken',
-        cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="APY" />,
-        sortKey: 'apy',
-        cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="NAV (USDC)" />,
-        sortKey: 'valueLocked',
-        cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="NAV per share" />,
-        sortKey: 'navPerToken',
-        cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
-      },
-    ]
-  }, [pools])
+    },
+    {
+      header: 'Tranche',
+      sortKey: 'tranchetoken',
+      cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="APY" />,
+      sortKey: 'rawAPY',
+      cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="NAV (USDC)" />,
+      sortKey: 'valueLocked',
+      cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="Token price" />,
+      sortKey: 'navPerToken',
+      cell: ({ navPerToken }: Row) => (
+        <Text variant="body3">{navPerToken ? formatBalance(navPerToken, '', 6) : '-'}</Text>
+      ),
+    },
+  ]
 
   if (!pools.length) return <Text variant="heading4">No data available</Text>
 
@@ -99,7 +100,8 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
         scrollable
         hideBorder
         hideHeader
-        onRowClicked={(row) => `/pools/${row.poolId}`}
+        defaultSortKey="valueLocked"
+        defaultSortOrder="desc"
       />
       <Divider color={theme.colors.backgroundSecondary} />
       <PoolConfigurationDrawer open={open} setOpen={setOpen} pools={pools} />

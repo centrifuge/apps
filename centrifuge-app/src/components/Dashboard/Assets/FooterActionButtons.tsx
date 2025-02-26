@@ -1,6 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Grid, IconWarning, Text } from '@centrifuge/fabric'
+import { Box, Button, IconWarning, Stack, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useCallback, useMemo } from 'react'
 import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
@@ -13,6 +13,7 @@ export const FooterActionButtons = ({
   isUploadingTemplates,
   resetToDefault,
   isLoading,
+  disabled,
 }: {
   type: string
   setType: (type: 'create-asset' | 'upload-template') => void
@@ -20,6 +21,7 @@ export const FooterActionButtons = ({
   isUploadingTemplates: boolean
   resetToDefault: () => void
   isLoading: boolean
+  disabled?: boolean
 }) => {
   const form = useFormikContext<CreateAssetFormValues>()
   const pool = form.values.selectedPool
@@ -114,7 +116,7 @@ export const FooterActionButtons = ({
             >
               Upload asset template
             </Button>
-            <Text variant="body3" color="textSecondary">
+            <Text variant="body3" color="textSecondary" textAlign="center">
               Template must be in .JSON format. 5MB size limit
             </Text>
           </Box>
@@ -147,20 +149,15 @@ export const FooterActionButtons = ({
     isTemplatesTxLoading,
     isUploadingTemplates,
     uploadTemplates,
+    canCreateAssets,
   ])
 
   return (
-    <Grid
-      gap={2}
-      display="flex"
-      justifyContent="flex-end"
-      flexDirection="column"
-      marginTop={type === 'upload-template' ? '60%' : '40%'}
-    >
+    <Stack gap={1} bg="backgroundPrimary" mt={3}>
       {createButton}
       <Button variant="inverted" onClick={() => setOpen(false)} style={{ width: '100%' }}>
         Cancel
       </Button>
-    </Grid>
+    </Stack>
   )
 }

@@ -77,7 +77,7 @@ const StyledAnchorTextLink = styled(AnchorTextLink)`
 
 export function ReportDetails({ metadata }: IssuerSectionProps) {
   const pathname = useLocation().pathname
-  const report = metadata?.pool?.reports?.[0]
+  const report = metadata?.pool?.report
   const theme = useTheme()
 
   const reportLinks = [
@@ -282,7 +282,7 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
 }
 
 export const PoolAnalysis = ({ metadata, inverted }: IssuerSectionProps & { inverted?: boolean }) => {
-  const report = metadata?.pool?.reports?.[0]
+  const report = metadata?.pool?.report
   // Not sure why some pools have N/A, it should be empty but this is a fix for those pools in the meantime
   const isEmpty = report?.author.name === 'N/A'
 

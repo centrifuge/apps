@@ -4,7 +4,6 @@ import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useBasePath } from '../../utils/useBasePath'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { RouterTextLink } from '../TextLink'
@@ -156,8 +155,6 @@ export const TransactionHistoryTable = ({
   activeAssetId?: string
   preview?: boolean
 }) => {
-  const basePath = useBasePath('/pools')
-
   const transformedTransactions =
     transactions
       ?.filter(
@@ -232,7 +229,7 @@ export const TransactionHistoryTable = ({
       align: 'left',
       header: <SortableTableHeader label="Transaction" />,
       cell: ({ assetId, assetName, toAssetId, toAssetName, label, sublabel, fromAssetName, fromAssetId }: Row) => {
-        const base = `${basePath}/${poolId}/assets/`
+        const base = `pools/${poolId}/assets/`
         const isCashTransfer = label === 'Cash transfer from'
         return (
           <Text as="span" variant="body3">

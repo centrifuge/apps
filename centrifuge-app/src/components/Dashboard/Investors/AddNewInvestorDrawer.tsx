@@ -1,5 +1,5 @@
 import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
-import { AddressInput, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
+import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
 import { isEvmAddress } from '../../../utils/address'
@@ -56,8 +56,8 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
         </Text>
         <FormikProvider value={formik}>
           <Form>
-            <Stack gap={4}>
-              <Stack gap={2}>
+            <Box display="flex" flexDirection="column" height="85vh">
+              <Stack gap={2} flex={1} overflow="auto">
                 <Select
                   label="Select pool"
                   options={
@@ -102,7 +102,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
               <Button type="submit" loading={isTransactionPending}>
                 Add new investor
               </Button>
-            </Stack>
+            </Box>
           </Form>
         </FormikProvider>
       </Stack>

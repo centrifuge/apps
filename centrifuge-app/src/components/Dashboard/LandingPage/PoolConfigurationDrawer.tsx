@@ -10,7 +10,7 @@ import {
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
 import { LoadBoundary } from '../../../../src/components/LoadBoundary'
 import { Spinner } from '../../../../src/components/Spinner'
@@ -175,7 +175,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         }
         tokenNames.add(t.tokenName)
 
-        // matches any character thats not alphanumeric or -
+        // matches any character thats not alphanumeric
         if (/[^a-z^A-Z^0-9^-]+/.test(t.symbolName)) {
           errors = setIn(errors, `tranches.${i}.symbolName`, 'Invalid character detected')
         }
@@ -220,7 +220,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
       let executiveSummary
 
       // Pin files ( poolIcon, issuerLogo, executiveSummary)
-
       const pinFile = async (file: File | FileType) => {
         const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(file as File)))
         return { uri: pinned.uri, mime: (file as File).type }
@@ -240,7 +239,6 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         executiveSummary = (await pinFile(values?.pool?.links?.executiveSummary)).uri
         prefetchMetadata(executiveSummary)
       }
-
 
       const newPoolMetadata: PoolMetadata = {
         pool: {
@@ -339,17 +337,10 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         })),
       ]
 
-
       execute([values.id, newPoolMetadata, tranches], { account })
       actions.setSubmitting(false)
     },
   })
-
-  // Force reinitialize Formik when the pool changes this is so we
-  // can use the formik (dirty) to enable/disable the update button.
-  useEffect(() => {
-    form.resetForm()
-  }, [pool])
 
   // form variables
   const isPoolAdmin = !!usePoolAdmin(pool.id)
@@ -366,31 +357,30 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
 
   return (
     <LoadBoundary>
-      <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration">
+      <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%">
         <Divider color="backgroundSecondary" />
+
+        <Select
+          label="Select pool"
+          options={poolsWithMetadata.map((pool) => ({
+            label: pool.meta?.pool?.name,
+            value: pool.id,
+          }))}
+          value={pool.id}
+          onChange={(event) => {
+            const selectedPool = poolsWithMetadata.find((pool: PoolWithMetadata) => pool.id === event.target.value)
+            if (selectedPool) {
+              setPool(selectedPool)
+            }
+          }}
+        />
         <FormikProvider value={form}>
           {pool.id !== form.values.id ? (
             <Spinner />
           ) : (
             <Form noValidate>
-              <Stack>
-                <Box px={1}>
-                  <Select
-                    label="Select pool"
-                    options={pools.map((pool) => ({
-                      label: pool.meta?.pool?.name,
-                      value: pool.id,
-                    }))}
-                    value={pool.id}
-                    onChange={(event) => {
-                      const selectedPool = pools.find((pool: PoolWithMetadata) => pool.id === event.target.value)
-                      if (selectedPool) {
-                        setPool(selectedPool)
-                      }
-                    }}
-                  />
-                </Box>
-                {isPoolAdmin && (
+              <Stack mb={3}>
+                {!isPoolAdmin && (
                   <Box mt={2}>
                     <Accordion
                       items={[

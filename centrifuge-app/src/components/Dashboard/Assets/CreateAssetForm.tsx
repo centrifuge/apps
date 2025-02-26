@@ -6,6 +6,7 @@ import {
   IconHelpCircle,
   ImageUpload,
   RadioButton,
+  Stack,
   Tabs,
   TabsItem,
   Text,
@@ -82,12 +83,11 @@ export function CreateAssetsForm() {
   }
 
   return (
-    <Box>
+    <Stack flex={1} overflow="auto">
       <Box
         backgroundColor="backgroundSecondary"
         borderRadius={8}
         p={2}
-        mt={3}
         border={`1px solid ${theme.colors.borderPrimary}`}
       >
         <Box>
@@ -236,11 +236,8 @@ export function CreateAssetsForm() {
               </Box>
             )}
           </Box>
-          <Box mb={2}>
-            <Divider color="backgroundSecondary" />
-          </Box>
         </>
       )}
-    </Box>
+    </Stack>
   )
 }

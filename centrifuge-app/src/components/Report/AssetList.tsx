@@ -7,7 +7,6 @@ import {
 } from '@centrifuge/sdk/dist/types/reports'
 import { useContext, useEffect, useMemo } from 'react'
 import { formatBalance, formatPercentage } from '../../../src/utils/formatting-sdk'
-import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { usePoolMetadata } from '../../utils/usePools'
@@ -181,7 +180,6 @@ function getColumnConfig(isPrivate: boolean, symbol: string, decimals: number) {
 }
 
 export function AssetList({ pool }: { pool: Pool }) {
-  const basePath = useBasePath()
   const { loanStatus, startDate, setCsvData, endDate } = useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { symbol, decimals } = pool.currency
@@ -212,7 +210,7 @@ export function AssetList({ pool }: { pool: Pool }) {
             const assetId = row?.id?.split('-')[1]
             return col.header === 'Name' ? (
               <Text as="span" variant="body3">
-                <RouterTextLink to={`${basePath}/${pool.id}/assets/${assetId}`}>
+                <RouterTextLink to={`pools/${pool.id}/assets/${assetId}`}>
                   {col.formatter((row.value as any)[index])}
                 </RouterTextLink>
               </Text>
@@ -223,7 +221,7 @@ export function AssetList({ pool }: { pool: Pool }) {
           csvOnly: col.csvOnly,
         }))
         .filter((col) => !col.csvOnly),
-    [columnConfig, basePath, pool.id]
+    [columnConfig, pool.id]
   )
 
   const data = useMemo((): any[] => {

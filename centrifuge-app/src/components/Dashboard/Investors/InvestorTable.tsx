@@ -1,9 +1,10 @@
-import { CurrencyBalance, FileType, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Stack, Text, truncate } from '@centrifuge/fabric'
+import { Box, IconInfo, Shelf, Text, truncate } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import {
   Column,
   DataTable,
@@ -34,11 +35,13 @@ export type InvestorTableRow = {
   realizedProfit: CurrencyBalance
 }
 
-export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
+export function InvestorTable() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const investorParam = searchParams.get('d_investor')
   const cent = useCentrifuge()
+<<<<<<< HEAD
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const investors = useInvestorListMulti(pools?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
@@ -68,6 +71,37 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
         investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
       }
     }) ?? []
+=======
+  const { poolsWithMetadata, selectedPoolIds } = useSelectedPools()
+  const investors = useInvestorListMulti(poolsWithMetadata?.map((p) => p.id) ?? [])
+  const getNetworkName = useGetNetworkName()
+
+  const data: InvestorTableRow[] =
+    investors
+      ?.map((investor) => {
+        const tokenName = poolsWithMetadata
+          ?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))
+          ?.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
+        return {
+          tokenName,
+          trancheId: investor.trancheId,
+          poolId: investor.poolId,
+          poolIcon: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.meta?.pool?.icon,
+          poolCurrency: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.currency.displayName,
+          wallet: investor?.evmAddress || investor.accountId || '',
+          network: investor.chainId,
+          holdings: investor.balance,
+          pendingInvestments: investor.pendingInvestCurrency,
+          pendingRedemptions: investor.pendingRedeemTrancheTokens,
+          investorSince: investor.initialisedAt,
+          unrealizedProfit: investor.unrealizedProfit,
+          realizedProfit: investor.sumClaimedCurrency,
+          investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
+        }
+      })
+      .filter((i) => selectedPoolIds.includes(i.poolId)) ?? []
+
+>>>>>>> 6f099578 (Add feedback)
   const filters = useFilters({ data })
   const [searchValue, setSearchValue] = useState('')
 
@@ -173,21 +207,32 @@ export function InvestorTable({ pools }: { pools: Pool[] | undefined }) {
           investor={filters.data.find((i) => `${i.wallet}-${i.trancheId}-${i.network}` === investorParam)!}
         />
       )}
-      <DataTable
-        data={tableData}
-        columns={columns}
-        hoverable
-        defaultSortKey="poolTokenId"
-        defaultSortOrder="asc"
-        scrollable
-        onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
-      />
-      {tableData.length === 0 && (
-        <Stack width="100%" alignItems="center">
-          <Text variant="body2" color="textSecondary">
+      {tableData.length === 0 ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+          background={theme.colors.backgroundSecondary}
+          borderRadius={4}
+          p={2}
+          border={`1px solid ${theme.colors.borderPrimary}`}
+        >
+          <IconInfo size={14} style={{ marginRight: 8 }} />
+          <Text variant="body3" color="textSecondary">
             No investors found
           </Text>
-        </Stack>
+        </Box>
+      ) : (
+        <DataTable
+          data={tableData}
+          columns={columns}
+          hoverable
+          defaultSortKey="poolTokenId"
+          defaultSortOrder="asc"
+          scrollable
+          onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
+        />
       )}
     </Box>
   )

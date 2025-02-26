@@ -49,7 +49,6 @@ export type Key =
   | 'showTokenYields'
   | 'showOracleTx'
   | 'showGmp'
-  | 'showDashboard'
 
 export const flagsConfig = {
   address: {
@@ -134,11 +133,6 @@ export const flagsConfig = {
   showGmp: {
     default: false,
     type: 'checkbox',
-  },
-  showDashboard: {
-    default: false,
-    type: 'checkbox',
-    alwaysShow: true,
   },
 } satisfies Record<Key, DebugFlagConfig>
 

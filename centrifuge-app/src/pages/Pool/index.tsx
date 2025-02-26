@@ -1,8 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { PoolDetailAssetsTab } from './Assets'
-import { PoolDetailLiquidityTab } from './Liquidity'
 import { PoolDetailOverviewTab } from './Overview'
-import { PoolFeesTab } from './PoolFees'
 import { PoolDetailReportingTab } from './Reporting'
 
 export default function PoolDetailPage() {
@@ -13,9 +11,7 @@ export default function PoolDetailPage() {
       <Route path="data/:report" element={<PoolDetailReportingTab />} />
       <Route path="reporting" element={<PoolDetailReportingTab />} />
       <Route path="data" element={<PoolDetailReportingTab />} />
-      <Route path="liquidity" element={<PoolDetailLiquidityTab />} />
       <Route path="assets" element={<PoolDetailAssetsTab />} />
-      <Route path="fees" element={<PoolFeesTab />} />
     </Routes>
   )
 }
