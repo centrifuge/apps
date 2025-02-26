@@ -58,7 +58,7 @@ export default function AssetsPage() {
   if (isLoading) return <Spinner />
 
   return (
-    <Box py={4} px={3}>
+    <Box py={2} px={3}>
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         <PoolSelector multiple />
