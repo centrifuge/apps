@@ -10,7 +10,7 @@ export default function DashboardPage() {
     <SelectedPoolsProvider>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/accounts" element={<AccountsPage />} />
+        <Route path="/account" element={<AccountsPage />} />
         <Route path="/assets" element={<AssetsPage />} />
         <Route path="/investors" element={<InvestorsPage />} />
       </Routes>
