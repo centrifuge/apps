@@ -4,9 +4,9 @@ import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@c
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
-import { IssuerCategoriesSection } from '../../../pages/IssuerCreatePool/IssuerCategories'
 import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
 import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
+import { ServiceProvidersSection } from '../../../pages/IssuerCreatePool/ServiceProviderSection'
 import { TranchesSection } from '../../../pages/IssuerCreatePool/TranchesSection'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
@@ -421,7 +421,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
                             <Text variant="heading3">Service providers</Text>
                           </Box>
                         ),
-                        body: <IssuerCategoriesSection isUpdating />,
+                        body: <ServiceProvidersSection isUpdating />,
                       },
                       {
                         title: (

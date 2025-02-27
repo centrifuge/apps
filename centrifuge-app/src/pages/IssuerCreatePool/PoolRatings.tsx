@@ -2,9 +2,9 @@ import { Box, FileUpload, FileUploadProps, Text, TextInput, URLInput } from '@ce
 import { Field, FieldArray, FieldProps, useField, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
-import { LabelWithDeleteButton } from './IssuerCategories'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
+import { LabelWithDeleteButton } from './ServiceProviderSection'
 
 interface ReportFileUploadProps extends FileUploadProps {
   name: string

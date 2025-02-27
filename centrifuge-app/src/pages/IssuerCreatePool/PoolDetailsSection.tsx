@@ -17,10 +17,10 @@ import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
-import { IssuerCategoriesSection } from './IssuerCategories'
 import { PoolAnalysisSection } from './PoolAnalysisSection'
 import { PoolRatingsSection } from './PoolRatings'
 import { StyledGrid } from './PoolStructureSection'
+import { ServiceProvidersSection } from './ServiceProviderSection'
 import { validate } from './validate'
 
 export const AddButton = ({
@@ -275,7 +275,7 @@ export const PoolDetailsSection = () => {
         </StyledGrid>
       </Box>
       {/* service providers section */}
-      <IssuerCategoriesSection />
+      <ServiceProvidersSection />
 
       {/* pool ratings section */}
       <PoolRatingsSection />
