@@ -5,8 +5,8 @@ import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsConte
 import { PoolSelector } from '../../components/Dashboard/PoolSelector'
 
 export default function AccountsPage() {
-  const { selectedPools, pools = [] } = useSelectedPools()
-  const pool = pools.find((pool) => pool.id === selectedPools[0])
+  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+  const pool = selectedPoolsWithMetadata.find((pool) => selectedPoolIds.includes(pool.id))
 
   return (
     <Box py={2} px={3}>

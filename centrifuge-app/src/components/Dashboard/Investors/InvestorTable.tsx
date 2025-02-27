@@ -173,16 +173,7 @@ export function InvestorTable() {
           investor={filters.data.find((i) => `${i.wallet}-${i.trancheId}-${i.network}` === investorParam)!}
         />
       )}
-      <DataTable
-        data={tableData}
-        columns={columns}
-        hoverable
-        defaultSortKey="poolTokenId"
-        defaultSortOrder="asc"
-        scrollable
-        onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
-      />
-      {tableData.length === 0 && (
+      {tableData.length === 0 ? (
         <Box
           display="flex"
           justifyContent="center"
@@ -195,9 +186,19 @@ export function InvestorTable() {
         >
           <IconInfo size={14} style={{ marginRight: 8 }} />
           <Text variant="body3" color="textSecondary">
-            No assets displayed yet
+            No investors found
           </Text>
         </Box>
+      ) : (
+        <DataTable
+          data={tableData}
+          columns={columns}
+          hoverable
+          defaultSortKey="poolTokenId"
+          defaultSortOrder="asc"
+          scrollable
+          onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
+        />
       )}
     </Box>
   )
