@@ -140,7 +140,7 @@ export function OracleFeeders({
                   }}
                 </Field>
               ))}
-              <Box alignSelf="flex-end">
+              <Box>
                 <AddButton
                   variant="inverted"
                   onClick={() => {

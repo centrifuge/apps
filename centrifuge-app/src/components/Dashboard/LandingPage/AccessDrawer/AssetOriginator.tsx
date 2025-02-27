@@ -37,6 +37,7 @@ import { combineLatest, firstValueFrom, switchMap } from 'rxjs'
 import type { FormHandle } from '.'
 import { parachainNames } from '../../../../config'
 import { FormAddressInput } from '../../../../pages/IssuerCreatePool/FormAddressInput'
+import { AddButton } from '../../../../pages/IssuerCreatePool/PoolDetailsSection'
 import { looksLike } from '../../../../utils/helpers'
 import { useIdentity } from '../../../../utils/useIdentity'
 import { useDomainRouters } from '../../../../utils/useLiquidityPools'
@@ -156,8 +157,7 @@ function AOForm({
       name: identity?.display,
       withdrawAddresses: [
         ...ao.transferAllowlist.map((allowList) => ({ ...allowList, address: utils.formatAddress(allowList.address) })),
-        ...new Array(3).fill({}),
-      ].slice(0, 3),
+      ],
       delegates: ao.delegates.map((d) => d.delegatee),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -334,17 +334,12 @@ function AOForm({
                     </Field>
                   ))}
                 </Stack>
-                <Box mt={2}>
-                  <Button
-                    variant="inverted"
-                    onClick={() => {
-                      push('')
-                    }}
-                    small
-                  >
-                    Add another
-                  </Button>
-                </Box>
+                <AddButton
+                  variant="inverted"
+                  onClick={() => {
+                    push('')
+                  }}
+                />
               </Stack>
             )}
           </FieldArray>
@@ -366,50 +361,73 @@ function AOForm({
               <b>receive funds</b> from the pool.
             </Text>
           </Text>
-          <Stack gap={2}>
-            {form.values.withdrawAddresses.map((value, index) => (
-              <Shelf gap={1} width="100%">
-                <Box width="100%" flex={3}>
-                  <FieldWithErrorMessage
-                    name={`withdrawAddresses.${index}.address`}
-                    validate={address()}
-                    label="Address"
-                    as={TextInput}
-                    onChange={(event: any) => {
-                      form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                      form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
-                    }}
-                    placeholder={''}
-                  />
-                </Box>
-                <Box width="100%" flex={2}>
-                  <Field name={`withdrawAddresses.${index}.location`}>
-                    {({ field, form }: FieldProps) => (
-                      <Select
-                        name={`withdrawAddresses.${index}.location`}
-                        onChange={(event) =>
-                          form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
-                        }
-                        label="Network"
-                        onBlur={field.onBlur}
-                        value={field.value ? JSON.stringify(field.value) : ''}
-                        options={destinations.map((dest) => ({
-                          value: JSON.stringify(dest),
-                          label:
-                            typeof dest === 'string'
-                              ? getName(dest as any)
-                              : 'parachain' in dest
-                              ? parachainNames[dest.parachain]
-                              : getName(dest.evm),
-                        }))}
-                        placeholder="Select..."
+          <FieldArray name="withdrawAddresses">
+            {({ push, remove }) => (
+              <Stack gap={2}>
+                {form.values.withdrawAddresses.map((_, index) => (
+                  <Shelf key={index} gap={1} width="100%">
+                    <Box width="100%" flex={3}>
+                      <FieldWithErrorMessage
+                        name={`withdrawAddresses.${index}.address`}
+                        validate={address()}
+                        label="Address"
+                        as={TextInput}
+                        onChange={(event: any) => {
+                          form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
+                          form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
+                        }}
+                        placeholder={''}
                       />
-                    )}
-                  </Field>
-                </Box>
-              </Shelf>
-            ))}
-          </Stack>
+                    </Box>
+                    <Box width="100%" flex={2}>
+                      <Field name={`withdrawAddresses.${index}.location`}>
+                        {({ field, form }: FieldProps) => (
+                          <Select
+                            name={`withdrawAddresses.${index}.location`}
+                            onChange={(event) =>
+                              form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
+                            }
+                            label={
+                              <Shelf gap={1} alignItems="center" justifyContent="space-between">
+                                <Text>Network</Text>
+                                {index > 0 && (
+                                  <IconButton onClick={() => remove(index)}>
+                                    <IconTrash color="textSecondary" />
+                                  </IconButton>
+                                )}
+                              </Shelf>
+                            }
+                            onBlur={field.onBlur}
+                            value={field.value ? JSON.stringify(field.value) : ''}
+                            options={destinations.map((dest) => ({
+                              value: JSON.stringify(dest),
+                              label:
+                                typeof dest === 'string'
+                                  ? getName(dest as any)
+                                  : 'parachain' in dest
+                                  ? parachainNames[dest.parachain]
+                                  : getName(dest.evm),
+                            }))}
+                            placeholder="Select..."
+                          />
+                        )}
+                      </Field>
+                    </Box>
+                  </Shelf>
+                ))}
+                {form.values.withdrawAddresses.length < 3 && (
+                  <Box>
+                    <AddButton
+                      variant="inverted"
+                      onClick={() => {
+                        push({ address: '', location: '' })
+                      }}
+                    />
+                  </Box>
+                )}
+              </Stack>
+            )}
+          </FieldArray>
         </Stack>
       </Card>
     </Stack>
