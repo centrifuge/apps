@@ -1,5 +1,5 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, FileUpload, IconDownload, IconFile, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, FileUpload, IconDownload, IconFile, Stack, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useMemo, useState } from 'react'
 import { lastValueFrom } from 'rxjs'

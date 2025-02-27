@@ -63,7 +63,7 @@ export default function AssetsPage() {
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         <PoolSelector multiple />
       </Box>
-      <PageSummary data={pageSummaryData} />
+      <PageSummary data={pageSummaryData} mx={0} />
       <AssetsTable />
     </Box>
   )
