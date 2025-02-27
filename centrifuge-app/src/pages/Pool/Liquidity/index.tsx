@@ -1,10 +1,9 @@
-import { Button, Drawer } from '@centrifuge/fabric'
+import { Button } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageSummary } from '../../../components/PageSummary'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatBalance } from '../../../utils/formatting'
@@ -48,11 +47,6 @@ export function PoolDetailLiquidity() {
 
   return (
     <>
-      <Drawer isOpen={showReserveForm} onClose={() => setShowReserveForm(false)} title="Maximum reserve">
-        <LoadBoundary>
-          <MaxReserveForm poolId={poolId} />
-        </LoadBoundary>
-      </Drawer>
       <PageSummary data={pageSummaryData}>
         {liquidityAdmin && (
           <Button variant="secondary" onClick={() => setShowReserveForm(true)} small>

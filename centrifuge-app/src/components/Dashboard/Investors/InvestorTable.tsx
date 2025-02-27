@@ -1,9 +1,10 @@
 import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Stack, Text, truncate } from '@centrifuge/fabric'
+import { Box, IconInfo, Shelf, Text, truncate } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import {
   Column,
   DataTable,
@@ -36,6 +37,7 @@ export type InvestorTableRow = {
 }
 
 export function InvestorTable() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const investorParam = searchParams.get('d_investor')
@@ -171,21 +173,32 @@ export function InvestorTable() {
           investor={filters.data.find((i) => `${i.wallet}-${i.trancheId}-${i.network}` === investorParam)!}
         />
       )}
-      <DataTable
-        data={tableData}
-        columns={columns}
-        hoverable
-        defaultSortKey="poolTokenId"
-        defaultSortOrder="asc"
-        scrollable
-        onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
-      />
-      {tableData.length === 0 && (
-        <Stack width="100%" alignItems="center">
-          <Text variant="body2" color="textSecondary">
+      {tableData.length === 0 ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+          background={theme.colors.backgroundSecondary}
+          borderRadius={4}
+          p={2}
+          border={`1px solid ${theme.colors.borderPrimary}`}
+        >
+          <IconInfo size={14} style={{ marginRight: 8 }} />
+          <Text variant="body3" color="textSecondary">
             No investors found
           </Text>
-        </Stack>
+        </Box>
+      ) : (
+        <DataTable
+          data={tableData}
+          columns={columns}
+          hoverable
+          defaultSortKey="poolTokenId"
+          defaultSortOrder="asc"
+          scrollable
+          onRowClicked={(row) => `?d_investor=${row.wallet}-${row.trancheId}-${row.network}`}
+        />
       )}
     </Box>
   )

@@ -11,6 +11,15 @@ import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
+const StyledIconButton = styled(Button)`
+  width: 34px;
+  height: 38px;
+  border-radius: 4px;
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.backgroundSecondary};
+  }
+`
+
 export type DrawerProps = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
@@ -110,7 +119,7 @@ function DrawerInner({ title, children, isOpen, onClose, width = 'drawer', ...pr
           <Stack gap={3}>
             <Shelf justifyContent="space-between">
               <Text variant="heading2">{title}</Text>
-              <Button variant="tertiary" icon={IconX} onClick={() => onClose()} />
+              <StyledIconButton variant="tertiary" icon={IconX} onClick={() => onClose()} />
             </Shelf>
             {children}
           </Stack>

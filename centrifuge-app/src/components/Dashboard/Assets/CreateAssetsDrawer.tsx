@@ -7,7 +7,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
-import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
+import { Form, FormikProvider, useFormik } from 'formik'
 import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
@@ -262,38 +262,36 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
         title={type === 'upload-template' ? 'Upload asset template' : 'Create asset'}
       >
         <Divider color="backgroundSecondary" />
+        <Select
+          name="poolId"
+          label="Select pool"
+          value={pid}
+          options={poolsWithMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
+          onChange={(event) => {
+            const selectedPool = poolsWithMetadata.find((pool) => pool.id === event.target.value) as PoolWithMetadata
+            form.setFieldValue('selectedPool', selectedPool)
+            form.setFieldValue('uploadedTemplates', selectedPool?.meta?.loanTemplates || [])
+            setPid(selectedPool?.id ?? '')
+          }}
+        />
+
         <FormikProvider value={form}>
           <Form noValidate>
-            <Box mb={2}>
-              <Field name="poolId">
-                {({ field, form }: FieldProps) => (
-                  <Select
-                    name="poolId"
-                    label="Select pool"
-                    value={field.value}
-                    options={poolsWithMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
-                    onChange={(event) => {
-                      const selectedPool = poolsWithMetadata.find((pool) => pool.id === event.target.value)
-                      form.setFieldValue('selectedPool', selectedPool)
-                      form.setFieldValue('uploadedTemplates', selectedPool?.meta?.loanTemplates || [])
-                      setPid(selectedPool?.id ?? '')
-                    }}
-                  />
-                )}
-              </Field>
+            <Box display="flex" flexDirection="column" height="75vh">
+              {type === 'create-asset' && <CreateAssetsForm />}
+              {type === 'upload-template' && (
+                <UploadAssetTemplateForm setIsUploadingTemplates={setIsUploadingTemplates} />
+              )}
+
+              <FooterActionButtons
+                type={type}
+                setType={setType}
+                setOpen={resetToDefault}
+                isUploadingTemplates={isUploadingTemplates}
+                resetToDefault={resetToDefault}
+                isLoading={isLoading || isTxLoading}
+              />
             </Box>
-            {type === 'create-asset' && <CreateAssetsForm />}
-            {type === 'upload-template' && (
-              <UploadAssetTemplateForm setIsUploadingTemplates={setIsUploadingTemplates} />
-            )}
-            <FooterActionButtons
-              type={type}
-              setType={setType}
-              setOpen={resetToDefault}
-              isUploadingTemplates={isUploadingTemplates}
-              resetToDefault={resetToDefault}
-              isLoading={isLoading || isTxLoading}
-            />
           </Form>
         </FormikProvider>
       </Drawer>

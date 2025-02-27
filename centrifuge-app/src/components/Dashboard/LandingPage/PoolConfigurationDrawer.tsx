@@ -171,7 +171,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
         }
         tokenNames.add(t.tokenName)
 
-        // matches any character thats not alphanumeric or -
+        // matches any character thats not alphanumeric
         if (/[^a-z^A-Z^0-9^-]+/.test(t.symbolName)) {
           errors = setIn(errors, `tranches.${i}.symbolName`, 'Invalid character detected')
         }
@@ -216,7 +216,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       let executiveSummary
 
       // Pin files ( poolIcon, issuerLogo, executiveSummary)
-
       const pinFile = async (file: File | FileType) => {
         const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(file as File)))
         return { uri: pinned.uri, mime: (file as File).type }
@@ -363,7 +362,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
   return (
     <LoadBoundary>
-      <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%">
+      <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%" overflow="hidden">
         <Divider color="backgroundSecondary" />
         <FormikProvider value={form}>
           {pool.id !== form.values.id ? (

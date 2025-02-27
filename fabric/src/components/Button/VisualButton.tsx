@@ -99,18 +99,18 @@ export const StyledButton = styled.span<StyledProps>(
       minHeight: $small ? 32 : 40,
 
       '&:hover': {
-        color: fgHover,
+        color: isTertiaryIcon ? undefined : fgHover,
         backgroundColor: isTertiaryIcon ? undefined : bgHover,
         boxShadow: variant !== 'tertiary' && !$disabled ? shadow : 'none',
       },
       '&:active': {
-        color: fgPressed,
+        color: isTertiaryIcon ? undefined : fgPressed,
         backgroundColor: isTertiaryIcon ? undefined : bgPressed,
         borderColor: isTertiaryIcon ? undefined : borderPressed,
       },
 
       'a:focus-visible &, button:focus-visible &': {
-        color: fgFocus,
+        color: isTertiaryIcon ? undefined : fgFocus,
         backgroundColor: isTertiaryIcon ? undefined : bgFocus,
         borderColor: borderFocus,
       },
