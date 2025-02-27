@@ -1,4 +1,5 @@
 import { Box, IconInfo, Text } from '@centrifuge/fabric'
+import AssetsSection from '../../../src/components/Dashboard/Account/AssetsSection'
 import OnchainSection from '../../../src/components/Dashboard/Account/OnchainSection'
 import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsContext'
 import { PoolSelector } from '../../components/Dashboard/PoolSelector'
@@ -14,7 +15,10 @@ export default function AccountsPage() {
         <PoolSelector multiple={false} />
       </Box>
       {pool ? (
-        <OnchainSection pool={pool} />
+        <>
+          <OnchainSection pool={pool} />
+          <AssetsSection pool={pool} />
+        </>
       ) : (
         <Box
           backgroundColor="backgroundSecondary"

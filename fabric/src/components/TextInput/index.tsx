@@ -164,11 +164,12 @@ export function TextInputBox(
     error?: boolean
     inputRef?: React.Ref<HTMLInputElement>
     row?: boolean
+    small?: boolean
   }
 ) {
-  const { error, disabled, action, symbol, inputRef, inputElement, row, ...inputProps } = props
+  const { error, disabled, action, symbol, inputRef, inputElement, row, small, ...inputProps } = props
   return (
-    <StyledInputBox hideBorder={!!row} alignItems="stretch" height="input" disabled={disabled}>
+    <StyledInputBox hideBorder={!!row} alignItems="stretch" height={small ? '28px' : 'input'} disabled={disabled}>
       {inputElement ?? <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />}
       {symbol && (
         <Flex alignSelf="center" pr={1}>

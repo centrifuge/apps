@@ -46,7 +46,7 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
     {
       label: <Tooltips label="Pool reserve" type="poolReserve" />,
-      value: <Text>{formatBalance(pool?.reserve.available || 0)} USDC</Text>,
+      value: <Text variant="heading1">{formatBalance(pool?.reserve.available || 0)}</Text>,
       heading: false,
     },
     {
@@ -59,7 +59,7 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
           errorMessage={error}
         />
       ) : (
-        <Text>{formatBalance(pool?.reserve.max || 0)} USDC</Text>
+        <Text variant="heading1">{formatBalance(pool?.reserve.max || 0)}</Text>
       ),
       heading: false,
     },
@@ -109,7 +109,7 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
       <Box display="flex" justifyContent="space-between">
         <Text variant="heading1">Onchain reserve</Text>
         <StyledRouterTextLink to={`/pools/${pool?.id}/assets/0`}>
-          <Text variant="heading1">{formatBalance(pool?.reserve.total || 0)}</Text>
+          <Text variant="heading1">{formatBalance(pool?.reserve.total || 0)} USDC</Text>
           <IconChevronRight />
         </StyledRouterTextLink>
       </Box>
