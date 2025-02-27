@@ -353,7 +353,7 @@ export const RatingPill = ({ agency, reportUrl, reportFile, value }: RatingProps
                 ? [
                     {
                       text: 'View PDF report',
-                      url: cent.metadata.parseMetadataUrl(reportFile?.uri ?? ''),
+                      url: cent.metadata.parseMetadataUrl(reportFile?.uri ?? '') ?? '',
                     },
                   ]
                 : []),

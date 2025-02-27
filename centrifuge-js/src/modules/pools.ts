@@ -659,9 +659,9 @@ export type PoolReport = {
     title: string
     avatar: FileType | null
   }
-  uri: string
+  url: string
 }
-interface TrancheFormValues {
+export interface TrancheFormValues {
   tokenName: string
   symbolName: string
   interestRate: number | ''
@@ -702,10 +702,12 @@ export interface PoolMetadataInput {
     reportUrl?: string
     reportFile?: FileType | null
   }[]
-  poolReport?: {
-    authorName: string
-    authorTitle: string
-    authorAvatar: FileType | null
+  report: {
+    author: {
+      name: string
+      title: string
+      avatar: FileType | null
+    }
     url: string
   }
 
@@ -759,7 +761,7 @@ export type PoolMetadata = {
       repName: string
       name: string
       description: string
-      email: string
+      email?: string
       logo?: FileType | null
       shortDescription: string
       categories: { type: string; value: string; customType?: string }[]
@@ -772,7 +774,7 @@ export type PoolMetadata = {
     details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
-    reports?: PoolReport[]
+    report?: PoolReport
     poolRatings?: {
       agency?: string
       value?: string
@@ -786,8 +788,7 @@ export type PoolMetadata = {
   tranches: Record<
     string,
     {
-      icon?: FileType | null
-      minInitialInvestment?: string
+      minInitialInvestment: string
       apy: string
       apyPercentage: number | null
     }
@@ -1176,17 +1177,15 @@ export function getPoolsModule(inst: Centrifuge) {
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
         poolRatings: metadata.poolRatings.length > 0 ? metadata.poolRatings : [],
-        reports: metadata.poolReport
-          ? [
-              {
-                author: {
-                  name: metadata.poolReport.authorName,
-                  title: metadata.poolReport.authorTitle,
-                  avatar: metadata.poolReport.authorAvatar,
-                },
-                uri: metadata.poolReport.url,
+        report: metadata.report
+          ? {
+              author: {
+                name: metadata.report.author.name,
+                title: metadata.report.author.title,
+                avatar: metadata.report.author.avatar,
               },
-            ]
+              url: metadata.report.url,
+            }
           : undefined,
       },
       pod: {},

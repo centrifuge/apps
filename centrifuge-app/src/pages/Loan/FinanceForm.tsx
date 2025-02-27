@@ -73,20 +73,10 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
 
   if (isExternalLoan(loan)) {
-    return (
-      <Stack gap={2} p={1}>
-        <Text variant="heading2">Purchase</Text>
-        <ExternalFinanceForm loan={loan} source={source} setSource={setSource} />
-      </Stack>
-    )
+    return <ExternalFinanceForm loan={loan} source={source} setSource={setSource} />
   }
 
-  return (
-    <Stack gap={2} p={1}>
-      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
-      <InternalFinanceForm loan={loan} source={source} onChange={setSource} />
-    </Stack>
-  )
+  return <InternalFinanceForm loan={loan} source={source} onChange={setSource} />
 }
 
 /**
@@ -408,8 +398,8 @@ function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: With
     return (
       <ErrorMessage type="warning" condition={!withdrawAddresses.length}>
         <Stack gap={1}>
-          To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
-          <RouterTextLink to={`/issuer/${poolId}/access`}>Add trusted addresses</RouterTextLink>
+          To purchase/finance this asset, the pool must set addresses which can receive the funds from the pool.
+          <RouterTextLink to={`/dashboard`}>To Dashboard</RouterTextLink>
         </Stack>
       </ErrorMessage>
     )
@@ -451,8 +441,8 @@ function Mux({
       {!withdrawAmounts.length ? (
         <ErrorMessage type="warning" condition={!withdrawAmounts.length}>
           <Stack gap={1}>
-            To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
-            <RouterTextLink to={`/issuer/${poolId}/access`}>Add trusted addresses</RouterTextLink>
+            To purchase/finance this asset, the pool must addresses which can receive the funds from the pool.
+            <RouterTextLink to={`/dashboard`}>To Dashboard</RouterTextLink>
           </Stack>
         </ErrorMessage>
       ) : (

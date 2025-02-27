@@ -35,10 +35,7 @@ export function OnboardingSettingsDrawer({ isOpen, onClose }: { isOpen: boolean;
   const [selectedPoolId, setSelectedPoolId] = useState<string | null>(pools?.[0]?.id ?? null)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
-      <Text variant="heading2" fontSize="20px" fontWeight="600">
-        Onboarding Settings
-      </Text>
+    <Drawer isOpen={isOpen} onClose={onClose} title="Onboarding Settings">
       <Select
         label="Select the pool to edit"
         options={

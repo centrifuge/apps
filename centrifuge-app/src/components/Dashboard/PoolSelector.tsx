@@ -6,12 +6,12 @@ import { useSelectedPools } from '../../utils/contexts/SelectedPoolsContext'
 import { usePoolMetadata } from '../../utils/usePools'
 
 export const PoolSelector = ({ multiple = true }: { multiple?: boolean }) => {
-  const { pools, selectedPools } = useSelectedPools(multiple)
+  const { pools, selectedPoolIds } = useSelectedPools(multiple)
   const theme = useTheme()
   return (
     <Shelf gap={0} overflowX="auto" borderBottom={multiple ? 'none' : `1px solid ${theme.colors.borderPrimary}`}>
       {pools?.map((pool) => (
-        <PoolSelect key={pool.id} pool={pool} active={selectedPools.includes(pool.id)} multiple={multiple} />
+        <PoolSelect key={pool.id} pool={pool} active={selectedPoolIds.includes(pool.id)} multiple={multiple} />
       ))}
     </Shelf>
   )
@@ -19,7 +19,7 @@ export const PoolSelector = ({ multiple = true }: { multiple?: boolean }) => {
 
 const PoolSelect = ({ pool, active, multiple }: { pool: Pool; active: boolean; multiple: boolean }) => {
   const cent = useCentrifuge()
-  const { togglePoolSelection, selectedPools, clearSelectedPools } = useSelectedPools(multiple)
+  const { togglePoolIdSelection, selectedPoolIds, clearSelectedPoolsIds } = useSelectedPools(multiple)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const theme = useTheme()
   const poolUri = poolMetadata?.pool?.icon?.uri
@@ -43,8 +43,8 @@ const PoolSelect = ({ pool, active, multiple }: { pool: Pool; active: boolean; m
       onClick={(e) => {
         e.stopPropagation()
         if (!multiple) {
-          clearSelectedPools()
-          togglePoolSelection(pool.id)
+          clearSelectedPoolsIds()
+          togglePoolIdSelection(pool.id)
         }
       }}
     >
@@ -62,9 +62,9 @@ const PoolSelect = ({ pool, active, multiple }: { pool: Pool; active: boolean; m
         {multiple ? (
           <Checkbox
             variant="secondary"
-            onChange={() => togglePoolSelection(pool.id)}
+            onChange={() => togglePoolIdSelection(pool.id)}
             onClick={(e) => e.stopPropagation()}
-            checked={selectedPools.includes(pool.id)}
+            checked={selectedPoolIds.includes(pool.id)}
           />
         ) : null}
       </Box>

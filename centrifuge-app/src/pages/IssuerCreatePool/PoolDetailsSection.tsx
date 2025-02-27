@@ -17,13 +17,20 @@ import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
-import { IssuerCategoriesSection } from './IssuerCategories'
+import { PoolAnalysisSection } from './PoolAnalysisSection'
 import { PoolRatingsSection } from './PoolRatings'
 import { StyledGrid } from './PoolStructureSection'
+import { ServiceProvidersSection } from './ServiceProviderSection'
 import { validate } from './validate'
 
-export const AddButton = ({ onClick }: { onClick: () => void }) => (
-  <Button variant="secondary" small style={{ width: 163, height: 36 }} onClick={onClick}>
+export const AddButton = ({
+  onClick,
+  variant = 'secondary',
+}: {
+  onClick: () => void
+  variant?: 'inverted' | 'secondary'
+}) => (
+  <Button variant={variant} small style={{ width: 163 }} onClick={onClick}>
     Add another
   </Button>
 )
@@ -37,7 +44,7 @@ export const PoolDetailsSection = () => {
       <Text variant="heading2" fontWeight={700}>
         Pool Details
       </Text>
-      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={2}>
+      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={2} p={5}>
         <Grid gap={2}>
           <Field name="investorType" validate={validate.investorType}>
             {({ field, meta, form }: FieldProps) => (
@@ -108,7 +115,7 @@ export const PoolDetailsSection = () => {
 
       <Box mt={4} mb={3}>
         <Text variant="heading2">Issuer</Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
+        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3} p={5}>
           <Grid gap={2}>
             <Field name="issuerName" validate={validate.issuerName}>
               {({ field, meta, form }: FieldProps) => (
@@ -268,51 +275,13 @@ export const PoolDetailsSection = () => {
         </StyledGrid>
       </Box>
       {/* service providers section */}
-      <IssuerCategoriesSection />
+      <ServiceProvidersSection />
 
       {/* pool ratings section */}
       <PoolRatingsSection />
 
-      <Box mt={4} mb={3}>
-        <Text variant="heading2">Pool analysis</Text>
-        <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} gap={3} mt={3}>
-          <FieldWithErrorMessage
-            name="reportUrl"
-            label="Report URL"
-            placeholder="Type here..."
-            validate={validate.websiteNotRequired()}
-            as={URLInput}
-          />
-          <FieldWithErrorMessage
-            name="reportAuthorName"
-            as={TextInput}
-            label="Rewiewer name"
-            placeholder="Type here..."
-          />
-          <FieldWithErrorMessage
-            name="reportAuthorTitle"
-            as={TextInput}
-            label="Rewiewer job title"
-            placeholder="Type here..."
-          />
-
-          <Field name="reportAuthorAvatar">
-            {({ field, meta, form }: FieldProps) => (
-              <FileUpload
-                file={field.value}
-                onFileChange={(file) => {
-                  form.setFieldValue('reportAuthorAvatar', file)
-                }}
-                label="Reviewer avatar"
-                placeholder="Choose file"
-                accept="image/png, image/jpeg, image/jpg"
-                onClear={() => form.setFieldValue('reportAuthorAvatar', null)}
-                small
-              />
-            )}
-          </Field>
-        </StyledGrid>
-      </Box>
+      {/* pool analysis section */}
+      <PoolAnalysisSection />
     </Box>
   )
 }
