@@ -1,8 +1,8 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
+import { MultisigForm } from '../../components/MultisigForm'
 import { PageSection } from '../../components/PageSection'
-import { MultisigForm } from '../IssuerPool/Access/MultisigForm'
 import { CreatePoolValues } from './types'
 
 export function AdminMultisigSection() {

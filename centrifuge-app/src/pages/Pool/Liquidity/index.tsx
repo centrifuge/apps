@@ -48,7 +48,7 @@ export function PoolDetailLiquidity() {
 
   return (
     <>
-      <Drawer isOpen={showReserveForm} onClose={() => setShowReserveForm(false)}>
+      <Drawer isOpen={showReserveForm} onClose={() => setShowReserveForm(false)} title="Maximum reserve">
         <LoadBoundary>
           <MaxReserveForm poolId={poolId} />
         </LoadBoundary>
