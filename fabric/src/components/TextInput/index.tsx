@@ -222,6 +222,7 @@ export function SearchInput({
   id ??= defaultId
   const [isDropdownOpen, setDropdownOpen] = React.useState(false)
   const theme = useTheme()
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setDropdownOpen(true)
@@ -229,14 +230,18 @@ export function SearchInput({
   }
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Delay closing so that clicks on the dropdown register
     setTimeout(() => setDropdownOpen(false), 200)
     onBlur && onBlur(e)
+  }
+
+  const handleClick = () => {
+    setDropdownOpen(true)
   }
 
   const handleOptionClick = (option: DropdownOption) => {
     onOptionSelect && onOptionSelect(option)
     setDropdownOpen(false)
+    inputRef.current?.focus()
   }
 
   return (
@@ -249,12 +254,14 @@ export function SearchInput({
         errorMessage={errorMessage}
         inputElement={
           <TextInputBox
+            inputRef={inputRef}
             type="search"
             disabled={disabled}
             error={!!errorMessage}
             symbol={<IconSearch size="iconSmall" color="textSecondary" />}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onClick={handleClick}
             {...inputProps}
           />
         }
