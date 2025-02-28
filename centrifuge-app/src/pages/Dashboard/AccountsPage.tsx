@@ -1,12 +1,17 @@
 import { Box, IconInfo, Text } from '@centrifuge/fabric'
+import { useEffect } from 'react'
 import AssetsSection from '../../../src/components/Dashboard/Account/AssetsSection'
 import OnchainSection from '../../../src/components/Dashboard/Account/OnchainSection'
 import { useSelectedPools } from '../../../src/utils/contexts/SelectedPoolsContext'
 import { PoolSelector } from '../../components/Dashboard/PoolSelector'
 
 export default function AccountsPage() {
-  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+  const { selectedPoolsWithMetadata, selectedPoolIds, setSelectedPoolIds } = useSelectedPools()
   const pool = selectedPoolsWithMetadata.find((pool) => selectedPoolIds.includes(pool.id))
+
+  useEffect(() => {
+    setSelectedPoolIds([])
+  }, [])
 
   return (
     <Box py={2} px={3}>
