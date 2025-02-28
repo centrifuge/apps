@@ -279,10 +279,11 @@ export function SearchInput({
             margin: 0,
             padding: 0,
             listStyle: 'none',
-            maxHeight: '300px',
+            maxHeight: '200px',
             overflowY: 'auto',
             borderRadius: '8px',
             marginTop: '4px',
+            boxShadow: '0px 4px 16px 0px rgba(0, 0, 0, 0.10)',
           }}
         >
           {dropdownOptions.map((option, index) => (

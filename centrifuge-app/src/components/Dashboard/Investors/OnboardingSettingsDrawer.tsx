@@ -61,11 +61,9 @@ export function OnboardingSettingsDrawer({ isOpen, onClose }: { isOpen: boolean;
 
 function OnboardingSettingsAccordion({
   children,
-  style,
   ...props
 }: {
   children: React.ReactNode
-  style?: React.CSSProperties
   props?: React.CSSProperties
 }) {
   return (
@@ -79,7 +77,6 @@ function OnboardingSettingsAccordion({
       borderStyle="solid"
       borderWidth={1}
       borderColor="borderPrimary"
-      style={style}
       {...props}
     >
       {children}
@@ -315,6 +312,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
   const uniqueCountries = [...formik.values.kybRestrictedCountries, ...formik.values.kycRestrictedCountries].filter(
     (country, index, self) => index === self.findIndex((c) => c.value === country.value)
   )
+
   const uniqueCountryCodesEntries = [...Object.entries(KYC_COUNTRY_CODES), ...Object.entries(KYB_COUNTRY_CODES)].filter(
     ([countryId], index, self) => index === self.findIndex(([cId]) => cId === countryId)
   )
@@ -328,16 +326,13 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
   const filteredOptions = useMemo(() => {
     const existingCountries = new Set(uniqueCountries.map((c) => c.label))
 
-    return (
-      uniqueCountryCodesEntries
-        // Filter out countries that are already selected
-        .filter(([_, country]) => !existingCountries.has(country))
-        // Filter further by matching the typed input (case-insensitive)
-        .filter(([_, country]) => country.toLowerCase().includes(countrySearch.toLowerCase()))
-        // Convert to { label, value } objects
-        .map(([code, country]) => ({ label: country, value: code }))
-    )
+    return uniqueCountryCodesEntries
+      .filter(([_, country]) => !existingCountries.has(country))
+      .filter(([_, country]) => country.toLowerCase().includes(countrySearch.toLowerCase()))
+      .map(([code, country]) => ({ label: country, value: code }))
   }, [uniqueCountryCodesEntries, uniqueCountries, countrySearch])
+
+  const displayDataTable = formik.values.onboardingExperience === 'centrifuge' || uniqueCountries.length > 0
 
   return (
     <FormikProvider value={formik}>
@@ -482,7 +477,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                     </Box>
                   ),
                   body: (
-                    <OnboardingSettingsAccordion style={{ position: 'absolute', width: '90%' }}>
+                    <OnboardingSettingsAccordion style={{ minHeight: displayDataTable ? 'auto' : '300px' }}>
                       <SearchInput
                         id="countrySearch"
                         label="Add restricted onboarding countries"
@@ -504,7 +499,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                         }}
                       />
 
-                      {uniqueCountries.length > 0 && (
+                      {displayDataTable && (
                         <Box backgroundColor="white" borderRadius={8}>
                           <DataTable
                             columns={
