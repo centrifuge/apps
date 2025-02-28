@@ -16,6 +16,7 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { Box, Button, Divider, Grid, Stack, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import { keccak256, SigningKey, toUtf8Bytes } from 'ethers'
 import { Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
@@ -32,7 +33,7 @@ import { useLiquidity } from '../../../../src/utils/useLiquidity'
 import { useActiveDomains } from '../../../../src/utils/useLiquidityPools'
 import { metadataQueryFn } from '../../../../src/utils/useMetadata'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
-import { usePoolAccountOrders } from '../../../../src/utils/usePools'
+import { usePoolAccountOrders, usePoolFees } from '../../../../src/utils/usePools'
 import { hasValuationMethod } from '../utils'
 import { EditableTableField } from './EditableTableField'
 
@@ -93,6 +94,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
   const provider = useEvmProvider()
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
+  const poolFees = usePoolFees(pool.id)
   const { ordersFullyExecutable } = useLiquidity(pool.id)
   const { substrate } = useWallet()
   const { data: domains } = useActiveDomains(pool.id)
@@ -383,6 +385,28 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     }))
   }, [loans])
 
+  const changeInValuation = useMemo(() => {
+    return (externalLoans as ActiveLoan[]).reduce((prev, curr) => {
+      const price = curr.currentPrice ? curr.currentPrice.toDecimal() : Dec(0)
+      const quantity = (curr as ExternalLoan).pricing.outstandingQuantity.toDecimal()
+      const updatedPrice = Dec(form.values[curr.id]?.newPrice || 0)
+      return CurrencyBalance.fromFloat(
+        prev.toDecimal().add(updatedPrice.sub(price).mul(quantity)).toString(),
+        pool.currency.decimals
+      )
+    }, new CurrencyBalance(0, pool.currency.decimals))
+  }, [externalLoans, form.values, pool.currency.decimals])
+
+  // NOTE: current pending here in the app does include both pending + disbursed fees
+  const pendingFees = useMemo(() => {
+    return new CurrencyBalance(
+      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
+      pool.currency.decimals
+    )
+  }, [poolFees, pool.currency.decimals])
+
+  const pendingNav = totalAum.add(changeInValuation.toDecimal()).sub(pendingFees.toDecimal())
+
   if (isLoading) return null
 
   return (
@@ -411,11 +435,11 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
               </Stack>
               <Stack gap={1}>
                 <Text variant="body3">Change in valuation</Text>
-                <Text variant="heading1">0</Text>
+                <Text variant="heading1">{changeInValuation ? formatBalance(changeInValuation) : 0}</Text>
               </Stack>
               <Stack gap={1}>
                 <Text variant="body3">New NAV</Text>
-                <Text variant="heading1">0</Text>
+                <Text variant="heading1">{pendingNav ? formatBalance(pendingNav) : 0}</Text>
               </Stack>
               <Stack gap={1}>
                 <Text variant="body3">Last updated</Text>

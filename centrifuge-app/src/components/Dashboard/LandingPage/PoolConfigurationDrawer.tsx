@@ -362,7 +362,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
   return (
     <LoadBoundary>
-      <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%" overflow="hidden">
+      <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%">
         <Divider color="backgroundSecondary" />
         <FormikProvider value={form}>
           {pool.id !== form.values.id ? (
