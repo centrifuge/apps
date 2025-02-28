@@ -400,7 +400,7 @@ export const tooltipText = {
   },
   discountedCashFlow: {
     label: '',
-    body: 'Valuing the asset at its face value or nominal value, without accounting for any discounts, premiums, or adjustments for time value of money',
+    body: 'Valuing the asset based on the present value of its future cash flows, discounted at an appropriate rate to account for the time value of money and risk.',
   },
 }
 
