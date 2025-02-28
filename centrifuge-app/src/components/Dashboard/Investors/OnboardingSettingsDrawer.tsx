@@ -7,6 +7,7 @@ import {
   Divider,
   Drawer,
   FileUpload,
+  IconButton,
   IconTrash,
   RadioButton,
   SearchInput,
@@ -58,7 +59,15 @@ export function OnboardingSettingsDrawer({ isOpen, onClose }: { isOpen: boolean;
   )
 }
 
-function OnboardingSettingsAccordion({ children }: { children: React.ReactNode }) {
+function OnboardingSettingsAccordion({
+  children,
+  style,
+  ...props
+}: {
+  children: React.ReactNode
+  style?: React.CSSProperties
+  props?: React.CSSProperties
+}) {
   return (
     <Stack
       borderRadius={8}
@@ -70,6 +79,8 @@ function OnboardingSettingsAccordion({ children }: { children: React.ReactNode }
       borderStyle="solid"
       borderWidth={1}
       borderColor="borderPrimary"
+      style={style}
+      {...props}
     >
       {children}
     </Stack>
@@ -314,10 +325,24 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     canBeDeleted: false,
   }))
 
+  const filteredOptions = useMemo(() => {
+    const existingCountries = new Set(uniqueCountries.map((c) => c.label))
+
+    return (
+      uniqueCountryCodesEntries
+        // Filter out countries that are already selected
+        .filter(([_, country]) => !existingCountries.has(country))
+        // Filter further by matching the typed input (case-insensitive)
+        .filter(([_, country]) => country.toLowerCase().includes(countrySearch.toLowerCase()))
+        // Convert to { label, value } objects
+        .map(([code, country]) => ({ label: country, value: code }))
+    )
+  }, [uniqueCountryCodesEntries, uniqueCountries, countrySearch])
+
   return (
     <FormikProvider value={formik}>
       <Form>
-        <Box display="flex" flexDirection="column" height="75vh">
+        <Box display="flex" flexDirection="column" height="85vh">
           <Stack gap={0} flex={1} overflow="auto">
             <Divider />
             <Accordion
@@ -457,44 +482,30 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                     </Box>
                   ),
                   body: (
-                    <OnboardingSettingsAccordion>
+                    <OnboardingSettingsAccordion style={{ position: 'absolute', width: '90%' }}>
                       <SearchInput
                         id="countrySearch"
                         label="Add restricted onboarding countries"
                         value={countrySearch}
+                        dropdownOptions={filteredOptions}
                         onChange={(e) => {
                           setCountrySearch(e.target.value)
-                          // Check if the selected value matches one of the options
-                          const selectedCountry = uniqueCountryCodesEntries.find(
-                            ([_, country]) => country === e.target.value
-                          )
-
-                          if (selectedCountry) {
-                            setCountrySearch('')
-                            formik.setFieldValue('kycRestrictedCountries', [
-                              ...formik.values.kycRestrictedCountries,
-                              { label: selectedCountry[1], value: selectedCountry[0] },
-                            ])
-                            formik.setFieldValue('kybRestrictedCountries', [
-                              ...formik.values.kybRestrictedCountries,
-                              { label: selectedCountry[1], value: selectedCountry[0] },
-                            ])
-                          }
                         }}
-                        list="countrySearchList"
+                        onOptionSelect={(option) => {
+                          setCountrySearch('')
+                          formik.setFieldValue('kycRestrictedCountries', [
+                            ...formik.values.kycRestrictedCountries,
+                            { label: option.label, value: option.value },
+                          ])
+                          formik.setFieldValue('kybRestrictedCountries', [
+                            ...formik.values.kybRestrictedCountries,
+                            { label: option.label, value: option.value },
+                          ])
+                        }}
                       />
-                      <datalist id="countrySearchList">
-                        {(() => {
-                          const existingCountries = new Set(uniqueCountries.map((c) => c.label))
-                          return uniqueCountryCodesEntries
-                            .filter(([_, country]) => !existingCountries.has(country))
-                            .map(([code, country]) => (
-                              <option key={`${code}-onboarding-country`} value={country} id={code} />
-                            ))
-                        })()}
-                      </datalist>
+
                       {uniqueCountries.length > 0 && (
-                        <Box backgroundColor="white">
+                        <Box backgroundColor="white" borderRadius={8}>
                           <DataTable
                             columns={
                               [
@@ -507,23 +518,27 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                                 {
                                   header: '',
                                   width: '20%',
-                                  cell: (row) => (
-                                    <Button
-                                      variant="tertiary"
-                                      disabled={!row.canBeDeleted}
-                                      onClick={() => {
-                                        formik.setFieldValue(
-                                          'kycRestrictedCountries',
-                                          formik.values.kycRestrictedCountries.filter((c) => c.value !== row.id)
-                                        )
-                                        formik.setFieldValue(
-                                          'kybRestrictedCountries',
-                                          formik.values.kybRestrictedCountries.filter((c) => c.value !== row.id)
-                                        )
-                                      }}
-                                      icon={row.canBeDeleted ? <IconTrash size="iconSmall" /> : undefined}
-                                    ></Button>
-                                  ),
+                                  cell: (row) => {
+                                    if (row.canBeDeleted) {
+                                      return (
+                                        <IconButton
+                                          disabled={!row.canBeDeleted}
+                                          onClick={() => {
+                                            formik.setFieldValue(
+                                              'kycRestrictedCountries',
+                                              formik.values.kycRestrictedCountries.filter((c) => c.value !== row.id)
+                                            )
+                                            formik.setFieldValue(
+                                              'kybRestrictedCountries',
+                                              formik.values.kybRestrictedCountries.filter((c) => c.value !== row.id)
+                                            )
+                                          }}
+                                        >
+                                          <IconTrash size="iconSmall" />
+                                        </IconButton>
+                                      )
+                                    } else return null
+                                  },
                                 },
                               ] as Column[]
                             }

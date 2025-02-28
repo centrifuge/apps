@@ -227,7 +227,7 @@ function SupportedNetworks({
                     Tokens
                   </Text>
 
-                  <FieldArray name={`networks`}>
+                  <FieldArray name="networks">
                     {() => (
                       <>
                         {domain?.currencies.map((currency) => {
@@ -236,9 +236,10 @@ function SupportedNetworks({
                               {({ field }: { field: any }) => {
                                 return (
                                   <Checkbox
+                                    variant="secondary"
                                     key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
                                     label={
-                                      <Text variant="label2">
+                                      <Text variant="body3">
                                         {currency.displayName} ({currency.symbol})
                                       </Text>
                                     }
