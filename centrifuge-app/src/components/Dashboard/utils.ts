@@ -22,7 +22,9 @@ export type TransformedLoan = Loan & {
   presentValue: CurrencyBalance
 }
 
-const hasValuationMethod = (pricing: any): pricing is { valuationMethod: string; presentValue: CurrencyBalance } => {
+export const hasValuationMethod = (
+  pricing: any
+): pricing is { valuationMethod: string; presentValue: CurrencyBalance } => {
   return pricing && typeof pricing.valuationMethod === 'string'
 }
 
