@@ -2,7 +2,7 @@ import { CurrencyMetadata, FileType, Perquintill, PoolMetadata, Rate } from '@ce
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
 import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
 import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
@@ -341,12 +341,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
     },
   })
 
-  // Force reinitialize Formik when the pool changes this is so we
-  // can use the formik (dirty) to enable/disable the update button.
-  useEffect(() => {
-    form.resetForm()
-  }, [pool, form])
-
   // form variables
   const isPoolAdmin = !!usePoolAdmin(pool.id)
   const [account] = useSuitableAccounts({ poolId: pool.id, poolRole: ['PoolAdmin'] })
@@ -364,30 +358,27 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
     <LoadBoundary>
       <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%">
         <Divider color="backgroundSecondary" />
+
+        <Select
+          label="Select pool"
+          options={poolsWithMetadata.map((pool) => ({
+            label: pool.meta?.pool?.name,
+            value: pool.id,
+          }))}
+          value={pool.id}
+          onChange={(event) => {
+            const selectedPool = poolsWithMetadata.find((pool: PoolWithMetadata) => pool.id === event.target.value)
+            if (selectedPool) {
+              setPool(selectedPool)
+            }
+          }}
+        />
         <FormikProvider value={form}>
           {pool.id !== form.values.id ? (
             <Spinner />
           ) : (
             <Form noValidate>
               <Stack mb={3}>
-                <Box>
-                  <Select
-                    label="Select pool"
-                    options={poolsWithMetadata.map((pool) => ({
-                      label: pool.meta?.pool?.name,
-                      value: pool.id,
-                    }))}
-                    value={pool.id}
-                    onChange={(event) => {
-                      const selectedPool = poolsWithMetadata.find(
-                        (pool: PoolWithMetadata) => pool.id === event.target.value
-                      )
-                      if (selectedPool) {
-                        setPool(selectedPool)
-                      }
-                    }}
-                  />
-                </Box>
                 {!isPoolAdmin && (
                   <Box mt={2}>
                     <Text variant="body2" color="textSecondary">

@@ -43,7 +43,7 @@ export const ServiceProvidersSection = ({ isUpdating }: { isUpdating?: boolean }
   const formName = isUpdating ? 'pool.issuer.categories' : 'issuerCategories'
 
   return (
-    <Stack mt={isUpdating ? 0 : 4} gap={isUpdating ? 3 : 0}>
+    <Stack mt={isUpdating ? 0 : 4}>
       {isUpdating ? <></> : <Text variant="heading2">Service providers</Text>}
       <Stack
         backgroundColor="backgroundSecondary"
@@ -55,7 +55,7 @@ export const ServiceProvidersSection = ({ isUpdating }: { isUpdating?: boolean }
       >
         <FieldArray name={formName}>
           {({ push, remove }) => (
-            <Stack gap={5}>
+            <Stack gap={3}>
               {categories.map((category: { type: string; value: string; description: string }, index: number) => (
                 <Stack gap={1} flexDirection={isUpdating ? 'column' : 'row'}>
                   <Field name={`${formName}.${index}.type`}>

@@ -279,7 +279,7 @@ export function SearchInput({
             margin: 0,
             padding: 0,
             listStyle: 'none',
-            maxHeight: '200px',
+            maxHeight: '150px',
             overflowY: 'auto',
             borderRadius: '8px',
             marginTop: '4px',

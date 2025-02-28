@@ -41,7 +41,7 @@ export function DashboardTable() {
         poolId: pool.id,
       }))
     )
-  }, [selectedPoolsWithMetadata, cent.metadata])
+  }, [selectedPoolsWithMetadata])
 
   const columns = [
     {

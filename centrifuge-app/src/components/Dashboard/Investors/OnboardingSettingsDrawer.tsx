@@ -147,7 +147,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
       externalOnboardingUrl: poolMetadata?.onboarding?.externalOnboardingUrl ?? '',
       taxInfoRequired: !!poolMetadata?.onboarding?.taxInfoRequired || true,
     }),
-    [poolMetadata, pool.tranches, centrifuge.metadata, isOpenForOnboarding]
+    [poolMetadata, pool.tranches, isOpenForOnboarding]
   )
 
   useEffect(() => {
@@ -183,7 +183,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     }
 
     loadFiles()
-  }, [baseInitialValues, pool.tranches, centrifuge.metadata, poolMetadata?.onboarding?.tranches])
+  }, [baseInitialValues, pool.tranches, poolMetadata?.onboarding?.tranches])
 
   const { execute: updatePermissionAndConfigTx } = useCentrifugeTransaction(
     'Update permissions and metadata',
@@ -337,7 +337,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
   return (
     <FormikProvider value={formik}>
       <Form>
-        <Box display="flex" flexDirection="column" height="85vh">
+        <Box display="flex" flexDirection="column" height="75vh">
           <Stack gap={0} flex={1} overflow="auto">
             <Divider />
             <Accordion
@@ -477,7 +477,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                     </Box>
                   ),
                   body: (
-                    <OnboardingSettingsAccordion style={{ minHeight: displayDataTable ? 'auto' : '300px' }}>
+                    <OnboardingSettingsAccordion style={{ minHeight: displayDataTable ? 'auto' : '200px' }}>
                       <SearchInput
                         id="countrySearch"
                         label="Add restricted onboarding countries"
