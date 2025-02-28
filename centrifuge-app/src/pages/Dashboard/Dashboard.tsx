@@ -12,8 +12,8 @@ import { useLiquidityMulti } from '../../../src/utils/useLiquidity'
 import { useNavGrowth, useTotalNAV } from '../../components/Dashboard/utils'
 
 const aumOptions = [
-  { label: 'YTD', value: 'YTD' },
   { label: '6M', value: '180d' },
+  { label: 'YTD', value: 'YTD' },
   { label: '3M', value: '90d' },
 ]
 
