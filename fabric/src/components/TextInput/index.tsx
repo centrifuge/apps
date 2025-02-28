@@ -1,7 +1,7 @@
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 import { Box, Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
 import { InputUnit, InputUnitProps, useContextId } from '../InputUnit'
 import { Shelf } from '../Shelf'
@@ -21,6 +21,16 @@ export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> 
 
 export type URLInputProps = TextInputProps & {
   prefix?: string
+}
+
+export interface DropdownOption {
+  label: string
+  value: string
+}
+
+export interface SearchInputProps extends TextInputProps {
+  dropdownOptions?: DropdownOption[]
+  onOptionSelect?: (option: DropdownOption) => void
 }
 
 export const StyledTextInput = styled.input`
@@ -196,26 +206,93 @@ export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, .
   )
 }
 
-export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+export function SearchInput({
+  label,
+  secondaryLabel,
+  disabled,
+  errorMessage,
+  id,
+  dropdownOptions,
+  onOptionSelect,
+  onFocus,
+  onBlur,
+  ...inputProps
+}: SearchInputProps) {
   const defaultId = React.useId()
   id ??= defaultId
+  const [isDropdownOpen, setDropdownOpen] = React.useState(false)
+  const theme = useTheme()
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setDropdownOpen(true)
+    onFocus && onFocus(e)
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Delay closing so that clicks on the dropdown register
+    setTimeout(() => setDropdownOpen(false), 200)
+    onBlur && onBlur(e)
+  }
+
+  const handleOptionClick = (option: DropdownOption) => {
+    onOptionSelect && onOptionSelect(option)
+    setDropdownOpen(false)
+  }
+
   return (
-    <InputUnit
-      id={id}
-      label={label}
-      secondaryLabel={secondaryLabel}
-      disabled={disabled}
-      errorMessage={errorMessage}
-      inputElement={
-        <TextInputBox
-          type="search"
-          disabled={disabled}
-          error={!!errorMessage}
-          symbol={<IconSearch size="iconSmall" color="textSecondary" />}
-          {...inputProps}
-        />
-      }
-    />
+    <div style={{ position: 'relative' }}>
+      <InputUnit
+        id={id}
+        label={label}
+        secondaryLabel={secondaryLabel}
+        disabled={disabled}
+        errorMessage={errorMessage}
+        inputElement={
+          <TextInputBox
+            type="search"
+            disabled={disabled}
+            error={!!errorMessage}
+            symbol={<IconSearch size="iconSmall" color="textSecondary" />}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            {...inputProps}
+          />
+        }
+      />
+      {dropdownOptions && isDropdownOpen && (
+        <ul
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            backgroundColor: theme.colors.backgroundPage,
+            border: `1px solid ${theme.colors.borderPrimary}`,
+            margin: 0,
+            padding: 0,
+            listStyle: 'none',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            borderRadius: '8px',
+            marginTop: '4px',
+          }}
+        >
+          {dropdownOptions.map((option, index) => (
+            <li
+              key={`${option.value}-${index}`}
+              onMouseDown={() => handleOptionClick(option)}
+              style={{
+                padding: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              {option.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
