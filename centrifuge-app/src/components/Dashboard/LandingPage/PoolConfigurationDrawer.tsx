@@ -345,7 +345,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
   // can use the formik (dirty) to enable/disable the update button.
   useEffect(() => {
     form.resetForm()
-  }, [pool])
+  }, [pool, form])
 
   // form variables
   const isPoolAdmin = !!usePoolAdmin(pool.id)

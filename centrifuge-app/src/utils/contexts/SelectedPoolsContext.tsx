@@ -25,7 +25,7 @@ export const useSelectedPools = (defaultSelectAll: boolean = false): SelectedPoo
     if (defaultSelectAll && context.pools?.length && context.selectedPoolIds.length === 0) {
       context.setSelectedPoolIds(context.pools.map((pool) => pool.id))
     }
-  }, [defaultSelectAll, context.pools])
+  }, [defaultSelectAll, context])
 
   return context
 }

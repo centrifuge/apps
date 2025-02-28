@@ -147,6 +147,7 @@ export const FooterActionButtons = ({
     isTemplatesTxLoading,
     isUploadingTemplates,
     uploadTemplates,
+    canCreateAssets,
   ])
 
   return (

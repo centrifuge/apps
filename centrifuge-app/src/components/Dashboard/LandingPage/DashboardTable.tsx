@@ -41,46 +41,44 @@ export function DashboardTable() {
         poolId: pool.id,
       }))
     )
-  }, [selectedPoolsWithMetadata])
+  }, [selectedPoolsWithMetadata, cent.metadata])
 
-  const columns = useMemo(() => {
-    return [
-      {
-        header: 'Pool',
-        align: 'left',
-        cell: ({ poolName, poolIcon }: Row) => {
-          return (
-            <Box display="flex" alignItems="center">
-              {poolIcon && <Box as="img" src={poolIcon} alt="" height={24} width={24} borderRadius={4} mr={1} />}
-              <Text style={{ fontWeight: 500 }} variant="body3">
-                {poolName}
-              </Text>
-            </Box>
-          )
-        },
+  const columns = [
+    {
+      header: 'Pool',
+      align: 'left',
+      cell: ({ poolName, poolIcon }: Row) => {
+        return (
+          <Box display="flex" alignItems="center">
+            {poolIcon && <Box as="img" src={poolIcon} alt="" height={24} width={24} borderRadius={4} mr={1} />}
+            <Text style={{ fontWeight: 500 }} variant="body3">
+              {poolName}
+            </Text>
+          </Box>
+        )
       },
-      {
-        header: 'Tranche',
-        sortKey: 'tranchetoken',
-        cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="APY" />,
-        sortKey: 'apy',
-        cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="NAV (USDC)" />,
-        sortKey: 'valueLocked',
-        cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="NAV per share" />,
-        sortKey: 'navPerToken',
-        cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
-      },
-    ]
-  }, [selectedPoolsWithMetadata])
+    },
+    {
+      header: 'Tranche',
+      sortKey: 'tranchetoken',
+      cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="APY" />,
+      sortKey: 'apy',
+      cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="NAV (USDC)" />,
+      sortKey: 'valueLocked',
+      cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="NAV per share" />,
+      sortKey: 'navPerToken',
+      cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
+    },
+  ]
 
   if (!selectedPoolsWithMetadata.length) return <Text variant="heading4">No data available</Text>
 

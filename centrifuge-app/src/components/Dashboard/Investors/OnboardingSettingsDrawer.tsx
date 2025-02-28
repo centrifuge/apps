@@ -140,7 +140,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
       externalOnboardingUrl: poolMetadata?.onboarding?.externalOnboardingUrl ?? '',
       taxInfoRequired: !!poolMetadata?.onboarding?.taxInfoRequired || true,
     }),
-    [poolMetadata, pool.tranches]
+    [poolMetadata, pool.tranches, centrifuge.metadata, isOpenForOnboarding]
   )
 
   useEffect(() => {
@@ -176,7 +176,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
     }
 
     loadFiles()
-  }, [baseInitialValues, pool.tranches])
+  }, [baseInitialValues, pool.tranches, centrifuge.metadata, poolMetadata?.onboarding?.tranches])
 
   const { execute: updatePermissionAndConfigTx } = useCentrifugeTransaction(
     'Update permissions and metadata',

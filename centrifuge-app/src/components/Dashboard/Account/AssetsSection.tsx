@@ -132,7 +132,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
       }
       return sum
     }, Dec(0))
-  }, [loans])
+  }, [loans, pool])
 
   const totalAum = pool.nav.aum.toDecimal().add(pool.reserve.total.toDecimal())
 

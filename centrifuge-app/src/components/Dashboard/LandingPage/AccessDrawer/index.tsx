@@ -1,6 +1,6 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Accordion, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
+import { Accordion, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'

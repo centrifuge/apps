@@ -6,7 +6,7 @@ import { Field, FieldArray, Form, FormikProvider, useFormikContext } from 'formi
 import * as React from 'react'
 import { firstValueFrom } from 'rxjs'
 import type { FormHandle } from '.'
-import { diffPermissions, usePoolAdmin, usePoolPermissions } from '../../../../utils/usePermissions'
+import { diffPermissions, usePoolPermissions } from '../../../../utils/usePermissions'
 import { DataTable } from '../../../DataTable'
 import { Identity } from '../../../Identity'
 import { Tooltips } from '../../../Tooltips'
@@ -32,7 +32,6 @@ type Row = Admin & { index: number }
 export function DebugAdmins({ poolId, handle }: { poolId: string; handle: React.RefObject<FormHandle> }) {
   const poolPermissions = usePoolPermissions(poolId)
   const form = useFormikContext<DebugAdminsFormValues>()
-  const poolAdmin = usePoolAdmin(poolId)
 
   const initialValues: DebugAdminsFormValues = React.useMemo(
     () => ({

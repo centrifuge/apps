@@ -27,7 +27,7 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
   const data = useMemo(() => {
     return pools.flatMap((pool) =>
       pool.tranches.map((token: Token) => ({
-        poolIcon: cent.metadata.parseMetadataUrl(pool.meta?.pool?.icon?.uri),
+        poolIcon: cent.metadata.parseMetadataUrl(pool.meta?.pool?.icon?.uri ?? ''),
         poolName: pool.meta?.pool?.name,
         trancheToken: token.currency.displayName,
         apy: calculateApyPerToken(token, pool),
@@ -36,46 +36,44 @@ export function DashboardTable({ filteredPools }: { filteredPools: Pool[] }) {
         poolId: pool.id,
       }))
     )
-  }, [pools])
+  }, [pools, cent.metadata])
 
-  const columns = useMemo(() => {
-    return [
-      {
-        header: 'Pool',
-        align: 'left',
-        cell: ({ poolName, poolIcon }: Row) => {
-          return (
-            <Box display="flex" alignItems="center">
-              {poolIcon && <Box as="img" src={poolIcon} alt="" height={24} width={24} borderRadius={4} mr={1} />}
-              <Text style={{ fontWeight: 500 }} variant="body3">
-                {poolName}
-              </Text>
-            </Box>
-          )
-        },
+  const columns = [
+    {
+      header: 'Pool',
+      align: 'left',
+      cell: ({ poolName, poolIcon }: Row) => {
+        return (
+          <Box display="flex" alignItems="center">
+            {poolIcon && <Box as="img" src={poolIcon} alt="" height={24} width={24} borderRadius={4} mr={1} />}
+            <Text style={{ fontWeight: 500 }} variant="body3">
+              {poolName}
+            </Text>
+          </Box>
+        )
       },
-      {
-        header: 'Tranche',
-        sortKey: 'tranchetoken',
-        cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="APY" />,
-        sortKey: 'apy',
-        cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="NAV (USDC)" />,
-        sortKey: 'valueLocked',
-        cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
-      },
-      {
-        header: <SortableTableHeader label="NAV per share" />,
-        sortKey: 'navPerToken',
-        cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
-      },
-    ]
-  }, [pools])
+    },
+    {
+      header: 'Tranche',
+      sortKey: 'tranchetoken',
+      cell: ({ trancheToken }: Row) => <Text variant="body3">{trancheToken}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="APY" />,
+      sortKey: 'apy',
+      cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="NAV (USDC)" />,
+      sortKey: 'valueLocked',
+      cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
+    },
+    {
+      header: <SortableTableHeader label="NAV per share" />,
+      sortKey: 'navPerToken',
+      cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
+    },
+  ]
 
   if (!pools.length) return <Text variant="heading4">No data available</Text>
 
