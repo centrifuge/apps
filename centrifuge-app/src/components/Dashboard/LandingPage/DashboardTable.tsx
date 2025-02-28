@@ -39,6 +39,7 @@ export function DashboardTable() {
         navPerToken: token.tokenPrice,
         valueLocked: token?.tokenPrice ? token.totalIssuance.toDecimal().mul(token.tokenPrice.toDecimal()) : Dec(0),
         poolId: pool.id,
+        rawAPY: Number(calculateApyPerToken(token, pool).split('%')[0]),
       }))
     )
   }, [selectedPoolsWithMetadata])
@@ -65,7 +66,7 @@ export function DashboardTable() {
     },
     {
       header: <SortableTableHeader label="APY" />,
-      sortKey: 'apy',
+      sortKey: 'rawAPY',
       cell: ({ apy }: Row) => <Text variant="body3">{apy}</Text>,
     },
     {
