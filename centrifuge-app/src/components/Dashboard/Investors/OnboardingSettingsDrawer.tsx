@@ -62,7 +62,6 @@ function OnboardingSettingsAccordion({ children }: { children: React.ReactNode }
   return (
     <Stack
       borderRadius={8}
-      mx={2}
       mb={4}
       py={3}
       px={2}
@@ -318,8 +317,8 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
   return (
     <FormikProvider value={formik}>
       <Form>
-        <Stack gap={0}>
-          <Stack gap={0}>
+        <Box display="flex" flexDirection="column" height="75vh">
+          <Stack gap={0} flex={1} overflow="auto">
             <Divider />
             <Accordion
               items={[
@@ -558,7 +557,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
               </Button>
             </Stack>
           </Stack>
-        </Stack>
+        </Box>
       </Form>
     </FormikProvider>
   )
