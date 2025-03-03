@@ -295,7 +295,7 @@ export function Holdings({
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
-      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder />
+      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder scrollable />
       <Box borderBottom={`1px solid ${theme.colors.backgroundTertiary}`} />
     </Box>
   ) : (

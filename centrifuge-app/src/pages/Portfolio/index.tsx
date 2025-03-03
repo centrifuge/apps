@@ -1,13 +1,17 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Grid, Stack, Text } from '@centrifuge/fabric'
+import { useTheme } from 'styled-components'
+import { PageSummary } from '../../../src/components/PageSummary'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
-import { Holdings } from '../../components/Portfolio/Holdings'
+import { Holdings, useHoldings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
+import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
+import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useTransactionsByAddress } from '../../utils/usePools'
 
@@ -16,6 +20,57 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
+  const theme = useTheme()
+  const address = useAddress()
+  const { showNetworks, connectedNetwork, evm } = useWallet()
+  const chainId = evm.chainId ?? undefined
+  const tokens = useHoldings(address, chainId)
+  const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
+
+  const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
+  const realizedPL = tokens.reduce((sum, token) => sum.add(token.realizedProfit?.toDecimal() ?? Dec(0)), Dec(0))
+  const unrealizedPL = tokens.reduce((sum, token) => sum.add(token.unrealizedProfit?.toDecimal() ?? Dec(0)), Dec(0))
+
+  const pageSummaryData: { label: React.ReactNode; value: React.ReactNode; heading?: boolean }[] = [
+    {
+      label: `Portfolio value`,
+      value: formatBalance(currentPortfolioValue || 0),
+    },
+    {
+      label: `Realized P&L`,
+      value: formatBalance(realizedPL || 0),
+    },
+    {
+      label: `Unrealized P&L`,
+      value: formatBalance(unrealizedPL || 0),
+    },
+  ]
+  return (
+    <Box>
+      <LayoutSection alignItems="flex-start">
+        <Text variant="heading1">Your portfolio</Text>
+      </LayoutSection>
+      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} />
+      <PageSummary data={pageSummaryData} />
+      <Stack gap={4} mx={4}>
+        <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={4}>
+          <CardPortfolioValue address={address} chainId={chainId} />
+          <Box>New box</Box>
+        </Grid>
+        <Box>
+          <Text variant="heading4">Investment positions</Text>
+          <Holdings address={address} chainId={chainId} />
+        </Box>
+        <Box>
+          <Text variant="heading4">Transaction history</Text>
+          <Transactions onlyMostRecent address={centAddress} />
+        </Box>
+      </Stack>
+    </Box>
+  )
+}
+
+function PortfolioOld() {
   const address = useAddress()
   const { data: transactions } = useTransactionsByAddress(address)
   const { showNetworks, connectedNetwork, evm } = useWallet()
