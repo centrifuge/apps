@@ -15,10 +15,10 @@ import {
   useEvmProvider,
   useWallet,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, Divider, Grid, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Divider, Grid, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { keccak256, SigningKey, toUtf8Bytes } from 'ethers'
-import { Form, FormikProvider, useFormik } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { combineLatest, defer, firstValueFrom, switchMap } from 'rxjs'
@@ -360,7 +360,22 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
       align: 'left',
       header: 'New price (USDC)',
       cell: ({ loan }: Row) => {
-        return <EditableTableField name={`${loan.id}.newPrice`} loanId={loan.id} />
+        return  <Field name={`${loan.id}.newPrice`}>
+        {({ field, form }: FieldProps) =>
+            <CurrencyInput
+              {...field}
+              autoFocus
+              value={field.value || ''}
+              onChange={(value) => {
+                form.setFieldValue(field.name, value)
+                const quantity = form.values[loan.id]?.quantity || 0
+                if (typeof value === 'number') {
+                  form.setFieldValue(`${loan.id}.newValue`, value * quantity)
+                }
+              }}
+            />
+        }
+      </Field>
       },
     },
     {
