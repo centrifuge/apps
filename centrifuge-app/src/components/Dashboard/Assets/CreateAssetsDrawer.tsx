@@ -75,6 +75,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
 
+
   const templateIds =
     poolsWithMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
   const templateId = templateIds.at(-1)
@@ -118,6 +119,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     }
   )
 
+
   const form = useFormik({
     initialValues: {
       image: null,
@@ -146,7 +148,8 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       oracleSource: 'isin',
     },
     onSubmit: async (values) => {
-      if (!pid || !collateralCollectionId || !template || !account) return
+      if (!pid || !collateralCollectionId || !account) return
+      if(values.assetType !== 'cash' && !template) return
       setIsLoading(true)
       const decimals = form.values.selectedPool.currency.decimals
       let pricingInfo: LoanInfoInput | undefined
@@ -163,7 +166,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
           break
         case 'liquid':
         case 'fund': {
-          const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
+          const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid])) as any
           pricingInfo = {
             valuationMethod: 'oracle',
             maxPriceVariation: Rate.fromPercent(9999),
@@ -214,7 +217,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       }
 
       const properties =
-        values.valuationMethod === 'cash'
+        values.assetType === 'cash'
           ? {}
           : { ...(valuesToNftProperties(values.attributes, template as any) as any), _template: templateId }
 

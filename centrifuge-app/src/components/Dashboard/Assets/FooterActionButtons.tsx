@@ -13,6 +13,7 @@ export const FooterActionButtons = ({
   isUploadingTemplates,
   resetToDefault,
   isLoading,
+  disabled,
 }: {
   type: string
   setType: (type: 'create-asset' | 'upload-template') => void
@@ -20,6 +21,7 @@ export const FooterActionButtons = ({
   isUploadingTemplates: boolean
   resetToDefault: () => void
   isLoading: boolean
+  disabled?: boolean
 }) => {
   const form = useFormikContext<CreateAssetFormValues>()
   const pool = form.values.selectedPool

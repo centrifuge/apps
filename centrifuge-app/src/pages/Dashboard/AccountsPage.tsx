@@ -11,7 +11,7 @@ export default function AccountsPage() {
 
   useEffect(() => {
     setSelectedPoolIds([])
-  }, [])
+  }, [setSelectedPoolIds])
 
   return (
     <Box py={2} px={3}>

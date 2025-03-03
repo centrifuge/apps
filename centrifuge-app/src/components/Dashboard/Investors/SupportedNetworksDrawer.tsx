@@ -319,7 +319,7 @@ function TrancheTokensInput({ chainId, poolId }: { chainId: number; poolId: stri
   return (
     <Stack gap={2}>
       <Text variant="label1" color="textPrimary">
-        Tranche token that will be deployed
+        Tranche tokens deployed
       </Text>
       {pool.tranches.map((t) => {
         return (
