@@ -2,6 +2,7 @@ import { Pool } from '@centrifuge/centrifuge-js'
 import React, { ReactNode, createContext, useContext, useState } from 'react'
 import { PoolWithMetadata, useGetPoolsMetadata } from '../../components/Dashboard/utils'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../usePermissions'
+import { usePools } from '../usePools'
 
 interface SelectedPoolsContextProps {
   selectedPoolIds: string[]
@@ -35,7 +36,8 @@ interface SelectedPoolsProviderProps {
 }
 
 export const SelectedPoolsProvider = ({ children }: SelectedPoolsProviderProps) => {
-  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor()
+  const pools = usePools()
+  const a = usePoolsThatAnyConnectedAddressHasPermissionsFor()
   const poolsWithMetadata = useGetPoolsMetadata(pools || [])
   const [selectedPoolIds, setSelectedPoolIds] = useState<string[]>([])
   const selectedPoolsWithMetadata = poolsWithMetadata.filter((pool) => selectedPoolIds.includes(pool.id))
