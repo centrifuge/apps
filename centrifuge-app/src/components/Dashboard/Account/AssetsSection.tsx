@@ -454,19 +454,19 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
             <Grid gridTemplateColumns={['1fr', '1fr 1fr 1fr 1fr 150px']} gap={2}>
               <Stack gap={1}>
                 <Text variant="body3">Current NAV</Text>
-                <Text variant="heading1">{formatBalance(totalAum)} USDC</Text>
+                <Text variant="heading1">{formatBalance(totalAum, 'USDC', 2)}</Text>
               </Stack>
               <Stack gap={1}>
                 <Text variant="body3">Change in valuation</Text>
-                <Text variant="heading1">{changeInValuation ? formatBalance(changeInValuation) : 0}</Text>
+                <Text variant="heading1">{changeInValuation ? formatBalance(changeInValuation, 'USDC', 2) : 0}</Text>
               </Stack>
               <Stack gap={1}>
                 <Text variant="body3">New NAV</Text>
-                <Text variant="heading1">{pendingNav ? formatBalance(pendingNav) : 0}</Text>
+                <Text variant="heading1">{pendingNav ? formatBalance(pendingNav, 'USDC', 2) : 0}</Text>
               </Stack>
               <Stack gap={1}>
                 <Text variant="body3">Last updated</Text>
-                <Text variant="heading1">{formatDate(pool.nav.lastUpdated)}</Text>
+                <Text variant="heading4">{formatDate(pool.nav.lastUpdated)}</Text>
               </Stack>
               {!update && (
                 <Button variant="secondary" small onClick={() => setUpdate(true)} disabled={!loans?.length}>
