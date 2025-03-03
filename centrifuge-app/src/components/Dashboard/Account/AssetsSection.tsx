@@ -303,6 +303,12 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
           return cent.wrapSignAndSend(api, tx, options)
         })
       )
+    },
+    {
+      onSuccess: () => {
+        setUpdate(false)
+        queryClient.invalidateQueries(['loans', pool.id])
+      },
     }
   )
 
@@ -334,6 +340,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     },
   })
 
+
   const columns = [
     {
       align: 'left',
@@ -354,7 +361,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     {
       align: 'left',
       header: 'Current price (USDC)',
-      cell: ({ currentPrice }: Row) => <Text variant="body3">{currentPrice ? formatBalance(currentPrice) : 0}</Text>,
+      cell: ({ currentPrice }: Row) => <Text variant="body3">{currentPrice ? formatBalance(currentPrice, '', 4) : 0}</Text>,
     },
     {
       align: 'left',
@@ -373,6 +380,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
                   form.setFieldValue(`${loan.id}.newValue`, value * quantity)
                 }
               }}
+              decimals={4}
             />
         }
       </Field>
@@ -384,7 +392,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
       cell: ({ loan }: Row) => {
         return (
           <Text variant="body3">
-            {form.values[loan.id]?.newValue ? formatBalance(form.values[loan.id]?.newValue) : 0}
+            {form.values[loan.id]?.newValue ? formatBalance(form.values[loan.id]?.newValue, '', 4) : 0}
           </Text>
         )
       },
