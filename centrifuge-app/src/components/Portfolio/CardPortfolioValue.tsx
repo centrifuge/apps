@@ -1,7 +1,8 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { formatBalance } from '@centrifuge/centrifuge-react'
-import { Box, Select, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Grid, Select, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useLocation } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
@@ -28,6 +29,8 @@ export function CardPortfolioValue({
   chainId?: number
   title?: string
 }) {
+  const location = useLocation()
+  const isPortfolioPage = location.pathname === '/portfolio'
   const tokens = useHoldings(address, chainId)
   const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
   const { data: transactions, isLoading } = useTransactionsByAddress(centAddress)
@@ -40,23 +43,49 @@ export function CardPortfolioValue({
     ? tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
     : Dec(0)
 
+  const totalPL = transactions?.investorTransactions.reduce(
+    (sum, transaction) => sum.add(transaction.realizedProfitFifo?.toDecimal() ?? Dec(0)),
+    Dec(0)
+  )
+
   return (
     <Box position="relative">
       <Box role="article" borderRadius="card" borderStyle="solid" borderWidth={1} borderColor="borderPrimary" p={2}>
         <Box>
           <Text variant="heading4">{title || 'Overview'}</Text>
           <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Box alignContent="center" mb={2} mt={3}>
-              <Box display="flex" alignItems="center">
-                <Box backgroundColor={colors.textGold} height={10} width={10} borderRadius="50%" marginRight={1} />
-                <Text variant="body3" color="textSecondary" style={{ fontWeight: 500 }}>
-                  Portfolio value
-                </Text>
+            <Grid gridTemplateColumns="1fr 1fr" gap={4}>
+              <Box alignContent="center" mb={2} mt={3}>
+                <Box display="flex" alignItems="center">
+                  <Box backgroundColor={colors.textGold} height={10} width={10} borderRadius="50%" marginRight={1} />
+                  <Text variant="body3" color="textSecondary" style={{ fontWeight: 500 }}>
+                    Portfolio value
+                  </Text>
+                </Box>
+                <TextWithPlaceholder isLoading={!currentPortfolioValue} variant="heading1">
+                  {formatBalance(currentPortfolioValue || 0, 'USD')}
+                </TextWithPlaceholder>
               </Box>
-              <TextWithPlaceholder isLoading={!currentPortfolioValue} variant="heading1">
-                {formatBalance(currentPortfolioValue || 0, 'USD')}
-              </TextWithPlaceholder>
-            </Box>
+              {isPortfolioPage && (
+                <Box alignContent="center" mb={2} mt={3}>
+                  <Box display="flex" alignItems="center">
+                    <Box
+                      backgroundColor={colors.textPrimary}
+                      height={10}
+                      width={10}
+                      borderRadius="50%"
+                      marginRight={1}
+                    />
+                    <Text variant="body3" color="textSecondary" style={{ fontWeight: 500 }}>
+                      Total P&L
+                    </Text>
+                  </Box>
+                  <TextWithPlaceholder isLoading={!totalPL} variant="heading1">
+                    {formatBalance(totalPL || 0)}
+                  </TextWithPlaceholder>
+                </Box>
+              )}
+            </Grid>
             <Select options={rangeFilters} onChange={(e) => setRange(e.target.value as RangeValue)} hideBorder />
           </Box>
           <Box width="100%" height={300} minHeight={300} position="relative">

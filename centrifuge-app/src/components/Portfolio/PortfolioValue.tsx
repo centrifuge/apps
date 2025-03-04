@@ -1,5 +1,6 @@
 import { Box, Card, Stack, Text } from '@centrifuge/fabric'
 import { useMemo } from 'react'
+import { useLocation } from 'react-router'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
@@ -16,8 +17,12 @@ const interval: Record<30 | 90, number> = {
 const chartColor = 'black'
 
 const TooltipInfo = ({ payload }: any) => {
+  const location = useLocation()
+  const isPortfolioPage = location.pathname === '/portfolio'
+
   if (payload) {
     const portfolioValue = payload[0]?.payload.portfolioValue
+    const realizedProfitFifo = payload[0]?.payload.realizedProfitFifo
     const date = payload[0]?.payload.dateInMilliseconds
 
     return (
@@ -37,22 +42,30 @@ const TooltipInfo = ({ payload }: any) => {
               <Text variant="body3">{formatBalance(portfolioValue, 'USD', 2, 2)}</Text>
             </Box>
           )}
+          {isPortfolioPage ? (
+            <Box display="flex" justifyContent="space-between">
+              <Text variant="body3">Total P&L</Text>
+              <Text variant="body3">{formatBalance(realizedProfitFifo || 0, 'USD', 2, 2)}</Text>
+            </Box>
+          ) : null}
         </Stack>
       </Card>
     )
   }
-
   return null
 }
 
 export function PortfolioValue({ rangeValue, address }: { rangeValue: string; address: string | undefined }) {
   const theme = useTheme()
+  const location = useLocation()
+  const isPortfolioPage = location.pathname === '/portfolio'
   const rangeNumber = getRangeNumber(rangeValue)
   const dailyPortfolioValue = useDailyPortfolioValue(address || '', rangeNumber)
 
   const chartData = dailyPortfolioValue?.map((value) => ({
     ...value,
     portfolioValue: value.portfolioValue.toNumber(),
+    realizedProfitFifo: value.realizedProfitFifo.toNumber(),
   }))
 
   const yAxisDomain = useMemo(() => {
@@ -110,6 +123,15 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
 
         <Tooltip content={<TooltipInfo />} />
         <Line type="monotone" dataKey="portfolioValue" stroke={theme.colors.textGold} strokeWidth={2} dot={false} />
+        {isPortfolioPage ? (
+          <Line
+            type="monotone"
+            dataKey="realizedProfitFifo"
+            stroke={theme.colors.textPrimary}
+            strokeWidth={2}
+            dot={false}
+          />
+        ) : null}
       </LineChart>
     </ResponsiveContainer>
   )
