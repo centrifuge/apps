@@ -22,7 +22,7 @@ export default function PortfolioPage() {
 function Portfolio() {
   const theme = useTheme()
   const test = useAddress()
-  const address = '0x0d9e269ecc319bae886dd8c8b98f7b89269c2b1b000000000000a4ec45564d00'
+  const address = '0xa23adc45d99e11ba3dbe9c029a4d378565eeb663e393569cee93fd9f89610faf'
   const { showNetworks, connectedNetwork, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
   const tokens = useHoldings(address, chainId)

@@ -8,7 +8,6 @@ import {
   TokenBalance,
   addressToHex,
 } from '@centrifuge/centrifuge-js'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Dec } from '../../utils/Decimal'
@@ -24,6 +23,7 @@ type InvestorTransaction = {
   tokenPrice: Price
   trancheId: string
   type: InvestorTransactionType
+  realizedProfitFifo?: CurrencyBalance
 }
 
 export function useDailyPortfolioValue(address: string, rangeValue?: number) {
@@ -61,37 +61,44 @@ export function useDailyPortfolioValue(address: string, rangeValue?: number) {
               (transaction) => new Date(transaction.timestamp) <= new Date(today.getTime() - day * 1000 * 60 * 60 * 24)
             )
 
-            return transactionsInDateRange.reduce((trancheValues: Decimal, transaction) => {
-              const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeDays, day, today)
-              if (!priceAtDate) return trancheValues
+            return transactionsInDateRange.reduce(
+              (trancheValues: { portfolioValue: Decimal; realizedProfitFifo: Decimal }, transaction) => {
+                const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeDays, day, today)
+                if (!priceAtDate) return trancheValues
 
-              // TODO: remove this once we have the correct price -- https://github.com/centrifuge/pools-subql/issues/76
-              const price =
-                priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
-                  ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
-                  : new Price(priceAtDate).toDecimal()
+                const price = new Price(priceAtDate).toDecimal()
+                const amount = transaction.tokenAmount.toDecimal().mul(price)
+                const realizedProfitFifo = transaction.realizedProfitFifo?.toDecimal() ?? Dec(0)
 
-              const amount = transaction.tokenAmount.toDecimal().mul(price)
+                if (transaction.type === 'INVEST_EXECUTION') {
+                  return {
+                    portfolioValue: trancheValues.portfolioValue.add(amount),
+                    realizedProfitFifo: trancheValues.realizedProfitFifo.add(realizedProfitFifo),
+                  }
+                }
 
-              if (transaction.type === 'INVEST_EXECUTION') {
-                return trancheValues.add(amount)
-              }
+                if (transaction.type === 'REDEEM_EXECUTION') {
+                  return {
+                    portfolioValue: trancheValues.portfolioValue.sub(amount),
+                    realizedProfitFifo: trancheValues.realizedProfitFifo.add(realizedProfitFifo),
+                  }
+                }
 
-              if (transaction.type === 'REDEEM_EXECUTION') {
-                return trancheValues.sub(amount)
-              }
-
-              return trancheValues
-            }, Dec(0))
+                return trancheValues
+              },
+              { portfolioValue: Dec(0), realizedProfitFifo: Dec(0) }
+            )
           })
 
           return valueOfTranche.reduce(
             (acc, cur) => ({
-              portfolioValue: acc.portfolioValue.add(cur),
+              portfolioValue: acc.portfolioValue.add(cur.portfolioValue),
+              realizedProfitFifo: acc.realizedProfitFifo.add(cur.realizedProfitFifo),
               dateInMilliseconds: new Date(today.getTime() - day * 1000 * 60 * 60 * 24),
             }),
             {
               portfolioValue: Dec(0),
+              realizedProfitFifo: Dec(0),
             }
           )
         })

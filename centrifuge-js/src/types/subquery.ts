@@ -87,6 +87,7 @@ export type SubqueryInvestorTransaction = {
   tokenPrice?: Price | null
   transactionFee?: string | null
   pool: {
+    sumRealizedProfitFifoByPeriod: string
     currency: {
       symbol: string
       decimals: number
