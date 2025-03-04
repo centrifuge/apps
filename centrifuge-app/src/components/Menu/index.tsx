@@ -1,10 +1,8 @@
 import { Box, IconGlobe, IconInvestments, IconNft, IconPlus, IconSwitch, IconWallet, Shelf } from '@centrifuge/fabric'
 import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
-import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
-import { useTransactionsByAddress } from '../../utils/usePools'
 import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { DashboardMenu } from './DashboardMenu'
@@ -36,10 +34,8 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
-  const address = useAddress('substrate')
   const theme = useTheme()
   const { showSwaps } = useDebugFlags()
-  const { data: transactions } = useTransactionsByAddress(address)
 
   return (
     <Shelf

@@ -86,14 +86,15 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
           dataKey="dateInMilliseconds"
           tickLine={false}
           axisLine={false}
-          style={{
-            fontSize: '10px',
-          }}
           dy={4}
           interval={rangeNumber && (rangeNumber === 30 || rangeNumber === 90) ? interval[rangeNumber] : 0}
           type="category"
-          ticks={rangeNumber && rangeNumber <= 90 ? undefined : getOneDayPerMonth(chartData, 'dateInMilliseconds')}
-          tick={(props) => <CustomTick filterValue={rangeNumber} {...props} />}
+          ticks={
+            rangeValue === 'all' || rangeValue === 'ytd'
+              ? getOneDayPerMonth(chartData, 'dateInMilliseconds')
+              : undefined
+          }
+          tick={(props) => <CustomTick filterValue={rangeNumber} {...props} y={290} />}
         />
         <YAxis
           dataKey="portfolioValue"

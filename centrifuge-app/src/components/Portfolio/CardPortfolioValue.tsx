@@ -19,22 +19,32 @@ const rangeFilters = [
 
 type RangeValue = (typeof rangeFilters)[number]['value']
 
-export function CardPortfolioValue({ address, chainId }: { address?: string; chainId?: number }) {
+export function CardPortfolioValue({
+  address,
+  chainId,
+  title,
+}: {
+  address?: string
+  chainId?: number
+  title?: string
+}) {
   const tokens = useHoldings(address, chainId)
   const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
   const { data: transactions, isLoading } = useTransactionsByAddress(centAddress)
 
   const { colors } = useTheme()
 
-  const [range, setRange] = React.useState<RangeValue>('ytd')
+  const [range, setRange] = React.useState<RangeValue>('30d')
 
-  const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
+  const currentPortfolioValue = transactions?.investorTransactions.length
+    ? tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
+    : Dec(0)
 
   return (
     <Box position="relative">
       <Box role="article" borderRadius="card" borderStyle="solid" borderWidth={1} borderColor="borderPrimary" p={2}>
         <Box>
-          <Text variant="heading4">Overview</Text>
+          <Text variant="heading4">{title || 'Overview'}</Text>
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box alignContent="center" mb={2} mt={3}>
               <Box display="flex" alignItems="center">
