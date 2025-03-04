@@ -49,6 +49,7 @@ type CustomTickProps = {
     value: ValueType
   }
   filterValue?: number
+  angle?: number
 }
 
 const rangeFilters = [
@@ -525,13 +526,7 @@ export const CustomTick = ({ x, y, payload, filterValue }: CustomTickProps) => {
 
   return (
     <g transform={`translate(${x},${y})`}>
-      <text
-        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-        x={0}
-        y={0}
-        dy={16}
-        textAnchor="middle"
-      >
+      <text style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }} textAnchor="middle">
         {dateValue ? dateValue.toLocaleString('en-US', dateFormat) : ''}
       </text>
     </g>

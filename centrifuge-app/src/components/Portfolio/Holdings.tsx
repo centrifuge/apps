@@ -1,6 +1,18 @@
 import { CurrencyBalance, Perquintill, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  Grid,
+  IconDownload,
+  IconMoreVertical,
+  IconSend,
+  Menu,
+  MenuItem,
+  Popover,
+  Shelf,
+  Text,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
@@ -132,19 +144,53 @@ const columns: Column[] = [
         <Grid gap={1} justifySelf="end">
           {showActions ? (
             trancheId ? (
-              <Shelf>
-                <RouterLinkButton to={`?receive=${poolId}.${trancheId}`} small variant="tertiary" icon={IconDownload}>
-                  Receive
-                </RouterLinkButton>
-                <RouterLinkButton to={`?send=${poolId}.${trancheId}`} small variant="tertiary" icon={IconSend}>
-                  Send
-                </RouterLinkButton>
-                <RouterLinkButton to={`?redeem=${poolId}.${trancheId}`} small variant="tertiary" icon={IconMinus}>
-                  Redeem
-                </RouterLinkButton>
-                <RouterLinkButton to={`?invest=${poolId}.${trancheId}`} small variant="tertiary" icon={IconPlus}>
+              <Shelf gap={1}>
+                <RouterLinkButton to={`?invest=${poolId}.${trancheId}`} small variant="primary">
                   Invest
                 </RouterLinkButton>
+                <RouterLinkButton to={`?redeem=${poolId}.${trancheId}`} small variant="secondary">
+                  Redeem
+                </RouterLinkButton>
+                <Popover
+                  renderTrigger={(props, ref) => (
+                    <Box ref={ref}>
+                      <Box
+                        border="none"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        backgroundColor="transparent"
+                        as="button"
+                        style={{
+                          cursor: 'pointer',
+                        }}
+                        {...props}
+                      >
+                        <IconMoreVertical size="iconSmall" />
+                      </Box>
+                    </Box>
+                  )}
+                  renderContent={(props, ref, state) => (
+                    <Box ref={ref} {...props} width="200px">
+                      <Menu backgroundColor="white">
+                        <MenuItem
+                          label="Receive"
+                          onClick={() => {
+                            window.location.href = `/#/portfolio?receive=${currency?.symbol}`
+                            state.close()
+                          }}
+                        />
+                        <MenuItem
+                          label="Send"
+                          onClick={() => {
+                            window.location.href = `/#/portfolio?send=${currency?.symbol}`
+                            state.close()
+                          }}
+                        />
+                      </Menu>
+                    </Box>
+                  )}
+                />
               </Shelf>
             ) : connectedNetwork === 'Centrifuge' ? (
               <Shelf>
@@ -295,7 +341,7 @@ export function Holdings({
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
-      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder scrollable />
+      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder />
       <Box borderBottom={`1px solid ${theme.colors.backgroundTertiary}`} />
     </Box>
   ) : (
