@@ -1,18 +1,6 @@
 import { CurrencyBalance, Perquintill, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Grid,
-  IconDownload,
-  IconMoreVertical,
-  IconSend,
-  Menu,
-  MenuItem,
-  Popover,
-  Shelf,
-  Text,
-  Thumbnail,
-} from '@centrifuge/fabric'
+import { Box, Grid, IconMoreVertical, Menu, MenuItem, Popover, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
@@ -67,11 +55,13 @@ const columns: Column[] = [
     align: 'left',
     header: 'Network',
     cell: ({ chainId }: Holding) => {
-      if (!chainId) return
       return (
         <Box display={'flex'}>
           <NetworkIcon size="iconSmall" network={chainId || 'centrifuge'} />
-          <Text style={{ marginLeft: 4 }}> {(evmChains as any)[chainId]?.name || 'Centrifuge'}</Text>
+          <Text style={{ marginLeft: 4 }}>
+            {' '}
+            {(evmChains as any)[chainId as keyof typeof evmChains]?.name || 'Centrifuge'}
+          </Text>
         </Box>
       )
     },
@@ -193,13 +183,14 @@ const columns: Column[] = [
                 />
               </Shelf>
             ) : connectedNetwork === 'Centrifuge' ? (
-              <Shelf>
-                <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
-                  Receive
-                </RouterLinkButton>
-                <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
+              <Shelf gap={1}>
+                <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="primary">
                   Send
                 </RouterLinkButton>
+                <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="secondary">
+                  Receive
+                </RouterLinkButton>
+                <Box width="25px" />
               </Shelf>
             ) : null
           ) : null}
