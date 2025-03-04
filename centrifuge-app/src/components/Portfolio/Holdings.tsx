@@ -332,7 +332,17 @@ export function Holdings({
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
-      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder />
+      <Box mt={2} style={{ height: tokens.length > 10 ? '200px' : 'auto', overflowY: 'auto' }}>
+        <DataTable
+          hideHeader
+          columns={columns}
+          data={tokens}
+          defaultSortKey="position"
+          hideBorder
+          scrollable={tokens.length > 10}
+        />
+      </Box>
+
       <Box borderBottom={`1px solid ${theme.colors.backgroundTertiary}`} />
     </Box>
   ) : (
