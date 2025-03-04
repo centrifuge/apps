@@ -19,7 +19,7 @@ type TransactionsProps = {
 
 type Row = {
   action: InvestorTransactionType | AssetTransactionType
-  date: number
+  date: string
   tranche?: Token
   tranchePrice: number | string
   amount: TokenBalance
@@ -40,11 +40,7 @@ export function TransactionHistory({ address }: TransactionsProps) {
       header: <SortableTableHeader label="Transaction date" />,
       cell: ({ date }: Row) => (
         <Text as="time" variant="body3" datetime={date}>
-          {formatDate(date, {
-            day: '2-digit',
-            month: '2-digit',
-            year: '2-digit',
-          })}
+          {formatDate(date)}
         </Text>
       ),
       sortKey: 'date',
@@ -109,7 +105,7 @@ export function TransactionHistory({ address }: TransactionsProps) {
       const pool = pools?.find((pool) => pool.id === tx.poolId)
       const tranche = pool?.tranches.find((tranche) => tranche.id === tx.trancheId)
       return {
-        date: new Date(tx.timestamp).getTime(),
+        date: tx.timestamp,
         action: tx.type,
         tranche,
         tranchePrice: !tx?.tokenPrice || tx?.tokenPrice.isZero() ? '-' : tx.tokenPrice.toFloat(),
@@ -138,6 +134,7 @@ export function TransactionHistory({ address }: TransactionsProps) {
         'Transaction date': `"${formatDate(entry.date)}"`,
         Action: entry.action,
         Token: (pool && pool.tranches.find(({ id }) => id === entry.trancheId)?.currency.name) ?? '',
+        Price: entry.tranchePrice,
         Amount: (pool && `"${formatBalance(entry.amount.toDecimal(), pool.currency.symbol)}"`) ?? '',
       }
     })
