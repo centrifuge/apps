@@ -7,13 +7,13 @@ import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, useHoldings } from '../../components/Portfolio/Holdings'
-import { Transactions } from '../../components/Portfolio/Transactions'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useTransactionsByAddress } from '../../utils/usePools'
+import { TransactionHistory } from './TransactionHistory'
 
 export default function PortfolioPage() {
   return <Portfolio />
@@ -47,7 +47,7 @@ function Portfolio() {
     },
   ]
   return (
-    <Box>
+    <Box mb={2}>
       <LayoutSection alignItems="flex-start">
         <Text variant="heading1">Your portfolio</Text>
       </LayoutSection>
@@ -62,10 +62,8 @@ function Portfolio() {
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        <Box>
-          <Text variant="heading4">Transaction history</Text>
-          <Transactions onlyMostRecent address={centAddress} />
-        </Box>
+
+        <TransactionHistory address={centAddress} />
       </Stack>
     </Box>
   )
@@ -122,7 +120,7 @@ function PortfolioOld() {
       </LayoutSection>
 
       <LayoutSection title="Transaction history">
-        <Transactions onlyMostRecent address={centAddress} />
+        <TransactionHistory address={centAddress} />
       </LayoutSection>
 
       <LayoutSection title="Allocation" pb={5}>
