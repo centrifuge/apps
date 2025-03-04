@@ -21,7 +21,8 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   const theme = useTheme()
-  const address = useAddress()
+  const test = useAddress()
+  const address = '0x0d9e269ecc319bae886dd8c8b98f7b89269c2b1b000000000000a4ec45564d00'
   const { showNetworks, connectedNetwork, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
   const tokens = useHoldings(address, chainId)
@@ -53,8 +54,8 @@ function Portfolio() {
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} />
       <PageSummary data={pageSummaryData} />
       <Stack gap={4} mx={4}>
-        <Grid gridTemplateColumns={['1fr', '1fr 1fr']} gap={4}>
-          <CardPortfolioValue address={address} chainId={chainId} />
+        <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
+          <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
           <Box>New box</Box>
         </Grid>
         <Box>
