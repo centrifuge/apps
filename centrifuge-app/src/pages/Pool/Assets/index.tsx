@@ -112,7 +112,7 @@ export function PoolDetailAssets() {
           },
           {
             label: `Total pending fees (${pool.currency.symbol})`,
-            value: `${pool.fees.totalPending.isZero() ? '' : formatBalance(pool.fees.totalPending)}`,
+            value: `${pool.fees.totalPending.isZero() ? 0 : formatBalance(pool.fees.totalPending)}`,
             heading: false,
           },
         ]
