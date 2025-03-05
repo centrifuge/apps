@@ -3,7 +3,7 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Grid, IconWallet, Select, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { PageSummary } from '../../../src/components/PageSummary'
+import { AssetSummary } from '../../../src/components/AssetSummary'
 import { evmChains } from '../../../src/config'
 import { useTransactionsByAddress } from '../../../src/utils/usePools'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -117,13 +117,36 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     [tokens]
   )
 
+  const yieldSinceInception = useMemo(() => {
+    return tokens.reduce((sum, token) => sum.add(token.yieldSinceInception?.toDecimal() ?? Dec(0)), Dec(0))
+  }, [tokens])
+
   const pageSummaryData = useMemo(
     () => [
-      { label: 'Portfolio value', value: formatBalance(currentPortfolioValue || 0) },
-      { label: 'Realized P&L', value: formatBalance(realizedPL || 0) },
-      { label: 'Unrealized P&L', value: formatBalance(unrealizedPL || 0) },
+      {
+        label: 'Portfolio value',
+        value: formatBalance(currentPortfolioValue || 0),
+        children: (
+          <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4}>
+            <Text
+              variant="body4"
+              color={yieldSinceInception?.isPositive() ? 'statusOk' : 'statusCritical'}
+              style={{ fontWeight: 500 }}
+            >
+              {yieldSinceInception?.isPositive() ? '+' : '-'}
+              {yieldSinceInception?.toPrecision(2)}
+            </Text>
+            <Text variant="body4" color={yieldSinceInception?.isPositive() ? 'statusOk' : 'statusCritical'}>
+              Since inception
+            </Text>
+          </Box>
+        ),
+        heading: false,
+      },
+      { label: 'Realized P&L', value: formatBalance(realizedPL || 0), heading: false },
+      { label: 'Unrealized P&L', value: formatBalance(unrealizedPL || 0), heading: false },
     ],
-    [currentPortfolioValue, realizedPL, unrealizedPL]
+    [currentPortfolioValue, realizedPL, unrealizedPL, yieldSinceInception]
   )
 
   if (!transactions?.investorTransactions?.length) {
@@ -147,7 +170,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   return (
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} />
-      <PageSummary data={pageSummaryData} />
+      <AssetSummary data={pageSummaryData} />
       <Stack gap={4} m={4}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
