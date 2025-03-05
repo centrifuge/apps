@@ -53,14 +53,17 @@ const columns: Column[] = [
     width: '300px',
   },
   {
-    align: 'left',
+    align: 'center',
     header: 'Network',
     cell: ({ chainId }: Holding) => {
-      return (
-        <Box display={'flex'}>
-          <NetworkIcon size="iconSmall" network={chainId || 'centrifuge'} />
+      const isPortfolioPage = window.location.hash.includes('portfolio')
+      const id = Number(chainId) === 0 ? 'centrifuge' : chainId
+      return isPortfolioPage ? (
+        <NetworkIcon size="iconMedium" network={id || 'centrifuge'} />
+      ) : (
+        <Box display="flex">
+          <NetworkIcon size="iconSmall" network={id || 'centrifuge'} />
           <Text style={{ marginLeft: 4 }}>
-            {' '}
             {(evmChains as any)[chainId as keyof typeof evmChains]?.name || 'Centrifuge'}
           </Text>
         </Box>
@@ -77,6 +80,7 @@ const columns: Column[] = [
       )
     },
     align: 'left',
+    sortKey: 'tokenPrice',
   },
   {
     header: <SortableTableHeader label="Position" />,
