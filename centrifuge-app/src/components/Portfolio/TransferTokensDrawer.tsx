@@ -15,9 +15,11 @@ import {
   Button,
   Checkbox,
   CurrencyInput,
+  Divider,
   Drawer,
-  IconCheckCircle,
+  Grid,
   IconCopy,
+  IconInfo,
   Select,
   Shelf,
   Stack,
@@ -33,8 +35,7 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useEffect, useMemo } from 'react'
 import { useQuery } from 'react-query'
 import { useLocation, useMatch, useNavigate } from 'react-router'
-import styled, { useTheme } from 'styled-components'
-import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
+import { useTheme } from 'styled-components'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
@@ -62,7 +63,6 @@ export function TransferTokensDrawer({ onClose, isOpen }: TransferTokensProps) {
 }
 
 function TransferTokensDrawerInner({ onClose, isOpen }: TransferTokensProps) {
-  const theme = useTheme()
   const address = useAddress()
   const consts = useCentrifugeConsts()
   const tokens = useHoldings(address, useWallet().evm.chainId)
@@ -93,12 +93,7 @@ function TransferTokensDrawerInner({ onClose, isOpen }: TransferTokensProps) {
       <LoadBoundary>
         {holding ? (
           <Stack gap={3}>
-            <Shelf
-              gap={3}
-              alignItems="flex-start"
-              justifyContent="flex-start"
-              borderBottom={`1px solid ${theme.colors.border}`}
-            >
+            <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
               <LabelValueStack
                 label="Position"
                 value={formatBalanceAbbreviated(holding?.position || 0, holding?.currency.symbol, 2)}
@@ -112,6 +107,7 @@ function TransferTokensDrawerInner({ onClose, isOpen }: TransferTokensProps) {
                 value={formatBalance(holding?.tokenPrice || 0, 'USD', 4)}
               />
             </Shelf>
+            <Divider color="borderPrimary" />
             {isPortfolioPage && (
               <Stack>
                 <Tabs
@@ -132,16 +128,7 @@ function TransferTokensDrawerInner({ onClose, isOpen }: TransferTokensProps) {
                 )}
               </Stack>
             )}
-            {isNativeTransfer && (
-              <Stack gap={12}>
-                <Text variant="heading4" color="textPrimary" fontWeight={600}>
-                  Price
-                </Text>
-                <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-                  <CFGPriceChart />
-                </Box>
-              </Stack>
-            )}
+            {isNativeTransfer && <CFGPriceChart />}
           </Stack>
         ) : (
           <Spinner />
@@ -157,6 +144,7 @@ type SendProps = {
 }
 
 const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
+  const theme = useTheme()
   const address = useAddress()
   const cent = useCentrifuge()
   const { data: domains } = useActiveDomains(holding.poolId)
@@ -304,15 +292,36 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
   }, [allowedTranches])
 
   return (
-    <Stack px={2} py={4} backgroundColor="backgroundSecondary">
+    <Stack
+      px={2}
+      py={4}
+      backgroundColor="backgroundSecondary"
+      mt={2}
+      borderRadius="8px"
+      border={`1px solid ${theme.colors.borderPrimary}`}
+    >
       <FormikProvider value={form}>
         <Form>
-          <Stack gap="2">
+          <Stack gap={2}>
+            <Field name="recipientAddress">
+              {({ field, meta }: FieldProps) => {
+                return (
+                  <AddressInput
+                    {...field}
+                    label="Recipient address"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    disabled={isLoading}
+                    placeholder="0x0A4..."
+                    required
+                  />
+                )
+              }}
+            </Field>
             <Field name="chain">
               {({ field, form, meta }: FieldProps) => (
                 <Select
                   name="chain"
-                  label="Destination"
+                  label="Network"
                   value={field.value}
                   options={[
                     { value: '', label: 'Centrifuge' },
@@ -329,20 +338,6 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 />
               )}
-            </Field>
-            <Field name="recipientAddress">
-              {({ field, meta }: FieldProps) => {
-                return (
-                  <AddressInput
-                    {...field}
-                    label="Recipient address"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    disabled={isLoading}
-                    placeholder="0x0A4..."
-                    required
-                  />
-                )
-              }}
             </Field>
             <Field
               name="amount"
@@ -368,10 +363,8 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
                 />
               )}
             </Field>
-            <Shelf pl={1}>
-              <Text variant="label2">
-                Wallet balance: {formatBalance(holding.position, holding.currency.symbol, 2)}
-              </Text>
+            <Shelf pl={1} display="flex" justifyContent="flex-end">
+              <Text variant="body2">Wallet balance: {formatBalance(holding.position, holding.currency.symbol, 2)}</Text>
             </Shelf>
             {form.values.recipientAddress.startsWith('0x') && isNativeTransfer && (
               <>
@@ -403,11 +396,15 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
                 </Shelf>
               </>
             )}
-            <Shelf>
-              <Button variant="primary" type="submit" loading={isLoading || evmIsLoading || isApproving}>
-                {isEvmAndNeedsApprove ? 'Approve and send' : 'Send'}
-              </Button>
-            </Shelf>
+
+            <Button
+              variant="primary"
+              type="submit"
+              loading={isLoading || evmIsLoading || isApproving}
+              style={{ width: '100%' }}
+            >
+              {isEvmAndNeedsApprove ? 'Approve and send' : 'Send'}
+            </Button>
           </Stack>
         </Form>
       </FormikProvider>
@@ -416,51 +413,87 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
 }
 
 const ReceiveToken = ({ address }: { address: string }) => {
-  const { connectedNetworkName } = useWallet()
+  const theme = useTheme()
+  const { connectedNetworkName, evm } = useWallet()
   const utils = useCentrifugeUtils()
-  const [copied, setCopied] = React.useState(false)
   const formattedAddr = utils.formatAddress(address)
+  const formattedEvmAddr = evm.selectedAddress ? utils.formatAddress(evm.selectedAddress) : ''
 
   return (
-    <Stack gap={2} px={1} py={2} backgroundColor="backgroundSecondary">
+    <Stack
+      gap={2}
+      px={2}
+      py={2}
+      backgroundColor="backgroundSecondary"
+      borderRadius="8px"
+      border={`1px solid ${theme.colors.borderPrimary}`}
+      mt={2}
+    >
       <Stack gap={3}>
-        <Text variant="interactive2" color="textSecondary">
-          Your address on {connectedNetworkName}
-        </Text>
-        <Shelf gap={1}>
-          <Button
-            variant="tertiary"
-            small
-            onClick={() => {
-              setTimeout(() => setCopied(true), 100)
-              setTimeout(() => setCopied(false), 1100)
-              copyToClipboard(formattedAddr)
-            }}
-            title="Copy to clipboard"
-          >
-            <Shelf gap={1} style={{ cursor: 'copy' }}>
-              <Container>
-                <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
-              </Container>
-              {truncate(formattedAddr, 10, 10)}
-              {copied ? <IconCheckCircle size="16px" /> : <IconCopy size="16px" />}
-            </Shelf>
-          </Button>
-        </Shelf>
+        <Text variant="heading4">Your addresses on {connectedNetworkName} chain</Text>
+        <Box>
+          {!!evm.selectedAddress && (
+            <Box>
+              <Text variant="body2">Ethereum address</Text>
+              <Box
+                borderRadius="8px"
+                border={`1px solid ${theme.colors.borderPrimary}`}
+                p={1}
+                display="flex"
+                justifyContent="space-between"
+                mt={1}
+                alignItems="center"
+              >
+                <Text variant="body2" color="textSecondary">
+                  {truncate(formattedEvmAddr, 10, 10)}
+                </Text>
+                <Button
+                  variant="tertiary"
+                  small
+                  onClick={() => copyToClipboard(formattedEvmAddr)}
+                  title="Copy to clipboard"
+                  icon={<IconCopy size="iconMedium" />}
+                />
+              </Box>
+              <Grid display="flex" alignItems="center" mt={1} gap={1}>
+                <IconInfo size="iconSmall" color="textSecondary" />
+                <Text color="textSecondary" variant="body2">
+                  Use this Ethereum address only on Centrifuge Chain. Receiving CFG on another network on this address
+                  will result in loss of funds. Be sure to select the right network
+                </Text>
+              </Grid>
+            </Box>
+          )}
+          {formattedAddr && (
+            <Box>
+              <Text variant="body2">Centrifuge native address</Text>
+              <Box
+                borderRadius="8px"
+                border={`1px solid ${theme.colors.borderPrimary}`}
+                p={1}
+                display="flex"
+                justifyContent="space-between"
+                mt={1}
+                alignItems="center"
+              >
+                <Text variant="body2" color="textSecondary">
+                  {truncate(formattedAddr, 10, 10)}
+                </Text>
+                <Button
+                  variant="tertiary"
+                  small
+                  onClick={() => copyToClipboard(formattedAddr)}
+                  title="Copy to clipboard"
+                  icon={<IconCopy size="iconMedium" />}
+                />
+              </Box>
+            </Box>
+          )}
+        </Box>
       </Stack>
     </Stack>
   )
 }
-
-const Container = styled(Shelf)`
-  position: relative;
-  filter: ${({ theme }) => (theme.scheme === 'dark' ? 'invert()' : undefined)};
-  img {
-    object-fit: contain;
-  }
-  height: 16px;
-  width: 16px;
-`
 
 const CFGPriceChart = React.memo(function CFGPriceChart() {
   const [filter, setFilter] = React.useState<FilterOptions>('YTD')
@@ -484,7 +517,18 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
     return tokenData
   }, [tokenDayData?.data?.tokenDayDatas, currentCFGPrice])
 
-  return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
+  if (!tokenDayData?.data?.tokenDayDatas?.length) {
+    return null
+  }
+
+  return (
+    <Stack gap={12}>
+      <Text variant="heading4" color="textPrimary" fontWeight={600}>
+        Price
+      </Text>
+      <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
+    </Stack>
+  )
 })
 
 export function useInvestorStatus(poolId: string, address: string, network: Network = 'centrifuge') {
