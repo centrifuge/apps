@@ -33,7 +33,7 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useEffect, useMemo } from 'react'
 import { useQuery } from 'react-query'
 import { useLocation, useMatch, useNavigate } from 'react-router'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
@@ -58,16 +58,11 @@ type TransferTokensProps = {
 }
 
 export function TransferTokensDrawer({ onClose, isOpen }: TransferTokensProps) {
-  return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
-      <LoadBoundary>
-        <TransferTokensDrawerInner />
-      </LoadBoundary>
-    </Drawer>
-  )
+  return <TransferTokensDrawerInner onClose={onClose} isOpen={isOpen} />
 }
 
-function TransferTokensDrawerInner() {
+function TransferTokensDrawerInner({ onClose, isOpen }: TransferTokensProps) {
+  const theme = useTheme()
   const address = useAddress()
   const consts = useCentrifugeConsts()
   const tokens = useHoldings(address, useWallet().evm.chainId)
@@ -93,58 +88,66 @@ function TransferTokensDrawerInner() {
 
   const holding = getHolding()
 
-  return holding ? (
-    <Stack gap={3}>
-      <Text textAlign="center" variant="heading2">
-        {holding?.currency.symbol} Holdings
-      </Text>
-      <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
-        <LabelValueStack
-          label="Position"
-          value={formatBalanceAbbreviated(holding?.position || 0, holding?.currency.symbol, 2)}
-        />
-        <LabelValueStack
-          label="Value"
-          value={formatBalanceAbbreviated(holding?.position.mul(holding?.tokenPrice) ?? 0, 'USD', 2)}
-        />
-        <LabelValueStack
-          label={isNativeTransfer ? <Tooltips type="cfgPrice" label={`${consts.chainSymbol} Price`} /> : 'Price'}
-          value={formatBalance(holding?.tokenPrice || 0, 'USD', 4)}
-        />
-      </Shelf>
-      {isPortfolioPage && (
-        <Stack>
-          <Tabs
-            selectedIndex={isSend ? 0 : 1}
-            onChange={(index) =>
-              navigate({
-                search: index === 0 ? `send=${transferKey}` : `receive=${transferKey}`,
-              })
-            }
-          >
-            <TabsItem>Send</TabsItem>
-            <TabsItem>Receive</TabsItem>
-          </Tabs>
-          {isSend ? (
-            <SendToken holding={holding} isNativeTransfer={isNativeTransfer} />
-          ) : (
-            <ReceiveToken address={address!} />
-          )}
-        </Stack>
-      )}
-      {isNativeTransfer && (
-        <Stack gap={12}>
-          <Text variant="heading4" color="textPrimary" fontWeight={600}>
-            Price
-          </Text>
-          <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-            <CFGPriceChart />
-          </Box>
-        </Stack>
-      )}
-    </Stack>
-  ) : (
-    <Spinner />
+  return (
+    <Drawer isOpen={isOpen} onClose={onClose} title={`${holding?.currency.symbol} holdings`}>
+      <LoadBoundary>
+        {holding ? (
+          <Stack gap={3}>
+            <Shelf
+              gap={3}
+              alignItems="flex-start"
+              justifyContent="flex-start"
+              borderBottom={`1px solid ${theme.colors.border}`}
+            >
+              <LabelValueStack
+                label="Position"
+                value={formatBalanceAbbreviated(holding?.position || 0, holding?.currency.symbol, 2)}
+              />
+              <LabelValueStack
+                label="Value"
+                value={formatBalanceAbbreviated(holding?.position.mul(holding?.tokenPrice) ?? 0, 'USD', 2)}
+              />
+              <LabelValueStack
+                label={isNativeTransfer ? <Tooltips type="cfgPrice" label={`${consts.chainSymbol} Price`} /> : 'Price'}
+                value={formatBalance(holding?.tokenPrice || 0, 'USD', 4)}
+              />
+            </Shelf>
+            {isPortfolioPage && (
+              <Stack>
+                <Tabs
+                  selectedIndex={isSend ? 0 : 1}
+                  onChange={(index) =>
+                    navigate({
+                      search: index === 0 ? `send=${transferKey}` : `receive=${transferKey}`,
+                    })
+                  }
+                >
+                  <TabsItem>Send</TabsItem>
+                  <TabsItem>Receive</TabsItem>
+                </Tabs>
+                {isSend ? (
+                  <SendToken holding={holding} isNativeTransfer={isNativeTransfer} />
+                ) : (
+                  <ReceiveToken address={address!} />
+                )}
+              </Stack>
+            )}
+            {isNativeTransfer && (
+              <Stack gap={12}>
+                <Text variant="heading4" color="textPrimary" fontWeight={600}>
+                  Price
+                </Text>
+                <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
+                  <CFGPriceChart />
+                </Box>
+              </Stack>
+            )}
+          </Stack>
+        ) : (
+          <Spinner />
+        )}
+      </LoadBoundary>
+    </Drawer>
   )
 }
 
