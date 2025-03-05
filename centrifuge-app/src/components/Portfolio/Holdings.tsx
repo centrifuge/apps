@@ -40,6 +40,7 @@ export type Holding = {
   unrealizedProfit?: CurrencyBalance
   yieldSinceInception?: Perquintill | null
   connectedNetwork?: any
+  hideCurrencyName?: boolean
 }
 
 const columns: Column[] = [
@@ -354,7 +355,7 @@ export function Holdings({
   )
 }
 
-const TokenWithIcon = ({ poolId, currency }: Holding) => {
+export const TokenWithIcon = ({ poolId, currency, hideCurrencyName = false }: Holding) => {
   const pool = usePool(poolId, false)
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
@@ -387,9 +388,11 @@ const TokenWithIcon = ({ poolId, currency }: Holding) => {
         )}
       </Eththumbnail>
 
-      <Text textOverflow="ellipsis" variant="body3">
-        {currency?.name}
-      </Text>
+      {!hideCurrencyName && (
+        <Text textOverflow="ellipsis" variant="body3">
+          {currency?.name}
+        </Text>
+      )}
     </Grid>
   )
 }
