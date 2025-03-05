@@ -1,6 +1,80 @@
-# Monorepo for the Centrifuge applications
+# Centrifuge Applications Monorepo
 
-## Preparing Envs (e.g when the dev chain data is reset)
+This monorepo contains the core applications and libraries that power the Centrifuge platform.
+
+## Architecture
+
+The repository is organized into several key components:
+
+#### Main Application
+- **centrifuge-app**: The main web application interface for Centrifuge
+
+#### Libraries (NPM Packages)
+- **centrifuge-js**: JavaScript client library for interacting with Centrifuge/Altair chains, built on top of @polkadot/api
+- **centrifuge-react**: React component library that combines centrifuge-js and fabric
+- **fabric**: Design system and component library providing shared styles and UI elements
+
+#### Supporting Services
+- **pinning-api**: Service for handling IPFS operations required by centrifuge-app
+- **onboarding-api**: Independent service managing user/entity onboarding and KYC/KYB processes via ShuftiPro
+- **faucet-api**: Development-only service for managing test tokens
+
+## Development Setup
+
+### Prerequisites
+- Node.js (version specified in .nvmrc)
+- Yarn (workspace configuration in .yarnrc.yml)
+
+### Installation
+```bash
+yarn install
+```
+
+### Environment Setup
+Copy the example environment files for each component that requires configuration:
+```bash
+# Main application
+cp centrifuge-app/.env.sample centrifuge-app/.env
+
+# Onboarding API
+cp onboarding-api/.env.example onboarding-api/.env
+
+# Pinning API
+cp pinning-api/env.yaml.example pinning-api/env.yaml
+```
+
+### Development Workflow
+
+#### Centrifuge App
+```bash
+cd centrifuge-app
+yarn dev     # Start development server
+```
+#### APIs
+
+**Pinning API**
+```bash
+cd pinning-api
+yarn dev     # Start development server
+```
+
+**Onboarding API**
+```bash
+cd onboarding-api
+yarn dev     # Start development server
+```
+
+**Faucet API (Development Only)**
+```bash
+cd faucet-api
+yarn dev     # Start development server
+```
+
+## Testing
+
+The repository includes simulation tests that provide lightweight testing without requiring a full browser environment. These can be found in the `simulation-tests` directory.
+
+## Preparing new or a recently resetted environment
 
 ### Faucet (only available in demo and dev)
 
@@ -18,69 +92,52 @@ Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 3. Copy the resulting pure proxy address and add it to the env varibles: `MEMBERLIST_ADMIN_PURE_PROXY` (onboarding-api) and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` (centrifuge-app)
 4. Enable onboarding for each new pool under /issuer/<poolId>/investors
 
-## Notes
+## Full Release process
+
+From a developer's perspective, the following happens to a line of code before it gets to prod:
+
+1. Local testing in Dev's laptop
+2. **Open a PR** -> Creates two preview sites (ff-prod and dev). See the comments in your PR
+3. **Merge PR** -> Preview sites automatically deleted and deploys to DEV and ff-prod (urls below)
+4. **Staging/Pre-prod** 
+    - Open [GH Releases](https://github.com/centrifuge/apps/releases) and cretate a new one. Alternatively run something like this: `gh release create --prerelease "centrifuge-app/v${VERSION}"xx`
+   -  Wait for [the job](https://github.com/centrifuge/apps/actions/workflows/staging-deploy.yml) to finish
+from `main` branch, which creates a permanent tag and thus a point in time for our code -> Deploy to Altair and staging. Upload deploy artifacts to the release
+5. **Deploy to prod** 
+   - *(Option 1)* 
+     - Navigate to the [release summary](https://github.com/centrifuge/apps/releases) and select the pre-release you want to publish. 
+     - Untick the `Set as a pre-release` checkbox and then tick the `Set as the latest release` checkbox. 
+     - Click `Update release` to trigger the prod deployment. As with the pre-release, the production release must be approved by a reviewer.
+     - Follow your prod deployment in the [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/prod-deploy.yml)
+   - *(Option 2)* Run the GH job directly with an specified tag (it requires that tag to have an associated release): https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml
+
+Note: production deployments require de approval of at least one team member other than the one that triggered the release.
+
+### Environments & Deployments
+
+| Name | Trigger | Chain / Back-end | Public URL |
+| --- | --- | --- | --- |
+| Production / Centrifuge | Promote release [Manual trigger](https://github.com/centrifuge/apps/actions/workflows/prod-deploy.yml) | Centrifuge (persistent) | [app.centrifuge.io](http://app.centrifuge.io/) |
+| Staging | Create a GH pre-release | Centrifuge | [app.staging.centrifuge.io](http://app.staging.centrifuge.io/) |
+| Altair | Create a GH pre-release | Altair (persistent) | [app.altair.centrifuge.io](http://app.altair.centrifuge.io/) |
+| ~~Catalyst~~ | ~~push tag~~ | ~~Catalyst (persistent)~~ | ~~app-catalyst.k-f.dev~~ |
+| Demo | [manual trigger](https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml) | Demo chain (persistent) | [app-demo.k-f.dev](http://app-demo.k-f.dev) |
+| Fast-forward prod | push to `main` | Centrifuge | [app-ff-production.k-f.dev](https://app-ff-production.k-f.dev/) |
+| Dev | push to `main` | Dev chain (ephemeral) | [app-dev.k-f.dev](http://app-dev.k-f.dev) |
+| Previews | open a PR | Dev chain | app-prXYZ.k-f.dev and app-prXYZ-app-ff-production.k-f.dev |
+
+### Staging & FF-prod
+
+This will be an exact copy of what prod will look like, the front end will be pointing to the production infrastructure, the only difference is the URL.
+
+Once staging is validated, a Github job can trigger a sync between staging and prod (rather than building from scratch from a commit/release/tag). This way we ensure we're promoting code line-by-line to prod.
+
+### Functions deployments
+
+Generally functions will only deploy using the above rules if the functions directories have any changes, **except for PRs** where functions will always be deployed at least once to test your PR in a preview, wether you change your functions folder or not.
+
+### Notes
 
 To add other repositories to this monorepo while preserving the Git history, we can use the following steps: https://medium.com/@filipenevola/how-to-migrate-to-mono-repository-without-losing-any-git-history-7a4d80aa7de2
 
 To set a pool into maintenance mode, add the pool id to the environment variable `NEXT_PUBLIC_FEATURE_FLAG_MAINTENANCE_MODE`.
-
-## Agile release process
-
-To make sure repository admins can control the full workflow of our apps to production safely this repository provides the following flow:
-
-- Opening a new PR will deploy cent-app using the PR number to app-prXXX.k-f.dev - There should be a comment with these links in your PR after deployment. Forks do not trigger a PR deployment
-
-- Merging code into `main` will deploy buckets and functions pointing to: app-dev.k-f.dev
-
-- Demo deployments must be [manually triggered](https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml). They are not required for the release process.
-
-- Catalyst deployments are triggered by pushing a tag containing `centrifuge-app-v*` in the tag name.
-
-- Altair and staging are triggered by creating a `pre-release` [on the Github repository](https://github.com/centrifuge/apps/releases/new)
-
-- Centrifuge is deployed by editing [an existing release](https://github.com/centrifuge/apps/releases) and unmarking `pre-release` to fully release it, it will promote the staging artifacts to app.centrifuge.io
-
-- Using the github release manager the pre-release can be promoted to production ([app.centrifuge.io](https://app.centrifuge.io)) using the artifacts generated in the pre-release. The production release must be approved by a reviewer.
-
-(Coming soon: release web-bundle to IPFS)
-
-You can follow your deployments by going to [the Actions section](https://github.com/centrifuge/apps/actions/workflows/centrifuge-app.yml) of the github repo
-
-HackMD docs: https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view
-
-## More info
-
-More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)
-
-## How to release to staging, Altair, and Prod/Centrifuge
-
-### 1. Create a release and mark it as a pre-release
-
--> Deploys to app.staging.centrifuge.io and app.altair.centrifuge.io
-
-Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releases/new). Make sure to tick the `pre-release` option.
-
-1. Create a new `centrifuge-app-vX.YY` tag on the release screen. Only tags starting with `centrifuge-app-v*` will meet the requirements for deployments:
-   - Major version: release includes new features/improvments
-   - Minor version: release only includes bug fixes
-2. Name the release `CentrifugeApp vX.X`
-3. Generate the release notes
-4. Tick the `Set as a pre-release` checkbox
-5. Click `Publish release` to trigger the build. You can follow progress on the [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/staging-deploy.yml)
-6. Once the build is complete, a reviewer must approve the release to trigger a deployment
-
-When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
-
-### 2. Create a production release
-
--> Deploys to app.centrifuge.io
-
-> The deployment to staging from point 1. needs to have been finished first. The production deployment uses the artifacts generated in the pre-release.
-
-Navigate to the [release summary](https://github.com/centrifuge/apps/releases) and select the pre-release you want to publish.
-
-1. Untick the `Set as a pre-release` checkbox and then tick the `Set as the latest release` checkbox
-2. Click `Update release` to trigger the prod deployment. As with the pre-release, the production release must be approved by a reviewer.
-3. Follow your prod deployment in the [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/prod-deploy.yml)
-
-When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
