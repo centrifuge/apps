@@ -36,7 +36,8 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = '0xa23adc45d99e11ba3dbe9c029a4d378565eeb663e393569cee93fd9f89610faf'
+  // For testing only - add useAddress() before merging to main
+  const address = '0x2923c1b5313f7375fdaee80b7745106debc1b53e000000000000000145564d00'
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
 
@@ -81,8 +82,8 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     convertedTokens.forEach((token) => {
       const chain = (evmChains as any)[Number(token.chainId)] || 'Centrifuge'
       networkMap.set(chain, {
-        label: chain,
-        value: chain.toLowerCase(),
+        label: chain.name ? chain.name : chain,
+        value: chain.name ? chain?.name : chain?.toLowerCase(),
         chainId: token.chainId,
       })
     })
