@@ -37,7 +37,7 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   // For testing only - add useAddress() before merging to main
-  const address = '0x2923c1b5313f7375fdaee80b7745106debc1b53e000000000000000145564d00'
+  const address = '0x30d3bbae8623d0e9c0db5c27b82dcda39de40997000000000000000145564d00'
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
 
