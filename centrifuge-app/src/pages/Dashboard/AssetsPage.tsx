@@ -48,7 +48,7 @@ export default function AssetsPage() {
     },
     {
       label: `Total pending fees (USDC)`,
-      value: `${pendingFees.isZero() ? '' : '-'}${formatBalance(pendingFees)} USDC`,
+      value: `${pendingFees.isZero() ? 0 : formatBalance(pendingFees)} USDC`,
       heading: false,
     },
   ]
