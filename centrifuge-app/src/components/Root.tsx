@@ -76,7 +76,6 @@ const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
 const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
-const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 const PoolsPage = React.lazy(() => import('../pages/Pools'))
@@ -142,7 +141,6 @@ const router = createHashRouter([
         element: <ConvertAddressPage />,
         handle: { component: ConvertAddressPage },
       },
-      { path: '/nav-management/:pid', element: <NavManagementPage />, handle: { component: NavManagementPage } },
       { path: '*', element: <NotFoundPage />, handle: { component: NotFoundPage } },
     ],
     errorElement: <NotFoundPage />,
