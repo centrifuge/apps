@@ -10,8 +10,8 @@ interface SelectedPoolsContextProps {
   togglePoolIdSelection: (poolId: string) => void
   setSelectedPoolIds: React.Dispatch<React.SetStateAction<string[]>>
   clearSelectedPoolsIds: () => void
-  pools: Pool[] | undefined // pools that the user has permissions for
-  poolsWithMetadata: PoolWithMetadata[] // pools with metadata that the user has permissions for
+  pools: Pool[] | undefined
+  poolsWithMetadata: PoolWithMetadata[]
 }
 
 const SelectedPoolsContext = createContext<SelectedPoolsContextProps | undefined>(undefined)
@@ -22,11 +22,15 @@ export const useSelectedPools = (defaultSelectAll: boolean = false): SelectedPoo
     throw new Error('useSelectedPools must be used within a SelectedPoolsProvider')
   }
 
+  const { pools, selectedPoolIds, setSelectedPoolIds } = context
+
+  // If defaultSelectAll is true and nothing has been selected yet,
+  // select all available pools on the first render.
   React.useEffect(() => {
-    if (defaultSelectAll && context.pools?.length && context.pools.length > 0) {
-      context.setSelectedPoolIds(context.pools.map((pool) => pool.id))
+    if (defaultSelectAll && pools && pools.length > 0 && selectedPoolIds.length === 0) {
+      setSelectedPoolIds(pools.map((pool) => pool.id))
     }
-  }, [])
+  }, [defaultSelectAll, pools, selectedPoolIds, setSelectedPoolIds])
 
   return context
 }
@@ -37,7 +41,7 @@ interface SelectedPoolsProviderProps {
 
 export const SelectedPoolsProvider = ({ children }: SelectedPoolsProviderProps) => {
   const pools = usePools()
-  const a = usePoolsThatAnyConnectedAddressHasPermissionsFor()
+  const poolsWithPermissions = usePoolsThatAnyConnectedAddressHasPermissionsFor()
   const poolsWithMetadata = useGetPoolsMetadata(pools || [])
   const [selectedPoolIds, setSelectedPoolIds] = useState<string[]>([])
   const selectedPoolsWithMetadata = poolsWithMetadata.filter((pool) => selectedPoolIds.includes(pool.id))
@@ -56,12 +60,12 @@ export const SelectedPoolsProvider = ({ children }: SelectedPoolsProviderProps) 
     <SelectedPoolsContext.Provider
       value={{
         selectedPoolIds,
+        selectedPoolsWithMetadata,
         togglePoolIdSelection,
         setSelectedPoolIds,
         clearSelectedPoolsIds,
         pools: pools ?? [],
         poolsWithMetadata,
-        selectedPoolsWithMetadata,
       }}
     >
       {children}

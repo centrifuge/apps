@@ -1,7 +1,7 @@
 import { CurrencyBalance, CurrencyMetadata, Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, Grid, IconDownload, IconInfo, IconPlus, Spinner, Text } from '@centrifuge/fabric'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isCashLoan } from '../../../../src/pages/Loan/utils'
 import { useSelectedPools } from '../../..//utils/contexts/SelectedPoolsContext'
@@ -139,6 +139,10 @@ export function AssetsTable() {
   const filters = useFilters({
     data,
   })
+
+  useEffect(() => {
+    filters.setFilter('status', ['Ongoing'])
+  }, [])
 
   const columns = [
     {

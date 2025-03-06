@@ -11,6 +11,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { NavLinkProps, Navigate, RouterProvider, createHashRouter, matchRoutes } from 'react-router-dom'
 import { config, evmChains } from '../config'
+import { SelectedPoolsProvider } from '../utils/contexts/SelectedPoolsContext'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -195,15 +196,17 @@ export function Root() {
               <SupportedBrowserBanner />
               <OnboardingAuthProvider>
                 <OnboardingProvider>
-                  <DebugFlags onChange={(state) => setDebugState(state)}>
-                    <ExpiringCFGRewardsBanner />
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <LoadBoundary>
-                        <RouterProvider router={router} />
-                      </LoadBoundary>
-                    </TransactionProvider>
-                  </DebugFlags>
+                  <SelectedPoolsProvider>
+                    <DebugFlags onChange={(state) => setDebugState(state)}>
+                      <ExpiringCFGRewardsBanner />
+                      <TransactionProvider>
+                        <TransactionToasts />
+                        <LoadBoundary>
+                          <RouterProvider router={router} />
+                        </LoadBoundary>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </SelectedPoolsProvider>
                 </OnboardingProvider>
               </OnboardingAuthProvider>
             </WalletProvider>
