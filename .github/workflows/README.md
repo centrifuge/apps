@@ -7,15 +7,21 @@ Each workflow represents a different trigger rather than a different "way of bui
 ```
 .github/workflows
 ├── centrifuge-app.yml -> triggers on PR or push to main (only changes to centrifuge-app components)
+├── centrifuge-app-countercheck.yml -> validates centrifuge-app deployment
 ├── demo-deploys.yml -> manual triggered deployment (deploys all)
+├── dev-n-ffprod-deploys.yml -> handles development and feature-flag production deployments
+├── deploy_all.yml -> orchestrates deployment of all components
+├── e2e.yml -> runs end-to-end tests 
 ├── fabric.yml -> builds on PR or push to main (only changes to fabric/)
-├── faucet-api.yml. Deploys 
+├── faucet-api.yml -> handles faucet API deployments
 ├── npm-publish.yml -> always manual from main
 ├── onboarding-api.yml -> triggers on PR or push to main (only changes to onboarding-api/)
+├── onboarding-api-countercheck.yml -> validates onboarding-api deployment
 ├── pinning-api.yml -> triggers on PR or push to main (only changes to pinning-api/)
-├── pre-prod-deploys.yml -> Manually deploy from main to Altair & Pre-prod. Always manual. Requires approval
+├── pinning-api-countercheck.yml -> validates pinning-api deployment
 ├── prepare-pr.yml -> Deploy functions for all PRs. Delete PR artifacts when closed
-└── prod-deploys.yml -> Move artifacts from pre-prod. Always manual. Requires approval
+├── prod-deploy.yml -> Fetches artifacts form an existing release
+└── staging-deploy.yml -> Builds & Uploads artifacts to a release, then deploys to staging and ff-prod
 ```
 ### Supporting actions
 ```
