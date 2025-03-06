@@ -305,7 +305,7 @@ export function LoanList({ loans }: Props) {
             <DataTable
               data={filteredData}
               columns={columns}
-              onRowClicked={(row) => `pools/${poolId}/assets/${row.id}`}
+              onRowClicked={(row) => `/pools/${poolId}/assets/${row.id}`}
               pageSize={20}
               page={pagination.page}
               defaultSortKey="maturityDate"

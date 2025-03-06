@@ -84,7 +84,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
           value={report}
           onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
             const newReport = event.target.value
-            let path = `pools/${pool.id}/data/${newReport}`
+            let path = `/pools/${pool.id}/data/${newReport}`
 
             if (newReport !== 'orders') {
               const params = new URLSearchParams()

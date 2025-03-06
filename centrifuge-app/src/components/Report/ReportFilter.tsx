@@ -74,7 +74,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
   }, [report, reportData])
 
   const changeTab = (tab: string) => {
-    const base = `pools/${pool.id}/reporting/${tab}`
+    const base = `/pools/${pool.id}/reporting/${tab}`
 
     const params = new URLSearchParams()
     if (startDate) params.append('from', startDate)
