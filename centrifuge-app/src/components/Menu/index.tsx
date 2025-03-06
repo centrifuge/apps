@@ -9,7 +9,6 @@ import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { DashboardMenu } from './DashboardMenu'
 import { GovernanceMenu } from './GovernanceMenu'
-import { NavManagementMenu } from './NavManagementMenu'
 import { PageLink } from './PageLink'
 
 const COLOR = '#7C8085'
@@ -39,7 +38,7 @@ export function Menu() {
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
   const theme = useTheme()
-  const { showSwaps, showDashboard } = useDebugFlags()
+  const { showSwaps } = useDebugFlags()
   const { data: transactions } = useTransactionsByAddress(address)
 
   return (
@@ -52,7 +51,7 @@ export function Menu() {
       justifyContent={['space-between', 'space-between']}
       backgroundColor="backgroundInverted"
     >
-      {showDashboard && pools.length > 0 && <DashboardMenu />}
+      {pools.length > 0 && <DashboardMenu />}
 
       <Box width="100%">
         <PageLink to="/pools" stacked={!isLarge}>
@@ -79,8 +78,6 @@ export function Menu() {
         <GovernanceMenu />
       </Box>
 
-      {!showDashboard && <NavManagementMenu stacked={!isLarge} />}
-
       {config.network !== 'centrifuge' && (
         <PageLink to="/nfts" stacked={!isLarge}>
           <IconNft size={['iconMedium', 'iconMedium', 'iconSmall']} />
@@ -88,7 +85,7 @@ export function Menu() {
         </PageLink>
       )}
 
-      {showDashboard && pools.length > 0 && (
+      {pools.length > 0 && (
         <Box mt={1}>
           <CreatePool />
         </Box>
