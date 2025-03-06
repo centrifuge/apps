@@ -1,15 +1,4 @@
-import {
-  Box,
-  IconGlobe,
-  IconInvestments,
-  IconNft,
-  IconPlus,
-  IconSwitch,
-  IconWallet,
-  MenuItemGroup,
-  Shelf,
-  Stack,
-} from '@centrifuge/fabric'
+import { Box, IconGlobe, IconInvestments, IconNft, IconPlus, IconSwitch, IconWallet, Shelf } from '@centrifuge/fabric'
 import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
@@ -20,10 +9,8 @@ import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { DashboardMenu } from './DashboardMenu'
 import { GovernanceMenu } from './GovernanceMenu'
-import { IssuerMenu } from './IssuerMenu'
 import { NavManagementMenu } from './NavManagementMenu'
 import { PageLink } from './PageLink'
-import { PoolLink } from './PoolLink'
 
 const COLOR = '#7C8085'
 
@@ -91,41 +78,6 @@ export function Menu() {
       <Box width="100%">
         <GovernanceMenu />
       </Box>
-
-      {(pools.length > 0 || config.poolCreationType === 'immediate') && !showDashboard && (
-        <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
-          {isLarge ? (
-            <Stack as="ul" gap={1}>
-              {pools.map((pool) => (
-                <Box key={pool.id} as="li" pl={4}>
-                  <PoolLink pool={pool} />
-                </Box>
-              ))}
-              {address && config.poolCreationType === 'immediate' && (
-                <Shelf justifyContent="center" as="li" mt={1}>
-                  <CreatePool />
-                </Shelf>
-              )}
-            </Stack>
-          ) : (
-            <Stack as="ul" gap={1}>
-              {!!pools.length &&
-                pools.map((pool) => (
-                  <MenuItemGroup key={pool.id}>
-                    <Box px={2} py={1}>
-                      <PoolLink pool={pool} />
-                    </Box>
-                  </MenuItemGroup>
-                ))}
-              {address && config.poolCreationType === 'immediate' && (
-                <Box px={2} py={1}>
-                  <CreatePool />
-                </Box>
-              )}
-            </Stack>
-          )}
-        </IssuerMenu>
-      )}
 
       {!showDashboard && <NavManagementMenu stacked={!isLarge} />}
 
