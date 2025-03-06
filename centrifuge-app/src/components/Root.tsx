@@ -61,7 +61,6 @@ const CollectionPage = React.lazy(() => import('../pages/Collection'))
 const CollectionsPage = React.lazy(() => import('../pages/Collections'))
 const InvestmentDisclaimerPage = React.lazy(() => import('../pages/InvestmentDisclaimer'))
 const IssuerCreatePoolPage = React.lazy(() => import('../pages/IssuerCreatePool'))
-const IssuerPoolPage = React.lazy(() => import('../pages/IssuerPool'))
 const LoanPage = React.lazy(() => import('../pages/Loan'))
 const MintNFTPage = React.lazy(() => import('../pages/MintNFT'))
 const MultisigApprovalPage = React.lazy(() => import('../pages/MultisigApproval'))
@@ -105,17 +104,12 @@ const router = createHashRouter([
         element: <PoolDetailPage />,
         handle: { component: PoolDetailPage },
       },
-      {
-        path: '/issuer/:pid/*',
-        element: <IssuerPoolPage />,
-        handle: { component: IssuerPoolPage },
-      },
       { path: '/nfts/collection/:cid/object/mint', element: <MintNFTPage />, handle: { component: MintNFTPage } },
       { path: '/nfts/collection/:cid/object/:nftid', element: <NFTPage />, handle: { component: NFTPage } },
       { path: '/nfts/collection/:cid', element: <CollectionPage />, handle: { component: CollectionPage } },
       { path: '/nfts/account', element: <AccountNFTsPage />, handle: { component: AccountNFTsPage } },
       { path: '/nfts', element: <CollectionsPage />, handle: { component: CollectionsPage } },
-      { path: '/issuer/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
+      { path: '/create-pool', element: <IssuerCreatePoolPage />, handle: { component: IssuerCreatePoolPage } },
       { path: '/history/:address', element: <TransactionHistoryPage />, handle: { component: TransactionHistoryPage } },
       { path: '/pools/:pid/assets/:aid', element: <LoanPage />, handle: { component: LoanPage } },
       {

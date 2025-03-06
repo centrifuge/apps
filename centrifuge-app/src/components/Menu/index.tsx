@@ -112,7 +112,7 @@ export function Menu() {
 
 function CreatePool() {
   return (
-    <StyledRouterLinkButton icon={<IconPlus size="iconSmall" />} to="/issuer/create-pool" small variant="inverted">
+    <StyledRouterLinkButton icon={<IconPlus size="iconSmall" />} to="/create-pool" small variant="inverted">
       Create pool
     </StyledRouterLinkButton>
   )
