@@ -16,7 +16,7 @@ Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 1. Use sudo in polkadot UI to give Alice enough currency to distribute (tokens.setBalance()). For currencyId select ForeignAsset and submit the transacton once with ForeignAsset 1 and once with ForeignAsset 2
 2. Run `/initProxies` to create the pure proxy, fund it, and give it sufficient permissions
 3. Copy the resulting pure proxy address and add it to the env varibles: `MEMBERLIST_ADMIN_PURE_PROXY` (onboarding-api) and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` (centrifuge-app)
-4. Enable onboarding for each new pool under /issuer/<poolId>/investors
+4. Enable onboarding for each new pool under /dashboard/investors
 
 ## Notes
 

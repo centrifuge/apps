@@ -124,7 +124,7 @@ const IssuerCreatePoolPage = () => {
       // Redirecting only when we find the newly created pool in the data from usePools
       // Otherwise the Issue Overview page will throw an error when it can't find the pool
       // It can take a second for the new data to come in after creating the pool
-      navigate(`/issuer/${poolId}`)
+      navigate(`/pools/${poolId}`)
     }
   }, [poolId, pools, navigate])
 

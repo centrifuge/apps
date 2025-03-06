@@ -75,7 +75,6 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
 
-
   const templateIds =
     poolsWithMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
   const templateId = templateIds.at(-1)
@@ -113,12 +112,11 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
 
           // Doing the redirect via state, so it only happens if the user is still on this
           // page when the transaction completes
-          setRedirect(`/issuer/${pid}/assets/${loanId}`)
+          setRedirect(`/pools/${pid}/assets/${loanId}`)
         }
       },
     }
   )
-
 
   const form = useFormik({
     initialValues: {
@@ -149,7 +147,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     },
     onSubmit: async (values) => {
       if (!pid || !collateralCollectionId || !account) return
-      if(values.assetType !== 'cash' && !template) return
+      if (values.assetType !== 'cash' && !template) return
       setIsLoading(true)
       const decimals = form.values.selectedPool.currency.decimals
       let pricingInfo: LoanInfoInput | undefined
@@ -166,7 +164,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
           break
         case 'liquid':
         case 'fund': {
-          const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid])) as any
+          const loanId = (await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))) as any
           pricingInfo = {
             valuationMethod: 'oracle',
             maxPriceVariation: Rate.fromPercent(9999),
