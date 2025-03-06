@@ -175,7 +175,14 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
 
   return data && data.length > 0 ? (
     <Box paddingX={2}>
-      <DataTable data={data} columns={columns} hoverable scrollable />
+      <DataTable
+        data={data}
+        columns={columns}
+        hoverable
+        scrollable
+        defaultSortKey="transactionDate"
+        defaultSortOrder="desc"
+      />
     </Box>
   ) : (
     <UserFeedback reportType="Asset transactions" />
