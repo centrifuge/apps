@@ -6,7 +6,6 @@ import { useTheme } from 'styled-components'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
-import { useBasePath } from '../../utils/useBasePath'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -16,7 +15,6 @@ type Props = {
 export function PoolDetailHeader({ actions }: Props) {
   const { pid } = useParams<{ pid: string }>()
   if (!pid) throw new Error('Pool not foud')
-  const basePath = useBasePath()
   const { state } = useLocation()
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
@@ -60,10 +58,10 @@ export function PoolDetailHeader({ actions }: Props) {
         color="textSelected"
       >
         <NavigationTabs>
-          <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
-          {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reports</NavigationTabsItem>}
-          {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/data`}>Data</NavigationTabsItem>}
+          <NavigationTabsItem to={`/pools/${pid}`}>Overview</NavigationTabsItem>
+          <NavigationTabsItem to={`/pools/${pid}/assets`}>Assets</NavigationTabsItem>
+          {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/reporting`}>Reports</NavigationTabsItem>}
+          {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/data`}>Data</NavigationTabsItem>}
         </NavigationTabs>
       </Shelf>
     </PageHeader>

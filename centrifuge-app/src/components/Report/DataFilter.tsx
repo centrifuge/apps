@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router'
 import { formatDate } from '../../../src/utils/date'
 import { usePool } from '../../../src/utils/usePools'
 import { nftMetadataSchema } from '../../schemas'
-import { useBasePath } from '../../utils/useBasePath'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -43,7 +42,6 @@ export function DataFilter({ poolId }: ReportFilterProps) {
     setLoan,
   } = React.useContext(ReportContext)
   const navigate = useNavigate()
-  const basePath = useBasePath()
   const pool = usePool(poolId) as Pool
 
   const { data: domains } = useActiveDomains(pool.id)
@@ -86,7 +84,7 @@ export function DataFilter({ poolId }: ReportFilterProps) {
           value={report}
           onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
             const newReport = event.target.value
-            let path = `${basePath}/${pool.id}/data/${newReport}`
+            let path = `pools/${pool.id}/data/${newReport}`
 
             if (newReport !== 'orders') {
               const params = new URLSearchParams()

@@ -6,7 +6,6 @@ import { useTheme } from 'styled-components'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
-import { useBasePath } from '../../utils/useBasePath'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -68,19 +67,17 @@ export function IssuerPoolHeader({ actions }: Props) {
   const { pid } = useParams<{ pid: string }>()
   if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
-  const basePath = useBasePath()
   const isTinlakePool = pool.id.startsWith('0x')
 
   return (
     <IssuerHeader>
       <NavigationTabs>
-        <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
-        <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
-        <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
-        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reports</NavigationTabsItem>}
-        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/data`}>Data</NavigationTabsItem>}
-        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/pricing`}>Pricing</NavigationTabsItem>}
-        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/fees`}>Fees</NavigationTabsItem>}
+        <NavigationTabsItem to={`pools/${pid}`}>Overview</NavigationTabsItem>
+        <NavigationTabsItem to={`pools/${pid}/assets`}>Assets</NavigationTabsItem>
+        <NavigationTabsItem to={`pools/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
+        {!isTinlakePool && <NavigationTabsItem to={`pools/${pid}/reporting`}>Reports</NavigationTabsItem>}
+        {!isTinlakePool && <NavigationTabsItem to={`pools/${pid}/data`}>Data</NavigationTabsItem>}
+        {!isTinlakePool && <NavigationTabsItem to={`pools/${pid}/pricing`}>Pricing</NavigationTabsItem>}
       </NavigationTabs>
     </IssuerHeader>
   )

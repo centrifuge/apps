@@ -16,7 +16,6 @@ import * as React from 'react'
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
 import { usePool } from '../../../src/utils/usePools'
-import { useBasePath } from '../../utils/useBasePath'
 import { SimpleBarChart } from '../Charts/SimpleBarChart'
 import { GroupBy, ReportContext } from './ReportContext'
 
@@ -48,7 +47,6 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
   const { csvData, setStartDate, startDate, endDate, setEndDate, groupBy, setGroupBy, report, reportData } =
     React.useContext(ReportContext)
   const navigate = useNavigate()
-  const basePath = useBasePath()
   const pool = usePool(poolId) as Pool
 
   const transformDataChart = React.useMemo(() => {
@@ -76,7 +74,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
   }, [report, reportData])
 
   const changeTab = (tab: string) => {
-    const base = `${basePath}/${pool.id}/reporting/${tab}`
+    const base = `pools/${pool.id}/reporting/${tab}`
 
     const params = new URLSearchParams()
     if (startDate) params.append('from', startDate)

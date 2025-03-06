@@ -1,4 +1,3 @@
-import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
@@ -79,14 +78,13 @@ const columns: Column[] = [
 ]
 
 export function TokenList({ tokens }: Props) {
-  const basePath = useBasePath()
   return (
     <DataTable
       data={tokens}
       columns={columns}
       defaultSortKey="valueLocked"
       onRowClicked={(token: TokenTableData) => ({
-        pathname: `${basePath}/${token.poolId}`,
+        pathname: `pools/${token.poolId}`,
         state: { token: token.id },
       })}
     />

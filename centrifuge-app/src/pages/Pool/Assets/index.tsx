@@ -4,7 +4,6 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { RouterTextLink } from '../../../../src/components/TextLink'
-import { useBasePath } from '../../../../src/utils/useBasePath'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList, getAmount } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -44,7 +43,6 @@ export function PoolDetailAssets() {
   const pool = usePool(poolId)
   const { data: loans } = useLoans([poolId])
   const isTinlakePool = poolId.startsWith('0x')
-  const basePath = useBasePath()
   const cashLoans = (loans ?? []).filter(
     (loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash'
   )
@@ -91,7 +89,7 @@ export function PoolDetailAssets() {
     {
       label: <Tooltips label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
       value: (
-        <StyledRouterTextLink to={`${basePath}/${pool.id}/assets/0`}>
+        <StyledRouterTextLink to={`pools/${pool.id}/assets/0`}>
           <Text>{formatBalance(pool.reserve.total || 0)}</Text>
           <IconChevronRight size={20} />
         </StyledRouterTextLink>

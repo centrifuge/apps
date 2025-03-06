@@ -1,4 +1,3 @@
-import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
@@ -55,7 +54,6 @@ export function LoanList({ loans }: Props) {
   const { data: snapshots } = useAllPoolAssetSnapshots(poolId, new Date().toISOString().slice(0, 10))
   const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
-  const basePath = useBasePath()
   const loansData = isTinlakePool
     ? loans
     : (loans ?? []).filter((loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash')
@@ -284,7 +282,7 @@ export function LoanList({ loans }: Props) {
             variant="inverted"
             style={{ marginRight: 12 }}
             small
-            onClick={() => navigate(`${basePath}/${poolId}/data/asset-tx`)}
+            onClick={() => navigate(`pools/${poolId}/data/asset-tx`)}
           >
             View asset transactions
           </Button>
@@ -307,7 +305,7 @@ export function LoanList({ loans }: Props) {
             <DataTable
               data={filteredData}
               columns={columns}
-              onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+              onRowClicked={(row) => `pools/${poolId}/assets/${row.id}`}
               pageSize={20}
               page={pagination.page}
               defaultSortKey="maturityDate"
