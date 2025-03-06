@@ -142,6 +142,7 @@ export function AssetsTable() {
 
   useEffect(() => {
     filters.setFilter('status', ['Ongoing'])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const columns = [

@@ -147,7 +147,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
       externalOnboardingUrl: poolMetadata?.onboarding?.externalOnboardingUrl ?? '',
       taxInfoRequired: !!poolMetadata?.onboarding?.taxInfoRequired || true,
     }),
-    [poolMetadata, pool.tranches, isOpenForOnboarding]
+    [poolMetadata, pool.tranches, isOpenForOnboarding, centrifuge]
   )
 
   useEffect(() => {

@@ -164,7 +164,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
           break
         case 'liquid':
         case 'fund': {
-          const loanId = (await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))) as any
+          const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
           pricingInfo = {
             valuationMethod: 'oracle',
             maxPriceVariation: Rate.fromPercent(9999),

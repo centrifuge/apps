@@ -10,6 +10,16 @@ import { formatBalance } from '../../../../src/utils/formatting'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { useInvestorList } from '../../../../src/utils/usePools'
 
+enum TrancheType {
+  Junior = 0,
+  Senior = 1,
+}
+
+interface TrancheBalances {
+  [TrancheType.Junior]: ReturnType<typeof Dec>
+  [TrancheType.Senior]: ReturnType<typeof Dec>
+}
+
 export default function OnchainSection({ pool }: { pool: Pool }) {
   const investors = useInvestorList(pool?.id ?? '')
   const [account] = useSuitableAccounts({ poolId: pool?.id ?? '', poolRole: ['LiquidityAdmin'] })
@@ -67,39 +77,53 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
 
   const pendingInvestments = useMemo(() => {
     if (!pool || !pool.tranches || !investors) {
-      return { 0: Dec(0), 1: Dec(0) }
+      return {
+        [TrancheType.Junior]: Dec(0),
+        [TrancheType.Senior]: Dec(0),
+      } as TrancheBalances
     }
 
-    return investors.reduce(
+    return investors.reduce<TrancheBalances>(
       (acc, investor) => {
         const tranche = pool.tranches.find((t) => t.id === investor.trancheId)
         if (tranche) {
-          const key = tranche.seniority === 0 ? 0 : 1
-          acc[key] = acc[key].add(investor.pendingInvestCurrency.toDecimal())
+          acc[tranche.seniority as TrancheType] = acc[tranche.seniority as TrancheType].add(
+            investor.pendingInvestCurrency.toDecimal()
+          )
         }
         return acc
       },
-      { 0: Dec(0), 1: Dec(0) }
+      {
+        [TrancheType.Junior]: Dec(0),
+        [TrancheType.Senior]: Dec(0),
+      } as TrancheBalances
     )
-  }, [pool, investors])
+  }, [pool, pool?.tranches, investors])
 
   const pendingRedemptions = useMemo(() => {
     if (!pool || !pool.tranches || !investors) {
-      return { 0: Dec(0), 1: Dec(0) }
+      return {
+        [TrancheType.Junior]: Dec(0),
+        [TrancheType.Senior]: Dec(0),
+      } as TrancheBalances
     }
 
-    return investors.reduce(
+    return investors.reduce<TrancheBalances>(
       (acc, investor) => {
         const tranche = pool.tranches.find((t) => t.id === investor.trancheId)
         if (tranche) {
-          const key = tranche.seniority === 0 ? 0 : 1
-          acc[key] = acc[key].add(investor.pendingRedeemTrancheTokens.toDecimal())
+          acc[tranche.seniority as TrancheType] = acc[tranche.seniority as TrancheType].add(
+            investor.pendingRedeemTrancheTokens.toDecimal()
+          )
         }
         return acc
       },
-      { 0: Dec(0), 1: Dec(0) }
+      {
+        [TrancheType.Junior]: Dec(0),
+        [TrancheType.Senior]: Dec(0),
+      } as TrancheBalances
     )
-  }, [pool, investors])
+  }, [pool, pool?.tranches, investors])
 
   const redemptions = pendingRedemptions[selectedTabIndexRedemptions as keyof typeof pendingRedemptions]
   const investments = pendingInvestments[selectedTabIndexInvestments as keyof typeof pendingInvestments]
