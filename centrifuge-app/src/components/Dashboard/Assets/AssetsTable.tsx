@@ -3,6 +3,7 @@ import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, Grid, IconDownload, IconInfo, IconPlus, Spinner, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { isCashLoan } from '../../../../src/pages/Loan/utils'
 import { useSelectedPools } from '../../..//utils/contexts/SelectedPoolsContext'
 import { useLoans } from '../../..//utils/useLoans'
 import { useAllPoolAssetSnapshotsMulti, usePools } from '../../..//utils/usePools'
@@ -47,18 +48,20 @@ export function AssetsTable() {
   const theme = useTheme()
   const pools = usePools()
   const { selectedPoolIds } = useSelectedPools()
-  const { data: loans } = useLoans(pools ? selectedPoolIds.slice(0, 10) : [])
+  const { data: loans } = useLoans(pools ? selectedPoolIds : [])
   const cent = useCentrifuge()
   const loansWithPool =
-    loans?.map((loan) => ({
-      ...loan,
-      pool: pools?.find((pool) => pool.id === loan.poolId) || null,
-    })) || []
+    loans
+      ?.map((loan) => ({
+        ...loan,
+        pool: pools?.find((pool) => pool.id === loan.poolId) || null,
+      }))
+      .filter((loan) => !isCashLoan(loan as Loan)) || []
 
   const extractedPools = loansWithPool.map((loan) => loan.pool!) ?? []
-  const poolMetadataMap = usePoolMetadataMap(extractedPools.slice(0, 1))
+  const poolMetadataMap = usePoolMetadataMap(extractedPools)
   const today = new Date().toISOString().slice(0, 10)
-  const [allSnapshots, isLoading] = useAllPoolAssetSnapshotsMulti(extractedPools.slice(0, 1), today)
+  const [allSnapshots, isLoading] = useAllPoolAssetSnapshotsMulti(extractedPools, today)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const [drawerType, setDrawerType] = useState<'create-asset' | 'upload-template'>('create-asset')
@@ -93,7 +96,7 @@ export function AssetsTable() {
           }
         })
     })
-    .filter((pool) => selectedPoolIds.includes(pool.poolId))
+    .filter((loan) => selectedPoolIds.includes(loan.poolId))
 
   const data = useMemo(
     () =>
@@ -215,7 +218,21 @@ export function AssetsTable() {
     },
     {
       align: 'left',
-      header: <FilterableTableHeader filterKey="status" label="Status" options={status} filters={filters} />,
+      header: (
+        <FilterableTableHeader
+          filterKey="status"
+          label="Status"
+          options={Object.fromEntries(
+            data.map((asset) => [
+              asset.status,
+              <Text variant="body3" fontWeight="500">
+                {asset.status}
+              </Text>,
+            ])
+          )}
+          filters={filters}
+        />
+      ),
       cell: (row: Row) => <LoanLabel loan={row.loan as Loan} />,
     },
   ]
@@ -308,6 +325,8 @@ export function AssetsTable() {
             columns={columns}
             scrollable
             onRowClicked={(row) => `/pools/${row.poolId}/assets/${row.assetId}`}
+            defaultSortOrder="desc"
+            defaultSortKey="maturityDate"
           />
         ) : (
           <Box

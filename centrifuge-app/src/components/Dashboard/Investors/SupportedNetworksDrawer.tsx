@@ -127,6 +127,7 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
                         borderStyle="solid"
                         borderWidth={1}
                         borderColor="borderPrimary"
+                        mb={2}
                       >
                         <SupportedNetworks
                           chainId={domain.chainId}
@@ -238,11 +239,7 @@ function SupportedNetworks({
                                   <Checkbox
                                     variant="secondary"
                                     key={`${domain?.chainId}-supported-networks-${index}-${currency.address}`}
-                                    label={
-                                      <Text variant="body3">
-                                        {currency.displayName} ({currency.symbol})
-                                      </Text>
-                                    }
+                                    label={<Text variant="body3">{currency.displayName}</Text>}
                                     checked={
                                       field.value?.currencies?.[currency.address]?.checked ??
                                       domain?.isAllowedAsset[currency.address]

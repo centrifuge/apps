@@ -25,7 +25,7 @@ import { combineLatest, defer, firstValueFrom, switchMap } from 'rxjs'
 import { stringToHex } from 'viem'
 import { DataTable } from '../../../../src/components/DataTable'
 import { AssetName, getAmount } from '../../../../src/components/LoanList'
-import { isExternalLoan } from '../../../../src/pages/Loan/utils'
+import { isCashLoan, isExternalLoan } from '../../../../src/pages/Loan/utils'
 import { formatDate } from '../../../../src/utils/date'
 import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
@@ -35,7 +35,6 @@ import { metadataQueryFn } from '../../../../src/utils/useMetadata'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { usePoolAccountOrders, usePoolFees } from '../../../../src/utils/usePools'
 import { hasValuationMethod } from '../utils'
-import { EditableTableField } from './EditableTableField'
 
 const MAX_COLLECT = 100
 
@@ -340,7 +339,6 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     },
   })
 
-
   const columns = [
     {
       align: 'left',
@@ -361,29 +359,32 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     {
       align: 'left',
       header: 'Current price (USDC)',
-      cell: ({ currentPrice }: Row) => <Text variant="body3">{currentPrice ? formatBalance(currentPrice, '', 4) : 0}</Text>,
+      cell: ({ currentPrice }: Row) => (
+        <Text variant="body3">{currentPrice ? formatBalance(currentPrice, '', 4) : 0}</Text>
+      ),
     },
     {
       align: 'left',
       header: 'New price (USDC)',
       cell: ({ loan }: Row) => {
-        return  <Field name={`${loan.id}.newPrice`}>
-        {({ field, form }: FieldProps) =>
-            <CurrencyInput
-              {...field}
-              autoFocus
-              value={field.value || ''}
-              onChange={(value) => {
-                form.setFieldValue(field.name, value)
-                const quantity = form.values[loan.id]?.quantity || 0
-                if (typeof value === 'number') {
-                  form.setFieldValue(`${loan.id}.newValue`, value * quantity)
-                }
-              }}
-              decimals={4}
-            />
-        }
-      </Field>
+        return (
+          <Field name={`${loan.id}.newPrice`}>
+            {({ field, form }: FieldProps) => (
+              <CurrencyInput
+                {...field}
+                value={field.value || ''}
+                onChange={(value) => {
+                  form.setFieldValue(field.name, value)
+                  const quantity = form.values[loan.id]?.quantity || 0
+                  if (typeof value === 'number') {
+                    form.setFieldValue(`${loan.id}.newValue`, value * quantity)
+                  }
+                }}
+                decimals={4}
+              />
+            )}
+          </Field>
+        )
       },
     },
     {
@@ -400,12 +401,15 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
   ]
 
   const data = useMemo(() => {
-    return loans?.map((loan) => ({
-      loan,
-      quantity: 'outstandingQuantity' in loan.pricing && loan.pricing.outstandingQuantity,
-      currentPrice:
-        loan.status === 'Active' ? ('currentPrice' in loan ? loan?.currentPrice.toDecimal().toNumber() : 0) : null,
-    }))
+    return loans
+      ?.map((loan) => ({
+        loan,
+        quantity: 'outstandingQuantity' in loan.pricing && loan.pricing.outstandingQuantity,
+        currentPrice:
+          loan.status === 'Active' ? ('currentPrice' in loan ? loan?.currentPrice.toDecimal().toNumber() : 0) : null,
+      }))
+      .filter((loan) => !isCashLoan(loan.loan))
+      .filter((loan) => loan.quantity && !loan.quantity.isZero())
   }, [loans])
 
   const changeInValuation = useMemo(() => {
@@ -487,7 +491,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
             >
               <Text variant="heading4">Update assets prices</Text>
               <Divider color="borderPrimary" />
-              <DataTable data={data} columns={columns} />
+              <DataTable data={data} columns={columns} defaultSortKey="quantity" defaultSortOrder="desc" />
               <Grid gridTemplateColumns="1fr 1fr" gap={2} display="flex" justifyContent="flex-end">
                 <Button variant="inverted" small style={{ width: '105px' }} onClick={() => setUpdate(false)}>
                   {' '}

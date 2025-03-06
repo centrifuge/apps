@@ -83,8 +83,8 @@ export const useLoanCalculations = (transformedLoans: TransformedLoan[]) => {
 
   const pendingFees = useMemo(() => {
     return uniquePools.reduce((sum, loan) => {
-      const feeTotalPaid = loan.pool.fees?.totalPaid ? loan.pool.fees.totalPaid.toDecimal() : 0
-      return sum.add(Dec(feeTotalPaid))
+      const feeTotalPending = loan.pool.fees?.totalPending ? loan.pool.fees.totalPending.toDecimal() : 0
+      return sum.add(Dec(feeTotalPending))
     }, Dec(0))
   }, [uniquePools])
 

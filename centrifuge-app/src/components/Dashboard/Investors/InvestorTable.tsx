@@ -42,32 +42,35 @@ export function InvestorTable() {
   const [searchParams] = useSearchParams()
   const investorParam = searchParams.get('d_investor')
   const cent = useCentrifuge()
-  const { poolsWithMetadata } = useSelectedPools()
+  const { poolsWithMetadata, selectedPoolIds } = useSelectedPools()
   const investors = useInvestorListMulti(poolsWithMetadata?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
 
   const data: InvestorTableRow[] =
-    investors?.map((investor) => {
-      const tokenName = poolsWithMetadata
-        ?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))
-        ?.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
-      return {
-        tokenName,
-        trancheId: investor.trancheId,
-        poolId: investor.poolId,
-        poolIcon: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.meta?.pool?.icon,
-        poolCurrency: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.currency.displayName,
-        wallet: investor?.evmAddress || investor.accountId || '',
-        network: investor.chainId,
-        holdings: investor.balance,
-        pendingInvestments: investor.pendingInvestCurrency,
-        pendingRedemptions: investor.pendingRedeemTrancheTokens,
-        investorSince: investor.initialisedAt,
-        unrealizedProfit: investor.unrealizedProfit,
-        realizedProfit: investor.sumClaimedCurrency,
-        investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
-      }
-    }) ?? []
+    investors
+      ?.map((investor) => {
+        const tokenName = poolsWithMetadata
+          ?.find((p) => p.tranches.find((t) => t.id === investor.trancheId))
+          ?.tranches.find((t) => t.id === investor.trancheId)?.currency.displayName
+        return {
+          tokenName,
+          trancheId: investor.trancheId,
+          poolId: investor.poolId,
+          poolIcon: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.meta?.pool?.icon,
+          poolCurrency: poolsWithMetadata?.find((p) => p.id === investor.poolId)?.currency.displayName,
+          wallet: investor?.evmAddress || investor.accountId || '',
+          network: investor.chainId,
+          holdings: investor.balance,
+          pendingInvestments: investor.pendingInvestCurrency,
+          pendingRedemptions: investor.pendingRedeemTrancheTokens,
+          investorSince: investor.initialisedAt,
+          unrealizedProfit: investor.unrealizedProfit,
+          realizedProfit: investor.sumClaimedCurrency,
+          investorId: `${investor.evmAddress || investor.accountId}-${investor.trancheId}-${investor.chainId}`,
+        }
+      })
+      .filter((i) => selectedPoolIds.includes(i.poolId)) ?? []
+
   const filters = useFilters({ data })
   const [searchValue, setSearchValue] = useState('')
 

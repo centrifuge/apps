@@ -23,7 +23,7 @@ export const useSelectedPools = (defaultSelectAll: boolean = false): SelectedPoo
   }
 
   React.useEffect(() => {
-    if (defaultSelectAll && context.pools?.length) {
+    if (defaultSelectAll && context.pools?.length && context.pools.length > 0) {
       context.setSelectedPoolIds(context.pools.map((pool) => pool.id))
     }
   }, [])

@@ -149,16 +149,18 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
         >
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Text variant="heading4">Pending investments</Text>
-            <Tabs
-              selectedIndex={selectedTabIndexInvestments}
-              onChange={(index) => setSelectedTabIndexInvestments(index)}
-            >
-              {pool.tranches.map((tranche) => (
-                <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
-                  {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
-                </TabsItem>
-              ))}
-            </Tabs>
+            {pool.tranches.length > 1 && (
+              <Tabs
+                selectedIndex={selectedTabIndexInvestments}
+                onChange={(index) => setSelectedTabIndexInvestments(index)}
+              >
+                {pool.tranches.map((tranche) => (
+                  <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
+                    {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
+                  </TabsItem>
+                ))}
+              </Tabs>
+            )}
           </Box>
           <Text
             variant={investments.isZero() ? 'body2' : 'heading1'}
@@ -178,17 +180,18 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
         >
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Text variant="heading4">Pending Redemptions</Text>
-
-            <Tabs
-              selectedIndex={selectedTabIndexRedemptions}
-              onChange={(index) => setSelectedTabIndexRedemptions(index)}
-            >
-              {pool.tranches.map((tranche) => (
-                <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
-                  {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
-                </TabsItem>
-              ))}
-            </Tabs>
+            {pool.tranches.length > 1 && (
+              <Tabs
+                selectedIndex={selectedTabIndexRedemptions}
+                onChange={(index) => setSelectedTabIndexRedemptions(index)}
+              >
+                {pool.tranches.map((tranche) => (
+                  <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
+                    {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
+                  </TabsItem>
+                ))}
+              </Tabs>
+            )}
           </Box>
           <Text
             variant={redemptions.isZero() ? 'body2' : 'heading1'}

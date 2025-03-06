@@ -75,9 +75,11 @@ export function DashboardTable() {
       cell: ({ valueLocked }: Row) => <Text variant="body3">{valueLocked ? formatBalance(valueLocked) : '-'}</Text>,
     },
     {
-      header: <SortableTableHeader label="NAV per share" />,
+      header: <SortableTableHeader label="Token price" />,
       sortKey: 'navPerToken',
-      cell: ({ navPerToken }: Row) => <Text variant="body3">{navPerToken ? formatBalance(navPerToken) : '-'}</Text>,
+      cell: ({ navPerToken }: Row) => (
+        <Text variant="body3">{navPerToken ? formatBalance(navPerToken, '', 6) : '-'}</Text>
+      ),
     },
   ]
 
@@ -99,7 +101,8 @@ export function DashboardTable() {
         scrollable
         hideBorder
         hideHeader
-        onRowClicked={(row) => `/pools/${row.poolId}`}
+        defaultSortKey="valueLocked"
+        defaultSortOrder="desc"
       />
       <Divider color={theme.colors.backgroundSecondary} />
       <PoolConfigurationDrawer open={open} setOpen={setOpen} />
