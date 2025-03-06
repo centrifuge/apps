@@ -169,7 +169,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
 
   return (
     <>
-      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} />
+      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
       <AssetSummary data={pageSummaryData} />
       <Stack gap={4} m={4}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
