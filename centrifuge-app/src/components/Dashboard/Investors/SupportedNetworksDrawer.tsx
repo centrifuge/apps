@@ -98,11 +98,8 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
   })
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
+    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="Supported networks">
       <Stack gap={2}>
-        <Text variant="heading2" fontWeight="600" fontSize="20px">
-          Supported Networks
-        </Text>
         <Text variant="body2" color="textSecondary">
           View liquidity on all blockchains that this pool is connected to, and enable investments on new blockchains.
         </Text>
@@ -221,11 +218,13 @@ function SupportedNetworks({
                   }}
                 />
                 <Stack gap={2}>{selectedPool && <TrancheTokensInput chainId={chainId} poolId={selectedPool} />}</Stack>
-                <Text variant="label1" color="textPrimary">
-                  Tokens
-                </Text>
+                {domain?.currencies.length ? (
+                  <Text variant="label1" color="textPrimary">
+                    Tokens
+                  </Text>
+                ) : null}
 
-                <FieldArray name={`networks`}>
+                <FieldArray name="networks">
                   {() => (
                     <>
                       {domain?.currencies.map((currency) => {

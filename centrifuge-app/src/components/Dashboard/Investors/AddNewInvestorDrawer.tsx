@@ -1,5 +1,5 @@
 import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
-import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
+import { AddressInput, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
 import { isEvmAddress } from '../../../utils/address'
@@ -49,11 +49,8 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
     },
   })
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
+    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="New investor">
       <Stack gap={4}>
-        <Text variant="heading2" fontWeight="600" fontSize="20px">
-          New Investor
-        </Text>
         <FormikProvider value={formik}>
           <Form>
             <Box display="flex" flexDirection="column" height="85vh">
@@ -132,10 +129,12 @@ function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<New
         name="network"
         options={[
           { value: '', label: 'Centrifuge' },
-          ...deployedLpChains.map((chainId) => ({
-            value: String(chainId),
-            label: getChainInfo(chains, chainId).name,
-          })),
+          ...deployedLpChains
+            .map((chainId) => ({
+              value: String(chainId),
+              label: getChainInfo(chains, chainId).name,
+            }))
+            .filter((option) => option.label === ''),
         ]}
         onChange={(event) => formik.setFieldValue('network', event.target.value)}
       />
