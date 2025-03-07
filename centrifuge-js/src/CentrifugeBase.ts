@@ -400,7 +400,6 @@ export class CentrifugeBase {
             )
         )
       )
-      console.log('multisig callData', actualSubmittable.method.toHex())
       actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
     }
 

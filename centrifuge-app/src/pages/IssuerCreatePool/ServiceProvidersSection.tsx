@@ -1,8 +1,7 @@
-import { Box, Grid, IconButton, IconTrash, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Box, IconButton, IconTrash, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
-import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
+import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { AddButton } from './PoolDetailsSection'
-import { StyledGrid } from './PoolStructureSection'
 
 const PROVIDERS = [
   { label: 'Please select...', value: '' },
@@ -38,7 +37,7 @@ export const LabelWithDeleteButton = ({
   )
 }
 
-export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
+export const ServiceProvidersSection = ({ isUpdating }: { isUpdating?: boolean }) => {
   const form = useFormikContext<any>()
   const categories = isUpdating ? form.values.pool.issuer.categories : form.values.issuerCategories
   const formName = isUpdating ? 'pool.issuer.categories' : 'issuerCategories'
@@ -46,31 +45,46 @@ export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }
   return (
     <Stack mt={isUpdating ? 0 : 4}>
       {isUpdating ? <></> : <Text variant="heading2">Service providers</Text>}
-      <StyledGrid
-        gridTemplateColumns={['1fr', '1fr 1fr']}
-        style={isUpdating ? { padding: 20 } : { padding: 40 }}
+      <Stack
+        backgroundColor="backgroundSecondary"
+        border="1px solid borderPrimary"
+        borderRadius="8px"
+        px={isUpdating ? 2 : 5}
+        py={isUpdating ? 3 : 5}
         mt={isUpdating ? 0 : 3}
       >
         <FieldArray name={formName}>
           {({ push, remove }) => (
             <Stack gap={3}>
               {categories.map((category: { type: string; value: string; description: string }, index: number) => (
-                <>
-                  <Grid gridTemplateColumns={['1fr', category?.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
-                    <Field name={`${formName}.${index}.type`}>
-                      {({ field, meta }: FieldProps) => (
+                <Stack gap={1} flexDirection={isUpdating ? 'column' : 'row'}>
+                  <Field name={`${formName}.${index}.type`}>
+                    {({ field, meta }: FieldProps) => (
+                      <Box flex="1">
                         <Select
                           name={field.name}
-                          label="Type"
+                          label={
+                            !isUpdating ? (
+                              'Type'
+                            ) : (
+                              <LabelWithDeleteButton
+                                onDelete={() => remove(index)}
+                                hideButton={categories?.length === 1}
+                                label="Type"
+                              />
+                            )
+                          }
                           onChange={(event) => form.setFieldValue(field.name, event.target.value)}
                           onBlur={field.onBlur}
                           value={field.value}
                           options={PROVIDERS}
                           errorMessage={meta.touched && meta.error ? meta.error : undefined}
                         />
-                      )}
-                    </Field>
-                    {category?.type === 'other' && (
+                      </Box>
+                    )}
+                  </Field>
+                  {category?.type === 'other' && (
+                    <Box flex="1">
                       <Field name={`${formName}.${index}.description`}>
                         {({ field, meta }: FieldProps) => (
                           <FieldWithErrorMessage
@@ -83,36 +97,43 @@ export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }
                           />
                         )}
                       </Field>
-                    )}
-                  </Grid>
-                  <Field name={`${formName}.${index}.value`}>
-                    {({ field, meta }: FieldProps) => (
-                      <FieldWithErrorMessage
-                        {...field}
-                        label={
-                          <LabelWithDeleteButton
-                            onDelete={() => remove(index)}
-                            hideButton={categories?.length === 1}
-                            label="Name of provider"
-                          />
-                        }
-                        placeholder="Type here..."
-                        maxLength={100}
-                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                        onBlur={field.onBlur}
-                        as={TextInput}
-                      />
-                    )}
-                  </Field>
-                </>
+                    </Box>
+                  )}
+
+                  <Box flex="1">
+                    <Field name={`${formName}.${index}.value`}>
+                      {({ field, meta }: FieldProps) => (
+                        <FieldWithErrorMessage
+                          {...field}
+                          label={
+                            isUpdating ? (
+                              'Name of provider'
+                            ) : (
+                              <LabelWithDeleteButton
+                                onDelete={() => remove(index)}
+                                hideButton={categories?.length === 1}
+                                label="Name of provider"
+                              />
+                            )
+                          }
+                          placeholder="Type here..."
+                          maxLength={100}
+                          errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                          onBlur={field.onBlur}
+                          as={TextInput}
+                        />
+                      )}
+                    </Field>
+                  </Box>
+                </Stack>
               ))}
-              <Box gridColumn="span 2">
+              <Box>
                 <AddButton onClick={() => push({ type: '', value: '' })} />
               </Box>
             </Stack>
           )}
         </FieldArray>
-      </StyledGrid>
+      </Stack>
     </Stack>
   )
 }

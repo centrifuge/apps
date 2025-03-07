@@ -12,20 +12,19 @@ import { useLiquidityMulti } from '../../../src/utils/useLiquidity'
 import { useNavGrowth, useTotalNAV } from '../../components/Dashboard/utils'
 
 const aumOptions = [
-  { label: 'YTD', value: 'YTD' },
   { label: '6M', value: '180d' },
+  { label: 'YTD', value: 'YTD' },
   { label: '3M', value: '90d' },
 ]
 
 export default function Dashboard() {
   const theme = useTheme()
-  const { selectedPools, pools = [] } = useSelectedPools()
-  const filteredPools = useMemo(() => pools.filter((pool) => selectedPools.includes(pool.id)), [pools, selectedPools])
-  const poolIds = useMemo(() => filteredPools.map((pool) => pool.id), [filteredPools])
-  const totalNAV = useTotalNAV(filteredPools)
-  const { liquidityData, isLoading } = useLiquidityMulti(poolIds)
+  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+
+  const totalNAV = useTotalNAV(selectedPoolsWithMetadata)
+  const { liquidityData, isLoading } = useLiquidityMulti(selectedPoolIds)
   const [selectedAumOption, setSelectedAumOption] = useState(aumOptions[0])
-  const { growth } = useNavGrowth(filteredPools, selectedAumOption.value as 'YTD' | '180d' | '90d')
+  const { growth } = useNavGrowth(selectedPoolsWithMetadata, selectedAumOption.value as 'YTD' | '180d' | '90d')
 
   const { aggregatedLockedInvestments, aggregatedLockedRedemptions } = useMemo(() => {
     return Object.values(liquidityData).reduce(
@@ -96,18 +95,18 @@ export default function Dashboard() {
     },
   ]
 
-  if (isLoading && filteredPools.length === 0) {
+  if (isLoading && selectedPoolsWithMetadata.length === 0) {
     return <Spinner />
   }
 
   return (
-    <Box py={4} px={3}>
+    <Box py={2} px={3}>
       <Text variant="heading1">Dashboard</Text>
       <Box mt={5} mb={2} display="flex" flexWrap="nowrap" overflowX="auto">
         <PoolSelector multiple />
       </Box>
-      <PageSummary data={pageSummaryData} style={{ marginLeft: 0, marginRight: 0 }} />
-      <DashboardTable filteredPools={filteredPools} />
+      <PageSummary data={pageSummaryData} mx={0} />
+      <DashboardTable />
     </Box>
   )
 }
