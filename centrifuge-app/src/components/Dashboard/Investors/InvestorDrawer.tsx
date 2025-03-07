@@ -397,6 +397,7 @@ const MiniTransactionHistoryTable = ({ wallet, network }: { wallet: string; netw
   const { data: transactions } = useTransactionsByAddress(
     network === 0 ? wallet : evmToSubstrateAddress(wallet, network)
   )
+
   const explorer = useGetExplorerUrl()
   const pools = usePools()
   const columns: Column[] = [

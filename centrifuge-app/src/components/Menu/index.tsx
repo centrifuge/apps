@@ -15,7 +15,6 @@ import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
-import { useTransactionsByAddress } from '../../utils/usePools'
 import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { DashboardMenu } from './DashboardMenu'
@@ -53,7 +52,6 @@ export function Menu() {
   const address = useAddress('substrate')
   const theme = useTheme()
   const { showSwaps, showDashboard } = useDebugFlags()
-  const { data: transactions } = useTransactionsByAddress(address)
 
   return (
     <Shelf

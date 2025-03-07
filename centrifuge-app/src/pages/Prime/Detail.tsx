@@ -57,10 +57,15 @@ const PrimeDetail = () => {
             heading: false,
             children: yieldSinceInception ? (
               <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4}>
-                <Text variant="body4" color="statusOk" style={{ fontWeight: 500 }}>
-                  +{formatPercentage(yieldSinceInception)}
+                <Text
+                  variant="body4"
+                  color={yieldSinceInception?.isNeg() ? 'statusCritical' : 'statusOk'}
+                  style={{ fontWeight: 500 }}
+                >
+                  {yieldSinceInception?.isNeg() ? '-' : '+'}
+                  {formatPercentage(yieldSinceInception)}
                 </Text>
-                <Text variant="body4" color="statusOk">
+                <Text variant="body4" color={yieldSinceInception?.isNeg() ? 'statusCritical' : 'statusOk'}>
                   Since inception
                 </Text>
               </Box>
