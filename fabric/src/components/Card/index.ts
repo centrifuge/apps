@@ -12,11 +12,11 @@ export type CardProps = Props &
 
 export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }) =>
   css({
-    bg: backgroundColor ?? 'white',
+    bg: backgroundColor ?? (variant === 'secondary' ? 'backgroundSecondary' : 'backgroundPrimary'),
     borderRadius: 'card',
     borderWidth: variant === 'default' || (variant === 'secondary' && !backgroundColor) ? 1 : 0,
     borderStyle: 'solid',
-    borderColor: variant === 'secondary' ? 'borderSecondary' : 'borderPrimary',
+    borderColor: 'borderPrimary',
     boxShadow: variant === 'interactive' ? 'cardInteractive' : variant === 'overlay' ? 'cardOverlay' : undefined,
     transition: 'box-shadow 100ms ease',
 

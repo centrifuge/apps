@@ -121,7 +121,7 @@ export const UploadAssetTemplateForm = ({
         {!!poolAdmin ? (
           <FileUpload
             errorMessage={errorMessage}
-            accept=".json"
+            accept="application/json"
             placeholder="Upload asset template"
             onFileChange={(file) => {
               if (!file) return

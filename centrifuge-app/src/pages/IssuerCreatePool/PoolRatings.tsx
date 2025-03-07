@@ -1,24 +1,80 @@
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, FileUpload, Text, TextInput, URLInput } from '@centrifuge/fabric'
-import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { Box, FileUpload, FileUploadProps, Text, TextInput, URLInput } from '@centrifuge/fabric'
+import { Field, FieldArray, FieldProps, useField, useFormikContext } from 'formik'
+import { useEffect, useState } from 'react'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { LabelWithDeleteButton } from './IssuerCategories'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
 
-export const PoolRatingsSection = () => {
-  const form = useFormikContext<PoolMetadataInput>()
+interface ReportFileUploadProps extends FileUploadProps {
+  name: string
+}
+
+export function ReportFileUpload({ name, ...props }: ReportFileUploadProps) {
+  const { setFieldValue } = useFormikContext<any>()
+  const [field, meta] = useField(name)
+  const [file, setFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    if (typeof field.value === 'string' && field.value) {
+      fetch(field.value)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+          return response.blob()
+        })
+        .then((blob) => {
+          const fileFromUrl = new File([blob], 'report.pdf', { type: blob.type })
+          setFile(fileFromUrl)
+          if (!(field.value instanceof File)) {
+            setFieldValue(name, fileFromUrl)
+          }
+        })
+        .catch((error) => {
+          console.error('Error converting URL to file:', error)
+        })
+    } else if (field.value instanceof File) {
+      setFile(field.value)
+    }
+  }, [field.value, name, setFieldValue])
 
   return (
-    <Box mt={4} mb={3}>
-      <Text variant="heading2">Pool rating</Text>
-      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} mt={3}>
-        <FieldArray name="poolRatings">
+    <FileUpload
+      file={file}
+      onFileChange={(newFile) => {
+        setFile(newFile)
+        setFieldValue(name, newFile)
+      }}
+      onClear={() => {
+        setFile(null)
+        setFieldValue(name, null)
+      }}
+      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+      {...props}
+    />
+  )
+}
+
+export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => {
+  const form = useFormikContext<any>()
+  const ratings = isUpdating ? form.values.pool.poolRatings : form.values.poolRatings
+  const formName = isUpdating ? 'pool.poolRatings' : 'poolRatings'
+
+  return (
+    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+      {isUpdating ? <></> : <Text variant="heading2">Pool rating</Text>}
+      <StyledGrid
+        gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
+        mt={isUpdating ? 0 : 3}
+        style={isUpdating ? { padding: 20 } : { padding: 40 }}
+      >
+        <FieldArray name={formName}>
           {({ push, remove }) => (
             <>
-              {form.values.poolRatings.map((_, index) => (
+              {ratings.map((_: any, index: number) => (
                 <>
-                  <Field name={`poolRatings.${index}.agency`}>
+                  <Field name={`${formName}.${index}.agency`}>
                     {({ field, meta }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
@@ -29,7 +85,7 @@ export const PoolRatingsSection = () => {
                     )}
                   </Field>
 
-                  <Field name={`poolRatings.${index}.value`}>
+                  <Field name={`${formName}.${index}.value`}>
                     {({ field, meta }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
@@ -38,7 +94,7 @@ export const PoolRatingsSection = () => {
                         label={
                           <LabelWithDeleteButton
                             onDelete={() => remove(index)}
-                            hideButton={form.values.poolRatings.length === 1}
+                            hideButton={ratings?.length === 1}
                             label="Rating value"
                           />
                         }
@@ -46,7 +102,7 @@ export const PoolRatingsSection = () => {
                     )}
                   </Field>
 
-                  <Field name={`poolRatings.${index}.reportUrl`}>
+                  <Field name={`${formName}.${index}.reportUrl`}>
                     {({ field }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
@@ -57,20 +113,14 @@ export const PoolRatingsSection = () => {
                     )}
                   </Field>
 
-                  <Field name={`poolRatings.${index}.reportFile`}>
-                    {({ field, form, meta }: FieldProps) => (
-                      <FileUpload
-                        file={field.value}
-                        onFileChange={(file) => {
-                          form.setFieldTouched(`poolRatings.${index}.reportFile`, true, false)
-                          form.setFieldValue(`poolRatings.${index}.reportFile`, file)
-                        }}
+                  <Field name={`${formName}.${index}.reportFile`}>
+                    {() => (
+                      <ReportFileUpload
+                        name={`${formName}.${index}.reportFile`}
                         accept="application/pdf"
                         label="Rating report PDF"
                         placeholder="Choose file"
                         small
-                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                        onClear={() => form.setFieldValue(`poolRatings.${index}.reportFile`, null)}
                       />
                     )}
                   </Field>

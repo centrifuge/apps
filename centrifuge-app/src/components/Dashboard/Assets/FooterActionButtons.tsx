@@ -1,6 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconWarning, Text } from '@centrifuge/fabric'
+import { Box, Button, Grid, IconWarning, Text } from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useCallback, useMemo } from 'react'
 import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
@@ -61,16 +61,13 @@ export const FooterActionButtons = ({
     // If the mode is 'upload-template', show a Save button.
     if (type === 'upload-template') {
       return (
-        <Box width="100%">
-          <Button
-            loading={isTemplatesTxLoading || isUploadingTemplates}
-            disabled={form.values.uploadedTemplates.length === 0 || !isAdmin}
-            style={{ width: '100%', marginBottom: 8 }}
-            onClick={uploadTemplates}
-          >
-            Save
-          </Button>
-        </Box>
+        <Button
+          loading={isTemplatesTxLoading || isUploadingTemplates}
+          disabled={form.values.uploadedTemplates.length === 0 || !isAdmin}
+          onClick={uploadTemplates}
+        >
+          Save
+        </Button>
       )
     }
 
@@ -78,7 +75,6 @@ export const FooterActionButtons = ({
     if (isCash) {
       return (
         <Button
-          style={{ width: '100%' }}
           disabled={!form.values.assetName || !canCreateAssets}
           loading={isLoading}
           onClick={() => {
@@ -95,7 +91,6 @@ export const FooterActionButtons = ({
       // Templates exist: allow both admins and borrowers to create assets.
       return (
         <Button
-          style={{ width: '100%' }}
           disabled={!form.values.assetName || !canCreateAssets}
           loading={isLoading}
           onClick={() => {
@@ -155,13 +150,17 @@ export const FooterActionButtons = ({
   ])
 
   return (
-    <Box display="flex" flexDirection="column" mt={3}>
-      <Box flexGrow={1}>{createButton}</Box>
-      <Box mt={2} flexGrow={1}>
-        <Button variant="inverted" onClick={() => setOpen(false)} style={{ width: '100%' }}>
-          Cancel
-        </Button>
-      </Box>
-    </Box>
+    <Grid
+      gap={2}
+      display="flex"
+      justifyContent="flex-end"
+      flexDirection="column"
+      marginTop={type === 'upload-template' ? '60%' : '40%'}
+    >
+      {createButton}
+      <Button variant="inverted" onClick={() => setOpen(false)} style={{ width: '100%' }}>
+        Cancel
+      </Button>
+    </Grid>
   )
 }

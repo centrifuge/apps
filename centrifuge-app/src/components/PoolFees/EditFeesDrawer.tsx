@@ -147,11 +147,8 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   }, [isLoading, initialFormData, isOpen])
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} px={0}>
-      <Stack gap={0}>
-        <Stack px={3} pb={3}>
-          <Text variant="heading2">Fee structure</Text>
-        </Stack>
+    <Drawer isOpen={isOpen} onClose={onClose} title="Fee structure">
+      <Stack>
         <Shelf px={3} gap={3} alignItems="flex-start" justifyContent="flex-start">
           <Stack width="100%" borderTop={poolFees ? '0.5px solid' : undefined} borderColor="borderPrimary">
             {poolFees
