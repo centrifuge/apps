@@ -2,9 +2,9 @@ import { Box, FileUpload, FileUploadProps, Text, TextInput, URLInput } from '@ce
 import { Field, FieldArray, FieldProps, useField, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
-import { LabelWithDeleteButton } from './IssuerCategories'
 import { AddButton } from './PoolDetailsSection'
 import { StyledGrid } from './PoolStructureSection'
+import { LabelWithDeleteButton } from './ServiceProvidersSection'
 
 interface ReportFileUploadProps extends FileUploadProps {
   name: string
@@ -62,12 +62,13 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
   const formName = isUpdating ? 'pool.poolRatings' : 'poolRatings'
 
   return (
-    <Box mt={isUpdating ? 0 : 4} mb={isUpdating ? 0 : 3}>
+    <Box mt={isUpdating ? 0 : 4} mb={3}>
       {isUpdating ? <></> : <Text variant="heading2">Pool rating</Text>}
       <StyledGrid
         gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
         mt={isUpdating ? 0 : 3}
-        style={isUpdating ? { padding: 20 } : { padding: 40 }}
+        px={isUpdating ? 0 : 5}
+        py={isUpdating ? 0 : 5}
       >
         <FieldArray name={formName}>
           {({ push, remove }) => (

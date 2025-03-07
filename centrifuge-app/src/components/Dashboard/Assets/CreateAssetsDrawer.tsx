@@ -1,12 +1,4 @@
-import {
-  CurrencyBalance,
-  LoanInfoInput,
-  NFTMetadataInput,
-  Pool,
-  PoolMetadata,
-  Price,
-  Rate,
-} from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, LoanInfoInput, NFTMetadataInput, Price, Rate } from '@centrifuge/centrifuge-js'
 import {
   useCentrifuge,
   useCentrifugeApi,
@@ -20,16 +12,15 @@ import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { LoanTemplate } from '../../../types'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useMetadata } from '../../../utils/useMetadata'
 import { useFilterPoolsByUserRole, usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
 import { LoadBoundary } from '../../LoadBoundary'
-import { useGetPoolsMetadata, valuesToNftProperties } from '../utils'
+import { PoolWithMetadata, valuesToNftProperties } from '../utils'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
-
-export type PoolWithMetadata = Pool & { meta: PoolMetadata }
 
 export type UploadedTemplate = {
   id: string
@@ -72,12 +63,12 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
   const api = useCentrifugeApi()
   const centrifuge = useCentrifuge()
   const filteredPools = useFilterPoolsByUserRole(type === 'upload-template' ? ['PoolAdmin'] : ['Borrower', 'PoolAdmin'])
-  const poolsMetadata = useGetPoolsMetadata(filteredPools || [])
+  const { poolsWithMetadata } = useSelectedPools()
   const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
   const [redirect, setRedirect] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const [pid, setPid] = useState<string>(poolsMetadata[0].id)
+  const [pid, setPid] = useState<string>(poolsWithMetadata?.[0]?.id ?? '')
   const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['Borrow'] })
   const { assetOriginators } = usePoolAccess(pid)
 
@@ -85,7 +76,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     ?.collateralCollections[0]?.id
 
   const templateIds =
-    poolsMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
+    poolsWithMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: template } = useMetadata<LoanTemplate>(templateId)
 
@@ -135,8 +126,8 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       assetType: 'cash',
       assetName: '',
       customType: 'atPar',
-      selectedPool: poolsMetadata[0],
-      uploadedTemplates: poolsMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
+      selectedPool: poolsWithMetadata[0],
+      uploadedTemplates: poolsWithMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
       valuationMethod: 'oracle',
       maxBorrowAmount: 'upToTotalBorrowed',
       maturity: 'fixed',
@@ -173,7 +164,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
           break
         case 'liquid':
         case 'fund': {
-          const loanId = (await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))) as any
+          const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
           pricingInfo = {
             valuationMethod: 'oracle',
             maxPriceVariation: Rate.fromPercent(9999),
@@ -262,7 +253,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     return <Navigate to={redirect} />
   }
 
-  if (!filteredPools?.length || !poolsMetadata.length) return null
+  if (!filteredPools?.length || !poolsWithMetadata.length) return null
 
   return (
     <LoadBoundary>

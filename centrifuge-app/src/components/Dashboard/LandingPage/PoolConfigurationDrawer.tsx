@@ -1,35 +1,28 @@
-import {
-  CurrencyBalance,
-  CurrencyMetadata,
-  FileType,
-  Perquintill,
-  Pool,
-  PoolMetadata,
-  Rate,
-} from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, FileType, Perquintill, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import { useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
-import { LoadBoundary } from '../../../../src/components/LoadBoundary'
-import { Spinner } from '../../../../src/components/Spinner'
-import { IssuerCategoriesSection } from '../../../../src/pages/IssuerCreatePool/IssuerCategories'
-import { PoolAnalysisSection } from '../../../../src/pages/IssuerCreatePool/PoolAnalysisSection'
-import { PoolRatingsSection } from '../../../../src/pages/IssuerCreatePool/PoolRatings'
-import { TranchesSection } from '../../../../src/pages/IssuerCreatePool/TranchesSection'
-import { getFileDataURI } from '../../../../src/utils/getFileDataURI'
-import { usePrefetchMetadata } from '../../../../src/utils/useMetadata'
-import { usePoolAdmin, useSuitableAccounts } from '../../../../src/utils/usePermissions'
+import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
+import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
+import { ServiceProvidersSection } from '../../../pages/IssuerCreatePool/ServiceProvidersSection'
+import { TranchesSection } from '../../../pages/IssuerCreatePool/TranchesSection'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
+import { getFileDataURI } from '../../../utils/getFileDataURI'
+import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
+import { useDebugFlags } from '../../DebugFlags'
+import { LoadBoundary } from '../../LoadBoundary'
+import { Spinner } from '../../Spinner'
+import { PoolWithMetadata } from '../utils'
+import { DebugPoolConfig } from './DebugPoolConfig'
 import { IssuerDetailsSection } from './IssuerDetailsSection'
 import { PoolDescriptionSection } from './PoolDescriptionSection'
-
-export type PoolWithMetadata = Pool & { meta: PoolMetadata }
 
 type PoolConfigurationDrawerProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  pools: PoolWithMetadata[]
 }
 
 export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
@@ -42,7 +35,7 @@ export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
     index: number
     apy: string
     apyPercentage: number | null
-    minInvestment: string
+    minInvestment: number
     minRiskBuffer: number | null
     interestRate: number | null
   }[]
@@ -71,13 +64,14 @@ const createPoolValues = (pool: PoolWithMetadata) => {
     },
     tranches: pool.tranches.map((tranche) => {
       const trancheMeta = pool?.meta?.tranches[tranche.id]
+
       return {
         id: tranche.id,
         index: tranche.index,
         tokenName: tranche.currency.name,
         symbolName: tranche.currency.symbol,
         minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? null,
-        minInvestment: trancheMeta?.minInitialInvestment,
+        minInvestment: Number(trancheMeta?.minInitialInvestment ?? 0),
         apy: trancheMeta?.apy,
         apyPercentage: trancheMeta?.apyPercentage ?? null,
         interestRate:
@@ -89,11 +83,13 @@ const createPoolValues = (pool: PoolWithMetadata) => {
   }
 }
 
-export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurationDrawerProps) {
+export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDrawerProps) {
   const cent = useCentrifuge()
+  const { editPoolConfig } = useDebugFlags()
   const prefetchMetadata = usePrefetchMetadata()
   const [isEditing, setIsEditing] = useState(false)
-  const [pool, setPool] = useState<PoolWithMetadata>(pools[0])
+  const { poolsWithMetadata, selectedPoolsWithMetadata } = useSelectedPools()
+  const [pool, setPool] = useState<PoolWithMetadata>(selectedPoolsWithMetadata[0])
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update configuration',
@@ -249,7 +245,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
         },
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
-            minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, values.currency.decimals).toString(),
+            minInitialInvestment: tranche.minInvestment.toString(),
             apy: tranche.apy,
             apyPercentage: tranche.apyPercentage,
           }
@@ -334,6 +330,9 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
           minRiskBuffer: tranche.minRiskBuffer ? Perquintill.fromPercent(tranche.minRiskBuffer) : null,
           tokenName: tranche.tokenName,
           tokenSymbol: tranche.symbolName,
+          minInitialInvestment: tranche.minInvestment,
+          apy: tranche.apy.toString(),
+          apyPercentage: tranche.apyPercentage,
         })),
       ]
 
@@ -350,10 +349,10 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
     form.resetForm()
     setOpen(false)
     setIsEditing(false)
-    setPool(pools[0])
+    setPool(selectedPoolsWithMetadata[0])
   }
 
-  if (!pools.length || !pool) return
+  if (!selectedPoolsWithMetadata.length || !pool) return
 
   return (
     <LoadBoundary>
@@ -382,52 +381,67 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
               <Stack mb={3}>
                 {!isPoolAdmin && (
                   <Box mt={2}>
-                    <Accordion
-                      items={[
-                        {
-                          title: 'Pool description',
-                          body: <PoolDescriptionSection />,
-                        },
-                        {
-                          title: 'Issuer details',
-                          body: <IssuerDetailsSection />,
-                        },
-                        {
-                          title: 'Service providers',
-                          body: <IssuerCategoriesSection isUpdating />,
-                        },
-                        {
-                          title: 'Pool ratings',
-                          body: <PoolRatingsSection isUpdating />,
-                        },
-                        {
-                          title: 'Pool analysis',
-                          body: <PoolAnalysisSection isUpdating />,
-                        },
-                        {
-                          title: 'Tranche structure',
-                          body: <TranchesSection isUpdating />,
-                        },
-                      ]}
-                    />
-                  </Box>
-                )}
-
-                {!isPoolAdmin && (
-                  <Box mt={2} padding={1}>
-                    <Text variant="heading4" color="statusCritical">
-                      Only pool admins can edit the pool
+                    <Text variant="body2" color="textSecondary">
+                      Only pool admins can edit configuration.
                     </Text>
                   </Box>
                 )}
+                {isPoolAdmin && (
+                  <Accordion
+                    items={[
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Pool description</Text>
+                          </Box>
+                        ),
+                        body: <PoolDescriptionSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Issuer details</Text>
+                          </Box>
+                        ),
+                        body: <IssuerDetailsSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Service providers</Text>
+                          </Box>
+                        ),
+                        body: <ServiceProvidersSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Pool ratings</Text>
+                          </Box>
+                        ),
+                        body: <PoolRatingsSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Pool analysis</Text>
+                          </Box>
+                        ),
+                        body: <PoolAnalysisSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Tranche structure</Text>
+                          </Box>
+                        ),
+                        body: <TranchesSection isUpdating />,
+                      },
+                    ]}
+                  />
+                )}
               </Stack>
-              <Stack
-                gap={2}
-                display="flex"
-                justifyContent="flex-end"
-                flexDirection="column"
-                marginTop={isPoolAdmin ? '40%' : '100%'}
-              >
+              <Stack gap={2} display="flex" justifyContent="flex-end" flexDirection="column">
                 <Button
                   onClick={form.submitForm}
                   loading={isEditing || isLoading}
@@ -443,6 +457,7 @@ export function PoolConfigurationDrawer({ open, setOpen, pools }: PoolConfigurat
             </Form>
           )}
         </FormikProvider>
+        {isPoolAdmin && editPoolConfig && <DebugPoolConfig poolId={pool.id} />}
       </Drawer>
     </LoadBoundary>
   )

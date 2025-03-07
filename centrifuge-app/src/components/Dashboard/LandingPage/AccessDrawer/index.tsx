@@ -1,18 +1,21 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Accordion, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
+import { Accordion, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ObservableInput, defer, firstValueFrom, from, switchMap } from 'rxjs'
-import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { usePoolAccess, useSuitableAccounts } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
-import { LoadBoundary } from '../LoadBoundary'
-import { AOFormValues, AssetOriginators } from './Access/AssetOriginator'
-import { FeedersFormValues, OracleFeeders } from './Access/OracleFeeders'
-import { PoolManagers, PoolManagersFormValues } from './Access/PoolManagers'
+import { useSelectedPools } from '../../../../utils/contexts/SelectedPoolsContext'
+import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
+import { usePoolAccess, usePoolAdmin, useSuitableAccounts } from '../../../../utils/usePermissions'
+import { usePool, usePoolMetadata } from '../../../../utils/usePools'
+import { useDebugFlags } from '../../../DebugFlags'
+import { LoadBoundary } from '../../../LoadBoundary'
+import { AOFormValues, AssetOriginators } from './AssetOriginator'
+import { DebugAdmins, DebugAdminsFormValues } from './DebugAdmins'
+import { FeedersFormValues, OracleFeeders } from './OracleFeeders'
+import { PoolManagers, PoolManagersFormValues } from './PoolManagers'
 
-type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues
+type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues & DebugAdminsFormValues
 
 export type FormHandle = {
   getBatch: (
@@ -23,34 +26,28 @@ export type FormHandle = {
   validate?: (values: FormValues) => FormikErrors<any>
 }
 
-export function AccessDrawer({
-  isOpen,
-  onClose,
-  poolIds,
-}: {
-  onClose: () => void
-  isOpen: boolean
-  poolIds: string[]
-}) {
-  const [poolId, setPoolId] = useState<string>('')
-
-  useEffect(() => {
-    if (poolIds.includes(poolId)) return
-    setPoolId(poolIds[0] || '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [poolIds.length])
-
+export function AccessDrawer({ isOpen, onClose }: { onClose: () => void; isOpen: boolean }) {
+  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+  const [selectedPoolId, setSelectedPoolId] = useState<string>(selectedPoolsWithMetadata?.[0].id ?? '')
+  const isPoolAdmin = !!usePoolAdmin(selectedPoolId)
   return (
     <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose} overflow="hidden">
       <Select
         label="Select pool"
         onChange={(event) => {
-          setPoolId(event.target.value)
+          setSelectedPoolId(event.target.value)
         }}
-        value={poolId}
-        options={poolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
+        value={selectedPoolId}
+        options={selectedPoolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
       />
-      <LoadBoundary>{poolId && <AccessDrawerInner poolId={poolId} key={poolId} onClose={onClose} />}</LoadBoundary>
+      {!isPoolAdmin && (
+        <Text variant="body2" color="textSecondary">
+          Only pool admins can manage access.
+        </Text>
+      )}
+      <LoadBoundary>
+        {selectedPoolId && <AccessDrawerInner poolId={selectedPoolId} key={selectedPoolId} onClose={onClose} />}
+      </LoadBoundary>
     </Drawer>
   )
 }
@@ -62,6 +59,7 @@ function PoolName({ poolId }: { poolId: string }) {
 }
 
 function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () => void }) {
+  const { editAdminConfig } = useDebugFlags()
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const api = useCentrifugeApi()
@@ -69,7 +67,9 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   const poolManagersRef = useRef<FormHandle>(null)
   const aoRef = useRef<FormHandle>(null)
   const feedersRef = useRef<FormHandle>(null)
-  const refs = [aoRef, feedersRef, poolManagersRef]
+  const debugAdminsRef = useRef<FormHandle>(null)
+  const refs = [aoRef, feedersRef, poolManagersRef, debugAdminsRef]
+  const admin = usePoolAdmin(poolId)
 
   const access = usePoolAccess(poolId)
   const ao = access.assetOriginators[0]
@@ -79,7 +79,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   const adminDelegateAccounts = useSuitableAccounts({
     poolId,
     poolRole: ['PoolAdmin'],
-    actingAddress: [access.admin || ''],
+    actingAddress: [access.admin || admin?.signingAccount.address || ''],
   })
   const adminDelegateAccount = adminDelegateAccounts.find((a) => a.signingAccount === aoDelegateAccount?.signingAccount)
 
@@ -121,6 +121,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
       },
       withdrawAddresses: [],
       delegates: [],
+      admins: [],
     },
     validate: (values) => {
       const errors: any = {}

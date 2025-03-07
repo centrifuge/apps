@@ -19,13 +19,12 @@ const aumOptions = [
 
 export default function Dashboard() {
   const theme = useTheme()
-  const { selectedPools, pools = [] } = useSelectedPools()
-  const filteredPools = useMemo(() => pools.filter((pool) => selectedPools.includes(pool.id)), [pools, selectedPools])
-  const poolIds = useMemo(() => filteredPools.map((pool) => pool.id), [filteredPools])
-  const totalNAV = useTotalNAV(filteredPools)
-  const { liquidityData, isLoading } = useLiquidityMulti(poolIds)
+  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+
+  const totalNAV = useTotalNAV(selectedPoolsWithMetadata)
+  const { liquidityData, isLoading } = useLiquidityMulti(selectedPoolIds)
   const [selectedAumOption, setSelectedAumOption] = useState(aumOptions[0])
-  const { growth } = useNavGrowth(filteredPools, selectedAumOption.value as 'YTD' | '180d' | '90d')
+  const { growth } = useNavGrowth(selectedPoolsWithMetadata, selectedAumOption.value as 'YTD' | '180d' | '90d')
 
   const { aggregatedLockedInvestments, aggregatedLockedRedemptions } = useMemo(() => {
     return Object.values(liquidityData).reduce(
@@ -96,7 +95,7 @@ export default function Dashboard() {
     },
   ]
 
-  if (isLoading && filteredPools.length === 0) {
+  if (isLoading && selectedPoolsWithMetadata.length === 0) {
     return <Spinner />
   }
 
