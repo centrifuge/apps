@@ -353,7 +353,7 @@ export const RatingPill = ({ agency, reportUrl, reportFile, value }: RatingProps
                 ? [
                     {
                       text: 'View PDF report',
-                      url: cent.metadata.parseMetadataUrl(reportFile?.uri ?? ''),
+                      url: cent.metadata.parseMetadataUrl(reportFile?.uri ?? '') || '',
                     },
                   ]
                 : []),
@@ -367,8 +367,9 @@ export const RatingPill = ({ agency, reportUrl, reportFile, value }: RatingProps
           padding="2px 0px"
           display="flex"
           alignItems="center"
-          width={70}
           justifyContent="center"
+          pl={1}
+          pr={1}
         >
           {agency && ratingIcons[agency] ? ratingIcons[agency] : <IconSp size={16} />}
           <Text variant="body2" style={{ marginLeft: 4 }}>
