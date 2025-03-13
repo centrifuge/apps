@@ -262,7 +262,7 @@ export function LoanList({ loans }: Props) {
   }, [rows, pool])
 
   const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData as any), [csvData])
-  const filteredData = showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero())
+  const filteredData = showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero() && row.status !== 'Closed')
   const pagination = usePagination({ data: filteredData, pageSize: 20 })
 
   return (
