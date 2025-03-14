@@ -70,6 +70,7 @@ export function TransferTokensDrawer({ onClose, isOpen }: TransferTokensProps) {
 function TransferTokensDrawerInner() {
   const address = useAddress()
   const consts = useCentrifugeConsts()
+  console.log('TransferTokensDrawerInner', address, useWallet().evm.chainId)
   const tokens = useHoldings(address, useWallet().evm.chainId)
   const isPortfolioPage = useMatch('/portfolio')
 
