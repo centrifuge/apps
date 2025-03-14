@@ -514,8 +514,6 @@ export function WalletProvider({
     }
   }, [connect, disconnect, proxies, state, isConnectError, isConnecting, isSmartContractWallet])
 
-  console.log('walletcontext', ctx)
-
   return (
     <WalletContext.Provider value={ctx}>
       {children}
