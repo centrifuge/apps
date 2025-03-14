@@ -165,6 +165,8 @@ const columns: Column[] = [
 
 export function useHoldings(address?: string, chainId?: number, showActions = true) {
   const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
+  console.log('centAddress', centAddress)
+  console.log('address', address)
   const { data: tinlakeBalances } = useTinlakeBalances(address && isEvmAddress(address) ? address : undefined)
   const centBalances = useBalances(centAddress)
   const match = useMatch('/portfolio')
