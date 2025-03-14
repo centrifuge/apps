@@ -264,14 +264,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     ]
 
     const data = await multicall<{
-      decimals: number
+      decimals: bigint
       allowance: bigint
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
 
     return {
-      allowance: new CurrencyBalance(data.allowance.toString(), data.decimals),
+      allowance: new CurrencyBalance(data.allowance.toString(), Number(data.decimals)),
     }
   }
 
