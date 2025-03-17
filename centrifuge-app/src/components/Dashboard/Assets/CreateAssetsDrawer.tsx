@@ -1,12 +1,4 @@
-import {
-  CurrencyBalance,
-  LoanInfoInput,
-  NFTMetadataInput,
-  Pool,
-  PoolMetadata,
-  Price,
-  Rate,
-} from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, LoanInfoInput, NFTMetadataInput, Price, Rate } from '@centrifuge/centrifuge-js'
 import {
   useCentrifuge,
   useCentrifugeApi,
@@ -15,21 +7,20 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Box, Divider, Drawer, Select } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
-import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import { useMemo, useState } from 'react'
+import { Form, FormikProvider, useFormik } from 'formik'
+import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { LoanTemplate } from '../../../types'
+import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useMetadata } from '../../../utils/useMetadata'
 import { useFilterPoolsByUserRole, usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
 import { LoadBoundary } from '../../LoadBoundary'
-import { usePoolMetadataMap, valuesToNftProperties } from '../utils'
+import { PoolWithMetadata, valuesToNftProperties } from '../utils'
 import { CreateAssetsForm } from './CreateAssetForm'
 import { FooterActionButtons } from './FooterActionButtons'
 import { UploadAssetTemplateForm } from './UploadAssetTemplateForm'
-
-export type PoolWithMetadata = Pool & { meta: PoolMetadata }
 
 export type UploadedTemplate = {
   id: string
@@ -72,24 +63,12 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
   const api = useCentrifugeApi()
   const centrifuge = useCentrifuge()
   const filteredPools = useFilterPoolsByUserRole(type === 'upload-template' ? ['PoolAdmin'] : ['Borrower', 'PoolAdmin'])
-  const metas = usePoolMetadataMap(filteredPools || [])
+  const { poolsWithMetadata } = useSelectedPools()
   const [isUploadingTemplates, setIsUploadingTemplates] = useState(false)
   const [redirect, setRedirect] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const poolsMetadata = useMemo(() => {
-    return (
-      filteredPools?.map((pool) => {
-        const meta = metas.get(pool.id)
-        return {
-          ...pool,
-          meta,
-        }
-      }) || []
-    )
-  }, [filteredPools, metas])
-
-  const [pid, setPid] = useState<string>(poolsMetadata[0].id)
+  const [pid, setPid] = useState<string>(poolsWithMetadata?.[0]?.id ?? '')
   const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['Borrow'] })
   const { assetOriginators } = usePoolAccess(pid)
 
@@ -97,7 +76,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     ?.collateralCollections[0]?.id
 
   const templateIds =
-    poolsMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
+    poolsWithMetadata.find((pool) => pool.id === pid)?.meta?.loanTemplates?.map((s: { id: string }) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: template } = useMetadata<LoanTemplate>(templateId)
 
@@ -133,7 +112,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
 
           // Doing the redirect via state, so it only happens if the user is still on this
           // page when the transaction completes
-          setRedirect(`/issuer/${pid}/assets/${loanId}`)
+          setRedirect(`/pools/${pid}/assets/${loanId}`)
         }
       },
     }
@@ -147,8 +126,8 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       assetType: 'cash',
       assetName: '',
       customType: 'atPar',
-      selectedPool: poolsMetadata[0],
-      uploadedTemplates: poolsMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
+      selectedPool: poolsWithMetadata[0],
+      uploadedTemplates: poolsWithMetadata[0]?.meta?.loanTemplates || ([] as UploadedTemplate[]),
       valuationMethod: 'oracle',
       maxBorrowAmount: 'upToTotalBorrowed',
       maturity: 'fixed',
@@ -167,7 +146,8 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       oracleSource: 'isin',
     },
     onSubmit: async (values) => {
-      if (!pid || !collateralCollectionId || !template || !account) return
+      if (!pid || !collateralCollectionId || !account) return
+      if (values.assetType !== 'cash' && !template) return
       setIsLoading(true)
       const decimals = form.values.selectedPool.currency.decimals
       let pricingInfo: LoanInfoInput | undefined
@@ -235,7 +215,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
       }
 
       const properties =
-        values.valuationMethod === 'cash'
+        values.assetType === 'cash'
           ? {}
           : { ...(valuesToNftProperties(values.attributes, template as any) as any), _template: templateId }
 
@@ -273,7 +253,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     return <Navigate to={redirect} />
   }
 
-  if (!filteredPools?.length || !poolsMetadata.length) return null
+  if (!filteredPools?.length || !poolsWithMetadata.length) return null
 
   return (
     <LoadBoundary>
@@ -283,38 +263,36 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
         title={type === 'upload-template' ? 'Upload asset template' : 'Create asset'}
       >
         <Divider color="backgroundSecondary" />
+        <Select
+          name="poolId"
+          label="Select pool"
+          value={pid}
+          options={poolsWithMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
+          onChange={(event) => {
+            const selectedPool = poolsWithMetadata.find((pool) => pool.id === event.target.value) as PoolWithMetadata
+            form.setFieldValue('selectedPool', selectedPool)
+            form.setFieldValue('uploadedTemplates', selectedPool?.meta?.loanTemplates || [])
+            setPid(selectedPool?.id ?? '')
+          }}
+        />
+
         <FormikProvider value={form}>
           <Form noValidate>
-            <Box mb={2}>
-              <Field name="poolId">
-                {({ field, form }: FieldProps) => (
-                  <Select
-                    name="poolId"
-                    label="Select pool"
-                    value={field.value}
-                    options={poolsMetadata?.map((pool) => ({ label: pool?.meta?.pool?.name, value: pool.id }))}
-                    onChange={(event) => {
-                      const selectedPool = poolsMetadata.find((pool) => pool.id === event.target.value)
-                      form.setFieldValue('selectedPool', selectedPool)
-                      form.setFieldValue('uploadedTemplates', selectedPool?.meta?.loanTemplates || [])
-                      setPid(selectedPool?.id ?? '')
-                    }}
-                  />
-                )}
-              </Field>
+            <Box display="flex" flexDirection="column" height="75vh">
+              {type === 'create-asset' && <CreateAssetsForm />}
+              {type === 'upload-template' && (
+                <UploadAssetTemplateForm setIsUploadingTemplates={setIsUploadingTemplates} />
+              )}
+
+              <FooterActionButtons
+                type={type}
+                setType={setType}
+                setOpen={resetToDefault}
+                isUploadingTemplates={isUploadingTemplates}
+                resetToDefault={resetToDefault}
+                isLoading={isLoading || isTxLoading}
+              />
             </Box>
-            {type === 'create-asset' && <CreateAssetsForm />}
-            {type === 'upload-template' && (
-              <UploadAssetTemplateForm setIsUploadingTemplates={setIsUploadingTemplates} />
-            )}
-            <FooterActionButtons
-              type={type}
-              setType={setType}
-              setOpen={resetToDefault}
-              isUploadingTemplates={isUploadingTemplates}
-              resetToDefault={resetToDefault}
-              isLoading={isLoading || isTxLoading}
-            />
           </Form>
         </FormikProvider>
       </Drawer>

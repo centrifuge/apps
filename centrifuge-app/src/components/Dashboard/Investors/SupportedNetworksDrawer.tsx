@@ -98,11 +98,8 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
   })
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3}>
+    <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="Supported networks">
       <Stack gap={2}>
-        <Text variant="heading2" fontWeight="600" fontSize="20px">
-          Supported Networks
-        </Text>
         <Text variant="body2" color="textSecondary">
           View liquidity on all blockchains that this pool is connected to, and enable investments on new blockchains.
         </Text>
@@ -110,50 +107,55 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
         <Box>
           <FormikProvider value={formik}>
             <Form>
-              <Stack gap={2}>
-                {domains
-                  ?.slice(0, 2)
-                  // filters out goerli networks on demo, they are not supported by the providers anymore
-                  ?.filter((domain) => getNetworkName(domain.chainId || 'centrifuge') !== 'Unknown')
-                  .map((domain, index) => (
-                    <Box
-                      key={`${domain.chainId}-supported-networks-${index}`}
-                      backgroundColor="backgroundSecondary"
+              <Box display="flex" flexDirection="column" height="75vh">
+                <Box flex={1} overflow="auto">
+                  {domains
+                    ?.slice(0, 2)
+                    // filters out goerli networks on demo, they are not supported by the providers anymore
+                    ?.filter((domain) => getNetworkName(domain.chainId || 'centrifuge') !== 'Unknown')
+                    .map((domain, index) => (
+                      <Box
+                        key={`${domain.chainId}-supported-networks-${index}`}
+                        backgroundColor="backgroundSecondary"
+                        borderRadius={8}
+                        borderStyle="solid"
+                        borderWidth={1}
+                        borderColor="borderPrimary"
+                        mb={2}
+                      >
+                        <SupportedNetworks
+                          chainId={domain.chainId}
+                          index={index}
+                          selectedPool={selectedPool}
+                          setSelectedPool={setSelectedPool}
+                        />
+                      </Box>
+                    ))}
+                  {successMessage && (
+                    <Shelf
+                      p={1}
                       borderRadius={8}
-                      borderStyle="solid"
-                      borderWidth={1}
-                      borderColor="borderPrimary"
+                      backgroundColor="statusWarningBg"
+                      justifyContent="flex-start"
+                      alignItems="flex-start"
+                      gap={1}
                     >
-                      <SupportedNetworks
-                        chainId={domain.chainId}
-                        index={index}
-                        selectedPool={selectedPool}
-                        setSelectedPool={setSelectedPool}
-                      />
-                    </Box>
-                  ))}
-                {successMessage && (
-                  <Shelf
-                    p={1}
-                    borderRadius={8}
-                    backgroundColor="statusWarningBg"
-                    justifyContent="flex-start"
-                    alignItems="flex-start"
-                    gap={1}
-                  >
-                    <IconInfo size="iconSmall" color="statusWarning" />
-                    <Text variant="body2" color="statusWarning">
-                      {successMessage}
-                    </Text>
-                  </Shelf>
-                )}
-                <Button variant="primary" small type="submit">
-                  Update
-                </Button>
-                <Button variant="inverted" small onClick={onClose} disabled={formik.isSubmitting}>
-                  Cancel
-                </Button>
-              </Stack>
+                      <IconInfo size="iconSmall" color="statusWarning" />
+                      <Text variant="body2" color="statusWarning">
+                        {successMessage}
+                      </Text>
+                    </Shelf>
+                  )}
+                </Box>
+                <Stack gap={2}>
+                  <Button variant="primary" small type="submit">
+                    Update
+                  </Button>
+                  <Button variant="inverted" small onClick={onClose} disabled={formik.isSubmitting}>
+                    Cancel
+                  </Button>
+                </Stack>
+              </Box>
             </Form>
           </FormikProvider>
         </Box>
@@ -216,11 +218,13 @@ function SupportedNetworks({
                   }}
                 />
                 <Stack gap={2}>{selectedPool && <TrancheTokensInput chainId={chainId} poolId={selectedPool} />}</Stack>
-                <Text variant="label1" color="textPrimary">
-                  Tokens
-                </Text>
+                {domain?.currencies.length ? (
+                  <Text variant="label1" color="textPrimary">
+                    Tokens
+                  </Text>
+                ) : null}
 
-                <FieldArray name={`networks`}>
+                <FieldArray name="networks">
                   {() => (
                     <>
                       {domain?.currencies.map((currency) => {
@@ -310,7 +314,7 @@ function TrancheTokensInput({ chainId, poolId }: { chainId: number; poolId: stri
   return (
     <Stack gap={2}>
       <Text variant="label1" color="textPrimary">
-        Tranche token that will be deployed
+        Tranche tokens deployed
       </Text>
       {pool.tranches.map((t) => {
         return (

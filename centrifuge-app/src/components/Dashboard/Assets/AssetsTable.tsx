@@ -1,18 +1,19 @@
 import { CurrencyBalance, CurrencyMetadata, Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, Button, Grid, IconDownload, IconPlus, Text } from '@centrifuge/fabric'
-import { useMemo, useState } from 'react'
+import { AnchorButton, Box, Button, Grid, IconDownload, IconInfo, IconPlus, Spinner, Text } from '@centrifuge/fabric'
+import { useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
+import { isCashLoan } from '../../../../src/pages/Loan/utils'
+import { useSelectedPools } from '../../..//utils/contexts/SelectedPoolsContext'
+import { useLoans } from '../../..//utils/useLoans'
+import { useAllPoolAssetSnapshotsMulti, usePools } from '../../..//utils/usePools'
+import { DataTable, FilterableTableHeader, SortableTableHeader } from '../../../components/DataTable'
 import { formatDate } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { getCSVDownloadUrl } from '../../../utils/getCSVDownloadUrl'
 import { useFilters } from '../../../utils/useFilters'
-import { useAllPoolAssetSnapshotsMulti } from '../../../utils/usePools'
-import { DataTable, FilterableTableHeader, SortableTableHeader } from '../../DataTable'
 import { LoanLabel, getLoanLabelStatus } from '../../LoanLabel'
-import { Amount, getAmount } from '../../LoanList'
-import { Spinner } from '../../Spinner'
+import { Amount } from '../../LoanList'
 import { TransformedLoan, usePoolMetadataMap } from '../utils'
 import { CreateAssetsDrawer } from './CreateAssetsDrawer'
 
@@ -43,48 +44,59 @@ type Row = Loan & {
   pool: Pool
 }
 
-export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
+export function AssetsTable() {
   const theme = useTheme()
+  const pools = usePools()
+  const { selectedPoolIds } = useSelectedPools()
+  const { data: loans } = useLoans(pools ? selectedPoolIds : [])
   const cent = useCentrifuge()
-  const { selectedPools } = useSelectedPools()
-  const extractedPools = loans.map((loan) => loan.pool)
+  const loansWithPool =
+    loans
+      ?.map((loan) => ({
+        ...loan,
+        pool: pools?.find((pool) => pool.id === loan.poolId) || null,
+      }))
+      .filter((loan) => !isCashLoan(loan as Loan)) || []
+
+  const extractedPools = loansWithPool.map((loan) => loan.pool!) ?? []
   const poolMetadataMap = usePoolMetadataMap(extractedPools)
   const today = new Date().toISOString().slice(0, 10)
   const [allSnapshots, isLoading] = useAllPoolAssetSnapshotsMulti(extractedPools, today)
   const [drawerOpen, setDrawerOpen] = useState(false)
+
   const [drawerType, setDrawerType] = useState<'create-asset' | 'upload-template'>('create-asset')
 
-  const loansData = loans
+  const loansData = loansWithPool
     .flatMap((loan) => {
-      const snapshots = allSnapshots?.[loan.pool.id] ?? []
-      const metadata = poolMetadataMap.get(loan.pool.id)
+      const snapshots = allSnapshots?.[loan?.poolId] ?? []
+      const metadata = poolMetadataMap.get(loan?.poolId)
       const poolIcon = metadata?.pool?.icon?.uri && cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)
       const poolName = metadata?.pool?.name
-      return (
-        snapshots
-          ?.filter((snapshot) => {
-            const snapshotLoanId = snapshot.assetId.split('-')[1]
-            return snapshotLoanId === loan.id
-          })
-          .map((snapshot) => ({
+      return snapshots
+        ?.filter((snapshot) => {
+          const snapshotLoanId = snapshot.assetId.split('-')[1]
+          return snapshotLoanId === loan.id
+        })
+        .map((snapshot) => {
+          return {
             poolIcon,
-            currency: loan.pool.currency,
+            currency: loan?.pool?.currency,
             poolName,
             assetName: snapshot.asset.name,
             maturityDate: snapshot.actualMaturityDate,
-            poolId: loan.pool.id,
+            poolId: loan.poolId,
             quantity: snapshot.outstandingQuantity,
-            value: loan.presentValue,
+            value: (loan as TransformedLoan).presentValue,
             unrealizedPL: snapshot.unrealizedProfitAtMarketPrice,
             realizedPL: snapshot.sumRealizedProfitFifo,
             status: loan.status,
             loan,
             assetId: snapshot.assetId.split('-')[1],
             pool: loan.pool,
-          })) || []
-      )
+          }
+        })
     })
-    .filter((item) => selectedPools.includes(item.poolId))
+    .filter((loan) => selectedPoolIds.includes(loan.poolId))
 
   const data = useMemo(
     () =>
@@ -127,6 +139,11 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
   const filters = useFilters({
     data,
   })
+
+  useEffect(() => {
+    filters.setFilter('status', ['Ongoing'])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const columns = [
     {
@@ -206,8 +223,22 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
     },
     {
       align: 'left',
-      header: <FilterableTableHeader filterKey="status" label="Status" options={status} filters={filters} />,
-      cell: ({ loan }: Row) => <LoanLabel loan={loan} />,
+      header: (
+        <FilterableTableHeader
+          filterKey="status"
+          label="Status"
+          options={Object.fromEntries(
+            data.map((asset) => [
+              asset.status,
+              <Text variant="body3" fontWeight="500">
+                {asset.status}
+              </Text>,
+            ])
+          )}
+          filters={filters}
+        />
+      ),
+      cell: (row: Row) => <LoanLabel loan={row.loan as Loan} />,
     },
   ]
 
@@ -215,7 +246,7 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
     if (!data.length) return undefined
 
     return data.map((loan) => {
-      const quantity = getAmount(loan.loan, loan.pool)
+      const quantity = 'getAmount(loan.loan, loan.pool)'
 
       return {
         Pool: loan.poolName,
@@ -255,7 +286,7 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
           <Text variant="heading4">Assets</Text>
         </Box>
         <Grid gridTemplateColumns={filters.data.length ? '160px 220px 44px' : '160px 220px'} gap={1}>
-          {!!selectedPools.length && (
+          {!!selectedPoolIds.length && (
             <Button
               icon={<IconPlus />}
               small
@@ -267,7 +298,7 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
               Create asset
             </Button>
           )}
-          {!!selectedPools.length && (
+          {!!selectedPoolIds.length && (
             <Button
               variant="inverted"
               small
@@ -299,14 +330,28 @@ export default function AssetsTable({ loans }: { loans: TransformedLoan[] }) {
             columns={columns}
             scrollable
             onRowClicked={(row) => `/pools/${row.poolId}/assets/${row.assetId}`}
+            defaultSortOrder="desc"
+            defaultSortKey="maturityDate"
           />
         ) : (
-          <Box display="flex" justifyContent="center" alignItems="center" height="100%" mt={5}>
-            <Text variant="heading4">No data available</Text>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            background={theme.colors.backgroundSecondary}
+            borderRadius={4}
+            p={2}
+            border={`1px solid ${theme.colors.borderPrimary}`}
+          >
+            <IconInfo size={14} style={{ marginRight: 8 }} />
+            <Text variant="body3" color="textSecondary">
+              No assets displayed yet
+            </Text>
           </Box>
         )}
       </Box>
-      {!!selectedPools.length && (
+      {!!selectedPoolIds.length && (
         <CreateAssetsDrawer open={drawerOpen} setOpen={setDrawerOpen} type={drawerType} setType={setDrawerType} />
       )}
     </>

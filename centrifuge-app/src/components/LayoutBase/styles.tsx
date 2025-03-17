@@ -126,7 +126,6 @@ export const WalletContainer = styled(Stack)`
   pointer-events: none;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    margin-right: 20px;
     position: fixed;
     top: 0;
     right: 0;

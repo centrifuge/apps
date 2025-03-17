@@ -18,7 +18,6 @@ import { ApiRx } from '@polkadot/api'
 import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
 import { combineLatest, combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs'
-import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
 import { usePool, usePoolMetadata, usePools } from './usePools'
@@ -415,5 +414,56 @@ export function getKeyForReceiver(api: ApiRx, receiver: WithdrawAddress) {
         EVM: [receiver.location.evm, receiver.address],
       },
     }
+  }
+}
+
+const roles: AdminRole[] = [
+  'PoolAdmin',
+  'Borrower',
+  'PricingAdmin',
+  'LiquidityAdmin',
+  'InvestorAdmin',
+  'LoanAdmin',
+  'PODReadAccess',
+]
+type AdminRole =
+  | 'PoolAdmin'
+  | 'Borrower'
+  | 'PricingAdmin'
+  | 'LiquidityAdmin'
+  | 'InvestorAdmin'
+  | 'LoanAdmin'
+  | 'PODReadAccess'
+
+type Admin = {
+  address: string
+  roles: { [key in AdminRole]?: boolean }
+}
+
+export function diffPermissions(storedValues: Admin[], formValues: Admin[], rolesToCheck = roles) {
+  const storedObj = Object.fromEntries(storedValues.map((admin) => [admin.address, admin.roles]))
+  const formObj = Object.fromEntries(formValues.map((admin) => [admin.address, admin.roles]))
+  const addresses = [...new Set(storedValues.map((a) => a.address).concat(formValues.map((a) => a.address)))]
+
+  const add: [string, AdminRole][] = []
+  const remove: [string, AdminRole][] = []
+
+  addresses.forEach((addr) => {
+    rolesToCheck.forEach((role) => {
+      const stored = !!storedObj[addr]?.[role as AdminRole]
+      const value = !!formObj[addr]?.[role as AdminRole]
+      if (stored !== value) {
+        if (value) {
+          add.push([addr, role as AdminRole])
+        } else {
+          remove.push([addr, role as AdminRole])
+        }
+      }
+    })
+  })
+
+  return {
+    add,
+    remove,
   }
 }

@@ -4,7 +4,6 @@ import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../../../src/utils/formatting'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
-import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
@@ -34,7 +33,6 @@ type Row = {
 export function AssetTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData, loan: loanId } = React.useContext(ReportContext)
   const explorer = useGetExplorerUrl()
-  const basePath = useBasePath()
 
   const { data: transactions = [], isLoading } = useReport(
     'assetTransactions',
@@ -64,7 +62,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       csvOnly: false,
       width: '38%',
       cell: ({ assetId, assetName, toAssetId, toAssetName, label, sublabel, fromAssetName, fromAssetId }: Row) => {
-        const base = `${basePath}/${pool.id}/assets/`
+        const base = `pools/${pool.id}/assets/`
         const isCashTransfer = label === 'Cash transfer from'
         return (
           <Text as="span" variant="body3">
@@ -154,7 +152,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
             timeZoneName: 'short',
           })}"`,
           Transaction: explorer.tx(transaction.transactionHash),
-          Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
+          Amount: amount ? `"${formatBalance(amount.toFloat(), 'USD', 2, 2)}"` : '-',
           epoch: transaction.epoch,
         }
       })

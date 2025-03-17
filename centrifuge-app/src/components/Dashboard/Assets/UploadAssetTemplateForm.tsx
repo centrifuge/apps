@@ -1,5 +1,15 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, FileUpload, Grid, IconDownload, IconFile, IconWarning, Text } from '@centrifuge/fabric'
+import {
+  AnchorButton,
+  Box,
+  FileUpload,
+  Grid,
+  IconDownload,
+  IconFile,
+  IconWarning,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import { useFormikContext } from 'formik'
 import { useMemo, useState } from 'react'
 import { lastValueFrom } from 'rxjs'
@@ -87,41 +97,47 @@ export const UploadAssetTemplateForm = ({
   }
 
   return (
-    <Box display="flex" flexDirection="column" justifyContent="flex-start">
-      {templateDownloadItems.map((item) => (
-        <Box
-          key={item.id}
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          px={2}
-          py={3}
-          mb={2}
-          borderRadius={8}
-          border={`1px solid ${theme.colors.borderPrimary}`}
-        >
-          <Box display="flex" alignItems="center">
-            <IconFile />
-            <Text variant="heading4" ml={2}>
-              {item?.name?.length > 20 ? `${item.name.slice(0, 20)}...` : item?.name}
-            </Text>
-          </Box>
-          <AnchorButton
-            href={item.url}
-            target="_blank"
-            variant="tertiary"
-            icon={<IconDownload size={18} />}
-            small
-            download={item.downloadFileName}
-          />
-        </Box>
-      ))}
+    <Stack flex={1} overflow="auto">
+      {templateDownloadItems.length > 0 && (
+        <Stack mt={1}>
+          <Text variant="heading4">Asset template/s</Text>
+          {templateDownloadItems.map((item) => (
+            <Box
+              key={item.id}
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              px={2}
+              py={3}
+              mb={1}
+              borderRadius={8}
+              border={`1px solid ${theme.colors.borderPrimary}`}
+              mt={1}
+            >
+              <Box display="flex" alignItems="center">
+                <IconFile />
+                <Text variant="heading4" ml={2}>
+                  {item?.name?.length > 20 ? `${item.name.slice(0, 20)}...` : item?.name}
+                </Text>
+              </Box>
+              <AnchorButton
+                href={item.url}
+                target="_blank"
+                variant="tertiary"
+                icon={<IconDownload size={18} />}
+                small
+                download={item.downloadFileName}
+              />
+            </Box>
+          ))}
+        </Stack>
+      )}
 
-      <Box>
+      <Box mt={2}>
         {!!poolAdmin ? (
           <FileUpload
             errorMessage={errorMessage}
-            accept=".json"
+            accept="application/json"
             placeholder="Upload asset template"
             onFileChange={(file) => {
               if (!file) return
@@ -162,8 +178,9 @@ export const UploadAssetTemplateForm = ({
               }
               reader.readAsText(file)
             }}
-            small
             file={null}
+            fileTypeText="Template must be in .JSON format. 5MB size limit"
+            label="Asset template"
           />
         ) : (
           <Grid display="flex" alignItems="center" mb={1} gap={1}>
@@ -174,6 +191,6 @@ export const UploadAssetTemplateForm = ({
           </Grid>
         )}
       </Box>
-    </Box>
+    </Stack>
   )
 }

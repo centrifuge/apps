@@ -57,20 +57,10 @@ export function RepayForm({ loan }: { loan: CreatedLoan | ActiveLoan }) {
   const [destination, setDestination] = React.useState<string>('reserve')
 
   if (isExternalLoan(loan)) {
-    return (
-      <Stack gap={2} p={1}>
-        <Text variant="heading2">Sell</Text>
-        <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} setDestination={setDestination} />
-      </Stack>
-    )
+    return <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} setDestination={setDestination} />
   }
 
-  return (
-    <Stack gap={2} p={1}>
-      <Text variant="heading2">{isCashLoan(loan) ? 'Withdraw' : 'Repay'}</Text>
-      <InternalRepayForm loan={loan} destination={destination} setDestination={setDestination} />
-    </Stack>
-  )
+  return <InternalRepayForm loan={loan} destination={destination} setDestination={setDestination} />
 }
 /**
  * Repay form for loans with `valuationMethod: outstandingDebt, discountedCashflow, cash`

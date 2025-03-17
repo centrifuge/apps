@@ -25,7 +25,7 @@ type PoolLinkProps = {
   path?: string
 }
 
-export function PoolLink({ pool, path = 'issuer' }: PoolLinkProps) {
+export function PoolLink({ pool, path = 'pools' }: PoolLinkProps) {
   const match = useMatch(`/${path}/:pid/*`)
   const { data: metadata } = usePoolMetadata(pool)
   const to = `/${path}/${pool.id}`

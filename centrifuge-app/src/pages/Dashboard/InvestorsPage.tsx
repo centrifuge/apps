@@ -11,14 +11,14 @@ import { useInvestorListMulti } from '../../utils/usePools'
 
 export default function InvestorsPage() {
   const theme = useTheme()
-  const { pools, selectedPools } = useSelectedPools(true)
   const [isAddNewInvestorDrawerOpen, setIsAddNewInvestorDrawerOpen] = useState(false)
   const [isSupportedNetworksDrawerOpen, setIsSupportedNetworksDrawerOpen] = useState(false)
   const [isOnboardingSettingsDrawerOpen, setIsOnboardingSettingsDrawerOpen] = useState(false)
-  const investors = useInvestorListMulti(selectedPools)
+  const { poolsWithMetadata } = useSelectedPools(true)
+  const investors = useInvestorListMulti(poolsWithMetadata?.map((p) => p.id) ?? [])
 
   return (
-    <Stack gap={4} py={3} px={3}>
+    <Stack gap={4} py={2} px={3}>
       <AddNewInvestorDrawer isOpen={isAddNewInvestorDrawerOpen} onClose={() => setIsAddNewInvestorDrawerOpen(false)} />
       <SupportedNetworksDrawer
         isOpen={isSupportedNetworksDrawerOpen}
@@ -60,7 +60,7 @@ export default function InvestorsPage() {
           </Button>
         </Shelf>
       </Shelf>
-      <InvestorTable pools={pools?.filter((p) => selectedPools.includes(p.id))} />
+      <InvestorTable />
     </Stack>
   )
 }

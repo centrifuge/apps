@@ -1,7 +1,7 @@
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 import { Box, Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
 import { InputUnit, InputUnitProps, useContextId } from '../InputUnit'
 import { Shelf } from '../Shelf'
@@ -21,6 +21,16 @@ export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> 
 
 export type URLInputProps = TextInputProps & {
   prefix?: string
+}
+
+export interface DropdownOption {
+  label: string
+  value: string
+}
+
+export interface SearchInputProps extends TextInputProps {
+  dropdownOptions?: DropdownOption[]
+  onOptionSelect?: (option: DropdownOption) => void
 }
 
 export const StyledTextInput = styled.input`
@@ -56,10 +66,11 @@ export const StyledTextInput = styled.input`
     margin: 0;
   }
 `
-export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean; disabled?: boolean }>`
+export const StyledInputBox = styled(Shelf)<{ hideBorder?: boolean; disabled?: boolean; background?: string }>`
   width: 100%;
   position: relative;
-  background: ${({ theme, disabled }) => (disabled ? 'transparent' : theme.colors.backgroundPage)};
+  background: ${({ theme, disabled, background }) =>
+    disabled ? 'transparent' : background || theme.colors.backgroundPage};
   border: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `1px solid ${theme.colors.borderPrimary}`)};
   border-radius: ${({ hideBorder, theme }) => (hideBorder ? 'none' : `${theme.radii.input}px`)};
 
@@ -163,11 +174,12 @@ export function TextInputBox(
     error?: boolean
     inputRef?: React.Ref<HTMLInputElement>
     row?: boolean
+    small?: boolean
   }
 ) {
-  const { error, disabled, action, symbol, inputRef, inputElement, row, ...inputProps } = props
+  const { error, disabled, action, symbol, inputRef, inputElement, row, small, ...inputProps } = props
   return (
-    <StyledInputBox hideBorder={!!row} alignItems="stretch" height="input" disabled={disabled}>
+    <StyledInputBox hideBorder={!!row} alignItems="stretch" height={small ? '28px' : 'input'} disabled={disabled}>
       {inputElement ?? <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />}
       {symbol && (
         <Flex alignSelf="center" pr={1}>
@@ -194,26 +206,101 @@ export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, .
   )
 }
 
-export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+export function SearchInput({
+  label,
+  secondaryLabel,
+  disabled,
+  errorMessage,
+  id,
+  dropdownOptions,
+  onOptionSelect,
+  onFocus,
+  onBlur,
+  ...inputProps
+}: SearchInputProps) {
   const defaultId = React.useId()
   id ??= defaultId
+  const [isDropdownOpen, setDropdownOpen] = React.useState(false)
+  const theme = useTheme()
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setDropdownOpen(true)
+    onFocus && onFocus(e)
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTimeout(() => setDropdownOpen(false), 200)
+    onBlur && onBlur(e)
+  }
+
+  const handleClick = () => {
+    setDropdownOpen(true)
+  }
+
+  const handleOptionClick = (option: DropdownOption) => {
+    onOptionSelect && onOptionSelect(option)
+    setDropdownOpen(false)
+    inputRef.current?.focus()
+  }
+
   return (
-    <InputUnit
-      id={id}
-      label={label}
-      secondaryLabel={secondaryLabel}
-      disabled={disabled}
-      errorMessage={errorMessage}
-      inputElement={
-        <TextInputBox
-          type="search"
-          disabled={disabled}
-          error={!!errorMessage}
-          symbol={<IconSearch size="iconSmall" color="textSecondary" />}
-          {...inputProps}
-        />
-      }
-    />
+    <div style={{ position: 'relative' }}>
+      <InputUnit
+        id={id}
+        label={label}
+        secondaryLabel={secondaryLabel}
+        disabled={disabled}
+        errorMessage={errorMessage}
+        inputElement={
+          <TextInputBox
+            inputRef={inputRef}
+            type="search"
+            disabled={disabled}
+            error={!!errorMessage}
+            symbol={<IconSearch size="iconSmall" color="textSecondary" />}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onClick={handleClick}
+            {...inputProps}
+          />
+        }
+      />
+      {dropdownOptions && isDropdownOpen && (
+        <ul
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            backgroundColor: theme.colors.backgroundPage,
+            border: `1px solid ${theme.colors.borderPrimary}`,
+            margin: 0,
+            padding: 0,
+            listStyle: 'none',
+            maxHeight: '150px',
+            overflowY: 'auto',
+            borderRadius: '8px',
+            marginTop: '4px',
+            boxShadow: '0px 4px 16px 0px rgba(0, 0, 0, 0.10)',
+          }}
+        >
+          {dropdownOptions.map((option, index) => (
+            <li
+              key={`${option.value}-${index}`}
+              onMouseDown={() => handleOptionClick(option)}
+              style={{
+                padding: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              {option.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 

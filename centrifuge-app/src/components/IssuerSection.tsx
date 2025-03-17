@@ -77,7 +77,7 @@ const StyledAnchorTextLink = styled(AnchorTextLink)`
 
 export function ReportDetails({ metadata }: IssuerSectionProps) {
   const pathname = useLocation().pathname
-  const report = metadata?.pool?.reports?.[0]
+  const report = metadata?.pool?.report
   const theme = useTheme()
 
   const reportLinks = [
@@ -135,22 +135,22 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
   const links = [
     {
       label: 'Website',
-      href: metadata?.pool?.links.website,
-      show: !!metadata?.pool?.links.website,
+      href: metadata?.pool?.links?.website,
+      show: !!metadata?.pool?.links?.website,
     },
     {
       label: 'Forum',
-      href: metadata?.pool?.links.forum,
-      show: !!metadata?.pool?.links.forum,
+      href: metadata?.pool?.links?.forum,
+      show: !!metadata?.pool?.links?.forum,
     },
     {
       label: 'Email',
-      href: `mailto:${metadata?.pool?.issuer.email}`,
-      show: !!metadata?.pool?.issuer.email,
+      href: `mailto:${metadata?.pool?.issuer?.email}`,
+      show: !!metadata?.pool?.issuer?.email,
     },
     {
       label: 'Executive summary',
-      show: !!metadata?.pool?.links.executiveSummary,
+      show: !!metadata?.pool?.links?.executiveSummary,
       onClick: () => setIsDialogOpen(true),
     },
   ]
@@ -198,7 +198,7 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
       </Grid>
       <ExecutiveSummaryDialog
         issuerName={metadata?.pool?.issuer.name ?? ''}
-        href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri ?? '')}
+        href={cent.metadata.parseMetadataUrl(metadata?.pool?.links?.executiveSummary?.uri ?? '')}
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
       />
@@ -282,14 +282,14 @@ export function RatingDetails({ metadata }: IssuerSectionProps) {
 }
 
 export const PoolAnalysis = ({ metadata, inverted }: IssuerSectionProps & { inverted?: boolean }) => {
-  const report = metadata?.pool?.reports?.[0]
+  const report = metadata?.pool?.report
   // Not sure why some pools have N/A, it should be empty but this is a fix for those pools in the meantime
   const isEmpty = report?.author.name === 'N/A'
 
   return report?.author?.name || report?.author?.title ? (
     isEmpty ? null : (
       <Stack gap={1}>
-        <StyledAnchorTextLink color={inverted ? 'textPrimary' : 'white'} href={report.uri}>
+        <StyledAnchorTextLink color={inverted ? 'textPrimary' : 'white'} href={report.url}>
           Pool analysis
         </StyledAnchorTextLink>
         <Stack gap={0}>

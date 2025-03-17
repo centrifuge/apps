@@ -1,5 +1,4 @@
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, Grid, IconButton, IconTrash, Select, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Grid, IconButton, IconTrash, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
 import { AddButton } from './PoolDetailsSection'
@@ -39,19 +38,26 @@ export const LabelWithDeleteButton = ({
   )
 }
 
-export const IssuerCategoriesSection = () => {
-  const form = useFormikContext<PoolMetadataInput>()
+export const IssuerCategoriesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
+  const form = useFormikContext<any>()
+  const categories = isUpdating ? form.values.pool.issuer.categories : form.values.issuerCategories
+  const formName = isUpdating ? 'pool.issuer.categories' : 'issuerCategories'
+
   return (
-    <Box mt={4} mb={3}>
-      <Text variant="heading2">Service providers</Text>
-      <StyledGrid gridTemplateColumns={['1fr', '1fr 1fr']} mt={3}>
-        <FieldArray name="issuerCategories">
+    <Stack mt={isUpdating ? 0 : 4}>
+      {isUpdating ? <></> : <Text variant="heading2">Service providers</Text>}
+      <StyledGrid
+        gridTemplateColumns={['1fr', '1fr 1fr']}
+        style={isUpdating ? { padding: 20 } : { padding: 40 }}
+        mt={isUpdating ? 0 : 3}
+      >
+        <FieldArray name={formName}>
           {({ push, remove }) => (
-            <>
-              {form.values.issuerCategories.map((category, index) => (
+            <Stack gap={3}>
+              {categories.map((category: { type: string; value: string; description: string }, index: number) => (
                 <>
-                  <Grid gridTemplateColumns={['1fr', category.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
-                    <Field name={`issuerCategories.${index}.type`}>
+                  <Grid gridTemplateColumns={['1fr', category?.type === 'other' ? '1fr 1fr' : '1fr']} gap={2}>
+                    <Field name={`${formName}.${index}.type`}>
                       {({ field, meta }: FieldProps) => (
                         <Select
                           name={field.name}
@@ -64,8 +70,8 @@ export const IssuerCategoriesSection = () => {
                         />
                       )}
                     </Field>
-                    {category.type === 'other' && (
-                      <Field name={`issuerCategories.${index}.description`}>
+                    {category?.type === 'other' && (
+                      <Field name={`${formName}.${index}.description`}>
                         {({ field, meta }: FieldProps) => (
                           <FieldWithErrorMessage
                             {...field}
@@ -79,14 +85,14 @@ export const IssuerCategoriesSection = () => {
                       </Field>
                     )}
                   </Grid>
-                  <Field name={`issuerCategories.${index}.value`}>
+                  <Field name={`${formName}.${index}.value`}>
                     {({ field, meta }: FieldProps) => (
                       <FieldWithErrorMessage
                         {...field}
                         label={
                           <LabelWithDeleteButton
                             onDelete={() => remove(index)}
-                            hideButton={form.values.issuerCategories.length === 1}
+                            hideButton={categories?.length === 1}
                             label="Name of provider"
                           />
                         }
@@ -103,10 +109,10 @@ export const IssuerCategoriesSection = () => {
               <Box gridColumn="span 2">
                 <AddButton onClick={() => push({ type: '', value: '' })} />
               </Box>
-            </>
+            </Stack>
           )}
         </FieldArray>
       </StyledGrid>
-    </Box>
+    </Stack>
   )
 }

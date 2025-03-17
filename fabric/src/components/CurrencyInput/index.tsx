@@ -11,6 +11,7 @@ export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement
     onSetMax?: () => void
     onChange?: (value: number | '') => void
     decimals?: number
+    small?: boolean
   }
 
 const StyledMaxButton = styled(Box)`
@@ -47,6 +48,7 @@ export function CurrencyInput({
   decimals = 8,
   onChange,
   onBlur,
+  small,
   ...inputProps
 }: CurrencyInputProps) {
   const defaultId = React.useId()
@@ -126,6 +128,7 @@ export function CurrencyInput({
             )
           }
           inputRef={ref}
+          small={small}
         />
       }
     />

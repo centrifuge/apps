@@ -124,7 +124,7 @@ const IssuerCreatePoolPage = () => {
       // Redirecting only when we find the newly created pool in the data from usePools
       // Otherwise the Issue Overview page will throw an error when it can't find the pool
       // It can take a second for the new data to come in after creating the pool
-      navigate(`/issuer/${poolId}`)
+      navigate(`/pools/${poolId}`)
     }
   }, [poolId, pools, navigate])
 
@@ -279,10 +279,14 @@ const IssuerCreatePoolPage = () => {
       forum: '',
       email: '',
       details: [],
-      reportAuthorName: '',
-      reportAuthorTitle: '',
-      reportAuthorAvatar: null,
-      reportUrl: '',
+      report: {
+        author: {
+          name: '',
+          title: '',
+          avatar: null,
+        },
+        url: '',
+      },
       assetOriginators: [''],
       adminMultisig: {
         signers: [substrate?.selectedAddress ?? ''],
@@ -316,23 +320,13 @@ const IssuerCreatePoolPage = () => {
         poolIcon: values.poolIcon,
         issuerLogo: values.issuerLogo,
         executiveSummary: values.executiveSummary,
-        authorAvatar: values.reportAuthorAvatar,
+        authorAvatar: values.report.author.avatar,
       }
 
       const pinnedFiles = await pinFiles(centrifuge, filesToPin)
       if (pinnedFiles.poolIcon) metadataValues.poolIcon = pinnedFiles.poolIcon as FileType
       if (pinnedFiles.issuerLogo) metadataValues.issuerLogo = pinnedFiles.issuerLogo as FileType
       if (pinnedFiles.executiveSummary) metadataValues.executiveSummary = pinnedFiles.executiveSummary
-
-      // Pool report
-      if (values.reportUrl) {
-        metadataValues.poolReport = {
-          authorAvatar: pinnedFiles.authorAvatar,
-          authorName: values.reportAuthorName,
-          authorTitle: values.reportAuthorTitle,
-          url: values.reportUrl,
-        }
-      }
 
       // Pool ratings
       if (values.poolRatings[0].agency === '') {

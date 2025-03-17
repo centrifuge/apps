@@ -224,7 +224,9 @@ export function FileUpload({
               {curFile && typeof curFile !== 'string' && curFile.name ? (
                 ''
               ) : (
-                <Text variant="body3">{fileTypeText}</Text>
+                <Text variant="body3" color="textSecondary">
+                  {fileTypeText}
+                </Text>
               )}
               <StyledTextInput
                 readOnly
@@ -241,6 +243,7 @@ export function FileUpload({
             disabled={disabled}
             tabIndex={-1}
             ref={inputRef}
+            accept={accept}
             {...inputProps}
           />
         </FileDragOverContainer>

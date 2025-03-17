@@ -32,6 +32,7 @@ export function getMetadataModule(inst: Centrifuge) {
   }
 
   function parseMetadataUrl(url: string) {
+    if (!url) return null
     try {
       let newUrl
 

@@ -16,6 +16,7 @@ export type CollapsibleProps = BoxProps & {
 export const CollapsibleChevron = styled(IconChevronDown)<{ open: boolean }>`
   transform: ${({ open }) => `rotate(${open ? -180 : 0}deg)`};
   transition: transform 0.25s;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `
 
 export function Collapsible({ open, children, ...boxProps }: CollapsibleProps) {
