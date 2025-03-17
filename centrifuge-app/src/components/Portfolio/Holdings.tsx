@@ -43,6 +43,23 @@ export type Holding = {
   hideCurrencyName?: boolean
 }
 
+const NetworkCell = ({ chainId }: { chainId: Holding['chainId'] }) => {
+  const location = useLocation()
+  const isPortfolioPage = location.pathname.includes('portfolio')
+  const id = Number(chainId) === 0 ? 'centrifuge' : chainId
+
+  return isPortfolioPage ? (
+    <NetworkIcon size="iconMedium" network={id || 'centrifuge'} />
+  ) : (
+    <Box display="flex">
+      <NetworkIcon size="iconSmall" network={id || 'centrifuge'} />
+      <Text style={{ marginLeft: 4 }}>
+        {(evmChains as any)[chainId as keyof typeof evmChains]?.name || 'Centrifuge'}
+      </Text>
+    </Box>
+  )
+}
+
 const columns: Column[] = [
   {
     align: 'left',
@@ -55,20 +72,7 @@ const columns: Column[] = [
   {
     align: 'center',
     header: 'Network',
-    cell: ({ chainId }: Holding) => {
-      const isPortfolioPage = window.location.hash.includes('portfolio')
-      const id = Number(chainId) === 0 ? 'centrifuge' : chainId
-      return isPortfolioPage ? (
-        <NetworkIcon size="iconMedium" network={id || 'centrifuge'} />
-      ) : (
-        <Box display="flex">
-          <NetworkIcon size="iconSmall" network={id || 'centrifuge'} />
-          <Text style={{ marginLeft: 4 }}>
-            {(evmChains as any)[chainId as keyof typeof evmChains]?.name || 'Centrifuge'}
-          </Text>
-        </Box>
-      )
-    },
+    cell: ({ chainId }: Holding) => <NetworkCell chainId={chainId} />,
   },
   {
     header: <SortableTableHeader label="Token price" />,
