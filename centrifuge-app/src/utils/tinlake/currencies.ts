@@ -17,4 +17,13 @@ export const currencies = {
     isPermissioned: false,
     displayName: 'wCFG',
   },
+  newCFG: {
+    decimals: 18,
+    name: 'New CFG',
+    symbol: 'newCFG',
+    key: 'newCFG',
+    isPoolCurrency: false,
+    isPermissioned: false,
+    displayName: 'newCFG',
+  },
 }

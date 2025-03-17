@@ -51,6 +51,7 @@
     "@polkadot/react-identicon": "~3.1.4",
     "@polkadot/types": "~12.1.1",
     "@subwallet/wallet-connect": "0.2.5",
+    "@supabase/supabase-js": "^2.49.1",
     "@types/bn.js": "^5",
     "@walletconnect/ethereum-provider": "^2.12.2",
     "@walletconnect/modal": "^2.6.2",

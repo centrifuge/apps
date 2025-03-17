@@ -6,6 +6,7 @@ import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { evmChains } from '../../../src/config'
+import { useTokenBalance } from '../../../src/pages/Portfolio/useTokenBalance'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
@@ -221,6 +222,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
   const portfolioTokens = usePortfolioTokens(centAddress)
   const currencies = usePoolCurrencies()
   const CFGPrice = useCFGTokenPrice()
+  const tokenBalances = useTokenBalance(address)
 
   const tokens: Holding[] = [
     ...portfolioTokens.map((token) => ({
@@ -259,6 +261,26 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
         connectedNetwork: wallet.connectedNetworkName,
       }
     }),
+    tokenBalances.data?.legacy && {
+      position: Dec(tokenBalances.data?.legacy?.balance || 0),
+      marketValue: Dec(tokenBalances.data?.legacy?.balance || 0).mul(Dec(CFGPrice ?? 0)),
+      tokenPrice: Dec(CFGPrice ?? 0),
+      trancheId: '',
+      poolId: '',
+      currency: tokenBalances.data?.legacy?.currency,
+      showActions: false,
+      connectedNetwork: wallet.connectedNetworkName,
+    },
+    tokenBalances.data?.new && {
+      position: Dec(tokenBalances.data?.new?.balance || 0),
+      marketValue: Dec(tokenBalances.data?.new?.balance || 0).mul(Dec(CFGPrice ?? 0)),
+      tokenPrice: Dec(CFGPrice ?? 0),
+      trancheId: '',
+      poolId: '',
+      currency: tokenBalances.data?.new?.currency,
+      showActions: false,
+      connectedNetwork: wallet.connectedNetworkName,
+    },
     ...(centBalances?.currencies
       ?.filter((currency) => currency.balance.gtn(0))
       .map((currency) => {

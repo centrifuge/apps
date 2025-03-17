@@ -137,7 +137,7 @@ export function useTinlakePools(suspense = false) {
     ['tinlakePools', !!ipfsPools],
     () => {
       if (ethConfig.network !== 'mainnet') {
-        return [] as any as { pools: TinlakePool[] }
+        return { pools: [] } as { pools: TinlakePool[] }
       }
 
       return getPools(ipfsPools!)
