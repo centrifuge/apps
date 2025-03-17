@@ -175,15 +175,30 @@ export function TextInputBox(
     inputRef?: React.Ref<HTMLInputElement>
     row?: boolean
     small?: boolean
+    secondaryValue?: string
   }
 ) {
-  const { error, disabled, action, symbol, inputRef, inputElement, row, small, ...inputProps } = props
+  const { error, disabled, action, symbol, inputRef, inputElement, row, small, secondaryValue, ...inputProps } = props
   return (
     <StyledInputBox hideBorder={!!row} alignItems="stretch" height={small ? '28px' : 'input'} disabled={disabled}>
       {inputElement ?? <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />}
       {symbol && (
         <Flex alignSelf="center" pr={1}>
           {symbol}
+        </Flex>
+      )}
+      {secondaryValue && (
+        <Flex
+          alignSelf="center"
+          pl={1}
+          pr={1}
+          alignItems="center"
+          borderTopRightRadius={6}
+          borderBottomRightRadius={6}
+          backgroundColor="backgroundSecondary"
+          height="100%"
+        >
+          {secondaryValue}
         </Flex>
       )}
       <Flex>{action}</Flex>
