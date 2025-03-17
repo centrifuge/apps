@@ -72,7 +72,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
         symbolName: tranche.currency.symbol,
         minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? null,
         minInvestment: Number(trancheMeta?.minInitialInvestment ?? 0),
-        apy: trancheMeta?.apy,
+        apy: trancheMeta?.apy || 'Target',
         apyPercentage: trancheMeta?.apyPercentage ?? null,
         interestRate:
           tranche.index !== 0 && tranche.interestRatePerSec
