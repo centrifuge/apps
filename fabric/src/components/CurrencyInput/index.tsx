@@ -12,6 +12,7 @@ export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement
     onChange?: (value: number | '') => void
     decimals?: number
     small?: boolean
+    secondaryValue?: string
   }
 
 const StyledMaxButton = styled(Box)`
@@ -49,6 +50,7 @@ export function CurrencyInput({
   onChange,
   onBlur,
   small,
+  secondaryValue,
   ...inputProps
 }: CurrencyInputProps) {
   const defaultId = React.useId()
@@ -120,6 +122,7 @@ export function CurrencyInput({
           }}
           value={internalValue}
           symbol={currency}
+          secondaryValue={secondaryValue}
           action={
             onSetMax && (
               <InputAction aria-label="Set max amount" onClick={onSetMax} disabled={disabled}>
