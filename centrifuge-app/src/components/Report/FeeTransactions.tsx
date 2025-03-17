@@ -132,7 +132,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
 
   return data.length > 0 ? (
     <Box paddingX={2}>
-      <DataTable data={data} columns={columns} hoverable scrollable />
+      <DataTable data={data} columns={columns} hoverable scrollable defaultSortKey="value[0]" defaultSortOrder="desc" />
     </Box>
   ) : (
     <UserFeedback reportType="Fee transactions" />
