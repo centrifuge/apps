@@ -29,7 +29,26 @@ function MultisigApproval() {
     { enabled: !!multisig && !!hash, suspense: true }
   )
 
-  if (!multisig || !hash || !pendingMultisig) throw new Error('Not enough data')
+  if (!multisig)
+    return (
+      <PageSection>
+        <Text variant="heading2">Multisig not found</Text>
+      </PageSection>
+    )
+
+  if (!pendingMultisig)
+    return (
+      <PageSection>
+        <Text variant="heading2">No pending multisig transaction</Text>
+      </PageSection>
+    )
+
+  if (!hash)
+    return (
+      <PageSection>
+        <Text variant="heading2">Hash not found</Text>
+      </PageSection>
+    )
 
   const {
     approveOrReject,

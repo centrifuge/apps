@@ -1,19 +1,22 @@
-import { ComputedMultisig, computeMultisig, Multisig, PendingMultisigData } from '@centrifuge/centrifuge-js'
+import {
+  ComputedMultisig,
+  computeMultisig,
+  Multisig,
+  PendingMultisigData,
+  Pool,
+  PoolMetadata,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Dialog, Divider, Stack, Text, TextAreaInput } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useAddress } from '../../utils/useAddress'
 import { useSuitableAccounts } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
 
-export function PendingMultisigs({ poolId }: { poolId: string }) {
+export function PendingMultisigs({ pool }: { pool: Pool & { meta: PoolMetadata } }) {
   const [multisigDialogOpen, setMultisigDialogOpen] = React.useState(false)
-  const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
 
-  const multisig = metadata?.adminMultisig && computeMultisig(metadata.adminMultisig)
-  const multiAddress = multisig?.address
-  const [account] = useSuitableAccounts({ actingAddress: [multiAddress || ''] })
+  const multisig = pool.meta?.adminMultisig && computeMultisig(pool.meta.adminMultisig)
+  const multiAddress = multisig?.address || ''
 
   const [pendingMultisigs] = useCentrifugeQuery(
     ['pendingMultisig', multiAddress],
@@ -25,9 +28,14 @@ export function PendingMultisigs({ poolId }: { poolId: string }) {
 
   return (
     <>
-      {account && multisig && pendingMultisigs && pendingMultisigs?.length > 0 && (
+      {multisig && pendingMultisigs && pendingMultisigs?.length > 0 && (
         <>
-          <MultisigDialog open={multisigDialogOpen} onClose={() => setMultisigDialogOpen(false)} multisig={multisig} />
+          <MultisigDialog
+            open={multisigDialogOpen}
+            onClose={() => setMultisigDialogOpen(false)}
+            multisig={multisig}
+            multiAddress={multiAddress}
+          />
           <Stack as={Card} p={2} gap={2}>
             <Text>
               {pendingMultisigs.length} pending multisig approval{pendingMultisigs.length > 0 && 's'}
@@ -46,10 +54,12 @@ function MultisigDialog({
   open,
   onClose,
   multisig,
+  multiAddress,
 }: {
   open: boolean
   onClose: () => void
   multisig: ComputedMultisig
+  multiAddress: string
 }) {
   const [pendingMultisigs] = useCentrifugeQuery(['pendingMultisig', multisig.address], (cent) =>
     cent.multisig.getPendingTransactions([multisig.address])
@@ -61,7 +71,7 @@ function MultisigDialog({
           {pendingMultisigs?.map((data, i) => (
             <>
               {i > 0 && <Divider />}
-              <PendingMultisig data={data} multisig={multisig} />
+              <PendingMultisig data={data} multisig={multisig} multiAddress={multiAddress} />
             </>
           ))}
         </>
@@ -74,10 +84,12 @@ export function PendingMultisig({
   data,
   multisig,
   possibleCallData,
+  multiAddress,
 }: {
   data: PendingMultisigData
   multisig: Multisig
   possibleCallData?: string
+  multiAddress: string
 }) {
   const {
     approveOrReject,
@@ -93,6 +105,7 @@ export function PendingMultisig({
     multisig,
     possibleCallData,
   })
+  const [account] = useSuitableAccounts({ actingAddress: [multiAddress || ''] })
 
   return (
     <Stack gap={2} alignItems="flex-start">
@@ -128,7 +141,7 @@ export function PendingMultisig({
               </Box>
             </details>
           )}
-          <Button disabled={transactionIsPending} onClick={approveOrReject}>
+          <Button disabled={transactionIsPending || !account} onClick={approveOrReject}>
             Approve
           </Button>
         </>
