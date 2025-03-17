@@ -1,5 +1,5 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { useWallet } from '@centrifuge/centrifuge-react'
+import { useAddress, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Grid, IconWallet, Select, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -36,8 +36,7 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  // For testing only - add useAddress() before merging to main
-  const address = '0x30d3bbae8623d0e9c0db5c27b82dcda39de40997000000000000000145564d00'
+  const address = useAddress()
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
 
