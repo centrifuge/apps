@@ -70,7 +70,7 @@ export function TransferTokensDrawer({ onClose, isOpen }: TransferTokensProps) {
 function TransferTokensDrawerInner() {
   const address = useAddress()
   const consts = useCentrifugeConsts()
-  const tokens = useHoldings(address)
+  const tokens = useHoldings(address, useWallet().evm.chainId)
   const isPortfolioPage = useMatch('/portfolio')
 
   const { search } = useLocation()
