@@ -66,9 +66,10 @@ export const PoolRatingsSection = ({ isUpdating }: { isUpdating?: boolean }) => 
       {isUpdating ? <></> : <Text variant="heading2">Pool rating</Text>}
       <StyledGrid
         gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']}
-        mt={isUpdating ? 0 : 3}
-        px={isUpdating ? 0 : 5}
-        py={isUpdating ? 0 : 5}
+        mt={isUpdating ? '0 !important' : 3}
+        px={isUpdating ? '16px !important' : 5}
+        py={isUpdating ? '24px !important' : 5}
+        mb={isUpdating ? '24px !important' : 3}
       >
         <FieldArray name={formName}>
           {({ push, remove }) => (
