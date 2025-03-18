@@ -1,6 +1,6 @@
 import { CurrencyBalance, Perquintill, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, Grid, IconMoreVertical, Menu, MenuItem, Popover, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
@@ -40,6 +40,24 @@ export type Holding = {
   unrealizedProfit?: CurrencyBalance
   yieldSinceInception?: Perquintill | null
   connectedNetwork?: any
+  hideCurrencyName?: boolean
+}
+
+const NetworkCell = ({ chainId }: { chainId: Holding['chainId'] }) => {
+  const location = useLocation()
+  const isPortfolioPage = location.pathname.includes('portfolio')
+  const id = Number(chainId) === 0 ? 'centrifuge' : chainId
+
+  return isPortfolioPage ? (
+    <NetworkIcon size="iconMedium" network={id || 'centrifuge'} />
+  ) : (
+    <Box display="flex">
+      <NetworkIcon size="iconSmall" network={id || 'centrifuge'} />
+      <Text style={{ marginLeft: 4 }}>
+        {(evmChains as any)[chainId as keyof typeof evmChains]?.name || 'Centrifuge'}
+      </Text>
+    </Box>
+  )
 }
 
 const columns: Column[] = [
@@ -52,17 +70,9 @@ const columns: Column[] = [
     width: '300px',
   },
   {
-    align: 'left',
+    align: 'center',
     header: 'Network',
-    cell: ({ chainId }: Holding) => {
-      if (!chainId) return
-      return (
-        <Box display={'flex'}>
-          <NetworkIcon size="iconSmall" network={chainId || 'centrifuge'} />
-          <Text style={{ marginLeft: 4 }}> {(evmChains as any)[chainId]?.name || 'Centrifuge'}</Text>
-        </Box>
-      )
-    },
+    cell: ({ chainId }: Holding) => <NetworkCell chainId={chainId} />,
   },
   {
     header: <SortableTableHeader label="Token price" />,
@@ -74,6 +84,7 @@ const columns: Column[] = [
       )
     },
     align: 'left',
+    sortKey: 'tokenPrice',
   },
   {
     header: <SortableTableHeader label="Position" />,
@@ -132,28 +143,63 @@ const columns: Column[] = [
         <Grid gap={1} justifySelf="end">
           {showActions ? (
             trancheId ? (
-              <Shelf>
-                <RouterLinkButton to={`?receive=${poolId}.${trancheId}`} small variant="tertiary" icon={IconDownload}>
-                  Receive
-                </RouterLinkButton>
-                <RouterLinkButton to={`?send=${poolId}.${trancheId}`} small variant="tertiary" icon={IconSend}>
-                  Send
-                </RouterLinkButton>
-                <RouterLinkButton to={`?redeem=${poolId}.${trancheId}`} small variant="tertiary" icon={IconMinus}>
-                  Redeem
-                </RouterLinkButton>
-                <RouterLinkButton to={`?invest=${poolId}.${trancheId}`} small variant="tertiary" icon={IconPlus}>
+              <Shelf gap={1}>
+                <RouterLinkButton to={`?invest=${poolId}.${trancheId}`} small variant="primary">
                   Invest
                 </RouterLinkButton>
+                <RouterLinkButton to={`?redeem=${poolId}.${trancheId}`} small variant="secondary">
+                  Redeem
+                </RouterLinkButton>
+                <Popover
+                  renderTrigger={(props, ref) => (
+                    <Box ref={ref}>
+                      <Box
+                        border="none"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        backgroundColor="transparent"
+                        as="button"
+                        style={{
+                          cursor: 'pointer',
+                        }}
+                        {...props}
+                      >
+                        <IconMoreVertical size="iconSmall" />
+                      </Box>
+                    </Box>
+                  )}
+                  renderContent={(props, ref, state) => (
+                    <Box ref={ref} {...props} width="200px">
+                      <Menu backgroundColor="white">
+                        <MenuItem
+                          label="Receive"
+                          onClick={() => {
+                            window.location.href = `/#/portfolio?receive=${currency?.symbol}`
+                            state.close()
+                          }}
+                        />
+                        <MenuItem
+                          label="Send"
+                          onClick={() => {
+                            window.location.href = `/#/portfolio?send=${currency?.symbol}`
+                            state.close()
+                          }}
+                        />
+                      </Menu>
+                    </Box>
+                  )}
+                />
               </Shelf>
             ) : connectedNetwork === 'Centrifuge' ? (
-              <Shelf>
-                <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
-                  Receive
-                </RouterLinkButton>
-                <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
+              <Shelf gap={1}>
+                <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="primary">
                   Send
                 </RouterLinkButton>
+                <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="secondary">
+                  Receive
+                </RouterLinkButton>
+                <Box width="25px" />
               </Shelf>
             ) : null
           ) : null}
@@ -295,7 +341,17 @@ export function Holdings({
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => navigate(pathname, { replace: true })}
       />
-      <DataTable hideHeader columns={columns} data={tokens} defaultSortKey="position" hideBorder />
+      <Box mt={2} style={{ height: tokens.length > 10 ? '200px' : 'auto', overflowY: 'auto' }}>
+        <DataTable
+          hideHeader
+          columns={columns}
+          data={tokens}
+          defaultSortKey="position"
+          hideBorder
+          scrollable={tokens.length > 10}
+        />
+      </Box>
+
       <Box borderBottom={`1px solid ${theme.colors.backgroundTertiary}`} />
     </Box>
   ) : (
@@ -307,7 +363,7 @@ export function Holdings({
   )
 }
 
-const TokenWithIcon = ({ poolId, currency }: Holding) => {
+export const TokenWithIcon = ({ poolId, currency, hideCurrencyName = false }: Holding) => {
   const pool = usePool(poolId, false)
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
@@ -340,9 +396,11 @@ const TokenWithIcon = ({ poolId, currency }: Holding) => {
         )}
       </Eththumbnail>
 
-      <Text textOverflow="ellipsis" variant="body3">
-        {currency?.name}
-      </Text>
+      {!hideCurrencyName && (
+        <Text textOverflow="ellipsis" variant="body3">
+          {currency?.name}
+        </Text>
+      )}
     </Grid>
   )
 }

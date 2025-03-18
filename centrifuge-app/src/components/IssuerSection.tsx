@@ -94,37 +94,38 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
     },
   ]
   return (
-    <>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Text color="white" variant="heading4">
-          Reports
-        </Text>
-        <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
-      </Box>
+    <Stack display="flex" flexDirection="column" gap={2}>
+      <Box flex={1} width="100%">
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Text color="white" variant="heading4">
+            Reports
+          </Text>
+          <StyledRouterTextLink to={`${pathname}/reporting`}>View all</StyledRouterTextLink>
+        </Box>
 
-      <Box marginY={2} backgroundColor={SUBTLE_GRAY} borderRadius={10}>
-        {reportLinks.map((link, i) => (
-          <ButtonSections to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
-            <StyledBox
-              borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box display="flex" alignItems="center">
-                {link.icon}
-                <Text color="white" style={{ marginLeft: 8 }}>
-                  {link.label}
-                </Text>
-              </Box>
-              <IconChevronRight color="white" />
-            </StyledBox>
-          </ButtonSections>
-        ))}
+        <Box marginY={2} backgroundColor={SUBTLE_GRAY} borderRadius={10}>
+          {reportLinks.map((link, i) => (
+            <ButtonSections to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
+              <StyledBox
+                borderBottom={i === reportLinks.length - 1 ? null : `2px solid ${SUBTLE_GRAY}`}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box display="flex" alignItems="center">
+                  {link.icon}
+                  <Text color="white" style={{ marginLeft: 8 }}>
+                    {link.label}
+                  </Text>
+                </Box>
+                <IconChevronRight color="white" />
+              </StyledBox>
+            </ButtonSections>
+          ))}
+        </Box>
       </Box>
-
       {report && <PoolAnalysis metadata={metadata} />}
-    </>
+    </Stack>
   )
 }
 
