@@ -1,18 +1,19 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { useAddress, useWallet } from '@centrifuge/centrifuge-react'
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Grid, IconWallet, Select, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { AssetSummary } from '../../../src/components/AssetSummary'
-import { evmChains } from '../../../src/config'
-import { useTransactionsByAddress } from '../../../src/utils/usePools'
+import { AssetSummary } from '../../components/AssetSummary'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
+import { evmChains } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
+import { useAddress } from '../../utils/useAddress'
+import { useTransactionsByAddress } from '../../utils/usePools'
 import { TransactionHistory } from './TransactionHistory'
 
 const StyledGrid = styled(Grid)`
@@ -39,7 +40,6 @@ function Portfolio() {
   const address = useAddress()
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
-
   return (
     <Box mb={2}>
       <LayoutSection alignItems="flex-start">
@@ -64,9 +64,9 @@ function Portfolio() {
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
   const theme = useTheme()
-  const { data: transactions } = useTransactionsByAddress(address)
-  const tokens = useHoldings(address, chainId)
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
+  const { data: transactions } = useTransactionsByAddress(centAddress)
+  const tokens = useHoldings(address, chainId)
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
