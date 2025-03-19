@@ -1,8 +1,9 @@
-import { CurrencyBalance, Token } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Button, Divider, Grid, IconSettings, IconUsers, Text } from '@centrifuge/fabric'
+import { computeMultisig, CurrencyBalance, Token } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import { Box, Button, Divider, Grid, IconSettings, IconUsers, IconWallet, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMemo, useState } from 'react'
+import { combineLatest, map, of, take } from 'rxjs'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
@@ -10,6 +11,7 @@ import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { DataTable, SortableTableHeader } from '../../DataTable'
 import { calculateApyPerToken } from '../utils'
 import { AccessDrawer } from './AccessDrawer'
+import { PendingMultisigDrawer } from './PendingMultisigDrawer'
 import { PoolConfigurationDrawer } from './PoolConfigurationDrawer'
 
 export type Row = {
@@ -25,6 +27,7 @@ export type Row = {
 export function DashboardTable() {
   const [open, setOpen] = useState(false)
   const [accessDrawerOpen, setAccessDrawerOpen] = useState(false)
+  const [pendingMultisigsDrawerOpen, setPendingMultisigsDrawerOpen] = useState(false)
   const theme = useTheme()
   const cent = useCentrifuge()
   const { selectedPoolsWithMetadata } = useSelectedPools()
@@ -83,14 +86,40 @@ export function DashboardTable() {
     },
   ]
 
+  const [pendingMultisigs] = useCentrifugeQuery(
+    ['pendingMultisig', selectedPoolsWithMetadata],
+    () => {
+      const poolsWithMultisig = selectedPoolsWithMetadata?.filter((pool) => pool.meta?.adminMultisig).slice(0, 4) || []
+
+      if (!poolsWithMultisig.length) {
+        return of([])
+      }
+
+      const queries = poolsWithMultisig.map((pool) => {
+        const multisig = pool.meta.adminMultisig && computeMultisig(pool.meta.adminMultisig)
+        const multiAddress = multisig?.address
+        return multiAddress ? cent.multisig.getPendingTransactions([multiAddress]).pipe(take(1)) : of([])
+      })
+
+      return combineLatest(queries).pipe(map((results) => results.flat()))
+    },
+    { enabled: !!selectedPoolsWithMetadata }
+  )
+
   if (!selectedPoolsWithMetadata.length) return <Text variant="heading4">No data available</Text>
 
   return (
     <Box>
       <Grid display="flex" justifyContent="flex-end" gap={2} mb={2}>
+        {pendingMultisigs && pendingMultisigs.length > 0 && (
+          <Button variant="primary" small icon={IconWallet} onClick={() => setPendingMultisigsDrawerOpen(true)}>
+            Pending multisigs`
+          </Button>
+        )}
         <Button variant="inverted" small icon={IconUsers} onClick={() => setAccessDrawerOpen(true)}>
           Access
         </Button>
+
         <Button variant="inverted" small icon={IconSettings} onClick={() => setOpen(true)}>
           Configuration
         </Button>
@@ -107,6 +136,7 @@ export function DashboardTable() {
       <Divider color={theme.colors.backgroundSecondary} />
       <PoolConfigurationDrawer open={open} setOpen={setOpen} />
       <AccessDrawer isOpen={accessDrawerOpen} onClose={() => setAccessDrawerOpen(false)} />
+      <PendingMultisigDrawer open={pendingMultisigsDrawerOpen} onClose={() => setPendingMultisigsDrawerOpen(false)} />
     </Box>
   )
 }

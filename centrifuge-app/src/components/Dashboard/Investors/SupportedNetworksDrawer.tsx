@@ -44,8 +44,8 @@ interface NetworkFormValues {
 export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const domains = useDomainRouters()
   const getNetworkName = useGetNetworkName()
-  const { selectedPools } = useSelectedPools(true)
-  const [selectedPool, setSelectedPool] = useState<string | null>(selectedPools?.[0] ?? null)
+  const { selectedPoolIds } = useSelectedPools(true)
+  const [selectedPool, setSelectedPool] = useState<string | null>(selectedPoolIds?.[0] ?? null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const admin = usePoolAdmin(selectedPool ?? '')
@@ -110,7 +110,6 @@ export function SupportedNetworksDrawer({ isOpen, onClose }: { isOpen: boolean; 
               <Box display="flex" flexDirection="column" height="75vh">
                 <Box flex={1} overflow="auto">
                   {domains
-                    ?.slice(0, 2)
                     // filters out goerli networks on demo, they are not supported by the providers anymore
                     ?.filter((domain) => getNetworkName(domain.chainId || 'centrifuge') !== 'Unknown')
                     .map((domain, index) => (

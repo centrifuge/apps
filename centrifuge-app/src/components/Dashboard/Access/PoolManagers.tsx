@@ -6,7 +6,7 @@ import { combineLatest, map, of } from 'rxjs'
 import { diffPermissions } from '../../../pages/IssuerPool/Configuration/Admins'
 import { usePoolAccess } from '../../../utils/usePermissions'
 import { MultisigForm } from '../../MultisigForm'
-import type { FormHandle } from '../AccessDrawer'
+import { FormHandle } from '../LandingPage/AccessDrawer'
 
 export type PoolManagersFormValues = {
   adminMultisigEnabled: boolean
