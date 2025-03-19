@@ -122,7 +122,7 @@ export const WalletContainer = styled(Stack)`
   right: 0;
   z-index: ${({ theme }) => theme.zIndices.header};
   grid-area: wallet;
-  margin-right: 10px;
+  margin-right: 0px;
   pointer-events: none;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
@@ -147,7 +147,7 @@ export const WalletInner = styled(Stack)`
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: flex-end;
     height: 50px;
-    margin-right: 20px;
+    margin-right: 16px;
     margin-top: 15px;
   }
 `
