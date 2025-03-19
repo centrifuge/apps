@@ -1,13 +1,12 @@
-import { ConnectionGuard, useAddress } from '@centrifuge/centrifuge-react'
+import { ConnectionGuard, useAddress, useBalances } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, IconClock, IconInfo, Text, TextInput } from '@centrifuge/fabric'
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { Tooltips } from '../../../src/components/Tooltips'
-import { Dec, Decimal } from '../../utils/Decimal'
+import { Dec } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
-import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { TooltipText } from './CFGTokenMigration'
 import MigrationSuccessPage from './MigrationSuccessPage'
@@ -39,14 +38,11 @@ const Header = () => {
 
 export default function CFGTokenMigrationCent() {
   const theme = useTheme()
-  const address = useAddress('evm')
-  const { data: balances } = useTinlakeBalances(address)
-  const wcfg = balances?.currencies.find((balance) => balance.currency.symbol === 'wCFG')
-  const wcfgBalance = wcfg?.balance || Dec(0)
+  const address = useAddress()!
+  const balances = useBalances(address)
+  const balance = balances?.native.balance.toDecimal() || Dec(0)
   const CFGPrice = useCFGTokenPrice()
-  const convertedWcfgBalance =
-    wcfgBalance instanceof Decimal ? wcfgBalance || Dec(0) : wcfgBalance.toDecimal() || Dec(0)
-  const wcfgValue = convertedWcfgBalance.mul(Dec(CFGPrice || 0))
+  const wcfgValue = balance ? balance.mul(Dec(CFGPrice || 0)) : Dec(0)
 
   const [isMigrated, setIsMigrated] = useState<boolean>(false)
   const [addressToVerify, setAddressToVerify] = useState<string>('')
@@ -94,12 +90,7 @@ export default function CFGTokenMigrationCent() {
         flexDirection="column"
         gap={2}
       >
-        <CurrencyInput
-          value={convertedWcfgBalance.toNumber()}
-          currency="CFG"
-          label="Amount of CFG to migrate"
-          disabled
-        />
+        <CurrencyInput value={balance?.toNumber()} currency="CFG" label="Amount of CFG to migrate" disabled />
         <TextInput value={formattedAddress} label="Ethereum wallet address" disabled />
       </Grid>
     )
@@ -139,7 +130,7 @@ export default function CFGTokenMigrationCent() {
                     <Text variant="body3" color="textSecondary">
                       Position
                     </Text>
-                    <Text variant="heading3">{formatBalance(wcfgBalance, '', 2)} WCFG (Legacy)</Text>
+                    <Text variant="heading3">{formatBalance(balance?.toNumber(), '', 2)} WCFG (Legacy)</Text>
                   </Box>
                   <Box>
                     <Text variant="body3" color="textSecondary">
@@ -157,21 +148,16 @@ export default function CFGTokenMigrationCent() {
                 <Box border={`1px solid ${theme.colors.borderSecondary}`} borderRadius={8} p={2} mb={3}>
                   <Box display="flex" flexDirection="column">
                     <CurrencyInput
-                      value={wcfgBalance.toNumber()}
+                      value={balance?.toNumber()}
                       currency="WCFG"
                       label="Amount of CFG (Legacy) to migrate"
                       disabled
                     />
                     <Text style={{ marginTop: 8, alignSelf: 'flex-end' }} variant="body2">
-                      Wallet balance: {formatBalance(wcfgBalance)} WCFG
+                      Wallet balance: {formatBalance(balance, '', 2)} WCFG
                     </Text>
                   </Box>
-                  <CurrencyInput
-                    value={convertedWcfgBalance.toNumber()}
-                    currency="CFG"
-                    label="Amount of new CFG tokens"
-                    disabled
-                  />
+                  <CurrencyInput value={balance?.toNumber()} currency="CFG" label="Amount of new CFG tokens" disabled />
                   <Grid gridTemplateColumns="1fr 1fr" alignItems="center" mt={2} gap={2} mb={2}>
                     <TextInput
                       value={formattedAddress}
@@ -271,9 +257,7 @@ export default function CFGTokenMigrationCent() {
               </Box>
             )}
 
-            {step === 3 && (
-              <MigrationSuccessPage title="CFG" currencyName="Legacy CFG" balance={convertedWcfgBalance.toNumber()} />
-            )}
+            {step === 3 && <MigrationSuccessPage title="CFG" currencyName="Legacy CFG" balance={0} />}
           </Box>
         </Box>
       </Box>
