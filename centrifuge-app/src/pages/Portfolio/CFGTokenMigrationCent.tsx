@@ -3,6 +3,7 @@ import { Box, Button, CurrencyInput, Divider, Grid, IconClock, IconInfo, Text, T
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { Dec } from '../../../src/utils/Decimal'
@@ -37,6 +38,7 @@ const Header = () => {
 }
 
 export default function CFGTokenMigrationCent() {
+  const debug = useDebugFlags()
   const theme = useTheme()
   const address = useAddress()!
   const balances = useBalances(address)
@@ -94,6 +96,10 @@ export default function CFGTokenMigrationCent() {
         <TextInput value={formattedAddress} label="Ethereum wallet address" disabled />
       </Grid>
     )
+  }
+
+  if (!debug.showCFGTokenMigration) {
+    return null
   }
 
   return (
