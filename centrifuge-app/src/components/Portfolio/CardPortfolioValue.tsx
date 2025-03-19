@@ -1,6 +1,6 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { formatBalance } from '@centrifuge/centrifuge-react'
-import { Box, Grid, Select, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Grid, Select, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -54,7 +54,7 @@ export function CardPortfolioValue({
         <Box>
           <Text variant="heading4">{title || 'Overview'}</Text>
           <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Grid gridTemplateColumns="1fr 1fr" gap={4}>
+            <Grid gridTemplateColumns="1fr 1fr" gap={8}>
               <Box alignContent="center" mb={2} mt={3}>
                 <Box display="flex" alignItems="center">
                   <Box backgroundColor={colors.textGold} height={10} width={10} borderRadius="50%" marginRight={1} />
@@ -67,8 +67,8 @@ export function CardPortfolioValue({
                 </TextWithPlaceholder>
               </Box>
               {isPortfolioPage && (
-                <Box alignContent="center" mb={2} mt={3}>
-                  <Box display="flex" alignItems="center">
+                <Box mb={2} mt={3}>
+                  <Shelf alignItems="center">
                     <Box
                       backgroundColor={colors.textPrimary}
                       height={10}
@@ -79,7 +79,7 @@ export function CardPortfolioValue({
                     <Text variant="body3" color="textSecondary" style={{ fontWeight: 500 }}>
                       Total P&L
                     </Text>
-                  </Box>
+                  </Shelf>
                   <TextWithPlaceholder isLoading={!totalPL} variant="heading1">
                     {formatBalance(totalPL || 0)}
                   </TextWithPlaceholder>

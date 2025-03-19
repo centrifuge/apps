@@ -67,7 +67,7 @@ const columns: Column[] = [
     cell: (token: Holding) => {
       return <TokenWithIcon {...token} />
     },
-    width: '300px',
+    width: '150px',
   },
   {
     align: 'center',
@@ -398,7 +398,7 @@ export const TokenWithIcon = ({ poolId, currency, hideCurrencyName = false }: Ho
 
       {!hideCurrencyName && (
         <Text textOverflow="ellipsis" variant="body3">
-          {currency?.name}
+          {currency?.displayName}
         </Text>
       )}
     </Grid>
