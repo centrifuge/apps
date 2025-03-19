@@ -112,7 +112,8 @@ function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<New
     evm: { chains },
   } = useWallet()
   const { data: domains } = useActiveDomains(poolId)
-  const deployedLpChains = domains?.map((d) => d.chainId) ?? []
+  const deployedLpChains = domains?.filter((d) => d.isActive).map((d) => d.chainId) ?? []
+
   return (
     <Stack gap={2} backgroundColor="backgroundSecondary" borderRadius="10px" padding={2}>
       <AddressInput
@@ -134,7 +135,7 @@ function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<New
               value: String(chainId),
               label: getChainInfo(chains, chainId).name,
             }))
-            .filter((option) => option.label === ''),
+            .filter((option) => option.label !== ''),
         ]}
         onChange={(event) => formik.setFieldValue('network', event.target.value)}
       />

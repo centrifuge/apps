@@ -3,8 +3,8 @@ import { Box, Grid, IconHelpCircle, RadioButton, Select, Text, TextInput } from 
 import { Field, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
-import { FieldWithErrorMessage } from '../../../src/components/FieldWithErrorMessage'
-import { Tooltips, tooltipText } from '../../../src/components/Tooltips'
+import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
+import { Tooltips, tooltipText } from '../../components/Tooltips'
 import { config } from '../../config'
 import { TranchesSection } from './TranchesSection'
 import { createEmptyTranche } from './types'
@@ -65,6 +65,7 @@ export const CheckboxOption = ({
   const theme = useTheme()
 
   return (
+    // @ts-expect-error
     <Box
       backgroundColor="white"
       padding="12px 14px"
@@ -79,7 +80,7 @@ export const CheckboxOption = ({
       {...styles}
     >
       {onChange ? (
-        <RadioButton label={label} disabled={disabled} onChange={onChange} checked={isChecked} />
+        <RadioButton label={label} disabled={disabled} onChange={onChange} checked={isChecked} name={name} />
       ) : (
         <Field name={name} validate={validate[name as keyof typeof validate]}>
           {({ field, form, meta }: FieldProps) => (
@@ -89,7 +90,9 @@ export const CheckboxOption = ({
               label={label}
               value={value?.toString() || ''}
               disabled={disabled}
-              onChange={(val) => form.setFieldValue(name, val.target.checked ? value : null)}
+              onChange={(val) => {
+                form.setFieldValue(name, val.target.checked ? value : null)
+              }}
               onBlur={field.onBlur}
               checked={form.values[name] === value}
             />
@@ -175,9 +178,10 @@ export const PoolStructureSection = () => {
           {Array.from({ length: 3 }).map((_, index) => {
             return (
               <CheckboxOption
+                key={index}
                 name="tranches"
                 label={tranches[index].label}
-                id={tranches[index].id}
+                id={tranches[index].id as keyof typeof tooltipText}
                 icon={<IconHelpCircle size="iconSmall" color={theme.colors.textSecondary} />}
                 onChange={() => handleTrancheCheckboxChange(index)}
                 isChecked={values.tranches.length === tranches[index].length}

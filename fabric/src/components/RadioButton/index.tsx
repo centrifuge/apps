@@ -30,11 +30,11 @@ export const RadioButton = ({
   label: string
   value?: string | number
   disabled?: boolean
-  onChange?: () => void
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   checked?: boolean
   id?: string
   border?: boolean
-}) => {
+} & RadioButtonProps) => {
   const theme = useTheme()
 
   return (

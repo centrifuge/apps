@@ -67,7 +67,13 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
     <Box mt={isUpdating ? 0 : 4} mb={3}>
       {isUpdating ? <></> : <Text>Tranches</Text>}
       {tranches.map((_, index) => (
-        <StyledGrid key={index} mt={isUpdating ? 0 : 3} style={{ padding: isUpdating ? 20 : 40 }}>
+        <StyledGrid
+          key={index}
+          mt={isUpdating ? 0 : 3}
+          px={isUpdating ? '16px !important' : 5}
+          py={isUpdating ? '24px !important' : 5}
+          mb={isUpdating ? '24px !important' : 3}
+        >
           <Text variant="heading3">Tranche {index + 1}</Text>
           <Line />
           <Grid gridTemplateColumns={isUpdating ? ['1fr'] : ['1fr', '1fr 1fr']} gap={3}>
@@ -148,7 +154,7 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
                         placeholder="0.00"
                         symbol="%"
                         name={`tranches.${index}.apyPercentage`}
-                        validate={validate.apyPercentage}
+                        validate={isUpdating ? undefined : validate.apyPercentage}
                       />
                     </Box>
                   </Grid>
@@ -161,7 +167,7 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
                     placeholder="0.00"
                     symbol="%"
                     name={`tranches.${index}.minRiskBuffer`}
-                    validate={validate.minRiskBuffer}
+                    validate={isUpdating ? undefined : validate.minRiskBuffer}
                   />
                 )}
               </Box>

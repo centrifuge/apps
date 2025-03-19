@@ -49,9 +49,10 @@ export const ServiceProvidersSection = ({ isUpdating }: { isUpdating?: boolean }
         backgroundColor="backgroundSecondary"
         border="1px solid borderPrimary"
         borderRadius="8px"
-        px={isUpdating ? 2 : 5}
-        py={isUpdating ? 3 : 5}
-        mt={isUpdating ? 0 : 3}
+        px={isUpdating ? '16px !important' : 5}
+        py={isUpdating ? '24px !important' : 5}
+        mt={isUpdating ? '0 !important' : 3}
+        mb={isUpdating ? '24px !important' : 3}
       >
         <FieldArray name={formName}>
           {({ push, remove }) => (
