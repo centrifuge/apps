@@ -49,6 +49,7 @@ export type Key =
   | 'showTokenYields'
   | 'showOracleTx'
   | 'showGmp'
+  | 'showCFGTokenMigration'
 
 export const flagsConfig = {
   address: {
@@ -131,6 +132,10 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showGmp: {
+    default: false,
+    type: 'checkbox',
+  },
+  showCFGTokenMigration: {
     default: false,
     type: 'checkbox',
   },
