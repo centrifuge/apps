@@ -113,7 +113,7 @@ export default function CFGTokenMigration() {
             borderRadius={8}
             m={2}
             p={2}
-            width={550}
+            width={500}
             style={{
               boxShadow: '4px 8px 24px 0px #0000000D',
             }}
@@ -159,6 +159,7 @@ export default function CFGTokenMigration() {
                       currency="WCFG"
                       label="Amount of WCFG to migrate"
                       disabled
+                      secondaryValue="Max"
                     />
                     <Text style={{ marginTop: 8, alignSelf: 'flex-end' }} variant="body2">
                       Wallet balance: {formatBalance(balance?.toNumber() || 0)} WCFG
