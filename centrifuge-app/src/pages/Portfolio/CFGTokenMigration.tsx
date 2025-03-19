@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useAddress } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, IconInfo, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -59,7 +60,7 @@ export default function CFGTokenMigration() {
       ([, ...args]: [cb: () => void, amount: BN], options) =>
         cent.migration.depositForMigration(args, options),
     {
-      onSuccess: ([cb]) => {
+      onSuccess: () => {
         setIsMigrated(true)
       },
     }
@@ -72,14 +73,14 @@ export default function CFGTokenMigration() {
         cent.migration.approveForMigration(args, options),
     {
       onSuccess: ([cb]) => {
-        const amount = balance ? new BN(balance.toNumber()) : new BN(0)
+        const amount = CurrencyBalance.fromFloat(balance || 0, 18)
         executeDeposit([cb, amount])
       },
     }
   )
 
   const migrate = () => {
-    executeApprove([() => {}, new BN(balance?.toNumber() || 0)])
+    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18)])
   }
 
   if (loading) {
