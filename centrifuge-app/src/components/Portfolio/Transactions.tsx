@@ -38,7 +38,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
     {
       align: 'left',
       header: 'Action',
-      width: '140px',
+      width: '200px',
       cell: ({ action, tranche, pool, amount }: Row) => (
         <TransactionTypeChip
           type={action as InvestorTransactionType}

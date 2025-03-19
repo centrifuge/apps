@@ -3101,6 +3101,7 @@ export function getPoolsModule(inst: Centrifuge) {
               tokenPrice
               currencyAmount
               pool {
+                sumRealizedProfitFifoByPeriod
                 currency {
                   symbol
                   decimals
@@ -3127,6 +3128,7 @@ export function getPoolsModule(inst: Centrifuge) {
             currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
             trancheId: tx.trancheId.split('-')[1],
             poolCurrency: poolCurrency.symbol,
+            realizedProfitFifo: new CurrencyBalance(tx.pool.sumRealizedProfitFifoByPeriod, poolCurrency.decimals),
           }
         })
         return {
