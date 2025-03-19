@@ -136,6 +136,7 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showCFGTokenMigration: {
+    alwaysShow: true,
     default: false,
     type: 'checkbox',
   },
