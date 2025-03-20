@@ -1,18 +1,18 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { useAddress, useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Button, Grid, IconWallet, Select, Stack, Text } from '@centrifuge/fabric'
+import { useWallet } from '@centrifuge/centrifuge-react'
+import { Box, Button, Grid, IconWallet, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { AssetSummary } from '../../../src/components/AssetSummary'
-import { evmChains } from '../../../src/config'
-import { useTransactionsByAddress } from '../../../src/utils/usePools'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
+import { evmChains } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
+import { useAddress } from '../../utils/useAddress'
+import { useTransactionsByAddress } from '../../utils/usePools'
 import { TransactionHistory } from './TransactionHistory'
 
 const StyledGrid = styled(Grid)`
@@ -39,7 +39,6 @@ function Portfolio() {
   const address = useAddress()
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
-
   return (
     <Box mb={2}>
       <LayoutSection alignItems="flex-start">
@@ -64,9 +63,9 @@ function Portfolio() {
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
   const theme = useTheme()
-  const { data: transactions } = useTransactionsByAddress(address)
-  const tokens = useHoldings(address, chainId)
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
+  const { data: transactions } = useTransactionsByAddress(centAddress)
+  const tokens = useHoldings(address, chainId)
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -126,7 +125,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
         label: 'Portfolio value',
         value: formatBalance(currentPortfolioValue || 0),
         children: (
-          <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4}>
+          <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4} mr={2}>
             <Text
               variant="body4"
               color={yieldSinceInception?.isPositive() ? 'statusOk' : 'statusCritical'}
@@ -169,8 +168,8 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   return (
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
-      <AssetSummary data={pageSummaryData} />
-      <Stack gap={4} m={4}>
+      <PortfolioSummary data={pageSummaryData} />
+      <Stack gap={4} m={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
           <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} p={1} px={2}>
@@ -208,5 +207,45 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
         <TransactionHistory address={centAddress} />
       </Stack>
     </>
+  )
+}
+
+type Props = {
+  data?: {
+    label: React.ReactNode
+    value: React.ReactNode
+    heading: boolean
+    children?: React.ReactNode
+  }[]
+  children?: React.ReactNode
+}
+
+export function PortfolioSummary({ data, children }: Props) {
+  const theme = useTheme()
+  return (
+    <Stack
+      bg={theme.colors.backgroundSecondary}
+      border={`1px solid ${theme.colors.borderSecondary}`}
+      borderRadius={10}
+      padding={2}
+      mx={[2, 2, 2, 2, 5]}
+    >
+      <Shelf gap={4}>
+        {data?.map(({ label, value, heading, children }, index) => (
+          <Stack key={`${value}-${label}-${index}`}>
+            <Text variant={heading ? 'body2' : 'body3'} color="textSecondary" style={{ margin: 0, padding: 0 }}>
+              {label}
+            </Text>
+            <Box display="flex" alignItems="center">
+              <Text variant={heading ? 'heading' : 'heading1'} style={{ marginRight: 8 }}>
+                {value}
+              </Text>
+              {children && children}
+            </Box>
+          </Stack>
+        ))}
+        {children}
+      </Shelf>
+    </Stack>
   )
 }
