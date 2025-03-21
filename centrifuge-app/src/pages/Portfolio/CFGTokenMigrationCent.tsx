@@ -11,6 +11,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { TooltipText } from './CFGTokenMigration'
 import MigrationSuccessPage from './MigrationSuccessPage'
+import { TransactionData, useRecordTransaction } from './useRecordTransaction'
 
 const StyledButton = styled(Box)<{ disabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.textPrimary};
@@ -40,6 +41,7 @@ const Header = () => {
 export default function CFGTokenMigrationCent() {
   const debug = useDebugFlags()
   const theme = useTheme()
+  const { recordTransaction, loading, error, success } = useRecordTransaction()
   const address = useAddress()!
   const balances = useBalances(address)
   const balance = balances?.native.balance.toDecimal() || Dec(0)
@@ -54,8 +56,18 @@ export default function CFGTokenMigrationCent() {
 
   const formattedAddress = addressToVerify ? getAddress(addressToVerify) : ''
 
-  const migrate = () => {
-    setIsMigrated(true)
+  const migrate = async () => {
+    setStep(2)
+    const transactionData: TransactionData = {
+      from_address: address,
+      to_address: addressToVerify,
+      tx_hash: '0000000000',
+      chain: '2',
+      amount: balance?.toNumber(),
+    }
+
+    const success = await recordTransaction(transactionData)
+    console.log('success', success)
   }
 
   const verifyAddress = async () => {
@@ -225,7 +237,7 @@ export default function CFGTokenMigrationCent() {
                   <Button small style={{ width: '100%' }} onClick={() => setStep(0)} variant="inverted">
                     Cancel
                   </Button>
-                  <Button small style={{ width: '100%' }} onClick={() => setStep(2)}>
+                  <Button small style={{ width: '100%' }} onClick={migrate}>
                     Confirm
                   </Button>
                 </Grid>
