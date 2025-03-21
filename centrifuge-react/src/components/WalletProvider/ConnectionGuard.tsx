@@ -1,8 +1,8 @@
 import { Button, Card, IconChevronDown, Menu, MenuItem, MenuItemGroup, Popover, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useWallet } from './WalletProvider'
 import { Network } from './types'
 import { useGetNetworkName } from './utils'
-import { useWallet } from './WalletProvider'
 
 type Props = {
   networks: Network[]
@@ -18,6 +18,7 @@ export function ConnectionGuard({
   variant = 'plain',
   showConnect,
   body = 'Unsupported network.',
+  ...props
 }: Props) {
   const {
     isEvmOnSubstrate,
@@ -63,10 +64,12 @@ export function ConnectionGuard({
   const name = getName(networks[0])
 
   const element = (
-    <Stack gap={2} pb={3}>
+    <Stack gap={2} pb={3} {...props}>
       <Text variant="body3">{body}</Text>
       {networks.length === 1 ? (
-        <Button onClick={() => switchNetwork(networks[0])}>Switch to {name}</Button>
+        <Button onClick={() => switchNetwork(networks[0])} variant="secondary">
+          Switch to {name}
+        </Button>
       ) : (
         <Popover
           renderTrigger={(props, ref, state) => (

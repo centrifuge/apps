@@ -12,7 +12,7 @@ type Props = {
   children?: React.ReactNode
 }
 
-export function AssetSummary({ data, children }: Props) {
+export function AssetSummary({ data, children, ...props }: Props) {
   const theme = useTheme()
   return (
     <Stack
@@ -21,6 +21,7 @@ export function AssetSummary({ data, children }: Props) {
       borderRadius={10}
       padding={2}
       mx={[2, 2, 2, 2, 5]}
+      {...props}
     >
       <Shelf gap={2}>
         {data?.map(({ label, value, heading, children }, index) => (
