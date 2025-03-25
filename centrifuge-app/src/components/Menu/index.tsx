@@ -18,13 +18,16 @@ import { config } from '../../config'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
+import { SubMenu } from './SubMenu'
 
-const RouterButton = styled(Text)<{ isIpad?: boolean }>`
+const COLOR = '#7C8085'
+
+export const StyledRouterButton = styled(Text)<{ isIpad?: boolean }>`
   display: flex;
   flex-direction: ${({ isIpad }) => (isIpad ? 'column' : 'row')};
   align-items: center;
-  padding: 8px;
-  margin: 8px;
+  padding: 6px;
+  margin: 4px;
   border-radius: 4px;
   &:hover {
     & > div {
@@ -36,8 +39,6 @@ const RouterButton = styled(Text)<{ isIpad?: boolean }>`
     background-color: rgba(145, 150, 155, 0.13);
   }
 `
-
-const COLOR = '#7C8085'
 
 const StyledRouterLinkButton = styled(RouterLinkButton)<{ isIpad?: boolean }>`
   width: 100%;
@@ -65,7 +66,9 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const { showSwaps } = useDebugFlags()
   const iconSize = ['iconSmall', 'iconLarge', 'iconSmall']
-  const isIpad = useIsAboveBreakpoint('M') && !useIsAboveBreakpoint('L')
+  const aboveM = useIsAboveBreakpoint('M')
+  const aboveL = useIsAboveBreakpoint('L')
+  const isIpad = aboveM && !aboveL
 
   const menuItems = [
     {
@@ -74,6 +77,7 @@ export function Menu() {
       subMenu: ['Account', 'assets', 'investors'],
       enabled: true,
       route: '/dashboard',
+      withToggle: false,
     },
     { label: 'Pools', icon: <IconInvestments size={iconSize} color="white" />, route: '/pools', enabled: true },
     { label: 'Portfolio', icon: <IconWallet size={iconSize} color="white" />, route: '/portfolio', enabled: true },
@@ -84,6 +88,7 @@ export function Menu() {
       icon: <IconGovernance size={iconSize} color="white" />,
       subMenu: ['Onchain voting', 'Offchain voting', 'Governance forum'],
       enabled: true,
+      withToggle: true,
     },
     {
       label: 'NFTs',
@@ -99,12 +104,18 @@ export function Menu() {
       {menuItems.map((item, index) => {
         if (!item.enabled) return null
         return (
-          <RouterButton as={Link} key={item.label + index} isIpad={isIpad}>
-            {item.icon}
-            <Text color="white" variant={isIpad ? 'body3' : 'body2'} style={{ marginLeft: 8 }}>
-              {item.label}
-            </Text>
-          </RouterButton>
+          <>
+            {item.subMenu ? (
+              <SubMenu label={item.label} icon={item.icon} links={item.subMenu} withToggle={item.withToggle} />
+            ) : (
+              <StyledRouterButton as={Link} key={item.label + index} isIpad={isIpad} to={item.route}>
+                {item.icon}
+                <Text color="white" variant={isIpad ? 'body3' : 'body2'} style={{ marginLeft: 8 }}>
+                  {item.label}
+                </Text>
+              </StyledRouterButton>
+            )}
+          </>
         )
       })}
       <CreatePool />
@@ -113,7 +124,10 @@ export function Menu() {
 }
 
 function CreatePool() {
-  const isIpad = useIsAboveBreakpoint('M') && !useIsAboveBreakpoint('L')
+  const aboveM = useIsAboveBreakpoint('M')
+  const aboveL = useIsAboveBreakpoint('L')
+  const isIpad = aboveM && !aboveL
+
   return (
     <StyledRouterLinkButton
       icon={<IconPlus size="iconSmall" />}

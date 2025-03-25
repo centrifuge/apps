@@ -17,5 +17,9 @@ export const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   &:hover {
     color: ${({ theme }) => theme.colors.textGold};
     background-color: rgba(145, 150, 155, 0.13);
+
+    & svg {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
   }
 `
