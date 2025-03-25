@@ -1,23 +1,53 @@
-import { Box, IconGlobe, IconInvestments, IconNft, IconPlus, IconSwitch, IconWallet, Shelf } from '@centrifuge/fabric'
-import styled, { useTheme } from 'styled-components'
+import {
+  Box,
+  IconClock,
+  IconDashboard,
+  IconGlobe,
+  IconGovernance,
+  IconInvestments,
+  IconNft,
+  IconPlus,
+  IconSwitch,
+  IconWallet,
+  Text,
+} from '@centrifuge/fabric'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
+import { useIsAboveBreakpoint } from '../../../src/utils/useIsAboveBreakpoint'
 import { config } from '../../config'
-import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
-import { DashboardMenu } from './DashboardMenu'
-import { GovernanceMenu } from './GovernanceMenu'
-import { PageLink } from './PageLink'
+
+const RouterButton = styled(Text)<{ isIpad?: boolean }>`
+  display: flex;
+  flex-direction: ${({ isIpad }) => (isIpad ? 'column' : 'row')};
+  align-items: center;
+  padding: 8px;
+  margin: 8px;
+  border-radius: 4px;
+  &:hover {
+    & > div {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+    & > svg {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+    background-color: rgba(145, 150, 155, 0.13);
+  }
+`
 
 const COLOR = '#7C8085'
 
-const StyledRouterLinkButton = styled(RouterLinkButton)`
+const StyledRouterLinkButton = styled(RouterLinkButton)<{ isIpad?: boolean }>`
   width: 100%;
+  margin-top: 12px;
   & > span {
     background-color: ${COLOR};
     border-color: transparent;
     color: white;
     margin-bottom: 20px;
+    font-size: ${({ theme }) => theme.colors.textGold};
 
     &:hover {
       box-shadow: 0px 0px 0px 3px #7c8085b3;
@@ -33,82 +63,65 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
 
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const isLarge = useIsAboveBreakpoint('L')
-  const theme = useTheme()
   const { showSwaps } = useDebugFlags()
+  const iconSize = ['iconSmall', 'iconLarge', 'iconSmall']
+  const isIpad = useIsAboveBreakpoint('M') && !useIsAboveBreakpoint('L')
+
+  const menuItems = [
+    {
+      label: 'Dashboard',
+      icon: <IconDashboard size={iconSize} color="white" />,
+      subMenu: ['Account', 'assets', 'investors'],
+      enabled: true,
+      route: '/dashboard',
+    },
+    { label: 'Pools', icon: <IconInvestments size={iconSize} color="white" />, route: '/pools', enabled: true },
+    { label: 'Portfolio', icon: <IconWallet size={iconSize} color="white" />, route: '/portfolio', enabled: true },
+    { label: 'History', icon: <IconClock size={iconSize} color="white" />, route: '/history', enabled: true },
+    { label: 'Prime', icon: <IconGlobe size={iconSize} color="white" />, route: '/prime', enabled: true },
+    {
+      label: 'Governance',
+      icon: <IconGovernance size={iconSize} color="white" />,
+      subMenu: ['Onchain voting', 'Offchain voting', 'Governance forum'],
+      enabled: true,
+    },
+    {
+      label: 'NFTs',
+      icon: <IconNft size={iconSize} color="white" />,
+      route: '/nfts',
+      enabled: config.network !== 'centrifuge',
+    },
+    { label: 'Swaps', icon: <IconSwitch size={iconSize} color="white" />, route: '/swaps', enabled: showSwaps },
+  ]
 
   return (
-    <Shelf
-      width="100%"
-      position="relative"
-      gap={1}
-      flexDirection={['row', 'row', 'column']}
-      alignItems={['center', 'center', 'stretch']}
-      justifyContent={['space-between', 'space-between']}
-      backgroundColor="backgroundInverted"
-    >
-      {pools.length > 0 && <DashboardMenu />}
-
-      <Box width="100%">
-        <PageLink to="/pools" stacked={!isLarge}>
-          <IconInvestments size={['iconMedium', 'iconMedium', 'iconSmall']} />
-          Pools
-        </PageLink>
-      </Box>
-
-      <Box width="100%">
-        <PageLink to="/portfolio" stacked={!isLarge}>
-          <IconWallet size={['iconMedium', 'iconMedium', 'iconSmall']} />
-          Portfolio
-        </PageLink>
-      </Box>
-
-      <Box width="100%">
-        <PageLink to="/prime" stacked={!isLarge}>
-          <IconGlobe size={['iconMedium', 'iconMedium', 'iconSmall']} />
-          Prime
-        </PageLink>
-      </Box>
-
-      <Box width="100%">
-        <GovernanceMenu />
-      </Box>
-
-      {config.network !== 'centrifuge' && (
-        <PageLink to="/nfts" stacked={!isLarge}>
-          <IconNft size={['iconMedium', 'iconMedium', 'iconSmall']} />
-          NFTs
-        </PageLink>
-      )}
-
-      {pools.length > 0 && (
-        <Box mt={1}>
-          <CreatePool />
-        </Box>
-      )}
-
-      {showSwaps && (
-        <Box>
-          <Box
-            width="100%"
-            borderTopColor={theme.colors.borderSecondary}
-            borderTopWidth={1}
-            borderTopStyle="solid"
-            mb={2}
-          />
-          <PageLink to="/swaps" stacked={!isLarge}>
-            <IconSwitch size={['iconMedium', 'iconMedium', 'iconSmall']} />
-            Swaps
-          </PageLink>
-        </Box>
-      )}
-    </Shelf>
+    <Box width="100%" display="flex" flexDirection="column" mt={6}>
+      {menuItems.map((item, index) => {
+        if (!item.enabled) return null
+        return (
+          <RouterButton as={Link} key={item.label + index} isIpad={isIpad}>
+            {item.icon}
+            <Text color="white" variant={isIpad ? 'body3' : 'body2'} style={{ marginLeft: 8 }}>
+              {item.label}
+            </Text>
+          </RouterButton>
+        )
+      })}
+      <CreatePool />
+    </Box>
   )
 }
 
 function CreatePool() {
+  const isIpad = useIsAboveBreakpoint('M') && !useIsAboveBreakpoint('L')
   return (
-    <StyledRouterLinkButton icon={<IconPlus size="iconSmall" />} to="/create-pool" small variant="inverted">
+    <StyledRouterLinkButton
+      icon={<IconPlus size="iconSmall" />}
+      to="/create-pool"
+      small
+      variant="inverted"
+      isIpad={isIpad}
+    >
       Create pool
     </StyledRouterLinkButton>
   )

@@ -1,96 +1,109 @@
-import { WalletMenu } from '@centrifuge/centrifuge-react'
-import { Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
+import { Box, Button, Drawer, IconHamburger } from '@centrifuge/fabric'
+import { useState } from 'react'
 import { Outlet } from 'react-router'
+import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
-import { LoadBoundary } from '../LoadBoundary'
 import { LogoLink } from '../LogoLink-deprecated'
 import { Menu } from '../Menu'
-import { BasePadding } from './BasePadding'
-import {
-  ContentWrapper,
-  FooterContainer,
-  Inner,
-  LogoContainer,
-  MobileBar,
-  Root,
-  ToolbarContainer,
-  WalletContainer,
-  WalletInner,
-  WalletPositioner,
-} from './styles'
 
-export function LayoutBase(): JSX.Element {
-  const isMedium = useIsAboveBreakpoint('M')
+const Sidebar = styled.aside`
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background-color: ${({ theme }) => theme.colors.backgroundInverted};
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  width: 220px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.L}) and (min-width: ${({ theme }) => theme.breakpoints.M}) {
+    width: 90px;
+  }
+`
+
+const MobileHeader = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: ${({ theme }) => theme.colors.backgroundInverted};
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+`
+
+const Content = styled.main`
+  margin-left: 220px;
+  padding: 1rem;
+  @media (max-width: ${({ theme }) => theme.breakpoints.L}) and (min-width: ${({ theme }) => theme.breakpoints.M}) {
+    margin-left: 80px;
+  }
+  @media (max-width: ${({ theme }) => theme.breakpoints.M}) {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+`
+
+const SidebarMenu = () => (
+  <>
+    <Box>
+      <LogoLink />
+      <Menu />
+    </Box>
+    <Footer />
+  </>
+)
+
+const MobileMenuContent = () => (
+  <>
+    <Box>
+      <LogoLink />
+      <Menu />
+    </Box>
+    <Footer />
+  </>
+)
+
+export const LayoutBase = () => {
+  const isDesktop = useIsAboveBreakpoint('L')
+  const isIpad = useIsAboveBreakpoint('M') && !useIsAboveBreakpoint('L')
+  const isMobile = !useIsAboveBreakpoint('M')
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
-    <Root>
-      <WalletContainer>
-        <WalletPositioner>
-          <WalletInner>
-            <WalletMenu />
-          </WalletInner>
-        </WalletPositioner>
-      </WalletContainer>
-      {isMedium ? (
-        <Inner>
-          <LogoContainer>
-            <LogoLink />
-          </LogoContainer>
-          <ToolbarContainer as="aside">
-            <Menu />
-          </ToolbarContainer>
-          <FooterContainer>
-            <Footer />
-          </FooterContainer>
-        </Inner>
-      ) : (
-        <>
-          <LogoContainer>
-            <LogoLink />
-          </LogoContainer>
-          <MobileBar>
-            <ToolbarContainer as="aside">
-              <Menu />
-            </ToolbarContainer>
-          </MobileBar>
-        </>
+    <>
+      {(isDesktop || isIpad) && (
+        <Sidebar>
+          <SidebarMenu />
+        </Sidebar>
       )}
-      {/* The ID functions so we can deactive scrolling in certain pages, example in the data page */}
-      <ContentWrapper id="content-wrapper">
-        <LoadBoundary>
-          <Outlet />
-        </LoadBoundary>
-      </ContentWrapper>
-    </Root>
-  )
-}
 
-export function LayoutMain({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string
-  subtitle?: string
-  children: React.ReactNode
-}) {
-  return (
-    <BasePadding py={5}>
-      <Stack gap={4}>
-        <Stack>
-          <Text as="h1" variant="heading1">
-            {title}
-          </Text>
-          {subtitle && (
-            <Text as="p" variant="heading4">
-              {subtitle}
-            </Text>
-          )}
-        </Stack>
+      {isMobile && (
+        <MobileHeader>
+          <div>
+            <LogoLink />
+          </div>
+          <Button onClick={() => setMobileMenuOpen(true)}>
+            <IconHamburger />
+          </Button>
+        </MobileHeader>
+      )}
 
-        {children}
-      </Stack>
-    </BasePadding>
+      {isMobile && (
+        <Drawer isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} title="Menu">
+          <MobileMenuContent />
+        </Drawer>
+      )}
+
+      <Content>
+        <Outlet />
+      </Content>
+    </>
   )
 }
