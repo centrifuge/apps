@@ -330,7 +330,7 @@ export function ExternalRepayForm({
             </Box>
           </Stack>
 
-          <Box>
+          <Stack mt={3}>
             {destination === 'reserve' ? (
               <InlineFeedback status="default">
                 <Text variant="body2" color="statusDefault">
@@ -344,7 +344,7 @@ export function ExternalRepayForm({
                 </Text>
               </InlineFeedback>
             )}
-          </Box>
+          </Stack>
         </Stack>
 
         <Stack gap={1}>
