@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Checkbox, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { useEffect } from 'react'
 import { useTheme } from 'styled-components'
 import { useSelectedPools } from '../../utils/contexts/SelectedPoolsContext'
 import { usePoolMetadata } from '../../utils/usePools'
@@ -22,6 +23,11 @@ const PoolSelect = ({ pool, active, multiple }: { pool: Pool; active: boolean; m
   const { togglePoolIdSelection, selectedPoolIds, clearSelectedPoolsIds } = useSelectedPools(multiple)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const theme = useTheme()
+
+  useEffect(() => {
+    clearSelectedPoolsIds()
+  }, [])
+
   const poolUri = poolMetadata?.pool?.icon?.uri
     ? cent.metadata.parseMetadataUrl(poolMetadata?.pool?.icon?.uri)
     : undefined
