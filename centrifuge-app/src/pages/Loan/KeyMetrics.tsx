@@ -98,11 +98,6 @@ export function KeyMetrics({ pool, loan }: Props) {
     Dec(0)
   )
 
-  const unrealizedProfitAtMarketPrice = borrowerAssetTransactions?.reduce(
-    (sum, tx) => sum.add(tx.unrealizedProfitAtMarketPrice?.toDecimal() ?? Dec(0)),
-    Dec(0)
-  )
-
   const metrics = [
     ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
       ? templateMetadata?.keyAttributes
@@ -128,12 +123,6 @@ export function KeyMetrics({ pool, loan }: Props) {
             ? {
                 label: 'Realized P&L',
                 value: formatBalance(sumRealizedProfitFifo, pool.currency.symbol, 2, 2),
-              }
-            : (null as never),
-          unrealizedProfitAtMarketPrice
-            ? {
-                label: 'Unrealized P&L',
-                value: formatBalance(unrealizedProfitAtMarketPrice, pool.currency.symbol, 2, 2),
               }
             : (null as never),
         ].filter(Boolean)
