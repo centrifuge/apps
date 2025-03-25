@@ -37,8 +37,6 @@ type Row = (Loan | TinlakeLoan) & {
   maturityDate: string | null
   marketPrice: CurrencyBalance
   marketValue: CurrencyBalance
-  unrealizedPL: CurrencyBalance
-  realizedPL: CurrencyBalance
   portfolioPercentage: string
 }
 
@@ -80,8 +78,6 @@ export function LoanList({ loans }: Props) {
       acc[id] = {
         marketPrice: snapshot.currentPrice,
         marketValue: snapshot.presentValue,
-        unrealizedPL: snapshot.unrealizedProfitAtMarketPrice,
-        realizedPL: snapshot.sumRealizedProfitFifo,
       }
       return acc
     }, {}) ?? {}
@@ -211,28 +207,6 @@ export function LoanList({ loans }: Props) {
       : [
           {
             align: 'left',
-            header: <SortableTableHeader label="Unrealized P&L" />,
-            cell: (l: Row) => formatBalance(l.unrealizedPL ?? 0, pool.currency, 2, 0),
-            sortKey: 'unrealizedPL',
-            width: '140px',
-          },
-        ]),
-    ...(isTinlakePool
-      ? []
-      : [
-          {
-            align: 'left',
-            header: <SortableTableHeader label="Realized P&L" />,
-            cell: (l: Row) => formatBalance(l.realizedPL ?? 0, pool.currency, 2, 0),
-            sortKey: 'realizedPL',
-            width: '140px',
-          },
-        ]),
-    ...(isTinlakePool
-      ? []
-      : [
-          {
-            align: 'left',
             header: <SortableTableHeader label="Portfolio %" />,
             cell: (l: Row) => formatPercentage(l.portfolioPercentage ?? 0, true, undefined, 1),
             sortKey: 'portfolioPercentage',
@@ -252,8 +226,6 @@ export function LoanList({ loans }: Props) {
         Quantity: `${quantity ?? '-'}`,
         'Market Price': loan.marketPrice ? loan.marketPrice : '-',
         'Market Value': loan.marketValue ? loan.marketValue : '-',
-        'Unrealized P&L': loan.unrealizedPL ? loan.unrealizedPL : '-',
-        'Realized P&L': loan.realizedPL ? loan.realizedPL : '-',
         'Portfolio %': loan.portfolioPercentage ? loan.portfolioPercentage : '-',
       }
     })
