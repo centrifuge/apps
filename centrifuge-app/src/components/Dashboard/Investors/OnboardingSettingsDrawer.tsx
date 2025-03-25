@@ -367,23 +367,23 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                           <RadioButton
                             name="onboardingExperience"
                             id="onboardingExperience"
-                            border
-                            height={44}
-                            checked={formik.values.onboardingExperience === 'none'}
-                            label="None"
-                            onChange={() => {
-                              formik.setFieldValue('onboardingExperience', 'none')
-                            }}
-                          />
-                          <RadioButton
-                            name="onboardingExperience"
-                            id="onboardingExperience"
                             height={44}
                             border
                             checked={formik.values.onboardingExperience === 'other'}
                             label="Other"
                             onChange={() => {
                               formik.setFieldValue('onboardingExperience', 'other')
+                            }}
+                          />
+                          <RadioButton
+                            name="onboardingExperience"
+                            id="onboardingExperience"
+                            border
+                            height={44}
+                            checked={formik.values.onboardingExperience === 'none'}
+                            label="None"
+                            onChange={() => {
+                              formik.setFieldValue('onboardingExperience', 'none')
                             }}
                           />
                         </Stack>
