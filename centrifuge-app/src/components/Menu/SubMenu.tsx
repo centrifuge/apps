@@ -108,14 +108,14 @@ export function SubMenu({
             <ToggleMenu label={label} icon={icon} open={open} setOpen={setOpen} links={links} />
           ) : (
             <>
-              <StyledRouterButton as={Link} color="white">
+              <StyledRouterButton as={Link} color="white" to={`/${label.toLowerCase()}`}>
                 {icon}
                 <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
                   {label}
                 </Text>
               </StyledRouterButton>
               {links.map((link) => (
-                <RouterButton key={link} as={Link} color="white">
+                <RouterButton key={link} as={Link} color="white" to={`/${label.toLowerCase()}/${link.toLowerCase()}`}>
                   {link}
                 </RouterButton>
               ))}
@@ -124,14 +124,14 @@ export function SubMenu({
         </Stack>
       ) : (
         <>
-          <StyledRouterButton as={Link} color="white">
+          <StyledRouterButton as={Link} color="white" to={`/${label.toLowerCase()}`}>
             {icon}
             <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
               {label}
             </Text>
           </StyledRouterButton>
           {links.map((link) => (
-            <RouterButton key={link} as={Link} color="white">
+            <RouterButton key={link} as={Link} color="white" to={`/${label.toLowerCase()}/${link.toLowerCase()}`}>
               {link}
             </RouterButton>
           ))}

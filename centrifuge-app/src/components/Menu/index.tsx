@@ -74,7 +74,7 @@ export function Menu() {
     {
       label: 'Dashboard',
       icon: <IconDashboard size={iconSize} color="white" />,
-      subMenu: ['Account', 'assets', 'investors'],
+      subMenu: ['Account', 'Assets', 'Investors'],
       enabled: true,
       route: '/dashboard',
       withToggle: false,
