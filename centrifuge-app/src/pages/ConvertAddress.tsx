@@ -1,5 +1,5 @@
+import { LayoutMain } from 'src/components/LayoutBase/LayoutMain'
 import { ConvertAddress } from '../components/DebugFlags/components/ConvertAddress'
-import { LayoutMain } from '../components/LayoutBase'
 
 export default function ConvertAddressPage() {
   return (

@@ -1,4 +1,4 @@
-import { Box, Button, Drawer, IconHamburger } from '@centrifuge/fabric'
+import { Box, Drawer, IconButton, IconHamburger } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 import styled from 'styled-components'
@@ -61,10 +61,7 @@ const SidebarMenu = () => (
 
 const MobileMenuContent = () => (
   <>
-    <Box>
-      <LogoLink />
-      <Menu />
-    </Box>
+    <Menu />
     <Footer />
   </>
 )
@@ -87,14 +84,19 @@ export const LayoutBase = () => {
           <div>
             <LogoLink />
           </div>
-          <Button onClick={() => setMobileMenuOpen(true)}>
-            <IconHamburger />
-          </Button>
+          <IconButton onClick={() => setMobileMenuOpen(true)}>
+            <IconHamburger color="white" size="iconLarge" />
+          </IconButton>
         </MobileHeader>
       )}
 
       {!isDesktop && (
-        <Drawer isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} title="Menu">
+        <Drawer
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          title="Menu"
+          backgroundColor="backgroundInverted"
+        >
           <MobileMenuContent />
         </Drawer>
       )}

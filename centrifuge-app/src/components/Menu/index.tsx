@@ -65,7 +65,7 @@ const StyledRouterLinkButton = styled(RouterLinkButton)<{ isIpad?: boolean }>`
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const { showSwaps } = useDebugFlags()
-  const iconSize = ['iconSmall', 'iconLarge', 'iconSmall']
+  const iconSize = ['iconSmall', 'iconMedium', 'iconSmall']
   const isMedium = useIsAboveBreakpoint('M')
   const isLarge = useIsAboveBreakpoint('L')
   const isIpad = isMedium && !isLarge

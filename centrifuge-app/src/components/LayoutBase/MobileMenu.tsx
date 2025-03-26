@@ -10,7 +10,7 @@ export const MobileMenu = () => {
   return (
     <Box position="absolute" right={0} zIndex={99}>
       {isOpen ? null : (
-        <IconButton onClick={() => setIsOpen(true)}>
+        <IconButton onClick={() => setIsOpen(true)} variant="tertiary">
           <IconHamburger />
         </IconButton>
       )}
