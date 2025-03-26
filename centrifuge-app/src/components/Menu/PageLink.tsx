@@ -6,15 +6,23 @@ import { prefetchRoute } from '../Root'
 import { LIGHT_BACKGROUND } from './Toggle'
 import { baseButton, primaryButton } from './styles'
 
-const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
+const Root = styled(Text)<{
+  isActive?: boolean
+  stacked?: boolean
+  isMedium?: boolean
+  isSmall?: boolean
+}>`
   ${baseButton}
   ${primaryButton}
-  grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
+  display: flex;
+  align-items: center;
+  justify-content: 'flex-start';
+  flex-direction: ${({ stacked }) => (stacked ? 'column' : 'row')};
   color: ${({ isActive, theme }) => (isActive ? theme.colors.textGold : theme.colors.textInverted)};
-  font-size: 14px;
   font-weight: 500;
   background-color: ${({ isActive }) => (isActive ? LIGHT_BACKGROUND : 'transparent')};
   border-radius: 4px;
+  font-size: ${({ stacked }) => (stacked ? '10px' : '16px')};
   &:hover {
     color: ${({ theme }) => theme.colors.textGold};
     background-color: rgba(145, 150, 155, 0.13);
@@ -29,6 +37,7 @@ type PageLinkProps = LinkProps & {
 export function PageLink({ stacked = false, to, children, exact = false }: PageLinkProps) {
   const location = useLocation()
   const isMedium = useIsAboveBreakpoint('M')
+  const isLarge = useIsAboveBreakpoint('L')
 
   let isActive = false
   if (exact) {
@@ -43,9 +52,9 @@ export function PageLink({ stacked = false, to, children, exact = false }: PageL
       to={to}
       variant="interactive1"
       isActive={isActive}
-      stacked={stacked}
       onMouseOver={() => prefetchRoute(to)}
       isMedium={isMedium}
+      stacked={isMedium && !isLarge}
     >
       {children}
     </Root>

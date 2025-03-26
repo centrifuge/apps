@@ -13,9 +13,17 @@ export const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   color: ${({ theme }) => theme.colors.textInverted};
   border-radius: 4px;
   background-color: ${({ isActive }) => (isActive ? LIGHT_BACKGROUND : 'transparent')};
+  font-weight: 400;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.textGold};
     background-color: rgba(145, 150, 155, 0.13);
+
+    & span {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
+
+    & svg {
+      color: ${({ theme }) => theme.colors.textGold};
+    }
   }
 `
