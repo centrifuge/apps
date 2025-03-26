@@ -27,8 +27,7 @@ const StyledGrid = styled(Grid)`
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-left: 32px;
-  margin-right: 32px;
+
   @media (max-width: ${({ theme }) => theme.breakpoints.M}) {
     margin-left: 0;
     margin-right: 0;

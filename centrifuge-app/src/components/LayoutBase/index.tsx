@@ -82,7 +82,7 @@ export const LayoutBase = () => {
   return (
     <>
       {isDesktop && (
-        <Box position="fixed" top="1rem" right="1rem" zIndex={1200} width={220}>
+        <Box position="fixed" top="1rem" right="1rem" zIndex={1200} width={220} mt={2} marginRight={1}>
           <WalletMenu />
         </Box>
       )}
