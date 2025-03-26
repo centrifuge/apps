@@ -1,4 +1,4 @@
-import { LayoutMain } from 'src/components/LayoutBase/LayoutMain'
+import { LayoutMain } from '../components/LayoutBase/LayoutMain'
 import { Orders } from '../components/Swaps/Orders'
 
 export default function SwapsPage() {

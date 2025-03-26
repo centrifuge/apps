@@ -1,6 +1,6 @@
-import { Box, Drawer, IconButton, IconHamburger } from '@centrifuge/fabric'
-import { useState } from 'react'
-import { Outlet } from 'react-router'
+import { Box, Drawer, IconButton, IconHamburger, IconX } from '@centrifuge/fabric'
+import { useEffect, useState } from 'react'
+import { Outlet, useLocation } from 'react-router'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
@@ -18,10 +18,6 @@ const Sidebar = styled.aside`
   justify-content: space-between;
   padding: 1rem;
   width: 220px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.L}) and (min-width: ${({ theme }) => theme.breakpoints.M}) {
-    width: 90px;
-  }
 `
 
 const MobileHeader = styled.header`
@@ -38,10 +34,13 @@ const MobileHeader = styled.header`
 `
 
 const Content = styled.main`
-  margin-left: 220px;
   padding: 1rem;
+  @media (min-width: ${({ theme }) => theme.breakpoints.L}) {
+    margin-left: 220px;
+  }
   @media (max-width: ${({ theme }) => theme.breakpoints.L}) and (min-width: ${({ theme }) => theme.breakpoints.M}) {
-    margin-left: 80px;
+    margin-left: 0;
+    padding-top: 60px;
   }
   @media (max-width: ${({ theme }) => theme.breakpoints.M}) {
     margin-left: 0;
@@ -61,15 +60,24 @@ const SidebarMenu = () => (
 
 const MobileMenuContent = () => (
   <>
-    <Menu />
+    <Box>
+      <Menu />
+    </Box>
     <Footer />
   </>
 )
 
 export const LayoutBase = () => {
+  const location = useLocation()
   const isDesktop = useIsAboveBreakpoint('L')
+  const isMedium = useIsAboveBreakpoint('M')
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Close the mobile menu when the location changes
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [location])
 
   return (
     <>
@@ -84,8 +92,12 @@ export const LayoutBase = () => {
           <div>
             <LogoLink />
           </div>
-          <IconButton onClick={() => setMobileMenuOpen(true)}>
-            <IconHamburger color="white" size="iconLarge" />
+          <IconButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? (
+              <IconX color="white" size="iconLarge" />
+            ) : (
+              <IconHamburger color="white" size="iconLarge" />
+            )}
           </IconButton>
         </MobileHeader>
       )}
@@ -96,6 +108,8 @@ export const LayoutBase = () => {
           onClose={() => setMobileMenuOpen(false)}
           title="Menu"
           backgroundColor="backgroundInverted"
+          width={isMedium ? '400px' : '100%'}
+          hideIcon
         >
           <MobileMenuContent />
         </Drawer>

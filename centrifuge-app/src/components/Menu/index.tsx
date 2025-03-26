@@ -1,6 +1,5 @@
 import {
   Box,
-  IconClock,
   IconDashboard,
   IconGlobe,
   IconGovernance,
@@ -22,10 +21,10 @@ import { SubMenu } from './SubMenu'
 
 const COLOR = '#7C8085'
 
-export const StyledRouterButton = styled(Text)<{ isIpad?: boolean }>`
+export const StyledRouterButton = styled(Text)<{ isLarge?: boolean }>`
   display: flex;
-  flex-direction: ${({ isIpad }) => (isIpad ? 'column' : 'row')};
-  align-items: center;
+  flex-direction: row;
+  align-items: ${({ isLarge }) => (isLarge ? 'center' : 'flex-start')};
   padding: 6px;
   margin: 4px;
   border-radius: 4px;
@@ -40,7 +39,7 @@ export const StyledRouterButton = styled(Text)<{ isIpad?: boolean }>`
   }
 `
 
-const StyledRouterLinkButton = styled(RouterLinkButton)<{ isIpad?: boolean }>`
+const StyledRouterLinkButton = styled(RouterLinkButton)`
   width: 100%;
   margin-top: 12px;
   & > span {
@@ -65,30 +64,27 @@ const StyledRouterLinkButton = styled(RouterLinkButton)<{ isIpad?: boolean }>`
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const { showSwaps } = useDebugFlags()
-  const iconSize = ['iconSmall', 'iconMedium', 'iconSmall']
-  const isMedium = useIsAboveBreakpoint('M')
+  const iconSize = 'iconSmall'
   const isLarge = useIsAboveBreakpoint('L')
-  const isIpad = isMedium && !isLarge
 
   const menuItems = [
     {
       label: 'Dashboard',
       icon: <IconDashboard size={iconSize} color="white" />,
       subMenu: ['Account', 'Assets', 'Investors'],
-      enabled: true,
+      enabled: pools.length > 0,
       route: '/dashboard',
       withToggle: false,
     },
     { label: 'Pools', icon: <IconInvestments size={iconSize} color="white" />, route: '/pools', enabled: true },
     { label: 'Portfolio', icon: <IconWallet size={iconSize} color="white" />, route: '/portfolio', enabled: true },
-    { label: 'History', icon: <IconClock size={iconSize} color="white" />, route: '/history', enabled: true },
     { label: 'Prime', icon: <IconGlobe size={iconSize} color="white" />, route: '/prime', enabled: true },
     {
       label: 'Governance',
       icon: <IconGovernance size={iconSize} color="white" />,
       subMenu: ['Onchain voting', 'Offchain voting', 'Governance forum'],
       enabled: true,
-      withToggle: isLarge,
+      withToggle: true,
     },
     {
       label: 'NFTs',
@@ -100,7 +96,7 @@ export function Menu() {
   ]
 
   return (
-    <Box width="100%" display="flex" flexDirection="column" mt={6}>
+    <Box width="100%" display="flex" flexDirection="column" mt={isLarge ? 6 : 0}>
       {menuItems.map((item, index) => {
         if (!item.enabled) return null
         return (
@@ -108,9 +104,9 @@ export function Menu() {
             {item.subMenu ? (
               <SubMenu label={item.label} icon={item.icon} links={item.subMenu} withToggle={item.withToggle} />
             ) : (
-              <StyledRouterButton as={Link} key={item.label + index} isIpad={isIpad} to={item.route}>
+              <StyledRouterButton as={Link} key={item.label + index} isLarge={isLarge} to={item.route}>
                 {item.icon}
-                <Text color="white" variant={isIpad ? 'body3' : 'body2'} style={{ marginLeft: 8 }}>
+                <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
                   {item.label}
                 </Text>
               </StyledRouterButton>
@@ -124,18 +120,8 @@ export function Menu() {
 }
 
 function CreatePool() {
-  const aboveM = useIsAboveBreakpoint('M')
-  const aboveL = useIsAboveBreakpoint('L')
-  const isIpad = aboveM && !aboveL
-
   return (
-    <StyledRouterLinkButton
-      icon={<IconPlus size="iconSmall" />}
-      to="/create-pool"
-      small
-      variant="inverted"
-      isIpad={isIpad}
-    >
+    <StyledRouterLinkButton icon={<IconPlus size="iconSmall" />} to="/create-pool" small variant="inverted">
       Create pool
     </StyledRouterLinkButton>
   )

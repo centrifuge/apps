@@ -26,6 +26,7 @@ export type DrawerProps = React.PropsWithChildren<{
   width?: string | number
   innerPaddingTop?: number
   title?: React.ReactNode
+  hideIcon?: boolean
 }> &
   BoxProps
 
@@ -35,7 +36,7 @@ const DrawerCard = styled(Box)(
   })
 )
 
-function DrawerInner({ title, children, isOpen, onClose, width = 'drawer', ...props }: DrawerProps) {
+function DrawerInner({ title, children, isOpen, onClose, width = 'drawer', hideIcon = false, ...props }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const animation = React.useRef<Animation | undefined>(undefined)
@@ -119,7 +120,7 @@ function DrawerInner({ title, children, isOpen, onClose, width = 'drawer', ...pr
           <Stack gap={3}>
             <Shelf justifyContent="space-between">
               <Text variant="heading2">{title}</Text>
-              <StyledIconButton variant="tertiary" icon={IconX} onClick={() => onClose()} />
+              {hideIcon ? null : <StyledIconButton variant="tertiary" icon={IconX} onClick={() => onClose()} />}
             </Shelf>
             {children}
           </Stack>

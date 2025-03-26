@@ -1,4 +1,4 @@
-import { Box, Grid, IconChevronDown, IconChevronRight, Stack, Text } from '@centrifuge/fabric'
+import { Grid, IconChevronDown, IconChevronRight, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -48,7 +48,6 @@ export function ToggleMenu({
   setOpen: (open: boolean) => void
   links: string[]
 }) {
-  console.log(label)
   return (
     <>
       <Toggle
@@ -99,44 +98,45 @@ export function SubMenu({
 }) {
   const [open, setOpen] = React.useState(false)
   const isLarge = useIsAboveBreakpoint('L')
-
   return (
-    <Box>
-      {isLarge ? (
-        <Stack>
-          {withToggle ? (
-            <ToggleMenu label={label} icon={icon} open={open} setOpen={setOpen} links={links} />
-          ) : (
-            <>
-              <StyledRouterButton as={Link} color="white" to={`/${label.toLowerCase()}`}>
-                {icon}
-                <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
-                  {label}
-                </Text>
-              </StyledRouterButton>
-              {links.map((link) => (
-                <RouterButton key={link} as={Link} color="white" to={`/${label.toLowerCase()}/${link.toLowerCase()}`}>
-                  {link}
-                </RouterButton>
-              ))}
-            </>
-          )}
-        </Stack>
-      ) : (
-        <>
-          <StyledRouterButton as={Link} color="white" to={`/${label.toLowerCase()}`}>
-            {icon}
-            <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
-              {label}
-            </Text>
-          </StyledRouterButton>
-          {links.map((link) => (
-            <RouterButton key={link} as={Link} color="white" to={`/${label.toLowerCase()}/${link.toLowerCase()}`}>
-              {link}
-            </RouterButton>
-          ))}
-        </>
-      )}
-    </Box>
+    <>
+      <Stack>
+        {withToggle ? (
+          <ToggleMenu label={label} icon={icon} open={open} setOpen={setOpen} links={links} />
+        ) : (
+          <>
+            {isLarge ? (
+              <>
+                <StyledRouterButton as={Link} color="white" to={`/${label.toLowerCase()}`}>
+                  {icon}
+                  <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
+                    {label}
+                  </Text>
+                </StyledRouterButton>
+                {links.map((link) => (
+                  <RouterButton key={link} as={Link} color="white" to={`/${label.toLowerCase()}/${link.toLowerCase()}`}>
+                    {link}
+                  </RouterButton>
+                ))}
+              </>
+            ) : (
+              <Stack>
+                <StyledRouterButton as={Link} color="white" to={`/${label.toLowerCase()}`}>
+                  {icon}
+                  <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
+                    {label}
+                  </Text>
+                </StyledRouterButton>
+                {links.map((link) => (
+                  <RouterButton key={link} as={Link} color="white" to={`/${label.toLowerCase()}/${link.toLowerCase()}`}>
+                    {link}
+                  </RouterButton>
+                ))}
+              </Stack>
+            )}
+          </>
+        )}
+      </Stack>
+    </>
   )
 }
