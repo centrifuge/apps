@@ -114,7 +114,7 @@ export function Menu() {
           </>
         )
       })}
-      <CreatePool />
+      {pools.length > 0 && <CreatePool />}
     </Box>
   )
 }

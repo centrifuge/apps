@@ -1,3 +1,4 @@
+import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Drawer, IconButton, IconHamburger, IconX } from '@centrifuge/fabric'
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
@@ -22,7 +23,6 @@ const Sidebar = styled.aside`
 
 const MobileHeader = styled.header`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 1rem;
   background-color: ${({ theme }) => theme.colors.backgroundInverted};
@@ -82,24 +82,33 @@ export const LayoutBase = () => {
   return (
     <>
       {isDesktop && (
-        <Sidebar>
-          <SidebarMenu />
-        </Sidebar>
+        <Box position="fixed" top="1rem" right="1rem" zIndex={1200} width={220}>
+          <WalletMenu />
+        </Box>
       )}
 
       {!isDesktop && (
         <MobileHeader>
-          <div>
-            <LogoLink />
-          </div>
-          <IconButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? (
-              <IconX color="white" size="iconLarge" />
-            ) : (
-              <IconHamburger color="white" size="iconLarge" />
-            )}
-          </IconButton>
+          <LogoLink />
+          <Box display="flex" alignItems="center" marginLeft="auto">
+            <Box mr={2} width={220}>
+              <WalletMenu />
+            </Box>
+            <IconButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? (
+                <IconX color="white" size="iconLarge" />
+              ) : (
+                <IconHamburger color="white" size="iconLarge" />
+              )}
+            </IconButton>
+          </Box>
         </MobileHeader>
+      )}
+
+      {isDesktop && (
+        <Sidebar>
+          <SidebarMenu />
+        </Sidebar>
       )}
 
       {!isDesktop && (
