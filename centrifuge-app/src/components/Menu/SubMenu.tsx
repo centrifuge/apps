@@ -1,9 +1,10 @@
-import { Box, IconChevronDown, IconChevronRight, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconChevronDown, IconChevronRight, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { StyledRouterButton } from '.'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
+import { AnchorTextLink } from '../TextLink'
 import { Toggle } from './Toggle'
 
 const RouterButton = styled(Text)`
@@ -18,7 +19,7 @@ const RouterButton = styled(Text)`
   }
 `
 
-const links = [
+const onchainVoting = [
   {
     href: 'https://centrifuge.subsquare.io/democracy/referenda',
     label: 'Onchain voting',
@@ -36,18 +37,20 @@ const links = [
 export function ToggleMenu({
   label,
   icon,
-  withToggle = false,
   open,
   setOpen,
+  links,
 }: {
   label: string
   icon: React.ReactNode
   withToggle?: boolean
   open: boolean
   setOpen: (open: boolean) => void
+  links: string[]
 }) {
+  console.log(label)
   return (
-    <Box position="relative">
+    <>
       <Toggle
         forwardedAs="button"
         variant="interactive1"
@@ -57,25 +60,29 @@ export function ToggleMenu({
         onClick={() => setOpen(!open)}
       >
         {icon}
-        {label}
+        <Text color="white">{label}</Text>
         {open ? (
           <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
         ) : (
           <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} />
         )}
       </Toggle>
-      <Box position="absolute" top={0} left={0} width="100%" height="100%" backgroundColor="backgroundInverted">
-        {open && (
-          <Box>
-            {links.map((link) => (
-              <Text as={Link} color="white">
-                {link}
-              </Text>
-            ))}
-          </Box>
-        )}
-      </Box>
-    </Box>
+      {open && (
+        <Grid display="flex" flexDirection="column" mt={1}>
+          {links.map((link) => (
+            <RouterButton
+              as={AnchorTextLink}
+              color="white"
+              href={onchainVoting.find((l) => l.label === link)?.href}
+              target="_blank"
+              style={{ textDecoration: 'none' }}
+            >
+              {link}
+            </RouterButton>
+          ))}
+        </Grid>
+      )}
+    </>
   )
 }
 
@@ -86,41 +93,49 @@ export function SubMenu({
   icon,
 }: {
   links: string[]
-  withToggle?: boolean
+  withToggle: boolean
   label: string
   icon: React.ReactNode
 }) {
-  const theme = useTheme()
   const [open, setOpen] = React.useState(false)
-  const fullWidth = `calc(100vw - 2 * ${theme.space[1]}px)`
-  const offset = `calc(100% + 2 * ${theme.space[1]}px)`
-  const id = React.useId()
-  const aboveM = useIsAboveBreakpoint('M')
-  const aboveL = useIsAboveBreakpoint('L')
-  const isIpad = aboveM && !aboveL
+  const isLarge = useIsAboveBreakpoint('L')
 
   return (
     <Box>
-      {isIpad ? (
-        <ToggleMenu links={links} />
-      ) : (
+      {isLarge ? (
         <Stack>
           {withToggle ? (
-            <ToggleMenu label={label} icon={icon} withToggle={withToggle} open={open} setOpen={setOpen} links={links} />
+            <ToggleMenu label={label} icon={icon} open={open} setOpen={setOpen} links={links} />
           ) : (
-            <StyledRouterButton as={Link} color="white">
-              {icon}
-              <Text color="white" variant={isIpad ? 'body3' : 'body2'} style={{ marginLeft: 8 }}>
-                {label}
-              </Text>
-            </StyledRouterButton>
+            <>
+              <StyledRouterButton as={Link} color="white">
+                {icon}
+                <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
+                  {label}
+                </Text>
+              </StyledRouterButton>
+              {links.map((link) => (
+                <RouterButton key={link} as={Link} color="white">
+                  {link}
+                </RouterButton>
+              ))}
+            </>
           )}
+        </Stack>
+      ) : (
+        <>
+          <StyledRouterButton as={Link} color="white">
+            {icon}
+            <Text color="white" variant="body2" style={{ marginLeft: 8 }}>
+              {label}
+            </Text>
+          </StyledRouterButton>
           {links.map((link) => (
-            <RouterButton as={Link} color="white">
+            <RouterButton key={link} as={Link} color="white">
               {link}
             </RouterButton>
           ))}
-        </Stack>
+        </>
       )}
     </Box>
   )

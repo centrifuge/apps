@@ -66,9 +66,9 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const { showSwaps } = useDebugFlags()
   const iconSize = ['iconSmall', 'iconLarge', 'iconSmall']
-  const aboveM = useIsAboveBreakpoint('M')
-  const aboveL = useIsAboveBreakpoint('L')
-  const isIpad = aboveM && !aboveL
+  const isMedium = useIsAboveBreakpoint('M')
+  const isLarge = useIsAboveBreakpoint('L')
+  const isIpad = isMedium && !isLarge
 
   const menuItems = [
     {
@@ -88,7 +88,7 @@ export function Menu() {
       icon: <IconGovernance size={iconSize} color="white" />,
       subMenu: ['Onchain voting', 'Offchain voting', 'Governance forum'],
       enabled: true,
-      withToggle: true,
+      withToggle: isLarge,
     },
     {
       label: 'NFTs',

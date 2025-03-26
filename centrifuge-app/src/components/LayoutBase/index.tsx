@@ -71,20 +71,18 @@ const MobileMenuContent = () => (
 
 export const LayoutBase = () => {
   const isDesktop = useIsAboveBreakpoint('L')
-  const isIpad = useIsAboveBreakpoint('M') && !useIsAboveBreakpoint('L')
-  const isMobile = !useIsAboveBreakpoint('M')
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <>
-      {(isDesktop || isIpad) && (
+      {isDesktop && (
         <Sidebar>
           <SidebarMenu />
         </Sidebar>
       )}
 
-      {isMobile && (
+      {!isDesktop && (
         <MobileHeader>
           <div>
             <LogoLink />
@@ -95,7 +93,7 @@ export const LayoutBase = () => {
         </MobileHeader>
       )}
 
-      {isMobile && (
+      {!isDesktop && (
         <Drawer isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} title="Menu">
           <MobileMenuContent />
         </Drawer>
