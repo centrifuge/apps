@@ -5,7 +5,7 @@ import { useTinlakeLoans } from './tinlake/useTinlakePools'
 export function useLoans(poolIds: string[]) {
   const isTinlakePool = poolIds.length === 1 && poolIds[0]?.startsWith('0x')
 
-  const { data: tinlakeLoans, isLoading: isLoadingTinlake } = useTinlakeLoans(poolIds[0])
+  const { data: tinlakeLoans, isLoading: isLoadingTinlake } = useTinlakeLoans(poolIds?.[0])
 
   const [centLoans, isLoading] = useCentrifugeQuery(['loans', poolIds], (cent) => cent.pools.getLoans({ poolIds }), {
     suspense: true,

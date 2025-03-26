@@ -85,7 +85,7 @@ function OnboardingSettingsAccordion({
 }
 
 type OnboardingFormValues = {
-  onboardingExperience: 'centrifuge' | 'other' | 'none'
+  onboardingExperience: 'centrifuge' | 'external' | 'none'
   tranches: { [trancheId: string]: { agreement: undefined | File; openForOnboarding: boolean } }
   kybRestrictedCountries: { label: string; value: string }[]
   kycRestrictedCountries: { label: string; value: string }[]
@@ -115,10 +115,10 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
   const baseInitialValues = useMemo(
     () => ({
       onboardingExperience: poolMetadata?.onboarding?.externalOnboardingUrl
-        ? 'other'
+        ? 'external'
         : isOpenForOnboarding
         ? 'centrifuge'
-        : ('none' as 'centrifuge' | 'other' | 'none'),
+        : ('none' as 'centrifuge' | 'external' | 'none'),
       tranches: (pool.tranches as Token[]).reduce((prevT, currT) => {
         const agreementUrl = poolMetadata?.onboarding?.tranches?.[currT.id]?.agreement?.uri
           ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[currT.id].agreement!.uri)
@@ -284,7 +284,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
           tranches: onboardingTranches,
           kycRestrictedCountries,
           kybRestrictedCountries,
-          externalOnboardingUrl: values.onboardingExperience === 'other' ? values.externalOnboardingUrl : undefined,
+          externalOnboardingUrl: values.onboardingExperience === 'external' ? values.externalOnboardingUrl : undefined,
           taxInfoRequired: values.taxInfoRequired,
         },
       }
@@ -367,6 +367,17 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                           <RadioButton
                             name="onboardingExperience"
                             id="onboardingExperience"
+                            height={44}
+                            border
+                            checked={formik.values.onboardingExperience === 'external'}
+                            label="External"
+                            onChange={() => {
+                              formik.setFieldValue('onboardingExperience', 'external')
+                            }}
+                          />
+                          <RadioButton
+                            name="onboardingExperience"
+                            id="onboardingExperience"
                             border
                             height={44}
                             checked={formik.values.onboardingExperience === 'none'}
@@ -375,19 +386,8 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                               formik.setFieldValue('onboardingExperience', 'none')
                             }}
                           />
-                          <RadioButton
-                            name="onboardingExperience"
-                            id="onboardingExperience"
-                            height={44}
-                            border
-                            checked={formik.values.onboardingExperience === 'other'}
-                            label="Other"
-                            onChange={() => {
-                              formik.setFieldValue('onboardingExperience', 'other')
-                            }}
-                          />
                         </Stack>
-                        {formik.values.onboardingExperience === 'other' && (
+                        {formik.values.onboardingExperience === 'external' && (
                           <TextInput
                             value={formik.values.externalOnboardingUrl}
                             onChange={(e) => formik.setFieldValue('externalOnboardingUrl', e.target.value)}
@@ -395,7 +395,7 @@ function OnboardingSettings({ poolId, onClose }: { poolId: string; onClose: () =
                             label="External onboarding url"
                             onBlur={formik.handleBlur}
                             errorMessage={
-                              formik.errors.externalOnboardingUrl && formik.values.onboardingExperience === 'other'
+                              formik.errors.externalOnboardingUrl && formik.values.onboardingExperience === 'external'
                                 ? formik.errors.externalOnboardingUrl
                                 : undefined
                             }

@@ -4123,9 +4123,9 @@ export function getPoolsModule(inst: Centrifuge) {
         return poolIdSet.has(sanitizedEventPoolId)
       })
     )
-
     return $api.pipe(
       switchMap((api) => {
+        if (poolIds.length === 0) return of([])
         // For each poolId, create an observable to fetch its loans
         const poolObservables = poolIds.map((poolId) => {
           return api.query.poolSystem.pool(poolId).pipe(

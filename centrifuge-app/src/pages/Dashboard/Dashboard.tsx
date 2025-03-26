@@ -19,7 +19,7 @@ const aumOptions = [
 
 export default function Dashboard() {
   const theme = useTheme()
-  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools()
+  const { selectedPoolsWithMetadata, selectedPoolIds } = useSelectedPools(true)
 
   const totalNAV = useTotalNAV(selectedPoolsWithMetadata)
   const { liquidityData, isLoading } = useLiquidityMulti(selectedPoolIds)

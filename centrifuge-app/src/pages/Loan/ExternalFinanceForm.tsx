@@ -273,18 +273,22 @@ export function ExternalFinanceForm({
                 </Stack>
 
                 {source === 'reserve' ? (
-                  <InlineFeedback status="default">
-                    <Text variant="body2" color="statusDefault">
-                      Stablecoins will be transferred to the designated withdrawal addresses on the specified networks.
-                      A delay may occur before the transfer is completed.
-                    </Text>
-                  </InlineFeedback>
+                  <Stack mt={3}>
+                    <InlineFeedback status="default">
+                      <Text variant="body2" color="statusDefault">
+                        Stablecoins will be transferred to the designated withdrawal addresses on the specified
+                        networks. A delay may occur before the transfer is completed.
+                      </Text>
+                    </InlineFeedback>
+                  </Stack>
                 ) : (
-                  <InlineFeedback status="default">
-                    <Text variant="body2" color="statusDefault">
-                      Virtual accounting process. No onchain stablecoin transfers are expected.
-                    </Text>
-                  </InlineFeedback>
+                  <Stack mt={3}>
+                    <InlineFeedback status="default">
+                      <Text variant="body2" color="statusDefault">
+                        Virtual accounting process. No onchain stablecoin transfers are expected.
+                      </Text>
+                    </InlineFeedback>
+                  </Stack>
                 )}
               </Box>
             </Stack>
