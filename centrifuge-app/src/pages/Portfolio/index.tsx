@@ -29,6 +29,10 @@ const StyledGrid = styled(Grid)`
   gap: 16px;
   margin-left: 32px;
   margin-right: 32px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.M}) {
+    margin-left: 0;
+    margin-right: 0;
+  }
 `
 
 export default function PortfolioPage() {

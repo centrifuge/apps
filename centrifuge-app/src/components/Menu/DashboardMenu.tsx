@@ -11,32 +11,38 @@ const pages = [
 
 export function DashboardMenu() {
   const isLarge = useIsAboveBreakpoint('L')
+  const isSmall = useIsAboveBreakpoint('S')
+  const isMedium = useIsAboveBreakpoint('M')
+
+  const isLargeOrSmall = (isLarge || isSmall) && !isMedium
   return (
     <>
-      {isLarge ? (
-        <PageLink to="/dashboard" stacked={!isLarge} exact>
-          <IconDashboard size={['iconMedium', 'iconMedium', 'iconSmall']} />
-          Dashboard
-        </PageLink>
+      {isMedium ? (
+        <Box width="100%">
+          <PageLink to="/dashboard" exact>
+            <IconDashboard size={['iconMedium', 'iconSmall', 'iconMedium', 'iconSmall']} />
+            Dashboard
+          </PageLink>
+        </Box>
       ) : (
         pages.map(({ href, label }) => (
           <Box width="100%" key={href}>
-            <PageLink to={`/dashboard/${href}`} stacked={!isLarge}>
-              <IconDashboard size={['iconMedium', 'iconMedium', 'iconSmall']} />
+            <PageLink to={`/dashboard/${href}`}>
+              <IconDashboard size={['iconMedium', 'iconSmall', 'iconMedium', 'iconSmall']} />
               {label}
             </PageLink>
           </Box>
         ))
       )}
-      {isLarge && (
-        <Box pl={4}>
+      {isMedium ? (
+        <Box width="100%" pl={4}>
           <Stack as="ul" gap={1}>
             {pages.map(({ href, label, match }) => (
               <MenuLink path={href} name={label} matchingPath={match} />
             ))}
           </Stack>
         </Box>
-      )}
+      ) : null}
     </>
   )
 }

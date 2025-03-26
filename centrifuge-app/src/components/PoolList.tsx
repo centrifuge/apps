@@ -11,7 +11,6 @@ import { useMetadataMulti } from '../utils/useMetadata'
 import { PoolCard, PoolCardProps } from './PoolCard'
 import { PoolListView } from './PoolCard/PoolListView'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
-import { filterPools } from './PoolFilter/utils'
 
 export type MetaDataById = Record<string, PoolMetaDataPartial>
 export type PoolMetaDataPartial = Partial<PoolMetadata> | undefined
@@ -60,7 +59,7 @@ export function PoolList() {
       .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b.valueLocked.sub(a.valueLocked).toNumber() : 0))
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
-    return [pools, search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools]
+    return [pools, sortedPools]
   }, [listedPools, search, cent, centPoolsMetaDataById])
 
   const archivedPools = pools.filter((pool) => pool?.status?.includes('Archived'))

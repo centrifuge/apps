@@ -3,7 +3,6 @@ import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -50,7 +49,7 @@ export function PoolDetailHeader({ actions }: Props) {
     >
       <Shelf
         overflow="auto"
-        px={BASE_PADDING}
+        px={[2, 2, 2, 2, 5]}
         bg="backgroundPage"
         style={{
           boxShadow: `0 1px 0 ${theme.colors.borderPrimary}`,
