@@ -18,9 +18,10 @@ export function usePools(suspense = true) {
 }
 
 export function usePool<T extends boolean = true>(
-  id: string,
+  id: string | undefined,
   required?: T
 ): T extends true ? Pool | TinlakePool : Pool | TinlakePool | undefined {
+  if (!id) return required ? (undefined as any) : undefined
   const isTinlakePool = id?.startsWith('0x')
   const tinlakePools = useTinlakePools(isTinlakePool)
   const pools = usePools()

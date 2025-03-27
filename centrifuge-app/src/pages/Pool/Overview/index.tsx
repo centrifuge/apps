@@ -5,6 +5,7 @@ import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useNavigate, useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { GeoLocationBanner } from '../../../../src/components/GeoLocationBanner'
 import { InvestRedeemContext, InvestRedeemProvider } from '../../../../src/components/InvestRedeem/InvestRedeemProvider'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
@@ -51,6 +52,7 @@ export function PoolDetailOverviewTab() {
   return (
     <>
       <PoolDetailHeader />
+      <GeoLocationBanner />
       <LoadBoundary>
         <PoolDetailOverview />
       </LoadBoundary>
