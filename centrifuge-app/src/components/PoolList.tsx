@@ -78,7 +78,7 @@ export function PoolList() {
     <Stack>
       <Stack>
         <Box overflow="auto">
-          <Grid columns={[1, 2, 2, 3]} as="ul" role="list" gap={3}>
+          <Grid columns={[1, 1, 2, 2, 3]} as="ul" role="list" gap={3}>
             {metadataIsLoading
               ? Array(6)
                   .fill(true)
