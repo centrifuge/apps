@@ -2,7 +2,7 @@ import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Drawer, IconButton, IconHamburger, IconX } from '@centrifuge/fabric'
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
 import { LogoLink } from '../LogoLink-deprecated'
@@ -68,6 +68,7 @@ const MobileMenuContent = () => (
 )
 
 export const LayoutBase = () => {
+  const theme = useTheme()
   const location = useLocation()
   const isDesktop = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
@@ -82,7 +83,7 @@ export const LayoutBase = () => {
   return (
     <>
       {isDesktop && (
-        <Box position="fixed" top="1rem" right="1rem" zIndex={1200} width={220} mt={2} marginRight={1}>
+        <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
           <WalletMenu />
         </Box>
       )}

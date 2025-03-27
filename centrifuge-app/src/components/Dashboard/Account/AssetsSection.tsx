@@ -105,9 +105,14 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     }
   )
 
-  let [liquidityAdminAccount] = useSuitableAccounts({ poolId: pool.id, poolRole: ['LiquidityAdmin'] })
   const [update, setUpdate] = useState(false)
   const isTinlakePool = pool.id.startsWith('0x')
+  const [liquidityAdminAccount] = useSuitableAccounts({ poolId: pool.id, poolRole: ['LiquidityAdmin'] })
+  const [account] = useSuitableAccounts({
+    poolId: pool.id,
+    proxyType: ['Borrow', 'Invest'],
+    poolRole: ['LiquidityAdmin', 'PoolAdmin'],
+  })
 
   // Needs to update when selecting a new pool
   useEffect(() => {
@@ -154,6 +159,39 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
 
       return acc
     }, {}) || {}
+
+  const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
+    'Start order execution',
+    (cent) => (args: [poolId: string, collect: boolean], options) =>
+      cent.pools.closeEpoch([args[0], false], { batch: true }).pipe(
+        switchMap((closeTx) => {
+          const tx = api.tx.utility.batchAll(
+            [
+              ...closeTx.method.args[0],
+              orders?.length
+                ? api.tx.utility.batch(
+                    orders
+                      .slice(0, MAX_COLLECT)
+                      .map((order) =>
+                        api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
+                          order.accountId,
+                          [pool.id, order.trancheId]
+                        )
+                      )
+                  )
+                : null,
+            ].filter(Boolean)
+          )
+          return cent.wrapSignAndSend(api, tx, options)
+        })
+      ),
+    {
+      onSuccess: () => {
+        setUpdate(false)
+        queryClient.invalidateQueries(['loans', pool.id])
+      },
+    }
+  )
 
   const { execute, isLoading: isUpdating } = useCentrifugeTransaction(
     'Update NAV',
@@ -305,8 +343,10 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
     },
     {
       onSuccess: () => {
-        setUpdate(false)
-        queryClient.invalidateQueries(['loans', pool.id])
+        closeEpochTx([pool.id, ordersFullyExecutable], {
+          account,
+          forceProxyType: ['Borrow', 'Invest'],
+        })
       },
     }
   )
@@ -500,7 +540,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
                 <Button
                   small
                   style={{ width: '170px' }}
-                  disabled={!form.dirty || isUpdating}
+                  disabled={!form.dirty || isUpdating || loadingClose}
                   onClick={() => form.submitForm()}
                 >
                   Update NAV

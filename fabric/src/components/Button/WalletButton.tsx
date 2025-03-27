@@ -30,6 +30,7 @@ const StyledButton = styled.button`
   border-radius: 4px;
   white-space: nowrap;
   border: 3px solid transparent;
+  width: 220px;
 `
 
 const IdenticonWrapper = styled(Flex)({

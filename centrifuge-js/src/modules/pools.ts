@@ -40,6 +40,7 @@ import {
   isValidDate,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
+import { parseDate } from '../utils/Date'
 import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
@@ -1603,12 +1604,12 @@ export function getPoolsModule(inst: Centrifuge) {
                       tranches: {},
                     }
                     permissions.trancheInvestor.info
-                      .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                      .filter((info: any) => parseDate(info.permissionedTill) > new Date())
                       .forEach((info: any) => {
-                        roles.tranches[info.trancheId] = {
-                          permissionedTill: new Date(info.permissionedTill * 1000).toISOString(),
+                        return (roles.tranches[info.trancheId] = {
+                          permissionedTill: parseDate(info.permissionedTill).toISOString(),
                           isFrozen: info.isFrozen,
-                        }
+                        })
                       })
 
                     setPoolRoles(account, poolId, roles)
@@ -1681,10 +1682,10 @@ export function getPoolsModule(inst: Centrifuge) {
                 tranches: {},
               }
               permissions.trancheInvestor.info
-                .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                .filter((info: any) => parseDate(info.permissionedTill) > new Date())
                 .forEach((info: any) => {
                   roles[account].tranches[info.trancheId] = {
-                    permissionedTill: new Date(info.permissionedTill * 1000).toISOString(),
+                    permissionedTill: parseDate(info.permissionedTill).toISOString(),
                     isFrozen: info.isFrozen,
                   }
                 })

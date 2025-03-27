@@ -23,7 +23,7 @@ const StyledCard = styled(Card)`
   max-width: 100%;
   padding: 12px;
   border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
-  height: 350px;
+  min-height: 350px;
 
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.textPrimary};
