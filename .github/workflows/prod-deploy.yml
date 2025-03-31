@@ -147,7 +147,7 @@ jobs:
         uses: ./apps/.github/actions/deploy-gfunction
         if: ${{ github.event_name != 'pull_request' }}
         with:
-          app_name: "${{ matrix.function.name }}-production"
+          app_name: "${{ matrix.function.name }}"
           artifact_name: ${{ matrix.function.name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
