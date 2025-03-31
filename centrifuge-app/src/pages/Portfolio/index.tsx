@@ -150,7 +150,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     [currentPortfolioValue, realizedPL, unrealizedPL, yieldSinceInception]
   )
 
-  if (!transactions?.investorTransactions?.length) {
+  if (!tokens?.length) {
     return (
       <StyledGrid>
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center">
