@@ -1,5 +1,11 @@
 import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
-import { NetworkIcon, formatBalance, useCentrifuge, useGetNetworkName } from '@centrifuge/centrifuge-react'
+import {
+  NetworkIcon,
+  formatBalance,
+  useCentrifuge,
+  useCentrifugeUtils,
+  useGetNetworkName,
+} from '@centrifuge/centrifuge-react'
 import { Box, IconInfo, Shelf, Text, truncate } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -45,6 +51,7 @@ export function InvestorTable() {
   const { poolsWithMetadata, selectedPoolIds } = useSelectedPools()
   const investors = useInvestorListMulti(poolsWithMetadata?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
+  const utils = useCentrifugeUtils()
 
   const data: InvestorTableRow[] =
     investors
@@ -95,8 +102,13 @@ export function InvestorTable() {
       header: <SearchableTableHeader label="Wallet" value={searchValue} onSubmit={setSearchValue} />,
       align: 'left',
       cell: (row: InvestorTableRow) => (
-        <Text variant="body3" fontWeight="500" style={{ cursor: 'copy' }} onClick={() => copyToClipboard(row.wallet)}>
-          {truncate(row.wallet)}
+        <Text
+          variant="body3"
+          fontWeight="500"
+          style={{ cursor: 'copy' }}
+          onClick={() => copyToClipboard(row.wallet && utils.formatAddress(row.wallet))}
+        >
+          {truncate(row.wallet && utils.formatAddress(row.wallet))}
         </Text>
       ),
     },
