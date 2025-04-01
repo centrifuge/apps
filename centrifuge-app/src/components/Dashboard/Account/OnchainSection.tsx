@@ -1,6 +1,17 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Grid, IconChevronRight, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  Grid,
+  IconChevronRight,
+  Shelf,
+  Stack,
+  Tabs,
+  TabsItem,
+  Text,
+} from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import { PageSummary } from '../../../../src/components/PageSummary'
 import { Tooltips } from '../../../../src/components/Tooltips'
@@ -29,6 +40,11 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
         setError(undefined)
       },
     }
+  )
+
+  const { execute: closeEpochTx, isLoading: isClosingEpoch } = useCentrifugeTransaction(
+    'Close epoch',
+    (cent) => cent.pools.closeEpoch
   )
 
   const onClick = () => {
@@ -138,70 +154,68 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
           </Grid>
         }
       />
-      <Grid gridTemplateColumns={['1fr 1fr']} gap={2}>
-        <Stack
-          backgroundColor="backgroundPage"
-          borderRadius={8}
-          p={2}
-          mt={3}
-          border="1px solid"
-          borderColor="borderPrimary"
-        >
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Text variant="heading4">Pending investments</Text>
-            {pool.tranches.length > 1 && (
-              <Tabs
-                selectedIndex={selectedTabIndexInvestments}
-                onChange={(index) => setSelectedTabIndexInvestments(index)}
-              >
-                {pool.tranches.map((tranche) => (
-                  <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
-                    {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
-                  </TabsItem>
-                ))}
-              </Tabs>
-            )}
-          </Box>
-          <Text
-            variant={investments.isZero() ? 'body2' : 'heading1'}
-            color={investments.isZero() ? 'textSecondary' : 'textPrimary'}
-            style={{ marginTop: investments.isZero() ? '12px' : 0 }}
+      <Stack gap={2} mt={3}>
+        <Grid gridTemplateColumns={['1fr 1fr']} gap={2}>
+          <Stack backgroundColor="backgroundPage" borderRadius={8} p={2} border="1px solid" borderColor="borderPrimary">
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Text variant="heading4">Pending investments</Text>
+              {pool.tranches.length > 1 && (
+                <Tabs
+                  selectedIndex={selectedTabIndexInvestments}
+                  onChange={(index) => setSelectedTabIndexInvestments(index)}
+                >
+                  {pool.tranches.map((tranche) => (
+                    <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
+                      {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
+                    </TabsItem>
+                  ))}
+                </Tabs>
+              )}
+            </Box>
+            <Text
+              variant={investments.isZero() ? 'body2' : 'heading1'}
+              color={investments.isZero() ? 'textSecondary' : 'textPrimary'}
+              style={{ marginTop: investments.isZero() ? '12px' : 0 }}
+            >
+              {investments.isZero() ? 'No pending investments' : formatBalance(investments)}
+            </Text>
+          </Stack>
+          <Stack backgroundColor="backgroundPage" borderRadius={8} p={2} border="1px solid" borderColor="borderPrimary">
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Text variant="heading4">Pending Redemptions</Text>
+              {pool.tranches.length > 1 && (
+                <Tabs
+                  selectedIndex={selectedTabIndexRedemptions}
+                  onChange={(index) => setSelectedTabIndexRedemptions(index)}
+                >
+                  {pool.tranches.map((tranche) => (
+                    <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
+                      {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
+                    </TabsItem>
+                  ))}
+                </Tabs>
+              )}
+            </Box>
+            <Text
+              variant={redemptions.isZero() ? 'body2' : 'heading1'}
+              color={redemptions.isZero() ? 'textSecondary' : 'textPrimary'}
+              style={{ marginTop: redemptions.isZero() ? '12px' : 0 }}
+            >
+              {redemptions.isZero() ? 'No pending redemptions' : formatBalance(redemptions)}
+            </Text>
+          </Stack>
+        </Grid>
+        <Shelf justifyContent="flex-end">
+          <Button
+            variant="secondary"
+            small
+            onClick={() => closeEpochTx([pool?.id, false], { account, forceProxyType: ['Borrow', 'Invest'] })}
+            disabled={isClosingEpoch}
           >
-            {investments.isZero() ? 'No pending investments' : formatBalance(investments)}
-          </Text>
-        </Stack>
-        <Stack
-          backgroundColor="backgroundPage"
-          borderRadius={8}
-          p={2}
-          mt={3}
-          border="1px solid"
-          borderColor="borderPrimary"
-        >
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Text variant="heading4">Pending Redemptions</Text>
-            {pool.tranches.length > 1 && (
-              <Tabs
-                selectedIndex={selectedTabIndexRedemptions}
-                onChange={(index) => setSelectedTabIndexRedemptions(index)}
-              >
-                {pool.tranches.map((tranche) => (
-                  <TabsItem showBorder styleOverrides={{ padding: '8px' }}>
-                    {tranche.seniority === 0 ? 'Junior tranche' : 'Senior tranche'}
-                  </TabsItem>
-                ))}
-              </Tabs>
-            )}
-          </Box>
-          <Text
-            variant={redemptions.isZero() ? 'body2' : 'heading1'}
-            color={redemptions.isZero() ? 'textSecondary' : 'textPrimary'}
-            style={{ marginTop: redemptions.isZero() ? '12px' : 0 }}
-          >
-            {redemptions.isZero() ? 'No pending redemptions' : formatBalance(redemptions)}
-          </Text>
-        </Stack>
-      </Grid>
+            Close epoch
+          </Button>
+        </Shelf>
+      </Stack>
     </Box>
   )
 }
