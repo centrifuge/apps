@@ -268,7 +268,7 @@ function PoolPerformanceChart() {
                 minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tick={(props) => <CustomTick {...props} />}
+                tick={(props) => <CustomTick {...props} y={190} />}
                 ticks={getOneDayPerMonth(chartData, 'day')}
               />
               <YAxis
