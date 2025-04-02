@@ -59,7 +59,7 @@ export function PricingValues({ loan, pool }: Props) {
     const accruedPrice = 'currentPrice' in loan && loan.currentPrice
 
     return (
-      <Card p={3} variant="secondary">
+      <Card p={3}>
         <Stack gap={2}>
           <Text variant="heading4">Pricing</Text>
           <MetricsTable

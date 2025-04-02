@@ -261,7 +261,7 @@ function Loan() {
               if (!isPublic) return null
               return (
                 <React.Suspense fallback={<Spinner />}>
-                  <Card p={3} variant="secondary">
+                  <Card p={3}>
                     <Stack gap={2}>
                       <Text variant="heading4">{section.name}</Text>
                       <MetricsTable

@@ -74,7 +74,7 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
   ]
 
   return (
-    <Card p={3} variant="secondary">
+    <Card p={3}>
       <Stack gap={2}>
         <Text variant="heading4">Holdings</Text>
         <MetricsTable metrics={metrics} />
