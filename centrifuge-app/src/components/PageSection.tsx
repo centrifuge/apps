@@ -43,7 +43,7 @@ export function PageSection({
 }: Props) {
   const [open, setOpen] = React.useState(defaultOpen)
   return (
-    <Stack as="section" padding={2} mx={[0, 0, 0, 1, 3]} gap={3}>
+    <Stack as="section" padding={2} gap={3}>
       {(title || titleAddition) && (
         <Shelf justifyContent="space-between" as="header">
           <Stack>

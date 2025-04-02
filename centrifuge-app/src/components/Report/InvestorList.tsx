@@ -156,9 +156,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <Box paddingX={2}>
-      <DataTable data={data} columns={columns} hoverable defaultSortKey="value[3]" scrollable />
-    </Box>
+    <DataTable data={data} columns={columns} hoverable defaultSortKey="value[3]" scrollable />
   ) : (
     <UserFeedback reportType="InvestorList" />
   )

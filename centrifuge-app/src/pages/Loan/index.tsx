@@ -170,7 +170,7 @@ function Loan() {
 
   return (
     <Stack>
-      <Box mt={2} mb={2} ml={2}>
+      <Box mt={2} mb={2}>
         <BackButton label={name} as={RouterLinkButton} goBack>
           {loan && <LoanLabel loan={loan} />}
         </BackButton>

@@ -1,6 +1,6 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import { useGetExplorerUrl } from '@centrifuge/centrifuge-react'
-import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
+import { IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../../../src/utils/formatting'
 import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
@@ -168,20 +168,18 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
   }, [transactions, setCsvData])
 
   if (isLoading) {
-    return <Spinner mt={2} />
+    return <Spinner />
   }
 
   return data && data.length > 0 ? (
-    <Box paddingX={2}>
-      <DataTable
-        data={data}
-        columns={columns}
-        hoverable
-        scrollable
-        defaultSortKey="transactionDate"
-        defaultSortOrder="desc"
-      />
-    </Box>
+    <DataTable
+      data={data}
+      columns={columns}
+      hoverable
+      scrollable
+      defaultSortKey="transactionDate"
+      defaultSortOrder="desc"
+    />
   ) : (
     <UserFeedback reportType="Asset transactions" />
   )

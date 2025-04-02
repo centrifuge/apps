@@ -126,7 +126,9 @@ export const LayoutBase = () => {
       )}
 
       <Content>
-        <Outlet />
+        <Box mx={2}>
+          <Outlet />
+        </Box>
       </Content>
     </>
   )

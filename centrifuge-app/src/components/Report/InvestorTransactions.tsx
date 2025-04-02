@@ -237,7 +237,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <Box paddingX={2}>
+    <Box>
       <DataTable data={data} columns={columns} hoverable scrollable defaultSortKey="value[4]" defaultSortOrder="desc" />
     </Box>
   ) : (

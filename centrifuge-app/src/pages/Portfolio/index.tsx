@@ -12,7 +12,6 @@ import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { useTransactionsByAddress } from '../../utils/usePools'
 import { TransactionHistory } from './TransactionHistory'
 
 const StyledGrid = styled(Grid)`
@@ -67,7 +66,6 @@ function Portfolio() {
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
   const theme = useTheme()
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
-  const { data: transactions } = useTransactionsByAddress(centAddress)
   const tokens = useHoldings(address, chainId)
 
   const convertedTokens = useMemo(() => {
@@ -170,7 +168,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
 
   return (
     <>
-      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
+      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mb={2} />
       <PortfolioSummary data={pageSummaryData} />
       <Stack gap={4} m={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
