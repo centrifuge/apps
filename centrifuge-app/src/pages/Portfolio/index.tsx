@@ -1,5 +1,5 @@
 import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { useWallet } from '@centrifuge/centrifuge-react'
+import { useBalances, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Grid, IconInfo, IconWallet, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -72,7 +72,9 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const theme = useTheme()
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
   const tokens = useHoldings(address, chainId)
-  const tokenBalance = useTokenBalance(isEvmAddress(address) ? address : undefined)
+  const balances = useBalances(address)
+  const { balance: centBalance } = useTokenBalance(address)
+  const balance = isEvmAddress(address) ? centBalance || Dec(0) : balances?.native.balance.toDecimal() || Dec(0)
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -176,7 +178,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   return (
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
-      {debugFlags.showCFGTokenMigration && (
+      {debugFlags.showCFGTokenMigration && !balance?.isZero() && (
         <Grid
           display="flex"
           alignItems="center"

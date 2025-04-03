@@ -2,7 +2,7 @@ import { AxelarGMPRecoveryAPI, Environment } from '@axelar-network/axelarjs-sdk'
 import { useEffect } from 'react'
 import { isTestEnv } from '../../../src/config'
 
-const intervalMs = 600_000
+const intervalMs = 60_000
 
 const axelarRecoveryApi = new AxelarGMPRecoveryAPI({
   environment: isTestEnv ? Environment.TESTNET : Environment.MAINNET,
