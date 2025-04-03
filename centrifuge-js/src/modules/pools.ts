@@ -2083,6 +2083,7 @@ export function getPoolsModule(inst: Centrifuge) {
         }, {} as Record<string, string>)
 
         // read pools, poolIds and currencies from observable
+        // Reduce the amount of pools it's fetching to avoid performance issues
         const pools = rawPools.slice(Math.floor(Math.min(-0.3 * rawPools.length, -10))).map(([poolKeys, poolValue]) => {
           const data = poolValue.toJSON() as PoolDetailsData
           const { currency } = poolValue.toHuman() as any
