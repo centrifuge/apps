@@ -1,4 +1,3 @@
-import { AxelarGMPRecoveryAPI, Environment } from '@axelar-network/axelarjs-sdk'
 import {
   ConnectionGuard,
   useAddress,
@@ -8,7 +7,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, IconClock, IconInfo, Text, TextInput } from '@centrifuge/fabric'
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { firstValueFrom, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
@@ -23,10 +22,6 @@ import { TooltipText } from './CFGTokenMigration'
 import MigrationSuccessPage from './MigrationSuccessPage'
 import { useAxelarStatusPoller } from './useAxelarStatus'
 import { TransactionData, useRecordTransaction } from './useRecordTransaction'
-
-const axelarRecoveryApi = new AxelarGMPRecoveryAPI({
-  environment: isTestEnv ? Environment.TESTNET : Environment.MAINNET,
-})
 
 const StyledButton = styled(Box)<{ disabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.textPrimary};
@@ -57,7 +52,7 @@ export default function CFGTokenMigrationCent() {
   const api = useCentrifugeApi()
   const debug = useDebugFlags()
   const theme = useTheme()
-  const { recordTransaction, loading, error, success } = useRecordTransaction()
+  const { recordTransaction } = useRecordTransaction()
   const address = useAddress()!
   const balances = useBalances(address)
   const balance = balances?.native.balance.toDecimal() || Dec(0)
@@ -69,6 +64,13 @@ export default function CFGTokenMigrationCent() {
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false)
   const [axelarHash, setAxelarHash] = useState<string>('')
   const [step, setStep] = useState<number>(0)
+  const [initialTokenBalance, setInitialTokenBalance] = useState<number>()
+  const [isTouched, setIsTouched] = useState(false)
+
+  // ts-ignore
+  useEffect(() => {
+    setInitialTokenBalance(balance?.toNumber())
+  }, [])
 
   // Check if the migration has been completed
   useAxelarStatusPoller({
@@ -97,7 +99,7 @@ export default function CFGTokenMigrationCent() {
         const block = await firstValueFrom(api.rpc.chain.getBlockHash(result.blockNumber))
         const apiAt = await api.at(block)
         const events = await firstValueFrom(apiAt.query.system.events())
-        console.log('events', events)
+        console.log('events', result)
         const event = (events as any).find(({ event }: { event: any }) => api.events.ethereum.Executed.is(event))
         if (event) {
           const eventData = event.toHuman() as any
@@ -108,8 +110,8 @@ export default function CFGTokenMigrationCent() {
           const transactionData: TransactionData = {
             from_address: address,
             to_address: addressToVerify,
-            tx_hash: '0000000000',
-            chain: '2',
+            tx_hash: result.txHash,
+            chain: 'centrifuge',
             amount: balance?.toNumber(),
           }
           await recordTransaction(transactionData)
@@ -163,7 +165,7 @@ export default function CFGTokenMigrationCent() {
         flexDirection="column"
         gap={2}
       >
-        <CurrencyInput value={balance?.toNumber()} currency="CFG" label="Amount of CFG to migrate" disabled />
+        <CurrencyInput value={initialTokenBalance || 0} currency="CFG" label="Amount of CFG to migrate" disabled />
         <TextInput value={formattedAddress} label="Ethereum wallet address" disabled />
       </Grid>
     )
@@ -244,7 +246,8 @@ export default function CFGTokenMigrationCent() {
                       value={formattedAddress}
                       label="Ethereum wallet address"
                       onChange={(e) => setAddressToVerify(e.target.value)}
-                      errorMessage={!isEvmAddress(addressToVerify) ? 'Invalid Ethereum address' : ''}
+                      onBlur={() => setIsTouched(true)}
+                      errorMessage={isTouched && !isEvmAddress(addressToVerify) ? 'Invalid Ethereum address' : ''}
                     />
                     {isAddressValid ? (
                       <Box
@@ -356,7 +359,9 @@ export default function CFGTokenMigrationCent() {
               </Box>
             )}
 
-            {step === 3 && <MigrationSuccessPage title="CFG" currencyName="Legacy CFG" balance={0} />}
+            {step === 3 && (
+              <MigrationSuccessPage title="CFG" currencyName="Legacy CFG" balance={initialTokenBalance || 0} />
+            )}
           </Box>
         </Box>
       </Box>
