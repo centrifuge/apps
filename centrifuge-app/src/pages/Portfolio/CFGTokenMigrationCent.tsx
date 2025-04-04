@@ -16,6 +16,7 @@ import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
+import { isEvmAddress } from '../../../src/utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { TooltipText } from './CFGTokenMigration'
@@ -62,11 +63,13 @@ export default function CFGTokenMigrationCent() {
   const CFGPrice = useCFGTokenPrice()
   const wcfgValue = balance ? balance.mul(Dec(CFGPrice || 0)) : Dec(0)
 
+  const [addressToVerify, setAddressToVerify] = useState<string>('')
   const [isAddressValid, setIsAddressValid] = useState<boolean>(false)
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false)
   const [axelarHash, setAxelarHash] = useState<string>('')
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<number>()
+  const [isTouched, setIsTouched] = useState(false)
 
   // ts-ignore
   useEffect(() => {
@@ -82,8 +85,8 @@ export default function CFGTokenMigrationCent() {
     },
   })
 
-  const formattedAddress = evmAddress ? getAddress(evmAddress) : ''
-
+  const formattedAddress =
+    addressToVerify && isEvmAddress(addressToVerify) ? getAddress(addressToVerify) : addressToVerify
   const { execute: executeMigration, isLoading: isLoadingMigration } = useCentrifugeTransaction(
     'Migrate CFG',
     (cent) => (_, options) => {
@@ -108,7 +111,7 @@ export default function CFGTokenMigrationCent() {
           setStep(2)
           const transactionData: TransactionData = {
             from_address: address,
-            to_address: evmAddress || '',
+            to_address: addressToVerify,
             tx_hash: result.txHash,
             chain: 'centrifuge',
             amount: balance?.toNumber(),
@@ -130,9 +133,16 @@ export default function CFGTokenMigrationCent() {
       const provider = new BrowserProvider(window.ethereum)
       const signer = await provider.getSigner()
 
+      if (!isEvmAddress(addressToVerify)) {
+        setIsAddressValid(false)
+        setIsLoadingVerification(false)
+        return
+      }
+
       const message = `Verify ownership of this address: ${evmAddress}`
       const signature = await signer.signMessage(message)
       const recoveredAddress = verifyMessage(message, signature)
+      const formattedAddress = getAddress(addressToVerify)
       if (recoveredAddress.toLowerCase() === formattedAddress.toLowerCase()) {
         setIsAddressValid(true)
       } else {
@@ -234,7 +244,13 @@ export default function CFGTokenMigrationCent() {
                   </Box>
                   <CurrencyInput value={balance?.toNumber()} currency="CFG" label="Amount of new CFG tokens" disabled />
                   <Grid gridTemplateColumns="1fr 1fr" alignItems="center" mt={2} gap={2} mb={2} position="relative">
-                    <TextInput value={evmAddress || ''} label="Ethereum wallet address" disabled />
+                    <TextInput
+                      value={formattedAddress}
+                      label="Ethereum wallet address"
+                      onChange={(e) => setAddressToVerify(e.target.value)}
+                      onBlur={() => setIsTouched(true)}
+                      errorMessage={isTouched && !isEvmAddress(addressToVerify) ? 'Invalid Ethereum address' : ''}
+                    />
                     {isAddressValid ? (
                       <Box
                         backgroundColor="statusOkBg"
@@ -250,7 +266,7 @@ export default function CFGTokenMigrationCent() {
                       <StyledButton
                         as="button"
                         onClick={verifyAddress}
-                        disabled={isLoadingVerification || !evmAddress}
+                        disabled={isLoadingVerification || !addressToVerify || !isEvmAddress(addressToVerify)}
                         style={{ position: 'absolute', right: 0, top: 0, width: '50%' }}
                       >
                         {isLoadingVerification ? 'Verifying...' : 'Connect wallet and sign message to verify access'}
