@@ -47,7 +47,7 @@ export const TooltipText = () => {
 
 export default function CFGTokenMigration() {
   const theme = useTheme()
-  const address = useAddress()
+  const address = useAddress('evm')
   const debug = useDebugFlags()
   const { balance, loading } = useTokenBalance(address)
   const CFGPrice = useCFGTokenPrice()
