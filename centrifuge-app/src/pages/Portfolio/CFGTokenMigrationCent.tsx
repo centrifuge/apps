@@ -82,14 +82,14 @@ export default function CFGTokenMigrationCent() {
     },
   })
 
-  const formattedAddress = getAddress(evmAddress || '')
+  const formattedAddress = evmAddress ? getAddress(evmAddress) : ''
 
   const { execute: executeMigration, isLoading: isLoadingMigration } = useCentrifugeTransaction(
     'Migrate CFG',
     (cent) => (_, options) => {
       return cent.getApi().pipe(
         switchMap((api) => {
-          const submittable = api.tx.cfgMigration.migrate({ evm: [isTestEnv ? 11155111 : 1, addressToVerify] })
+          const submittable = api.tx.cfgMigration.migrate({ evm: [isTestEnv ? 11155111 : 1, evmAddress] })
           return cent.wrapSignAndSend(api, submittable, options)
         })
       )
@@ -99,7 +99,6 @@ export default function CFGTokenMigrationCent() {
         const block = await firstValueFrom(api.rpc.chain.getBlockHash(result.blockNumber))
         const apiAt = await api.at(block)
         const events = await firstValueFrom(apiAt.query.system.events())
-        console.log('events', result)
         const event = (events as any).find(({ event }: { event: any }) => api.events.ethereum.Executed.is(event))
         if (event) {
           const eventData = event.toHuman() as any

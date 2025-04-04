@@ -41,9 +41,9 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress()
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
+  const address = useAddress(chainId ? 'evm' : 'substrate')
   return (
     <Box mb={2}>
       <LayoutSection alignItems="flex-start">
@@ -72,9 +72,9 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const theme = useTheme()
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
   const tokens = useHoldings(address, chainId)
-  const balances = useBalances(address)
-  const { balance: centBalance } = useTokenBalance(address)
-  const balance = isEvmAddress(address) ? centBalance || Dec(0) : balances?.native.balance.toDecimal() || Dec(0)
+  const balances = useBalances(chainId ? undefined : address)
+  const { balance: wcfgBalance } = useTokenBalance(address)
+  const balance = isEvmAddress(address) ? wcfgBalance || Dec(0) : balances?.native.balance.toDecimal() || Dec(0)
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
