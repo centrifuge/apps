@@ -69,11 +69,25 @@ export default function CFGTokenMigrationCent() {
   const [axelarHash, setAxelarHash] = useState<string>('')
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<number>()
-  const [isTouched, setIsTouched] = useState(false)
 
   // ts-ignore
   useEffect(() => {
     setInitialTokenBalance(balance?.toNumber())
+  }, [])
+
+  useEffect(() => {
+    const getAddressFromWallet = async () => {
+      try {
+        const provider = new BrowserProvider(window.ethereum)
+        const signer = await provider.getSigner()
+        const address = await signer.getAddress()
+        setAddressToVerify(address)
+      } catch (err) {
+        console.error('Could not get EVM address:', err)
+      }
+    }
+
+    getAddressFromWallet()
   }, [])
 
   // Check if the migration has been completed
@@ -244,13 +258,7 @@ export default function CFGTokenMigrationCent() {
                   </Box>
                   <CurrencyInput value={balance?.toNumber()} currency="CFG" label="Amount of new CFG tokens" disabled />
                   <Grid gridTemplateColumns="1fr 1fr" alignItems="center" mt={2} gap={2} mb={2} position="relative">
-                    <TextInput
-                      value={formattedAddress}
-                      label="Ethereum wallet address"
-                      onChange={(e) => setAddressToVerify(e.target.value)}
-                      onBlur={() => setIsTouched(true)}
-                      errorMessage={isTouched && !isEvmAddress(addressToVerify) ? 'Invalid Ethereum address' : ''}
-                    />
+                    <TextInput value={formattedAddress} label="Ethereum wallet address" disabled />
                     {isAddressValid ? (
                       <Box
                         backgroundColor="statusOkBg"
