@@ -110,7 +110,7 @@ export function DashboardTable() {
 
   return (
     <Box>
-      <Grid display="flex" justifyContent="flex-end" gap={2} mb={2}>
+      <Grid display="flex" justifyContent="flex-end" gap={2} mb={2} mt={2}>
         {pendingMultisigs && pendingMultisigs.length > 0 && (
           <Button variant="primary" small icon={IconWallet} onClick={() => setPendingMultisigsDrawerOpen(true)}>
             Pending multi-sig
