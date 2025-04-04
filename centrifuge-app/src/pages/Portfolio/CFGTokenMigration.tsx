@@ -1,6 +1,6 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useAddress } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Divider, Grid, IconInfo, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Divider, Grid, IconInfo, Stack, Step, Stepper, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -53,9 +53,10 @@ export default function CFGTokenMigration() {
   const CFGPrice = useCFGTokenPrice()
   const wcfgValue = balance ? balance.mul(Dec(CFGPrice || 0)) : Dec(0)
   const [isMigrated, setIsMigrated] = useState<boolean>(false)
+  const [step, setStep] = useState<number>(0)
 
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
-    `Deposit token migration`,
+    `Migrate WCFG for CFG`,
     (cent) =>
       ([, ...args]: [cb: () => void, amount: BN, wrapperAddress: string], options) =>
         cent.migration.depositForMigration(args, options),
@@ -67,7 +68,7 @@ export default function CFGTokenMigration() {
   )
 
   const { execute: executeApprove, isLoading: isApproving } = useEvmTransaction(
-    `Approve migration deposit`,
+    `Approve WCFG for Migration`,
     (cent) =>
       ([, ...args]: [cb: () => void, amount: BN, legacyAddress: string, wrapperAddress: string], options) =>
         cent.migration.approveForMigration(args, options),
@@ -177,6 +178,12 @@ export default function CFGTokenMigration() {
                 >
                   Approve WCFG and migrate
                 </Button>
+                <Box mt={2} justifyContent="center" display="flex">
+                  <Stepper activeStep={step} setActiveStep={setStep} direction="row">
+                    <Step label="Approve" />
+                    <Step label="Confirm migration" />
+                  </Stepper>
+                </Box>
               </>
             )}
           </Box>
