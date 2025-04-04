@@ -67,12 +67,14 @@ function Portfolio() {
 }
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
+  const ctx = useWallet()
+  const { connectedType, isEvmOnSubstrate } = ctx
   const debugFlags = useDebugFlags()
   const navigate = useNavigate()
   const theme = useTheme()
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
   const tokens = useHoldings(address, chainId)
-  const balances = useBalances(chainId ? undefined : address)
+  const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
   const balance = isEvmAddress(address) ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
