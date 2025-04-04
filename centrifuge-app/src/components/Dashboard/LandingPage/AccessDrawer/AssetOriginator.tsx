@@ -415,7 +415,7 @@ function AOForm({
                     </Box>
                   </Shelf>
                 ))}
-                {form.values.withdrawAddresses.length < 3 && (
+                {form.values.withdrawAddresses.length < 10 && (
                   <Box>
                     <AddButton
                       variant="inverted"
