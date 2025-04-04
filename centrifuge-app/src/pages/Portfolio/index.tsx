@@ -185,7 +185,6 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
           backgroundColor="statusWarningBg"
           p={1}
           borderRadius={8}
-          mx={[2, 2, 2, 2, 4]}
           mb={2}
           border={`1px solid ${theme.colors.borderPrimary}`}
           justifyContent="center"
@@ -207,7 +206,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       )}
       {/* @ts-ignore */}
       <PortfolioSummary data={pageSummaryData} />
-      <Stack gap={4} m={2}>
+      <Stack gap={4} my={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
           <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} p={1} px={2}>
@@ -266,7 +265,6 @@ export function PortfolioSummary({ data, children }: Props) {
       border={`1px solid ${theme.colors.borderSecondary}`}
       borderRadius={10}
       padding={2}
-      mx={[2, 2, 2, 2, 5]}
     >
       <Shelf gap={4}>
         {data?.map(({ label, value, heading, children }, index) => (
