@@ -7,12 +7,6 @@ type EvmQueryOptions = {
   rpcProvider?: Provider
 }
 
-export const WRAPPER_ADDRESS = '0x8114C3AA5A18dE2fc1678117397EC8072A97072D'
-// we are migrating from this contract
-export const LEGACY_CFG_ADDRESS = '0x657a4556e60A6097975e2E6dDFbb399E5ee9a58b'
-// to this contract
-export const NEW_CFG_ADDRESS = '0xC12ca99432048f812AdAd2AA3031941Db6e2bCF7'
-
 export const WRAPPER_ABI = [
   'function depositFor(address account, uint256 value) external returns (bool)',
   'function withdrawTo(address account, uint256 value) external returns (bool)',
@@ -44,19 +38,20 @@ export function getTokenMigrationModule(inst: Centrifuge) {
     return new Contract(contractAddress, abi, provider)
   }
 
-  function approveForMigration(args: [amount: BN], options: TransactionRequest = {}) {
-    const [amount] = args
+  function approveForMigration(
+    args: [amount: BN, legacyAddress: string, wrapperAddress: string],
+    options: TransactionRequest = {}
+  ) {
+    const [amount, legacyAddress, wrapperAddress] = args
     return pending(
-      contract(LEGACY_CFG_ADDRESS, new Interface(ERC20_ABI)).approve(WRAPPER_ADDRESS, amount.toString(), options)
+      contract(legacyAddress, new Interface(ERC20_ABI)).approve(wrapperAddress, amount.toString(), options)
     )
   }
 
-  function depositForMigration(args: [amount: BN], options: TransactionRequest = {}) {
-    const [amount] = args
+  function depositForMigration(args: [amount: BN, wrapperAddress: string], options: TransactionRequest = {}) {
+    const [amount, wrapperAddress] = args
     const address = inst.config.evmSigner?.address
-    return pending(
-      contract(WRAPPER_ADDRESS, new Interface(WRAPPER_ABI)).depositFor(address, amount.toString(), options)
-    )
+    return pending(contract(wrapperAddress, new Interface(WRAPPER_ABI)).depositFor(address, amount.toString(), options))
   }
 
   return {

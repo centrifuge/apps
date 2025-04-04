@@ -73,8 +73,8 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
   const tokens = useHoldings(address, chainId)
   const balances = useBalances(chainId ? undefined : address)
-  const { balance: wcfgBalance } = useTokenBalance(address)
-  const balance = isEvmAddress(address) ? wcfgBalance || Dec(0) : balances?.native.balance.toDecimal() || Dec(0)
+  const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
+  const balance = isEvmAddress(address) ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
