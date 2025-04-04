@@ -170,7 +170,7 @@ function Loan() {
 
   return (
     <Stack>
-      <Box mt={2} mb={2} ml={2}>
+      <Box mt={2} mb={2}>
         <BackButton label={name} as={RouterLinkButton} goBack>
           {loan && <LoanLabel loan={loan} />}
         </BackButton>
@@ -261,7 +261,7 @@ function Loan() {
               if (!isPublic) return null
               return (
                 <React.Suspense fallback={<Spinner />}>
-                  <Card p={3} variant="secondary">
+                  <Card p={3}>
                     <Stack gap={2}>
                       <Text variant="heading4">{section.name}</Text>
                       <MetricsTable

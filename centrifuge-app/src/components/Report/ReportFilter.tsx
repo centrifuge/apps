@@ -87,7 +87,6 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
   return (
     <Shelf
       padding={2}
-      margin={2}
       borderRadius={6}
       borderStyle="solid"
       borderColor="borderPrimary"

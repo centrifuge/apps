@@ -120,7 +120,7 @@ export function PoolDetailAssets() {
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      <Box paddingX={3}>
+      <Box>
         <LoanList loans={loans} />
       </Box>
     </>
