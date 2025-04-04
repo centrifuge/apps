@@ -2,31 +2,51 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { BrowserProvider, ethers } from 'ethers'
 import { useQuery } from 'react-query'
 import { isTestEnv } from '../../../src/config'
-import { Decimal } from '../../../src/utils/Decimal'
+import { currencies } from '../../../src/utils/tinlake/currencies'
 
-const CONTRACT_ADDRESS = isTestEnv
-  ? '0x657a4556e60A6097975e2E6dDFbb399E5ee9a58b'
-  : '0xDD1D785F26e547c72CAe501081Deb61a56288204'
+export const cfgConfig = isTestEnv
+  ? {
+      legacy: '0x657a4556e60A6097975e2E6dDFbb399E5ee9a58b',
+      iou: '0xDD1D785F26e547c72CAe501081Deb61a56288204',
+      new: '0xccCccCc7323f37366f1E51da362A63B79ceA8742',
+    }
+  : {
+      legacy: '0xc221b7e65ffc80de234bbb6667abdd46593d34f0',
+      iou: 'TODO',
+      new: 'TODO',
+    }
 
 const ABI = ['function balanceOf(address owner) view returns (uint256)']
 
 export const useTokenBalance = (userAddress: string | undefined) => {
-  const {
-    data: balance,
-    error,
-    isLoading,
-  } = useQuery<Decimal, unknown>(
+  return useQuery(
     ['tokenBalance', userAddress],
     async () => {
       const provider = new BrowserProvider(window.ethereum)
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider)
-      const rawBalance = await contract.balanceOf(userAddress!)
-      return new CurrencyBalance(rawBalance.toString(), 18).toDecimal()
+      const tokens = await Promise.allSettled([
+        new ethers.Contract(cfgConfig.legacy, ABI, provider).balanceOf(userAddress!),
+        new ethers.Contract(cfgConfig.new, ABI, provider).balanceOf(userAddress!),
+      ])
+
+      return {
+        legacy: {
+          balance: new CurrencyBalance(
+            tokens[0].status === 'fulfilled' ? tokens[0].value.toString() : '0',
+            18
+          ).toDecimal(),
+          currency: currencies.wCFG,
+        },
+        new: {
+          balance: new CurrencyBalance(
+            tokens[1].status === 'fulfilled' ? tokens[1].value.toString() : '0',
+            18
+          ).toDecimal(),
+          currency: currencies.newCFG,
+        },
+      }
     },
     {
       enabled: !!userAddress,
     }
   )
-
-  return { balance: balance ?? null, error, loading: isLoading }
 }

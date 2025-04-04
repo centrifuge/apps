@@ -6,14 +6,13 @@ import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
-import { Spinner } from '../../../src/components/Spinner'
 import { useEvmTransaction } from '../../../src/utils/tinlake/useEvmTransaction'
 import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import MigrationSuccessPage from './MigrationSuccessPage'
-import { useTokenBalance } from './useTokenBalance'
+import { cfgConfig, useTokenBalance } from './useTokenBalance'
 
 export const TooltipText = () => {
   return (
@@ -49,7 +48,8 @@ export default function CFGTokenMigration() {
   const theme = useTheme()
   const address = useAddress('evm')
   const debug = useDebugFlags()
-  const { balance, loading } = useTokenBalance(address)
+  const { data: tokenBalances } = useTokenBalance(address)
+  const balance = tokenBalances?.legacy?.balance
   const CFGPrice = useCFGTokenPrice()
   const wcfgValue = balance ? balance.mul(Dec(CFGPrice || 0)) : Dec(0)
   const [isMigrated, setIsMigrated] = useState<boolean>(false)
@@ -57,7 +57,7 @@ export default function CFGTokenMigration() {
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
     `Deposit token migration`,
     (cent) =>
-      ([, ...args]: [cb: () => void, amount: BN], options) =>
+      ([, ...args]: [cb: () => void, amount: BN, wrapperAddress: string], options) =>
         cent.migration.depositForMigration(args, options),
     {
       onSuccess: () => {
@@ -69,22 +69,18 @@ export default function CFGTokenMigration() {
   const { execute: executeApprove, isLoading: isApproving } = useEvmTransaction(
     `Approve migration deposit`,
     (cent) =>
-      ([, ...args]: [cb: () => void, amount: BN], options) =>
+      ([, ...args]: [cb: () => void, amount: BN, legacyAddress: string, wrapperAddress: string], options) =>
         cent.migration.approveForMigration(args, options),
     {
       onSuccess: ([cb]) => {
         const amount = CurrencyBalance.fromFloat(balance || 0, 18)
-        executeDeposit([cb, amount])
+        executeDeposit([cb, amount, cfgConfig.iou])
       },
     }
   )
 
   const migrate = () => {
-    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18)])
-  }
-
-  if (loading) {
-    return <Spinner />
+    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
   }
 
   if (!debug.showCFGTokenMigration) {
@@ -179,7 +175,7 @@ export default function CFGTokenMigration() {
                   onClick={migrate}
                   loading={isApproving || isDepositing}
                 >
-                  Migrate
+                  Approve WCFG and migrate
                 </Button>
               </>
             )}
