@@ -75,12 +75,14 @@ export default function CFGTokenMigration() {
     {
       onSuccess: ([cb]) => {
         const amount = CurrencyBalance.fromFloat(balance || 0, 18)
+        setStep(2)
         executeDeposit([cb, amount, cfgConfig.iou])
       },
     }
   )
 
   const migrate = () => {
+    setStep(1)
     executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
   }
 
@@ -172,16 +174,28 @@ export default function CFGTokenMigration() {
                 <Button
                   small
                   style={{ width: '100%' }}
-                  disabled={balance?.isZero()}
                   onClick={migrate}
                   loading={isApproving || isDepositing}
+                  disabled={balance?.isZero()}
                 >
                   Approve WCFG and migrate
                 </Button>
                 <Box mt={2} justifyContent="center" display="flex">
                   <Stepper activeStep={step} setActiveStep={setStep} direction="row">
-                    <Step label="Approve" />
-                    <Step label="Confirm migration" />
+                    <Step
+                      label="Approve"
+                      isActive={step === 1}
+                      isStepCompleted={step === 2}
+                      empty
+                      variant="secondary"
+                    />
+                    <Step
+                      label="Confirm migration"
+                      isActive={step === 2}
+                      isStepCompleted={isMigrated}
+                      empty
+                      variant="secondary"
+                    />
                   </Stepper>
                 </Box>
               </>
