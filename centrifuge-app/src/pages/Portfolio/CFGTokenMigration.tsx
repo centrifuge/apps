@@ -118,7 +118,12 @@ export default function CFGTokenMigration() {
             }}
           >
             {isMigrated ? (
-              <MigrationSuccessPage title="WCFG" balance={balance?.toNumber() || 0} currencyName="WCFG" />
+              <MigrationSuccessPage
+                title="WCFG"
+                balance={balance?.toNumber() || 0}
+                currencyName="WCFG"
+                address={address ?? ''}
+              />
             ) : (
               <>
                 <Grid gridTemplateColumns="1fr 24px" alignItems="center" mb={2}>
