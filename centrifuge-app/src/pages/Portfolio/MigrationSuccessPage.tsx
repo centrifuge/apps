@@ -1,4 +1,4 @@
-import { truncateAddress, useAddress } from '@centrifuge/centrifuge-react'
+import { truncateAddress } from '@centrifuge/centrifuge-react'
 import { Box, Divider, Grid, IconArrowRight, IconInfo, Stack, Text } from '@centrifuge/fabric'
 import { getAddress } from 'ethers'
 import { useTheme } from 'styled-components'
@@ -39,13 +39,14 @@ export default function MigrationSuccessPage({
   title,
   currencyName,
   balance,
+  address,
 }: {
   title: string
   currencyName: string
   balance: number
+  address: string
 }) {
   const theme = useTheme()
-  const address = useAddress('evm')
   const formattedAddress = address ? getAddress(address) : ''
 
   return (
