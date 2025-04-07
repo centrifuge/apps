@@ -2,10 +2,11 @@ import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/c
 import { AddressInput, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
+import { useState } from 'react'
 import { isEvmAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { usePoolMetadataMulti } from '../../../utils/usePools'
+import { useInvestorList, usePoolMetadataMulti } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
   isOpen: boolean
@@ -22,14 +23,26 @@ type NewInvestorFormValues = {
 export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
   const { pools } = useSelectedPools(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
+  const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
+
+  const investors = useInvestorList(poolId)
+  const existingInvestorsAddresses = investors?.map((i) => i.evmAddress?.toLowerCase()) ?? []
+
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
     (cent) => cent.pools.updatePoolRoles
   )
 
+  const validate = (values: NewInvestorFormValues) => {
+    const errors: Partial<NewInvestorFormValues> = {}
+    if (existingInvestorsAddresses.includes(values.investorAddress.toLowerCase())) {
+      errors.investorAddress = 'Address already exists'
+    }
+    return errors
+  }
+
   const formik = useFormik({
     initialValues: {
-      poolId: pools?.[0]?.id ?? '',
       trancheId: '',
       investorAddress: '',
       network: '',
@@ -47,7 +60,9 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
         [],
       ])
     },
+    validate,
   })
+
   return (
     <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="New investor">
       <Stack gap={4}>
@@ -70,12 +85,11 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   value={formik.values.poolId}
                   onChange={(event) => {
                     const poolId = event.target.value
+                    setPoolId(poolId)
                     const trancheId = pools?.find((pool) => pool.id === poolId)?.tranches[0].id
-                    formik.setFieldValue('poolId', poolId)
                     formik.setFieldValue('trancheId', trancheId)
                   }}
                 />
-
                 <Select
                   label="Select tranche token"
                   id="trancheId"
@@ -94,9 +108,13 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   }
                   onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
                 />
-                <AddressNetworkInput formik={formik} poolId={formik.values.poolId} />
+                <AddressNetworkInput formik={formik} poolId={poolId} />
               </Stack>
-              <Button type="submit" loading={isTransactionPending}>
+              <Button
+                type="submit"
+                loading={isTransactionPending}
+                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress}
+              >
                 Add new investor
               </Button>
             </Box>
@@ -123,6 +141,7 @@ function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<New
         label="Wallet address"
         placeholder="Type here..."
         onChange={(event) => formik.setFieldValue('investorAddress', event.target.value)}
+        errorMessage={formik.errors.investorAddress}
       />
       <Select
         label="Network*"
