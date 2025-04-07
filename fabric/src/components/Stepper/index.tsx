@@ -68,9 +68,9 @@ const Number = styled(Text)<{ isActive?: boolean; done: boolean; variant?: 'prim
   width: 32px;
   height: 32px;
   text-align: center;
-  padding-top: 8px;
+  padding-top: ${({ variant }) => (variant === 'secondary' ? '8px' : '6px')};
   font-weight: 500;
-  font-size: ${({ variant }) => (variant === 'secondary' ? '12px' : '14px')};
+  font-size: 12px;
 `
 
 const Line = ({ direction }: { direction: 'row' | 'column' }) => {
@@ -105,7 +105,7 @@ export const Step = (props: StepProps & EnrichedStepProps) => {
             !empty && setActiveStep && setActiveStep((count as number) + 1)
           }}
         >
-          <Number variant="body3" isActive={isActive} done={isStepCompleted} variant={variant}>
+          <Number isActive={isActive} done={isStepCompleted} variant={variant}>
             {count ? count + 1 : 1}
           </Number>
           <Text as="h3" variant="heading4" style={{ marginTop: 8 }}>
