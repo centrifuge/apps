@@ -358,7 +358,12 @@ export default function CFGTokenMigrationCent() {
             )}
 
             {step === 3 && (
-              <MigrationSuccessPage title="CFG" currencyName="Legacy CFG" balance={initialTokenBalance || 0} />
+              <MigrationSuccessPage
+                title="CFG"
+                currencyName="Legacy CFG"
+                balance={initialTokenBalance || 0}
+                address={evmAddress}
+              />
             )}
           </Box>
         </Box>
