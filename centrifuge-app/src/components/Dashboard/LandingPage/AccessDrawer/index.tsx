@@ -92,7 +92,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
           const batches = []
           for (const ref of refs) {
             const { batch, metadata: updatedMetadata } = await firstValueFrom(
-              from(ref.current!.getBatch(cent, values, newMetadata))
+              from(ref?.current!.getBatch(cent, values, newMetadata))
             )
             batches.push(batch)
             newMetadata = updatedMetadata
