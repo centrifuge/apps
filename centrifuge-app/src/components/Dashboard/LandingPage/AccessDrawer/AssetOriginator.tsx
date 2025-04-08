@@ -1,5 +1,6 @@
 import Centrifuge, {
   computeTrancheId,
+  evmToSubstrateAddress,
   getCurrencyLocation,
   PoolMetadata,
   TransactionOptions,
@@ -280,6 +281,21 @@ function AOForm({
             errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Not a valid Substrate address')
           }
         }
+
+        const convertAddress = (address: string) => {
+          if (isEvmAddress(address)) {
+            return evmToSubstrateAddress(address, Number(value.location) || 1)
+          }
+          return address
+        }
+
+        if (
+          initialValues.withdrawAddresses.find(
+            (w, idx) => idx !== index && convertAddress(w.address) === convertAddress(value.address)
+          )
+        ) {
+          errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Address already exists')
+        }
       }
     })
     return errors
@@ -334,12 +350,7 @@ function AOForm({
                     </Field>
                   ))}
                 </Stack>
-                <AddButton
-                  variant="inverted"
-                  onClick={() => {
-                    push('')
-                  }}
-                />
+                <AddButton onClick={() => push('')} />
               </Stack>
             )}
           </FieldArray>
@@ -377,6 +388,7 @@ function AOForm({
                           form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
                         }}
                         placeholder={''}
+                        error={form.errors.withdrawAddresses?.[index]}
                       />
                     </Box>
                     <Box width="100%" flex={2}>
