@@ -240,12 +240,14 @@ function AOForm({
                         ])
                         .flat()
                     ),
-                  addedDelegates.map((addr) => [
-                    api.tx.proxy.addProxy(addr, 'Borrow', 0),
-                    api.tx.proxy.addProxy(addr, 'Invest', 0),
-                    api.tx.proxy.addProxy(addr, 'Transfer', 0),
-                    api.tx.proxy.addProxy(addr, 'PodOperation', 0),
-                  ]),
+                  addedDelegates.map((addr) =>
+                    [
+                      api.tx.proxy.addProxy(addr, 'Borrow', 0),
+                      api.tx.proxy.addProxy(addr, 'Invest', 0),
+                      api.tx.proxy.addProxy(addr, 'Transfer', 0),
+                      api.tx.proxy.addProxy(addr, 'PodOperation', 0),
+                    ].flat()
+                  ),
                   collectionId && [api.tx.uniques.create(collectionId, ao.address)],
                   addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
                   removedWithdrawAddresses.map((w) => api.tx.transferAllowList.removeTransferAllowance('All', w)),
