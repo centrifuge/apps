@@ -229,7 +229,6 @@ export function PortfolioSummary({ data, children }: Props) {
       border={`1px solid ${theme.colors.borderSecondary}`}
       borderRadius={10}
       padding={2}
-      mx={[2, 2, 2, 2, 5]}
     >
       <Shelf gap={4}>
         {data?.map(({ label, value, heading, children }, index) => (

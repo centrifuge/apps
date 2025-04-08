@@ -198,6 +198,7 @@ function AOForm({
     const addedWithdrawAddresses = addedWithdraw
       .filter((w) => Object.keys(w).length !== 0)
       .map((w) => getKeyForReceiver(api, w))
+    console.log(addedWithdrawAddresses, addedWithdraw)
     const removedWithdrawAddresses = removedWithdraw
       .filter((w) => Object.keys(w).length !== 0)
       .map((w) => getKeyForReceiver(api, w))
@@ -241,10 +242,10 @@ function AOForm({
                         .flat()
                     ),
                   addedDelegates.map((addr) => [
-                    api.tx.proxy.addProxy(addr, 'Borrow', 0),
-                    api.tx.proxy.addProxy(addr, 'Invest', 0),
-                    api.tx.proxy.addProxy(addr, 'Transfer', 0),
-                    api.tx.proxy.addProxy(addr, 'PodOperation', 0),
+                    api.tx.proxy.addProxy('5HmAmocKH4i18NdBWwcqwcE88UEU8E5z3fFgYjeAEGQtecB7', 'Borrow', 0),
+                    api.tx.proxy.addProxy('5HmAmocKH4i18NdBWwcqwcE88UEU8E5z3fFgYjeAEGQtecB7', 'Invest', 0),
+                    api.tx.proxy.addProxy('5HmAmocKH4i18NdBWwcqwcE88UEU8E5z3fFgYjeAEGQtecB7', 'Transfer', 0),
+                    api.tx.proxy.addProxy('5HmAmocKH4i18NdBWwcqwcE88UEU8E5z3fFgYjeAEGQtecB7', 'PodOperation', 0),
                   ]),
                   collectionId && [api.tx.uniques.create(collectionId, ao.address)],
                   addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
