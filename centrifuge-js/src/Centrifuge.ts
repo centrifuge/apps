@@ -12,6 +12,7 @@ import { getProxiesModule } from './modules/proxies'
 import { getRemarkModule } from './modules/remark'
 import { getRewardsModule } from './modules/rewards'
 import { getTinlakeModule } from './modules/tinlake'
+import { getTokenMigrationModule } from './modules/tokenMigration'
 import { getTokensModule } from './modules/tokens'
 import { getUtilsModule } from './modules/utils'
 
@@ -28,6 +29,7 @@ export class Centrifuge extends CentrifugeBase {
   multisig = getMultisigModule(this)
   remark = getRemarkModule(this)
   rewards = getRewardsModule(this)
+  migration = getTokenMigrationModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)
