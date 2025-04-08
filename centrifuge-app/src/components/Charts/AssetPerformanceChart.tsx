@@ -143,7 +143,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
   if (!assetSnapshots) return <Spinner style={{ margin: 'auto', height: 350 }} />
 
   return (
-    <Card p={3} height={320} variant="secondary">
+    <Card p={3} height={320}>
       <Stack gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box display="flex">
