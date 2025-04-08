@@ -267,7 +267,7 @@ export function AssetsTable() {
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" mt={2}>
         <Box display="flex" alignItems="center">
           <Box
             background={theme.colors.backgroundTertiary}
