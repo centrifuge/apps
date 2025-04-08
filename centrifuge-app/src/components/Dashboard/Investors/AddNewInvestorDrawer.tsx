@@ -1,3 +1,4 @@
+import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
@@ -35,7 +36,10 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
 
   const validate = (values: NewInvestorFormValues) => {
     const errors: Partial<NewInvestorFormValues> = {}
-    if (existingInvestorsAddresses.includes(values.investorAddress.toLowerCase())) {
+    const convertedAddress = isEvmAddress(values.investorAddress)
+      ? evmToSubstrateAddress(values.investorAddress, Number(values.network) || 1)
+      : values.investorAddress
+    if (existingInvestorsAddresses.includes(convertedAddress.toLowerCase())) {
       errors.investorAddress = 'Address already exists'
     }
     return errors
@@ -113,7 +117,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
               <Button
                 type="submit"
                 loading={isTransactionPending}
-                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress}
+                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress || !formik.values.network}
               >
                 Add new investor
               </Button>
