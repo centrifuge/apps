@@ -305,8 +305,6 @@ function AOForm({
     form.values.withdrawAddresses.filter((w) => !!w.location)
   )
 
-  console.log('form.values.delegates', form.values.delegates)
-
   return (
     <Stack gap={3}>
       <Card variant="secondary" px={2} py={2}>
