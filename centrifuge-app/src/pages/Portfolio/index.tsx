@@ -170,10 +170,10 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mb={2} />
       <PortfolioSummary data={pageSummaryData} />
-      <Stack gap={4} m={2}>
+      <Stack gap={4} mt={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
-          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} p={1} px={2}>
+          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} py={1} px={2}>
             <Grid gridTemplateColumns={['1fr 1fr']} gap={2} alignItems="center">
               <Text variant="heading4">Available to invest</Text>
               <Select
