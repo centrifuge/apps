@@ -1,4 +1,4 @@
-import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { evmToSubstrateAddress, Holder } from '@centrifuge/centrifuge-js'
 import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
@@ -7,11 +7,12 @@ import { useState } from 'react'
 import { isEvmAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { useInvestorList, usePoolMetadataMulti } from '../../../utils/usePools'
+import { usePoolMetadataMulti } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
   isOpen: boolean
   onClose: () => void
+  investors: Holder[]
 }
 
 type NewInvestorFormValues = {
@@ -21,13 +22,13 @@ type NewInvestorFormValues = {
   network: string
 }
 
-export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
+export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInvestorDrawerProps) {
   const { pools } = useSelectedPools(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
 
-  const investors = useInvestorList(poolId)
-  const existingInvestorsAddresses = investors?.map((i) => i.evmAddress?.toLowerCase()) ?? []
+  const poolInvestors = investors?.filter((i) => i.poolId === poolId)
+  const existingInvestorsAddresses = poolInvestors?.map((i) => i.accountId?.toLowerCase()) ?? []
 
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
@@ -86,7 +87,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   }
                   id="poolId"
                   name="poolId"
-                  value={formik.values.poolId}
+                  value={poolId}
                   onChange={(event) => {
                     const poolId = event.target.value
                     setPoolId(poolId)
@@ -98,11 +99,11 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   label="Select tranche token"
                   id="trancheId"
                   name="trancheId"
-                  disabled={pools?.find((pool) => pool.id === formik.values.poolId)?.tranches.length! === 1}
+                  disabled={pools?.find((pool) => pool.id === poolId)?.tranches.length! === 1}
                   value={formik.values.trancheId}
                   options={
                     pools
-                      ?.find((pool) => pool.id === formik.values.poolId)
+                      ?.find((pool) => pool.id === poolId)
                       ?.tranches.map((t) => {
                         return {
                           label: t.currency.displayName,

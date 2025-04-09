@@ -52,17 +52,22 @@ export function OracleFeeders({
   const initialValues = React.useMemo(
     () => ({
       feeders: storedInfo?.feeders.length ? storedInfo.feeders : [''],
-      minFeeders: storedInfo?.feeders.length ?? 1,
+      minFeeders: storedInfo?.feeders.length || 1,
     }),
     [storedInfo]
   )
 
-  async function getBatch(_: Centrifuge, values: FeedersFormValues, metadata: PoolMetadata) {
+  function checkHasChanges(values: FeedersFormValues) {
     const oldFeeders = new Set(initialValues.feeders)
-    const hasChanges =
+    return (
       values.minFeeders !== initialValues.minFeeders ||
       values.feeders.some((addr) => !oldFeeders.has(addr)) ||
       oldFeeders.size !== values.feeders.length
+    )
+  }
+
+  async function getBatch(_: Centrifuge, values: FeedersFormValues, metadata: PoolMetadata) {
+    const hasChanges = checkHasChanges(values)
 
     if (!hasChanges) return { batch: [], metadata }
 
@@ -91,6 +96,7 @@ export function OracleFeeders({
 
   React.useImperativeHandle(handle, () => ({
     getBatch,
+    hasChanges: checkHasChanges,
   }))
 
   React.useEffect(() => {

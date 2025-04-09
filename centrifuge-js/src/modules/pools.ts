@@ -941,7 +941,7 @@ export type OracleTransaction = {
   value: CurrencyBalance | undefined
 }
 
-type Holder = {
+export type Holder = {
   poolId: string
   accountId: string
   chainId: number
