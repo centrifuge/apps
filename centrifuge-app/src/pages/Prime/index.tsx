@@ -77,7 +77,7 @@ function Prime() {
   )
 }
 
-type Row = DAO & { value?: number; profit?: number; networkName: string; firstInvestment?: Date }
+type Row = DAO & { value?: number; profit?: number; firstInvestment?: Date }
 
 function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
@@ -176,12 +176,12 @@ function DaoPortfoliosTable() {
     return {
       ...dao,
       value: totalValue ?? 0,
-      networkName: getNetworkName(dao.network),
+      network: dao.network || 'centrifuge',
       firstInvestment: investTxs?.[0] && new Date(investTxs[0].timestamp),
     }
   })
 
-  const uniqueNetworks = [...new Set(daos.map((dao) => dao.network))]
+  const uniqueNetworks = [...new Set(mapped.map((dao) => dao.network))]
   const filters = useFilters({ data: mapped })
 
   const columns: Column[] = [

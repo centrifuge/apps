@@ -2,8 +2,8 @@ import {
   CurrencyBalance,
   CurrencyMetadata,
   InvestorTransactionType,
-  Perquintill,
   Price,
+  Rate,
   Token,
   TokenBalance,
   addressToHex,
@@ -180,13 +180,6 @@ export function usePortfolio(substrateAddress?: string) {
           purchasePrice
           timestamp
           trancheId
-          tranche {
-            yieldSinceInception
-            pool {
-              sumUnrealizedProfitAtMarketPrice
-              sumRealizedProfitFifoByPeriod
-            }
-          }
         }
       }
     }
@@ -205,9 +198,10 @@ export function usePortfolio(substrateAddress?: string) {
       {
         totalTrancheTokens: TokenBalance
         tokenPrice: Price
+        purchasePrice: Price
         unrealizedProfit: CurrencyBalance
         realizedProfit: CurrencyBalance
-        yieldSinceInception: Perquintill | null
+        unrealizedYield: Rate
         chainId: number
       }
     > = {}
@@ -224,13 +218,28 @@ export function usePortfolio(substrateAddress?: string) {
       const existing = trancheBalances[trancheId]
       if (existing) {
         existing.totalTrancheTokens.iadd(balance)
+
+        const initialPrice = existing.purchasePrice.toDecimal()
+        const tokenPriceDiff = tokenPrice.toDecimal().sub(initialPrice)
+        existing.unrealizedProfit = CurrencyBalance.fromFloat(
+          tokenPrice.toDecimal().sub(initialPrice).mul(existing.totalTrancheTokens.toDecimal()),
+          decimals
+        )
+        existing.unrealizedYield = Rate.fromFloat(tokenPriceDiff.div(initialPrice))
       } else {
+        const initialPrice = new Price(position.purchasePrice).toDecimal()
+        const tokenPriceDiff = tokenPrice.toDecimal().sub(initialPrice)
+
         trancheBalances[trancheId] = {
           totalTrancheTokens: balance,
+          purchasePrice: new Price(position.purchasePrice),
           tokenPrice,
-          realizedProfit: new CurrencyBalance(position.tranche.pool.sumRealizedProfitFifoByPeriod, decimals),
-          unrealizedProfit: new CurrencyBalance(position.tranche.pool.sumUnrealizedProfitAtMarketPrice, decimals),
-          yieldSinceInception: new Perquintill(position.tranche.yieldSinceInception),
+          realizedProfit: new CurrencyBalance(0, decimals),
+          unrealizedProfit: CurrencyBalance.fromFloat(
+            tokenPrice.toDecimal().sub(initialPrice).mul(new CurrencyBalance(balance, decimals).toDecimal()),
+            decimals
+          ),
+          unrealizedYield: Rate.fromFloat(tokenPriceDiff.div(initialPrice)),
           chainId,
         }
       }
@@ -250,7 +259,7 @@ type PortfolioToken = {
   currency: Token['currency']
   realizedProfit: CurrencyBalance
   unrealizedProfit: CurrencyBalance
-  yieldSinceInception: Perquintill
+  unrealizedYield: Rate
   chainId: number
 }
 
@@ -267,7 +276,7 @@ export function usePortfolioTokens(address?: string) {
           poolId: tranche.poolId,
           realizedProfit: portfolioData[tranche.id]?.realizedProfit,
           unrealizedProfit: portfolioData[tranche.id]?.unrealizedProfit,
-          yieldSinceInception: portfolioData[tranche.id]?.yieldSinceInception,
+          unrealizedYield: portfolioData[tranche.id]?.unrealizedYield,
         }
         return tranches
       }, tranches),
@@ -279,7 +288,7 @@ export function usePortfolioTokens(address?: string) {
         currency: CurrencyMetadata
         realizedProfit: CurrencyBalance
         unrealizedProfit: CurrencyBalance
-        yieldSinceInception: Perquintill | null
+        unrealizedYield: Rate | null
       }
     >
   )
@@ -299,7 +308,7 @@ export function usePortfolioTokens(address?: string) {
         currency: trancheTokenPrices[trancheId].currency,
         realizedProfit: trancheTokenPrices[trancheId].realizedProfit,
         unrealizedProfit: trancheTokenPrices[trancheId].unrealizedProfit,
-        yieldSinceInception: trancheTokenPrices[trancheId].yieldSinceInception,
+        unrealizedYield: trancheTokenPrices[trancheId].unrealizedYield,
         chainId: portfolioData[trancheId]?.chainId,
       }
     }, [] as PortfolioToken[])
