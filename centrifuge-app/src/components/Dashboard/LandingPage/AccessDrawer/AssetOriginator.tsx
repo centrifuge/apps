@@ -1,5 +1,6 @@
 import Centrifuge, {
   computeTrancheId,
+  evmToSubstrateAddress,
   getCurrencyLocation,
   PoolMetadata,
   TransactionOptions,
@@ -169,15 +170,29 @@ function AOForm({
     roles: Object.fromEntries(ao.permissions.roles.map((role) => [role, true])),
   }
 
+  function checkHasChanges(values: AOFormValues) {
+    const { add: addedWithdraw, remove: removedWithdraw } = diffWithdrawAddresses(
+      initialValues.withdrawAddresses.filter((w) => !!w.location),
+      values.withdrawAddresses.filter((w) => !!w.location)
+    )
+
+    return (
+      form.values.delegates.length !== initialValues.delegates.length ||
+      !form.values.delegates.every((s) => initialValues.delegates.includes(s)) ||
+      !!addedWithdraw.length ||
+      !!removedWithdraw.length
+    )
+  }
+
   async function getBatch(cent: Centrifuge, values: AOFormValues, metadata: PoolMetadata) {
+    const { add: addedWithdraw, remove: removedWithdraw } = diffWithdrawAddresses(
+      initialValues.withdrawAddresses.filter((w) => !!w.location),
+      form.values.withdrawAddresses.filter((w) => !!w.location)
+    )
     const addedDelegates = values.delegates.filter((addr) => !initialValues.delegates.includes(addr))
     const removedDelegates = initialValues.delegates.filter((addr) => !values.delegates.includes(addr))
 
-    const hasChanges =
-      form.values.delegates.length !== initialValues.delegates.length ||
-      !form.values.delegates.every((s) => initialValues.delegates.includes(s)) ||
-      addedWithdraw.length ||
-      removedWithdraw.length
+    const hasChanges = checkHasChanges(values)
 
     if (!hasChanges) return { batch: [], metadata }
 
@@ -230,21 +245,21 @@ function AOForm({
                 [
                   removedDelegates.length &&
                     api.tx.utility.batch(
-                      removedDelegates
-                        .map((addr) => [
-                          api.tx.proxy.removeProxy(addr, 'Borrow', 0),
-                          api.tx.proxy.removeProxy(addr, 'Invest', 0),
-                          api.tx.proxy.removeProxy(addr, 'Transfer', 0),
-                          api.tx.proxy.removeProxy(addr, 'PodOperation', 0),
-                        ])
-                        .flat()
+                      removedDelegates.map((addr) => [
+                        api.tx.proxy.removeProxy(addr, 'Borrow', 0),
+                        api.tx.proxy.removeProxy(addr, 'Invest', 0),
+                        api.tx.proxy.removeProxy(addr, 'Transfer', 0),
+                        api.tx.proxy.removeProxy(addr, 'PodOperation', 0),
+                      ])
                     ),
-                  addedDelegates.map((addr) => [
-                    api.tx.proxy.addProxy(addr, 'Borrow', 0),
-                    api.tx.proxy.addProxy(addr, 'Invest', 0),
-                    api.tx.proxy.addProxy(addr, 'Transfer', 0),
-                    api.tx.proxy.addProxy(addr, 'PodOperation', 0),
-                  ]),
+                  addedDelegates.map((addr) =>
+                    [
+                      api.tx.proxy.addProxy(addr, 'Borrow', 0),
+                      api.tx.proxy.addProxy(addr, 'Invest', 0),
+                      api.tx.proxy.addProxy(addr, 'Transfer', 0),
+                      api.tx.proxy.addProxy(addr, 'PodOperation', 0),
+                    ].flat()
+                  ),
                   collectionId && [api.tx.uniques.create(collectionId, ao.address)],
                   addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
                   removedWithdrawAddresses.map((w) => api.tx.transferAllowList.removeTransferAllowance('All', w)),
@@ -280,6 +295,21 @@ function AOForm({
             errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Not a valid Substrate address')
           }
         }
+
+        const convertAddress = (address: string) => {
+          if (isEvmAddress(address)) {
+            return evmToSubstrateAddress(address, Number(value.location) || 1)
+          }
+          return address
+        }
+
+        if (
+          initialValues.withdrawAddresses.find(
+            (w, idx) => idx !== index && convertAddress(w.address) === convertAddress(value.address)
+          )
+        ) {
+          errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Address already exists')
+        }
       }
     })
     return errors
@@ -288,6 +318,7 @@ function AOForm({
   React.useImperativeHandle(handle, () => ({
     getBatch,
     validate,
+    hasChanges: checkHasChanges,
   }))
 
   React.useEffect(() => {
@@ -295,11 +326,6 @@ function AOForm({
     form.setFieldValue('delegates', initialValues.delegates, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
-
-  const { add: addedWithdraw, remove: removedWithdraw } = diffWithdrawAddresses(
-    initialValues.withdrawAddresses.filter((w) => !!w.location),
-    form.values.withdrawAddresses.filter((w) => !!w.location)
-  )
 
   return (
     <Stack gap={3}>
@@ -334,12 +360,7 @@ function AOForm({
                     </Field>
                   ))}
                 </Stack>
-                <AddButton
-                  variant="inverted"
-                  onClick={() => {
-                    push('')
-                  }}
-                />
+                <AddButton onClick={() => push('')} />
               </Stack>
             )}
           </FieldArray>
@@ -377,6 +398,7 @@ function AOForm({
                           form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
                         }}
                         placeholder={''}
+                        error={form.errors.withdrawAddresses?.[index]}
                       />
                     </Box>
                     <Box width="100%" flex={2}>
@@ -415,7 +437,7 @@ function AOForm({
                     </Box>
                   </Shelf>
                 ))}
-                {form.values.withdrawAddresses.length < 3 && (
+                {form.values.withdrawAddresses.length < 10 && (
                   <Box>
                     <AddButton
                       variant="inverted"

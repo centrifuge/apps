@@ -237,8 +237,8 @@ export function LoanList({ loans }: Props) {
 
   return (
     <>
-      <Box pt={1} pb={2} paddingX={1} display="flex" justifyContent="space-between" alignItems="center">
-        <Text variant="heading4">{rows.filter((row) => !row.marketValue?.isZero()).length} ongoing assets</Text>
+      <Box pt={1} pb={2} paddingX={1} mt={2} display="flex" justifyContent="space-between" alignItems="center">
+        <Text variant="heading4">Assets</Text>
         <Box display="flex" alignItems="center">
           <Box mr={2}>
             <Checkbox

@@ -127,11 +127,11 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
   }, [data])
 
   if (isLoading) {
-    return <Spinner mt={2} />
+    return <Spinner />
   }
 
   return data.length > 0 ? (
-    <Box paddingX={2}>
+    <Box>
       <DataTable data={data} columns={columns} hoverable scrollable defaultSortKey="value[0]" defaultSortOrder="desc" />
     </Box>
   ) : (

@@ -71,7 +71,7 @@ function Prime() {
           </Box>
         </Grid>
       </LayoutSection>
-      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={3} mx={3} />
+      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={3} />
       <DaoPortfoliosTable />
     </>
   )
@@ -233,7 +233,7 @@ function DaoPortfoliosTable() {
   ]
 
   return (
-    <Box mt={2} px={4}>
+    <Box mt={2}>
       <Text variant="heading4" style={{ marginBottom: 12 }}>
         Portfolios
       </Text>

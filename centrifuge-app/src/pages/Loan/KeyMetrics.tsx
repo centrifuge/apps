@@ -144,7 +144,7 @@ export function KeyMetrics({ pool, loan }: Props) {
   ]
 
   return (
-    <Card p={3} variant="secondary">
+    <Card p={3} borderRadius={8}>
       <Stack gap={2}>
         <Text variant="heading4">Key metrics</Text>
         <MetricsTable metrics={metrics} />

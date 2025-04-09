@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Text } from '@centrifuge/fabric'
+import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -310,13 +310,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
   }, [priceRecords])
 
   if (isLoading) {
-    return <Spinner mt={2} />
+    return <Spinner />
   }
 
   return poolStates?.length > 0 ? (
-    <Box paddingX={2}>
-      <DataTable data={priceRecords} columns={columns} hoverable scrollable />
-    </Box>
+    <DataTable data={priceRecords} columns={columns} hoverable scrollable />
   ) : (
     <UserFeedback reportType="Token price" />
   )

@@ -87,12 +87,12 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
   return (
     <Shelf
       padding={2}
-      margin={2}
       borderRadius={6}
       borderStyle="solid"
       borderColor="borderPrimary"
       borderWidth={[0, 1]}
       flexDirection="column"
+      mb={2}
     >
       <Shelf alignItems="center" flexWrap="wrap" justifyContent="space-between" width="100%">
         <Shelf flexDirection={['column', 'row']}>

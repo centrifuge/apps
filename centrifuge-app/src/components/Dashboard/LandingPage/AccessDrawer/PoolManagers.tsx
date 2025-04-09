@@ -39,6 +39,14 @@ export function PoolManagers({
     }
   }, [access.multisig, access.adminDelegates])
 
+  function checkHasChanges(values: PoolManagersFormValues) {
+    return (
+      values.adminMultisig.threshold !== initialValues.adminMultisig.threshold ||
+      values.adminMultisig.signers.length !== initialValues.adminMultisig.signers.length ||
+      !values.adminMultisig.signers.every((s) => initialValues.adminMultisig.signers.includes(s))
+    )
+  }
+
   function getBatch(cent: Centrifuge, values: PoolManagersFormValues, metadata: PoolMetadata) {
     const isMultisig = values.adminMultisig.threshold > 1
     const wasMultisig = initialValues.adminMultisig.threshold > 1
@@ -47,10 +55,7 @@ export function PoolManagers({
     let addedDelegates: string[] = []
     let removedDelegates: string[] = []
 
-    const hasChanges =
-      values.adminMultisig.threshold !== initialValues.adminMultisig.threshold ||
-      values.adminMultisig.signers.length !== initialValues.adminMultisig.signers.length ||
-      !values.adminMultisig.signers.every((s) => initialValues.adminMultisig.signers.includes(s))
+    const hasChanges = checkHasChanges(values)
 
     if (!hasChanges) return of({ batch: [], metadata })
 
@@ -114,6 +119,7 @@ export function PoolManagers({
 
   React.useImperativeHandle(handle, () => ({
     getBatch,
+    hasChanges: checkHasChanges,
   }))
 
   React.useEffect(() => {

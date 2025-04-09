@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, Text } from '@centrifuge/fabric'
+import { Text } from '@centrifuge/fabric'
 import {
   AssetListReport,
   AssetListReportPrivateCredit,
@@ -325,16 +325,14 @@ export function AssetList({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <Box paddingX={2}>
-      <DataTable
-        data={data}
-        columns={columns}
-        hoverable
-        defaultSortKey="maturity-date"
-        defaultSortOrder="desc"
-        scrollable
-      />
-    </Box>
+    <DataTable
+      data={data}
+      columns={columns}
+      hoverable
+      defaultSortKey="maturity-date"
+      defaultSortOrder="desc"
+      scrollable
+    />
   ) : (
     <UserFeedback reportType="Assets" />
   )

@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Text } from '@centrifuge/fabric'
+import { Text } from '@centrifuge/fabric'
 import { useContext, useEffect, useMemo } from 'react'
 import { TableDataRow } from '.'
 import { formatDateAndTime } from '../../../src/utils/date'
@@ -136,11 +136,7 @@ const Orders = ({ pool }: { pool: Pool }) => {
 
   if (isLoading) return <Spinner />
 
-  return (
-    <Box paddingX={2}>
-      <DataTable data={data} columns={columns} scrollable defaultSortKey="value[1]" defaultSortOrder="desc" />
-    </Box>
-  )
+  return <DataTable data={data} columns={columns} scrollable defaultSortKey="value[1]" defaultSortOrder="desc" />
 }
 
 export default Orders

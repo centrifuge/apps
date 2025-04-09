@@ -46,7 +46,7 @@ const PrimeDetail = () => {
 
   return !isLoading && dao && centAddress ? (
     <Stack mx={1} my={1}>
-      <Box mt={2} mb={2} ml={2}>
+      <Box mt={2} mb={2}>
         <BackButton label={`${dao.name} Investements`} to="/prime" align="flex-start" as={RouterLinkButton} />
       </Box>
       <AssetSummary
@@ -83,7 +83,7 @@ const PrimeDetail = () => {
           },
         ]}
       />
-      <Box mt={3} mx={[2, 2, 2, 2, 5]}>
+      <Box mt={3}>
         <CardPortfolioValue address={centAddress} />
       </Box>
 

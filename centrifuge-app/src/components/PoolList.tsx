@@ -78,9 +78,14 @@ export function PoolList() {
     <Stack>
       <Stack>
         <Box overflow="auto">
-          <Grid columns={[1, 1, 2, 2, 3]} as="ul" role="list" gap={3}>
+          <Grid
+            as="ul"
+            role="list"
+            gap={3}
+            gridTemplateColumns={['1fr', '1fr', '1fr 1fr', '1fr 1fr 1fr', '1fr 1fr 1fr']}
+          >
             {metadataIsLoading
-              ? Array(6)
+              ? Array(2)
                   .fill(true)
                   .map((_, index) => (
                     <Box as="li" key={index}>

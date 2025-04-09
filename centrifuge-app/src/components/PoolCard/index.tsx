@@ -227,7 +227,7 @@ export function PoolCard({
         </CardHeader>
         <Divider />
         <Box display="flex" justifyContent="space-between" alignItems="center" marginY="8px">
-          <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+          <Text as="span" variant="body3" color="textSecondary">
             {currencySymbol && `TVL (${currencySymbol})`}
           </Text>
           <Text variant="heading1">{valueLocked ? formatBalance(valueLocked, '') : ''}</Text>
@@ -253,13 +253,13 @@ export function PoolCard({
             </Stack>
           )}
           <Stack>
-            <Text as="span" variant="body3" color="textButtonPrimaryDisabled">
+            <Text as="span" variant="body3" color="textSecondary">
               APY
             </Text>
             {tranchesData?.map((tranche) => renderText(`${tranche.apr}`, true, tranche.seniority))}
           </Stack>
           <Stack>
-            <Text as="span" variant="body2" color="textButtonPrimaryDisabled">
+            <Text as="span" variant="body2" color="textSecondary">
               Min. investment
             </Text>
             {tranchesData?.map((tranche) => renderText(`${tranche.minInvestment}`))}
@@ -267,7 +267,7 @@ export function PoolCard({
         </Box>
         {(metaData?.pool?.issuer?.shortDescription || isTinlakePool) && (
           <Box marginY={12}>
-            <Text as="p" variant="body2" color="textButtonPrimaryDisabled">
+            <Text as="p" variant="body2" color="textSecondary">
               {isTinlakePool ? tinlakeTranches[tinlakeKey].shortDescription : metaData?.pool?.issuer?.shortDescription}
             </Text>
           </Box>

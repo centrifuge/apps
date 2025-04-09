@@ -17,8 +17,6 @@ export function PageSummary({ data, children, ...props }: Props) {
     <Shelf
       bg={theme.colors.backgroundSecondary}
       gap={4}
-      my={3}
-      mx={3}
       padding={2}
       border={`1px solid ${theme.colors.borderSecondary}`}
       borderRadius={10}
