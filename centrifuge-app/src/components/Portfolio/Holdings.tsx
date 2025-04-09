@@ -1,4 +1,4 @@
-import { CurrencyBalance, Perquintill, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconMoreVertical, Menu, MenuItem, Popover, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -38,7 +38,7 @@ export type Holding = {
   chainId?: number
   realizedProfit?: CurrencyBalance
   unrealizedProfit?: CurrencyBalance
-  yieldSinceInception?: Perquintill | null
+  unrealizedYield?: Rate | null
   connectedNetwork?: any
   hideCurrencyName?: boolean
 }

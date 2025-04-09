@@ -42,7 +42,7 @@ const PrimeDetail = () => {
     Dec(0)
   )
 
-  const yieldSinceInception = tokens.find((token) => token.yieldSinceInception)?.yieldSinceInception
+  const yieldSinceInception = tokens.find((token) => token.unrealizedYield)?.unrealizedYield
 
   return !isLoading && dao && centAddress ? (
     <Stack mx={1} my={1}>
@@ -62,7 +62,7 @@ const PrimeDetail = () => {
                   color={yieldSinceInception?.isNeg() ? 'statusCritical' : 'statusOk'}
                   style={{ fontWeight: 500 }}
                 >
-                  {yieldSinceInception?.isNeg() ? '-' : '+'}
+                  {yieldSinceInception?.isNeg() ? '' : '+'}
                   {formatPercentage(yieldSinceInception)}
                 </Text>
                 <Text variant="body4" color={yieldSinceInception?.isNeg() ? 'statusCritical' : 'statusOk'}>
