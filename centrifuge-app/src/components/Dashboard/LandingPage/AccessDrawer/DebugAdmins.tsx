@@ -52,9 +52,15 @@ export function DebugAdmins({ poolId, handle }: { poolId: string; handle: React.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
+  function checkHasChanges(values: DebugAdminsFormValues) {
+    const { add, remove } = diffPermissions(initialValues.admins, values.admins)
+    return !!add.length || !!remove.length
+  }
+
   async function getBatch(cent: Centrifuge, values: DebugAdminsFormValues, metadata: PoolMetadata) {
-    const { add, remove } = diffPermissions(initialValues.admins, form.values.admins)
-    if (!add.length && !remove.length) {
+    const { add, remove } = diffPermissions(initialValues.admins, values.admins)
+
+    if (!checkHasChanges(values)) {
       return { batch: [], metadata }
     }
     return {
@@ -65,6 +71,7 @@ export function DebugAdmins({ poolId, handle }: { poolId: string; handle: React.
 
   React.useImperativeHandle(handle, () => ({
     getBatch,
+    hasChanges: checkHasChanges,
   }))
 
   const rows = React.useMemo(

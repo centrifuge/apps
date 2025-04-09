@@ -23,6 +23,7 @@ export type FormHandle = {
     values: FormValues,
     metadata: PoolMetadata
   ) => ObservableInput<{ batch: any[]; metadata: PoolMetadata }>
+  hasChanges: (values: FormValues) => boolean
   validate?: (values: FormValues) => FormikErrors<any>
 }
 
@@ -139,6 +140,8 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
 
   if (!aoDelegateAccount || !adminDelegateAccount) return null
 
+  const hasChanges = refs.some((ref) => ref.current?.hasChanges(form.values))
+
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
@@ -174,7 +177,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
             />
           </Stack>
           <Stack gap={1} bg="backgroundPrimary" mt={3}>
-            <Button type="submit" loading={isLoading} disabled={!form.isValid}>
+            <Button type="submit" loading={isLoading} disabled={!form.isValid || !hasChanges}>
               Update
             </Button>
             <Button variant="inverted" onClick={() => onClose()}>
