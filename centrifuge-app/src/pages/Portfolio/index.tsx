@@ -125,7 +125,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       {
         label: 'Portfolio value',
         value: formatBalance(currentPortfolioValue || 0),
-        children: (
+        children: yieldSinceInception.isZero() ? null : (
           <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4} mr={2}>
             <Text
               variant="body4"
@@ -135,6 +135,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
               {yieldSinceInception?.isPositive() ? '+' : '-'}
               {yieldSinceInception?.toPrecision(2)}
             </Text>
+
             <Text variant="body4" color={yieldSinceInception?.isPositive() ? 'statusOk' : 'statusCritical'}>
               Since inception
             </Text>
