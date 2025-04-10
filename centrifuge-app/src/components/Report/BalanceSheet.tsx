@@ -53,6 +53,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
+            timeZone: 'UTC',
           }),
           cell: (row: Row) => (
             <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>

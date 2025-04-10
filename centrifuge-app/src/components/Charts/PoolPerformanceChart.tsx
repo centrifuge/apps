@@ -515,14 +515,18 @@ export const CustomTick = ({ x, y, payload, filterValue }: CustomTickProps) => {
   let dateValue: Date | null = null
   if (payload.value instanceof Date) {
     dateValue = payload.value
-  } else if (typeof payload.value === 'string' || typeof payload.value === 'number') {
-    dateValue = new Date(payload.value)
+  } else {
+    dateValue = new Date(payload?.value as string)
   }
 
   const dateFormat: Intl.DateTimeFormatOptions =
     typeof filterValue !== 'undefined' && filterValue <= 90
-      ? { month: 'short' as const, day: 'numeric' as const }
-      : { month: 'short' as const }
+      ? {
+          month: 'short' as const,
+          day: 'numeric' as const,
+          timeZone: typeof payload.value === 'string' ? 'UTC' : undefined,
+        }
+      : { month: 'short' as const, timeZone: typeof payload.value === 'string' ? 'UTC' : undefined }
 
   return (
     <g transform={`translate(${x},${y})`}>
