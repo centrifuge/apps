@@ -63,7 +63,7 @@ jobs:
           unzip $ZIPFILE 1> /dev/null
           ls -la
       
-      - name: Upload webpack files
+      - name: Upload ${{ matrix.artifact.name }} files
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact.name }}
@@ -130,17 +130,17 @@ jobs:
           sparse-checkout: |
             .github/actions/deploy-gfunction
 
-      - name: Debug deployment variables
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          echo "App Name: ${{ matrix.function.name }}-production"
-          echo "Artifact Name: ${{ matrix.function.name }}"
-          echo "GWIP: ${{ secrets.GWIP }}"
-          echo "GSA: ${{ secrets.GSA }}"
-          echo "Target: ${{ matrix.function.handler }}"
-          echo "Gcloud Region: ${{ vars.GCLOUD_REGION }}"
-          echo "Service Account: ${{ env.SERVICE_ACCOUNT }}"
-          echo "Deploy Environment: production"
+      # - name: Debug deployment variables
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   run: |
+      #     echo "App Name: ${{ matrix.function.name }}-production"
+      #     echo "Artifact Name: ${{ matrix.function.name }}"
+      #     echo "GWIP: ${{ secrets.GWIP }}"
+      #     echo "GSA: ${{ secrets.GSA }}"
+      #     echo "Target: ${{ matrix.function.handler }}"
+      #     echo "Gcloud Region: ${{ vars.GCLOUD_REGION }}"
+      #     echo "Service Account: ${{ env.SERVICE_ACCOUNT }}"
+      #     echo "Deploy Environment: production"
 
       - name: Deploy Gfunction
         id: functionsdeploy
