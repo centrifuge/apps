@@ -164,11 +164,13 @@ export const getColumnHeader = (timestamp: string, groupBy: string) => {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: 'UTC',
     })
   } else if (groupBy === 'month') {
     return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'long',
       year: 'numeric',
+      timeZone: 'UTC',
     })
   } else if (groupBy === 'quarter') {
     const date = new Date(timestamp)
@@ -176,6 +178,7 @@ export const getColumnHeader = (timestamp: string, groupBy: string) => {
   } else if (groupBy === 'year') {
     return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
+      timeZone: 'UTC',
     })
   }
   return ''
