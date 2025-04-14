@@ -293,10 +293,7 @@ export default function CFGTokenMigrationCent() {
                 <ConfirmationDetails />
                 <Grid display="flex" gap={1} mb={2} mt={2}>
                   <IconInfo size="iconSmall" />
-                  <Text variant="body2">
-                    Please note that there will be a delay during the bridging process. A follow-up Ethereum transaction
-                    is required to claim your CFG tokens.
-                  </Text>
+                  <Text variant="body2">Please note that there will be a delay during the bridging process.</Text>
                 </Grid>
                 <Divider color="borderSecondary" />
                 <Grid display="flex" gap={1} mb={2} mt={2}>
