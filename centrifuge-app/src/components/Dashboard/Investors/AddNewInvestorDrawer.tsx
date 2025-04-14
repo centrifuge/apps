@@ -48,7 +48,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
 
   const formik = useFormik({
     initialValues: {
-      trancheId: '',
+      trancheId: pools?.find((p) => p.id === poolId)?.tranches[0].id ?? '',
       investorAddress: '',
       network: '',
     } as NewInvestorFormValues,
@@ -60,7 +60,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
       const domains = values.network ? [[values.network, validAddress]] : undefined
 
       execute([
-        values.poolId,
+        poolId,
         [[validAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]],
         [],
       ])
@@ -118,7 +118,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
               <Button
                 type="submit"
                 loading={isTransactionPending}
-                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress || !formik.values.network}
+                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress}
               >
                 Add new investor
               </Button>
