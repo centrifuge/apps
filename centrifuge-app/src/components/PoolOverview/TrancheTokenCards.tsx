@@ -125,7 +125,9 @@ export const TrancheTokenCards = ({
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
         if (isTinlakePool && trancheToken.seniority === 0) return '15%'
         if (daysSinceCreation < 30) return 'N/A'
-        return trancheToken.apy ? formatPercentage(new Perquintill(trancheToken.apy)) : '-'
+        return trancheToken.yieldSinceInception
+          ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception))
+          : '-'
       }
       return {
         tokenName: tranche.name,

@@ -1,4 +1,4 @@
-import { CurrencyBalance, FileType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, FileType, Holder } from '@centrifuge/centrifuge-js'
 import {
   NetworkIcon,
   formatBalance,
@@ -22,7 +22,6 @@ import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { copyToClipboard } from '../../../utils/copyToClipboard'
 import { formatDate } from '../../../utils/date'
 import { useFilters } from '../../../utils/useFilters'
-import { useInvestorListMulti } from '../../../utils/usePools'
 import { InvestorDrawer } from './InvestorDrawer'
 
 export type InvestorTableRow = {
@@ -42,14 +41,13 @@ export type InvestorTableRow = {
   realizedProfit: CurrencyBalance
 }
 
-export function InvestorTable() {
+export function InvestorTable({ investors }: { investors: Holder[] }) {
   const theme = useTheme()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const investorParam = searchParams.get('d_investor')
   const cent = useCentrifuge()
   const { poolsWithMetadata, selectedPoolIds } = useSelectedPools()
-  const investors = useInvestorListMulti(poolsWithMetadata?.map((p) => p.id) ?? [])
   const getNetworkName = useGetNetworkName()
   const utils = useCentrifugeUtils()
 
