@@ -49,26 +49,6 @@ const tinlakeTranches = {
     investorType: 'Qualified US and non-US investors',
     assetType: 'Residential real estate',
   },
-  BT3: {
-    name: 'BlockTower Series 3',
-    tranches: [
-      { name: 'Junior', apr: '15%', minInvestment: '-' },
-      { name: 'Senior', apr: '4%', minInvestment: '-' },
-    ],
-    shortDescription: ' Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
-    investorType: 'Private',
-    assetType: 'Structured Credit',
-  },
-  BT4: {
-    name: 'BlockTower Series 4',
-    tranches: [
-      { name: 'Junior', apr: '15%', minInvestment: '-' },
-      { name: 'Senior', apr: '4%', minInvestment: '-' },
-    ],
-    shortDescription: 'Investment-grade consumer ABS, auto ABS, and CLOs under 4 years.',
-    investorType: 'Private',
-    assetType: 'Structured Credit',
-  },
   none: {
     name: '-',
     tranches: [
@@ -81,15 +61,7 @@ const tinlakeTranches = {
   },
 }
 
-export const DYF_POOL_ID = '1655476167'
-export const NS3_POOL_ID = '1615768079'
 export const NS2 = '0x53b2d22d07E069a3b132BfeaaD275b10273d381E'
-
-export type CentrifugeTargetAPYs = keyof typeof centrifugeTargetAPYs
-export const centrifugeTargetAPYs = {
-  [DYF_POOL_ID]: ['15%'],
-  [NS3_POOL_ID]: ['16%', '8%'],
-}
 
 type TinlakeTranchesKey = keyof typeof tinlakeTranches
 
@@ -132,11 +104,7 @@ export function PoolCard({
 
   const renderText = (text: string, isApr?: boolean, seniority?: number) => {
     if (isArchive) return
-    if (
-      (isApr && poolId === NS3_POOL_ID) ||
-      (isApr && poolId === DYF_POOL_ID) ||
-      (isApr && isTinlakePool && seniority === 0)
-    ) {
+    if (isApr && isTinlakePool && seniority === 0) {
       return (
         <Box display="flex" alignItems="baseline">
           <Text
@@ -174,9 +142,6 @@ export function PoolCard({
 
         const calculateApy = (tranche: TrancheWithCurrency) => {
           const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
-          if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[DYF_POOL_ID][0]
-          if (poolId === NS3_POOL_ID && tranche.seniority === 0) return centrifugeTargetAPYs[NS3_POOL_ID][0]
-          if (poolId === NS3_POOL_ID && tranche.seniority === 1) return centrifugeTargetAPYs[NS3_POOL_ID][1]
           if (daysSinceCreation > 30 && tranche.yieldSinceInception)
             return formatPercentage(tranche.yieldSinceInception, true, {}, 1)
           if (tranche.interestRatePerSec) {

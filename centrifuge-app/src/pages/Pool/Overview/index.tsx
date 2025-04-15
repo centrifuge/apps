@@ -89,6 +89,8 @@ export function PoolDetailOverview() {
     })
   }
 
+  console.log(pool)
+
   const tokens: Token[] = pool?.tranches
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
