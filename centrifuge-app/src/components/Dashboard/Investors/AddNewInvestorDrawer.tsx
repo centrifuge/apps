@@ -1,5 +1,5 @@
 import { evmToSubstrateAddress, Holder } from '@centrifuge/centrifuge-js'
-import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { getChainInfo, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
 import { isAddress } from 'ethers'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
@@ -23,8 +23,12 @@ type NewInvestorFormValues = {
 }
 
 export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInvestorDrawerProps) {
+  const {
+    substrate: { evmChainId: substrateEvmChainId },
+  } = useWallet()
   const { pools } = useSelectedPools(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
+  const utils = useCentrifugeUtils()
   const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
 
   const poolInvestors = investors?.filter((i) => i.poolId === poolId)
@@ -48,7 +52,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
 
   const formik = useFormik({
     initialValues: {
-      trancheId: '',
+      trancheId: pools?.find((p) => p.id === poolId)?.tranches[0].id ?? '',
       investorAddress: '',
       network: '',
     } as NewInvestorFormValues,
@@ -59,11 +63,14 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
       const validAddress = validator(values.investorAddress) ? values.investorAddress : undefined
       const domains = values.network ? [[values.network, validAddress]] : undefined
 
-      execute([
-        values.poolId,
-        [[validAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]],
-        [],
-      ])
+      const centAddress =
+        values.network && validAddress
+          ? utils.evmToSubstrateAddress(values.investorAddress, Number(values.network) || 1)
+          : values.network === '' && substrateEvmChainId && isEvmAddress(values.investorAddress)
+          ? utils.evmToSubstrateAddress(values.investorAddress, substrateEvmChainId)
+          : validAddress
+
+      execute([poolId, [[centAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]], []])
     },
     validate,
   })
@@ -118,7 +125,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
               <Button
                 type="submit"
                 loading={isTransactionPending}
-                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress || !formik.values.network}
+                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress}
               >
                 Add new investor
               </Button>
