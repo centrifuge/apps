@@ -24,8 +24,9 @@ export const SimpleBarChart = ({ currency, data, groupBy }: SimpleBarChartProps)
 
     data.forEach((item) => {
       const date = new Date(item.name)
-      const month = date.getMonth() + 1
-      const year = date.getFullYear()
+      const year = date.getUTCFullYear()
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0')
+
       const monthYear = `${year}-${month}`
 
       if (!seenMonths.has(monthYear)) {
