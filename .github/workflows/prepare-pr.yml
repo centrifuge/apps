@@ -30,7 +30,7 @@ jobs:
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
       
       - name: Give time to avoid racing conditions
         uses: whatnick/wait-action@71008d68ab3939de1475f4938583e4480b5d09a6
@@ -78,7 +78,7 @@ jobs:
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
       
       - name: Give time for other jobs to finish
         uses: whatnick/wait-action@71008d68ab3939de1475f4938583e4480b5d09a6
@@ -124,7 +124,7 @@ jobs:
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
       
       - name: Give time for other jobs to finish
         uses: whatnick/wait-action@71008d68ab3939de1475f4938583e4480b5d09a6
@@ -167,7 +167,7 @@ jobs:
           service_account: '${{ secrets.GSA }}'
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a # v2.1.4
 
       - name: Delete functions
         shell: bash
