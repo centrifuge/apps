@@ -1,7 +1,7 @@
 import { Holder } from '@centrifuge/centrifuge-js'
 import { getChainInfo, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
-import { isAddress } from 'ethers'
+import { isAddress } from '@polkadot/util-crypto'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
 import { useState } from 'react'
 import { isEvmAddress, isSubstrateAddress } from '../../../utils/address'
