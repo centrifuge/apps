@@ -1,7 +1,7 @@
 import Centrifuge, {
   computeTrancheId,
-  evmToSubstrateAddress,
   getCurrencyLocation,
+  isSameAddress,
   PoolMetadata,
   TransactionOptions,
   WithdrawAddress,
@@ -296,16 +296,12 @@ function AOForm({
           }
         }
 
-        const convertAddress = (address: string) => {
-          if (isEvmAddress(address)) {
-            return evmToSubstrateAddress(address, Number(value.location) || 1)
-          }
-          return address
-        }
-
         if (
-          initialValues.withdrawAddresses.find(
-            (w, idx) => idx !== index && convertAddress(w.address) === convertAddress(value.address)
+          initialValues.withdrawAddresses.some(
+            (w, idx) =>
+              idx !== index &&
+              isSameAddress(w.address, value.address) &&
+              JSON.stringify(w.location) === JSON.stringify(value.location)
           )
         ) {
           errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Address already exists')
