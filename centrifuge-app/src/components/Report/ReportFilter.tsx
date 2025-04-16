@@ -53,21 +53,21 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
     if (!reportData.length) return
     if (report === 'balance-sheet') {
       return (reportData as BalanceSheetReport[]).map((data) => ({
-        name: data?.timestamp,
-        yAxis: data.totalCapital?.toDecimal(),
+        name: new Date(data?.timestamp).toISOString(),
+        yAxis: data.totalCapital?.toFloat(),
       }))
     } else if (report === 'profit-and-loss') {
       return (reportData as ProfitAndLossReport[]).map((data) => ({
-        name: data?.timestamp,
-        yAxis: data.totalProfitAndLoss?.toDecimal(),
+        name: new Date(data?.timestamp).toISOString(),
+        yAxis: data.totalProfitAndLoss?.toFloat(),
       }))
     } else {
       return (reportData as CashflowReport[])
         .filter((data) => !data.totalCashflow?.isZero())
         .map((data) => {
           return {
-            name: data?.timestamp,
-            yAxis: data.totalCashflow?.toDecimal(),
+            name: new Date(data?.timestamp).toISOString(),
+            yAxis: data.totalCashflow?.toFloat(),
           }
         })
     }

@@ -8,7 +8,6 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
-import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { PoolMetaDataPartial } from '../PoolList'
 import { Tooltips } from '../Tooltips'
 
@@ -41,6 +40,8 @@ export const TrancheTokenCards = ({
     if (trancheToken.seniority === 1) return 'senior'
     return 'mezzanine'
   }
+
+  console.log(trancheTokens)
 
   const columns = useMemo(() => {
     return [
@@ -118,17 +119,11 @@ export const TrancheTokenCards = ({
   }, [pool.tranches, metadata, poolId, pool?.currency.symbol])
 
   const dataTable = useMemo(() => {
-    const getTarget = (tranche: Token) =>
-      (isTinlakePool && tranche.seniority === 0) || poolId === DYF_POOL_ID || poolId === NS3_POOL_ID
+    const getTarget = (tranche: Token) => isTinlakePool && tranche.seniority === 0
     return trancheTokens.map((tranche) => {
       const calculateApy = (trancheToken: Token) => {
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
         if (isTinlakePool && trancheToken.seniority === 0) return '15%'
-        if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-        if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
-          return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-        if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
-          return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
         if (daysSinceCreation < 30) return 'N/A'
         return trancheToken.yieldSinceInception
           ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception))
