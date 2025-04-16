@@ -65,7 +65,7 @@ export default function InvestorsPage() {
           </Button>
         </Shelf>
       </Shelf>
-      <InvestorTable />
+      <InvestorTable investors={investors as Holder[]} />
     </Stack>
   )
 }

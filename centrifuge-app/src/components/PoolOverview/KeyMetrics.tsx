@@ -21,7 +21,6 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
-import { centrifugeTargetAPYs } from '../PoolCard'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
@@ -120,25 +119,15 @@ export const KeyMetrics = ({ poolId }: Props) => {
     })
   }, [metadata?.tranches, pool.currency.decimals])
 
-  const isBT3BT4 =
-    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
-    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
-    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
-
   const metrics = [
     {
       metric: 'Asset type',
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric:
-        centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] || tinlakeData[poolId as TinlakeDataKey]
-          ? 'Target APY'
-          : Object.values(metadata?.tranches ?? {})[0].apy || '90-day APY',
+      metric: Object.values(metadata?.tranches ?? {})[0].apy || '90-day APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
-        : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
-        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].reverse().join(' - ')
         : tranchesAPY?.length
         ? tranchesAPY.map((tranche, index) => {
             const formatted = formatPercentage(tranche)
@@ -146,14 +135,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
           })
         : '-',
     },
-    ...(isBT3BT4
-      ? []
-      : [
-          {
-            metric: 'Average asset maturity',
-            value: averageMaturity,
-          },
-        ]),
     {
       metric: 'Min. investment',
       value: minInvestmentPerTranche?.length
@@ -167,7 +148,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
     },
     {
       metric: 'Investor type',
-      value: isBT3BT4 ? 'Private' : metadata?.pool?.investorType ?? '-',
+      value: metadata?.pool?.investorType ?? '-',
     },
     ...(!isTinlakePool
       ? [
@@ -180,7 +161,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     {
       metric: 'Pool structure',
-      value: isBT3BT4 ? 'Revolving' : metadata?.pool?.poolStructure ?? '-',
+      value: metadata?.pool?.poolStructure ?? '-',
     },
     ...(metadata?.pool?.poolRatings?.length
       ? [

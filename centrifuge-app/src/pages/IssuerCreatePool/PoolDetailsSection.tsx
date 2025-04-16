@@ -190,7 +190,7 @@ export const PoolDetailsSection = () => {
                   as={TextAreaInput}
                   label="Overview page description (100-3000 characters)*"
                   placeholder="Type here..."
-                  maxLength={1000}
+                  maxLength={3000}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 />
               )}
