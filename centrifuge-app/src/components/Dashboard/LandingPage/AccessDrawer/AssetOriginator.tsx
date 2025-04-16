@@ -436,7 +436,6 @@ function AOForm({
                 {form.values.withdrawAddresses.length < 10 && (
                   <Box>
                     <AddButton
-                      variant="inverted"
                       onClick={() => {
                         push({ address: '', location: '' })
                       }}
