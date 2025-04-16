@@ -110,6 +110,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   )
 
   const form = useFormik<FormValues>({
+    enableReinitialize: true,
     initialValues: {
       feeders: [],
       minFeeders: 1,

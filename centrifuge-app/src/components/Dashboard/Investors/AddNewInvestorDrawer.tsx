@@ -1,6 +1,7 @@
 import { Holder } from '@centrifuge/centrifuge-js'
 import { getChainInfo, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
+import { isAddress } from 'ethers'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
 import { useState } from 'react'
 import { isEvmAddress, isSubstrateAddress } from '../../../utils/address'
@@ -72,7 +73,9 @@ export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInves
     validate,
   })
 
-  const convertedAddress = formik.values.investorAddress ? utils.formatAddress(formik.values.investorAddress) : ''
+  const convertedAddress = isAddress(formik.values.investorAddress)
+    ? utils.formatAddress(formik.values.investorAddress)
+    : ''
 
   const existingInvestorsAddresses =
     poolInvestors?.map((i) => {
