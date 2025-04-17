@@ -55,7 +55,7 @@ export const TrancheTokenCards = ({
         },
       },
       {
-        header: 'Yield since inception',
+        header: 'APY',
         align: 'left',
         cell: (row: Row) => {
           return (
@@ -116,7 +116,8 @@ export const TrancheTokenCards = ({
   }, [pool.tranches, metadata, poolId, pool?.currency.symbol])
 
   const dataTable = useMemo(() => {
-    const getTarget = (tranche: Token) => isTinlakePool && tranche.seniority === 0
+    // TODO: Remove this once we are not under fire
+    const getTarget = (tranche: Token) => (isTinlakePool && tranche.seniority === 0) || poolId === '4139607887'
     return trancheTokens.map((tranche) => {
       const calculateApy = (trancheToken: Token) => {
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
