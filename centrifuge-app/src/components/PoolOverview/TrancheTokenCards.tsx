@@ -1,4 +1,3 @@
-import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { Decimal } from 'decimal.js-light'
 import { useMemo } from 'react'
@@ -41,13 +40,11 @@ export const TrancheTokenCards = ({
     return 'mezzanine'
   }
 
-  console.log(trancheTokens)
-
   const columns = useMemo(() => {
     return [
       {
         header: 'Token',
-        width: '40%',
+        width: '45%',
         align: 'left',
         cell: (row: Row) => {
           return (
@@ -125,9 +122,7 @@ export const TrancheTokenCards = ({
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
         if (isTinlakePool && trancheToken.seniority === 0) return '15%'
         if (daysSinceCreation < 30) return 'N/A'
-        return trancheToken.yieldSinceInception
-          ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception))
-          : '-'
+        return trancheToken.apy ? `${trancheToken.apy}%` : '-'
       }
       return {
         tokenName: tranche.name,

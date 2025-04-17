@@ -155,11 +155,13 @@ export function PoolCard({
           name: trancheName,
           apr: isTinlakePool
             ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.apr
+            : metadata?.apyPercentage
+            ? formatPercentage(metadata.apyPercentage, true, {}, 2)
             : calculateApy(tranche),
           minInvestment: isTinlakePool
             ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.minInvestment
             : metadata && metadata.minInitialInvestment
-            ? `$${formatBalanceAbbreviated(investmentBalance, '', 0)}`
+            ? `$${formatBalanceAbbreviated(Number(metadata.minInitialInvestment), '', 0)}`
             : '-',
         }
       })

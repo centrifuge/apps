@@ -27,7 +27,7 @@ import { PoolDetailHeader } from '../Header'
 
 export type Token = {
   poolId: string
-  apy: Decimal
+  apy: string | number
   protection: Decimal
   ratio: number
   name: string
@@ -92,9 +92,10 @@ export function PoolDetailOverview() {
   const tokens: Token[] = pool?.tranches
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
+      const trancheMeta = metadata?.tranches?.[tranche.id]
       return {
         poolId: tranche.poolId,
-        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        apy: trancheMeta?.apyPercentage ? trancheMeta?.apyPercentage : '0',
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,

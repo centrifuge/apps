@@ -52,10 +52,8 @@ type CustomTickProps = {
 }
 
 const rangeFilters = [
-  { value: 'all', label: 'All' },
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
-  { value: 'ytd', label: 'Year to date' },
 ]
 
 function calculateTranchePrices(pool: Pool) {
