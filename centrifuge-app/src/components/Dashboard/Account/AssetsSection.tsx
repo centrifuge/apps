@@ -313,6 +313,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
                 return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
               }),
             api.tx.oraclePriceCollection.updateCollection(pool.id),
+            api.tx.loans.updatePortfolioValuation(pool.id),
             // api.tx.remarks.remark(
             //   [{ Named: `attestation:${pool.id}:${attestationHash}` }],
             //   api.tx.loans.updatePortfolioValuation(pool.id)
