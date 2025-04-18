@@ -65,11 +65,13 @@ export default function CFGTokenMigrationCent() {
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<number>()
 
+  const totalAmount = balance?.toNumber() - 10
+
   useEffect(() => {
-    if (!initialTokenBalance) {
-      setInitialTokenBalance(balance?.toNumber())
+    if (!initialTokenBalance && !balance.isZero()) {
+      setInitialTokenBalance(totalAmount)
     }
-  }, [balance, initialTokenBalance])
+  }, [initialTokenBalance, balance])
 
   useEffect(() => {
     const getAddressFromWallet = async () => {
@@ -244,7 +246,26 @@ export default function CFGTokenMigrationCent() {
                       Wallet balance: {formatBalance(balance, '', 2)} CFG
                     </Text>
                   </Box>
-                  <CurrencyInput value={balance?.toNumber()} currency="CFG" label="Amount of new CFG tokens" disabled />
+                  <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mt={3} mb={1}>
+                    <Text variant="heading4">Amount of CFG tokens</Text>
+                    <Text color="textSecondary" variant="body2">
+                      {formatBalance(balance, '', 2)} CFG
+                    </Text>
+                  </Grid>
+                  <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={3}>
+                    <Text variant="heading4">Legal gas fee estimate</Text>
+                    <Text color="textSecondary" variant="body2">
+                      -{formatBalance(10, '', 2)} CFG
+                    </Text>
+                  </Grid>
+
+                  <Divider color="borderSecondary" />
+                  <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={2} mt={2}>
+                    <Text variant="heading3">Total amount of CFG tokens</Text>
+                    <Text variant="heading3">-{formatBalance(totalAmount, '', 2)} CFG</Text>
+                  </Grid>
+                  <Divider color="borderSecondary" />
+
                   <Grid gridTemplateColumns="1fr 1fr" alignItems="center" mt={2} gap={2} mb={2} position="relative">
                     <TextInput value={evmAddress} label="Ethereum wallet address" disabled />
                     {isAddressValid ? (
@@ -269,7 +290,6 @@ export default function CFGTokenMigrationCent() {
                       </StyledButton>
                     )}
                   </Grid>
-                  <CurrencyInput value={10} label="Gas fee estimate" disabled currency="CFG" />
                 </Box>
                 <Grid display="flex" gap={1} mb={2}>
                   <IconInfo size="iconSmall" />

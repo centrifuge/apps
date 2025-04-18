@@ -2,13 +2,14 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useAddress } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, IconInfo, Stack, Step, Stepper, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
-import { useState } from 'react'
+import { ethers } from 'ethers'
+import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { useEvmTransaction } from '../../../src/utils/tinlake/useEvmTransaction'
 import { Tooltips } from '../../components/Tooltips'
-import { Dec } from '../../utils/Decimal'
+import { Dec, Decimal } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import MigrationSuccessPage from './MigrationSuccessPage'
@@ -54,6 +55,19 @@ export default function CFGTokenMigration() {
   const wcfgValue = balance ? balance.mul(Dec(CFGPrice || 0)) : Dec(0)
   const [isMigrated, setIsMigrated] = useState<boolean>(false)
   const [step, setStep] = useState<number>(0)
+  const [gasPrice, setGasPrice] = useState<string>('')
+
+  useEffect(() => {
+    async function getGasPrice() {
+      const gas = await window.ethereum.request({
+        method: 'eth_gasPrice',
+      })
+      setGasPrice(ethers.formatUnits(gas, 'gwei'))
+    }
+    getGasPrice()
+  }, [])
+
+  const totalCost = balance?.minus(new Decimal(gasPrice || 0))
 
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
     `Migrate WCFG for CFG`,
@@ -74,7 +88,7 @@ export default function CFGTokenMigration() {
         cent.migration.approveForMigration(args, options),
     {
       onSuccess: ([cb]) => {
-        const amount = CurrencyBalance.fromFloat(balance || 0, 18)
+        const amount = CurrencyBalance.fromFloat(0, 18)
         setStep(2)
         executeDeposit([cb, amount, cfgConfig.iou])
       },
@@ -83,7 +97,7 @@ export default function CFGTokenMigration() {
 
   const migrate = () => {
     setStep(1)
-    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
+    executeApprove([() => {}, CurrencyBalance.fromFloat(0, 18), cfgConfig.legacy, cfgConfig.iou])
   }
 
   if (!debug.showCFGTokenMigration) {
@@ -120,7 +134,7 @@ export default function CFGTokenMigration() {
             {isMigrated ? (
               <MigrationSuccessPage
                 title="WCFG"
-                balance={balance?.toNumber() || 0}
+                balance={totalCost?.toNumber() || 0}
                 currencyName="WCFG"
                 address={address ?? ''}
               />
@@ -175,7 +189,25 @@ export default function CFGTokenMigration() {
                     label="Amount of CFG tokens"
                     disabled
                   />
+                  <Grid display="flex" justifyContent="space-between" mt={2} mb={2}>
+                    <Text variant="heading4">Amount of CFG tokens</Text>
+                    <Text variant="body2" color="textSecondary">
+                      {formatBalance(balance?.toNumber() || 0)} WCFG
+                    </Text>
+                  </Grid>
+                  <Grid display="flex" justifyContent="space-between" mt={2} mb={2}>
+                    <Text variant="heading4">Network cost</Text>
+                    <Text variant="body2" color="textSecondary">
+                      - {formatBalance(new Decimal(gasPrice || 0), '', 2)} Gwei
+                    </Text>
+                  </Grid>
+                  <Divider color="borderSecondary" />
+                  <Grid display="flex" justifyContent="space-between" mt={2}>
+                    <Text variant="heading3">Total amount of CFG tokens</Text>
+                    <Text variant="heading3">{formatBalance(totalCost?.toNumber() || 0)} CFG</Text>
+                  </Grid>
                 </Box>
+
                 <Button
                   small
                   style={{ width: '100%' }}
