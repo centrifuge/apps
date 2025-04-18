@@ -109,6 +109,7 @@ export function PoolDetailOverview() {
         tokenPrice: tranche.tokenPrice,
         yield30DaysAnnualized: tranche?.yield30DaysAnnualized?.toString() || '',
         yieldSinceInception: tranche?.yieldSinceInception?.toString() || '',
+        isTarget: (isTinlakePool && tranche.seniority === 0) || trancheMeta?.apy?.includes('Target'),
       }
     })
     .reverse()

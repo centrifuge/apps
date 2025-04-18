@@ -16,6 +16,7 @@ import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
+import { Decimal } from '../../../src/utils/Decimal'
 import { evmChains } from '../../config'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
@@ -98,23 +99,23 @@ export const KeyMetrics = ({ poolId }: Props) => {
   }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
-    // TODO: Fix when we are not under fire
-    if (poolId === '4139607887') return [Object.values(metadata?.tranches ?? {})[0]?.apyPercentage]
-    const apy = getTodayValue(dailyTranches)
-    if (!apy) return null
+    // TODO: fix when we apy issue is solve, for now we will just use target
+    // const apy = getTodayValue(dailyTranches)
+    // if (!apy) return null
 
-    return Object.keys(apy)
-      .map((key) => {
-        return apy[key][0].yield90DaysAnnualized ? apy[key][0].yield90DaysAnnualized.toPercent().toNumber() : 0
-      })
-      .sort((a, b) => a - b)
+    // return Object.keys(apy)
+    //   .map((key) => {
+    //     return apy[key][0].yield90DaysAnnualized ? apy[key][0].yield90DaysAnnualized.toPercent().toNumber() : 0
+    //   })
+    //   .sort((a, b) => a - b)
+    return [Object.values(metadata?.tranches ?? {})[0]?.apyPercentage]
   }, [dailyTranches])
 
   const minInvestmentPerTranche = useMemo(() => {
     if (!metadata?.tranches) return null
 
     return Object.values(metadata.tranches).map((item) => {
-      return item.minInitialInvestment ? Number(item.minInitialInvestment) : null
+      return item.minInitialInvestment ? new Decimal(item.minInitialInvestment) : null
     })
   }, [metadata?.tranches])
 
@@ -124,15 +125,13 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: (metadata?.tranches && Object.values(metadata?.tranches ?? {})[0].apy) || '90-day APY',
+      metric: isTinlakePool ? '90-day APY' : 'Target',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
-        : tranchesAPY?.length
-        ? tranchesAPY.map((tranche, index) => {
-            const formatted = formatPercentage(tranche)
+        : tranchesAPY.map((tranche, index) => {
+            const formatted = formatPercentage(tranche ?? 0)
             return formatted && `${formatted} ${index !== tranchesAPY?.length - 1 ? '-' : ''}`
-          })
-        : '-',
+          }),
     },
     {
       metric: 'Min. investment',
