@@ -28,8 +28,6 @@ export function useTinlakeBalances(address?: string) {
   )
 }
 
-const WCFG_ADDRESS = '0xc221b7e65ffc80de234bbb6667abdd46593d34f0'
-
 async function getBalances(pools: TinlakePool[], address: string, provider: Provider) {
   const calls: EvmMulticallCall[] = []
   const toTokenBalance = (val: bigint) => new TokenBalance(val.toString(), 18)
@@ -81,13 +79,6 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Prov
     }
   })
 
-  calls.push({
-    target: WCFG_ADDRESS,
-    call: ['function balanceOf(address) view returns (uint256)', address],
-    returns: [[`currencies.${WCFG_ADDRESS}`, toCurrencyBalance]],
-    allowFailure: true,
-  })
-
   const multicallData = await evmMulticall<State>(calls, { rpcProvider: provider })
 
   const balances = {
@@ -117,7 +108,12 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Prov
   Object.entries(multicallData.currencies).forEach(([currencyAddress, balance]) => {
     balances.currencies.push({
       balance,
-      currency: currencyAddress === WCFG_ADDRESS ? currencies.wCFG : currencies.DAI,
+      currency:
+        currencyAddress === cfgConfig.legacy
+          ? currencies.wCFG
+          : currencyAddress === cfgConfig.new
+          ? currencies.newCFG
+          : currencies.DAI,
     })
   })
 
