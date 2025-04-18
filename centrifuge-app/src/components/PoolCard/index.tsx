@@ -1,9 +1,8 @@
-import { CurrencyBalance, PoolMetadata, Rate, Token } from '@centrifuge/centrifuge-js'
+import { PoolMetadata, Rate, Token } from '@centrifuge/centrifuge-js'
 import { Box, Card, Divider, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { CardHeader } from '../ListItemCardStyles'
 import { RatingPill } from '../PoolOverview/KeyMetrics'
@@ -11,7 +10,16 @@ import { RouterTextLink } from '../TextLink'
 import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 
-type TrancheWithCurrency = Pick<Token, 'yieldSinceInception' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'>
+type TrancheWithCurrency = Pick<
+  Token,
+  'yieldSinceInception' | 'interestRatePerSec' | 'currency' | 'id' | 'seniority'
+> & {
+  metadata?: {
+    apyPercentage?: number | null
+    minInitialInvestment?: string | null
+    apy?: string
+  }
+}
 
 const StyledRouterTextLink = styled(RouterTextLink)`
   font-size: 12px;
@@ -90,20 +98,23 @@ export function PoolCard({
   iconUri,
   tranches,
   metaData,
-  createdAt,
-  isArchive,
 }: PoolCardProps) {
   const theme = useTheme()
   const isOneTranche = tranches && tranches?.length === 1
   const isTinlakePool = poolId?.startsWith('0x')
   const ratings = metaData?.pool?.poolRatings ?? []
+  const combinedTranches = tranches?.map((tranche) => {
+    return {
+      ...tranche,
+      metadata: metaData?.tranches[tranche.id],
+    }
+  })
 
   const tinlakeKey = (Object.keys(tinlakeTranches).find(
     (key) => tinlakeTranches[key as TinlakeTranchesKey].name === name
   ) || 'none') as TinlakeTranchesKey
 
   const renderText = (text: string, isApr?: boolean, seniority?: number) => {
-    if (isArchive) return
     if (isApr && isTinlakePool && seniority === 0) {
       return (
         <Box display="flex" alignItems="baseline">
@@ -130,43 +141,28 @@ export function PoolCard({
   }
 
   const tranchesData = useMemo(() => {
-    return tranches
+    return combinedTranches
       ?.map((tranche: TrancheWithCurrency) => {
         const words = tranche.currency.name.trim().split(' ')
-        const metadata = metaData?.tranches[tranche.id] ?? null
         const trancheName = words[words.length - 1]
-        const investmentBalance = new CurrencyBalance(
-          metadata?.minInitialInvestment ?? 0,
-          tranche.currency.decimals
-        ).toDecimal()
 
-        const calculateApy = (tranche: TrancheWithCurrency) => {
-          const daysSinceCreation = createdAt ? daysBetween(createdAt, new Date()) : 0
-          if (daysSinceCreation > 30 && tranche.yieldSinceInception)
-            return formatPercentage(tranche.yieldSinceInception, true, {}, 1)
-          if (tranche.interestRatePerSec) {
-            return formatPercentage(tranche.interestRatePerSec.toAprPercent(), true, {}, 1)
-          }
-          return '-'
-        }
+        const minInvestment = tranche.metadata?.minInitialInvestment
+          ? new Decimal(tranche.metadata.minInitialInvestment)
+          : 0
 
         return {
           seniority: tranche.seniority,
           name: trancheName,
           apr: isTinlakePool
             ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.apr
-            : metadata?.apyPercentage
-            ? formatPercentage(metadata.apyPercentage, true, {}, 2)
-            : calculateApy(tranche),
+            : formatPercentage(tranche?.metadata?.apyPercentage || 0, true, {}, 2),
           minInvestment: isTinlakePool
             ? tinlakeTranches[tinlakeKey].tranches.find((t) => t.name === trancheName)?.minInvestment
-            : metadata && metadata.minInitialInvestment
-            ? `$${formatBalanceAbbreviated(Number(metadata.minInitialInvestment), '', 0)}`
-            : '-',
+            : `$${formatBalanceAbbreviated(minInvestment || 0, '', 0)}`,
         }
       })
       .reverse()
-  }, [isTinlakePool, metaData?.tranches, tinlakeKey, tranches, createdAt, poolId])
+  }, [isTinlakePool, tinlakeKey, combinedTranches])
 
   return (
     <RouterTextLink to={`${poolId}`} style={{ textDecoration: 'none' }}>

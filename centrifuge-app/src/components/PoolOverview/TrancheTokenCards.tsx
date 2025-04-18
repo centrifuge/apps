@@ -20,12 +20,16 @@ type Row = {
   isTarget: boolean
 }
 
+type TrancheToken = Token & {
+  isTarget: boolean
+}
+
 export const TrancheTokenCards = ({
   trancheTokens,
   poolId,
   metadata,
 }: {
-  trancheTokens: Token[]
+  trancheTokens: TrancheToken[]
   poolId: string
   metadata: PoolMetaDataPartial
 }) => {
@@ -116,8 +120,6 @@ export const TrancheTokenCards = ({
   }, [pool.tranches, metadata, poolId, pool?.currency.symbol])
 
   const dataTable = useMemo(() => {
-    // TODO: Remove this once we are not under fire
-    const getTarget = (tranche: Token) => (isTinlakePool && tranche.seniority === 0) || poolId === '4139607887'
     return trancheTokens.map((tranche) => {
       const calculateApy = (trancheToken: Token) => {
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
@@ -132,7 +134,7 @@ export const TrancheTokenCards = ({
         tokenPrice: tranche.tokenPrice,
         subordination: tranche.protection,
         trancheId: tranche.id,
-        isTarget: getTarget(tranche),
+        isTarget: tranche.isTarget,
       }
     })
   }, [trancheTokens, daysSinceCreation, isTinlakePool, poolId])
