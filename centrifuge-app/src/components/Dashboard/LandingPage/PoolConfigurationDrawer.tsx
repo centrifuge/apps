@@ -38,6 +38,7 @@ export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
     minInvestment: number
     minRiskBuffer: number | null
     interestRate: number | null
+    weightedAverageMaturity: number | null
   }[]
 }
 
@@ -72,6 +73,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
         symbolName: tranche.currency.symbol,
         minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? null,
         minInvestment: Number(trancheMeta?.minInitialInvestment ?? 0),
+        weightedAverageMaturity: trancheMeta?.weightedAverageMaturity ?? null,
         apy: trancheMeta?.apy || 'Target',
         apyPercentage: trancheMeta?.apyPercentage ?? null,
         interestRate:
@@ -248,9 +250,10 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
             minInitialInvestment: tranche.minInvestment.toString(),
             apy: tranche.apy,
             apyPercentage: tranche.apyPercentage,
+            weightedAverageMaturity: tranche.weightedAverageMaturity,
           }
           return acc
-        }, {} as Record<string, { minInitialInvestment: string; apy: string; apyPercentage: number | null }>),
+        }, {} as Record<string, { minInitialInvestment: string; apy: string; apyPercentage: number | null; weightedAverageMaturity: number | null }>),
       }
 
       // Pool report (pool analysis in UI)
@@ -333,6 +336,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
           minInitialInvestment: tranche.minInvestment,
           apy: tranche.apy.toString(),
           apyPercentage: tranche.apyPercentage,
+          weightedAverageMaturity: tranche.weightedAverageMaturity,
         })),
       ]
 
