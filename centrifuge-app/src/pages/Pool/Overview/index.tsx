@@ -163,16 +163,15 @@ export function InvestButton(props: InvestRedeemProps) {
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
   const { connectedType, showNetworks } = useWallet()
   const navigate = useNavigate()
-  const isTinlakePool = poolId.startsWith('0x')
 
   const getButtonText = (state: any) => {
-    if (!state.isAllowedToInvest && connectedType !== null && !isTinlakePool) {
+    if (!state.isAllowedToInvest && connectedType !== null) {
       return 'Onboard'
-    } else if (connectedType === null && !isTinlakePool) {
+    } else if (connectedType === null) {
       return 'Connect'
-    } else if (isTinlakePool) {
-      return 'Closed'
-    } else return state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'
+    } else {
+      return state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'
+    }
   }
 
   return (
@@ -201,7 +200,6 @@ export function InvestButton(props: InvestRedeemProps) {
                 }}
                 variant="primary"
                 loading={isLoading}
-                disabled={isTinlakePool}
               >
                 {buttonText}
               </Button>
