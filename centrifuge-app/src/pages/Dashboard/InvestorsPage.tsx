@@ -1,3 +1,4 @@
+import { Holder } from '@centrifuge/centrifuge-js'
 import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -19,7 +20,11 @@ export default function InvestorsPage() {
 
   return (
     <Stack gap={4} py={2} px={3}>
-      <AddNewInvestorDrawer isOpen={isAddNewInvestorDrawerOpen} onClose={() => setIsAddNewInvestorDrawerOpen(false)} />
+      <AddNewInvestorDrawer
+        isOpen={isAddNewInvestorDrawerOpen}
+        onClose={() => setIsAddNewInvestorDrawerOpen(false)}
+        investors={investors as Holder[]}
+      />
       <SupportedNetworksDrawer
         isOpen={isSupportedNetworksDrawerOpen}
         onClose={() => setIsSupportedNetworksDrawerOpen(false)}
@@ -60,7 +65,7 @@ export default function InvestorsPage() {
           </Button>
         </Shelf>
       </Shelf>
-      <InvestorTable />
+      <InvestorTable investors={investors as Holder[]} />
     </Stack>
   )
 }

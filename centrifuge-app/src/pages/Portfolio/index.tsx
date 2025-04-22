@@ -125,7 +125,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       {
         label: 'Portfolio value',
         value: formatBalance(currentPortfolioValue || 0),
-        children: (
+        children: yieldSinceInception.isZero() ? null : (
           <Box backgroundColor={theme.colors.statusOkBg} padding="4px" borderRadius={4} mr={2}>
             <Text
               variant="body4"
@@ -135,6 +135,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
               {yieldSinceInception?.isPositive() ? '+' : '-'}
               {yieldSinceInception?.toPrecision(2)}
             </Text>
+
             <Text variant="body4" color={yieldSinceInception?.isPositive() ? 'statusOk' : 'statusCritical'}>
               Since inception
             </Text>
@@ -170,10 +171,10 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mb={2} />
       <PortfolioSummary data={pageSummaryData} />
-      <Stack gap={4} m={2}>
+      <Stack gap={4} mt={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
-          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} p={1} px={2}>
+          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} py={1} px={2}>
             <Grid gridTemplateColumns={['1fr 1fr']} gap={2} alignItems="center">
               <Text variant="heading4">Available to invest</Text>
               <Select
@@ -229,7 +230,6 @@ export function PortfolioSummary({ data, children }: Props) {
       border={`1px solid ${theme.colors.borderSecondary}`}
       borderRadius={10}
       padding={2}
-      mx={[2, 2, 2, 2, 5]}
     >
       <Shelf gap={4}>
         {data?.map(({ label, value, heading, children }, index) => (

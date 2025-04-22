@@ -23,6 +23,7 @@ export type FormHandle = {
     values: FormValues,
     metadata: PoolMetadata
   ) => ObservableInput<{ batch: any[]; metadata: PoolMetadata }>
+  hasChanges: (values: FormValues) => boolean
   validate?: (values: FormValues) => FormikErrors<any>
 }
 
@@ -34,9 +35,7 @@ export function AccessDrawer({ isOpen, onClose }: { onClose: () => void; isOpen:
     <Drawer title="Manage Access" isOpen={isOpen} onClose={onClose} overflow="hidden">
       <Select
         label="Select pool"
-        onChange={(event) => {
-          setSelectedPoolId(event.target.value)
-        }}
+        onChange={(event) => setSelectedPoolId(event.target.value)}
         value={selectedPoolId}
         options={selectedPoolIds.map((id) => ({ label: <PoolName poolId={id} />, value: id }))}
       />
@@ -91,8 +90,9 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
           let newMetadata = metadata as PoolMetadata
           const batches = []
           for (const ref of refs) {
+            if (!ref.current) continue
             const { batch, metadata: updatedMetadata } = await firstValueFrom(
-              from(ref?.current!.getBatch(cent, values, newMetadata))
+              from(ref.current.getBatch(cent, values, newMetadata))
             )
             batches.push(batch)
             newMetadata = updatedMetadata
@@ -124,14 +124,12 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
       admins: [],
     },
     validate: (values) => {
-      const errors: any = {}
+      const combinedErrors = {}
       for (const ref of refs) {
-        const errors = ref.current?.validate?.(values) || {}
-        if (errors) {
-          Object.assign(errors, errors)
-        }
+        const refErrors = ref.current?.validate?.(values) || {}
+        Object.assign(combinedErrors, refErrors)
       }
-      return errors
+      return combinedErrors
     },
     onSubmit: async (values, actions) => {
       actions.setSubmitting(false)
@@ -142,6 +140,8 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   useFocusInvalidInput(form, formRef)
 
   if (!aoDelegateAccount || !adminDelegateAccount) return null
+
+  const hasChanges = refs.some((ref) => ref.current?.hasChanges(form.values))
 
   return (
     <FormikProvider value={form}>
@@ -178,7 +178,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
             />
           </Stack>
           <Stack gap={1} bg="backgroundPrimary" mt={3}>
-            <Button type="submit" loading={isLoading}>
+            <Button type="submit" loading={isLoading} disabled={!form.isValid || !hasChanges}>
               Update
             </Button>
             <Button variant="inverted" onClick={() => onClose()}>

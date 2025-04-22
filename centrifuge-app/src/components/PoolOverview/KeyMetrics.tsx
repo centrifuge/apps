@@ -1,4 +1,4 @@
-import { CurrencyBalance, DailyTrancheState, PoolMetadata, Price } from '@centrifuge/centrifuge-js'
+import { DailyTrancheState, PoolMetadata, Price } from '@centrifuge/centrifuge-js'
 import { NetworkIcon, formatBalanceAbbreviated, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -16,12 +16,11 @@ import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
+import { Decimal } from '../../../src/utils/Decimal'
 import { evmChains } from '../../config'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
-import { useAverageMaturity } from '../../utils/useAverageMaturity'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
-import { centrifugeTargetAPYs } from '../PoolCard'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
@@ -92,7 +91,6 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
-  const averageMaturity = useAverageMaturity(poolId)
 
   const expenseRatio = useMemo(() => {
     return (
@@ -101,29 +99,25 @@ export const KeyMetrics = ({ poolId }: Props) => {
   }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
-    const apy = getTodayValue(dailyTranches)
-    if (!apy) return null
+    // TODO: fix when we apy issue is solve, for now we will just use target
+    // const apy = getTodayValue(dailyTranches)
+    // if (!apy) return null
 
-    return Object.keys(apy)
-      .map((key) => {
-        return apy[key][0].yield90DaysAnnualized ? apy[key][0].yield90DaysAnnualized.toPercent().toNumber() : 0
-      })
-      .sort((a, b) => a - b)
+    // return Object.keys(apy)
+    //   .map((key) => {
+    //     return apy[key][0].yield90DaysAnnualized ? apy[key][0].yield90DaysAnnualized.toPercent().toNumber() : 0
+    //   })
+    //   .sort((a, b) => a - b)
+    return [Object.values(metadata?.tranches ?? {})[0]?.apyPercentage]
   }, [dailyTranches])
 
   const minInvestmentPerTranche = useMemo(() => {
     if (!metadata?.tranches) return null
 
     return Object.values(metadata.tranches).map((item) => {
-      const minInv = new CurrencyBalance(item.minInitialInvestment ?? 0, pool.currency.decimals).toDecimal()
-      return item.minInitialInvestment ? minInv : null
+      return item.minInitialInvestment ? new Decimal(item.minInitialInvestment) : null
     })
-  }, [metadata?.tranches, pool.currency.decimals])
-
-  const isBT3BT4 =
-    poolId === '0x53b2d22d07E069a3b132BfeaaD275b10273d381E' ||
-    poolId === '0x90040F96aB8f291b6d43A8972806e977631aFFdE' ||
-    poolId === '0x55d86d51Ac3bcAB7ab7d2124931FbA106c8b60c7'
+  }, [metadata?.tranches])
 
   const metrics = [
     {
@@ -131,43 +125,28 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric:
-        centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs] || tinlakeData[poolId as TinlakeDataKey]
-          ? 'Target APY'
-          : Object.values(metadata?.tranches ?? {})[0].apy || '90-day APY',
+      metric: isTinlakePool ? '90-day APY' : 'Target',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
-        : centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs]
-        ? centrifugeTargetAPYs[poolId as keyof typeof centrifugeTargetAPYs].reverse().join(' - ')
-        : tranchesAPY?.length
-        ? tranchesAPY.map((tranche, index) => {
-            const formatted = formatPercentage(tranche)
+        : tranchesAPY.map((tranche, index) => {
+            const formatted = formatPercentage(tranche ?? 0)
             return formatted && `${formatted} ${index !== tranchesAPY?.length - 1 ? '-' : ''}`
-          })
-        : '-',
+          }),
     },
-    ...(isBT3BT4
-      ? []
-      : [
-          {
-            metric: 'Average asset maturity',
-            value: averageMaturity,
-          },
-        ]),
     {
       metric: 'Min. investment',
       value: minInvestmentPerTranche?.length
         ? minInvestmentPerTranche
             .sort((a, b) => Number(a) - Number(b))
             .map((tranche, index) => {
-              const formatted = formatBalanceAbbreviated(tranche?.toNumber() ?? 0, '', 0)
+              const formatted = formatBalanceAbbreviated(tranche ?? 0, '', 0)
               return tranche && `$${formatted} ${index !== minInvestmentPerTranche?.length - 1 ? '-' : ''} `
             })
         : '-',
     },
     {
       metric: 'Investor type',
-      value: isBT3BT4 ? 'Private' : metadata?.pool?.investorType ?? '-',
+      value: metadata?.pool?.investorType ?? '-',
     },
     ...(!isTinlakePool
       ? [
@@ -180,9 +159,9 @@ export const KeyMetrics = ({ poolId }: Props) => {
 
     {
       metric: 'Pool structure',
-      value: isBT3BT4 ? 'Revolving' : metadata?.pool?.poolStructure ?? '-',
+      value: metadata?.pool?.poolStructure ?? '-',
     },
-    ...(metadata?.pool?.poolRatings?.length
+    ...(metadata?.pool?.poolRatings?.length && metadata?.pool?.poolRatings[0]?.agency !== ''
       ? [
           {
             metric: 'Rating',
@@ -251,7 +230,6 @@ const TooltipBody = ({
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation()
   }
-
   return (
     <Box backgroundColor="backgroundInverted" display="flex" alignItems="center" borderRadius="8px">
       <Box display="flex" flexDirection="column" marginRight="12px">

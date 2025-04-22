@@ -1,4 +1,3 @@
-import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { Decimal } from 'decimal.js-light'
 import { useMemo } from 'react'
@@ -8,7 +7,6 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
-import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { PoolMetaDataPartial } from '../PoolList'
 import { Tooltips } from '../Tooltips'
 
@@ -22,12 +20,16 @@ type Row = {
   isTarget: boolean
 }
 
+type TrancheToken = Token & {
+  isTarget: boolean
+}
+
 export const TrancheTokenCards = ({
   trancheTokens,
   poolId,
   metadata,
 }: {
-  trancheTokens: Token[]
+  trancheTokens: TrancheToken[]
   poolId: string
   metadata: PoolMetaDataPartial
 }) => {
@@ -46,7 +48,7 @@ export const TrancheTokenCards = ({
     return [
       {
         header: 'Token',
-        width: '40%',
+        width: '45%',
         align: 'left',
         cell: (row: Row) => {
           return (
@@ -57,7 +59,7 @@ export const TrancheTokenCards = ({
         },
       },
       {
-        header: 'Yield since inception',
+        header: 'APY',
         align: 'left',
         cell: (row: Row) => {
           return (
@@ -118,21 +120,12 @@ export const TrancheTokenCards = ({
   }, [pool.tranches, metadata, poolId, pool?.currency.symbol])
 
   const dataTable = useMemo(() => {
-    const getTarget = (tranche: Token) =>
-      (isTinlakePool && tranche.seniority === 0) || poolId === DYF_POOL_ID || poolId === NS3_POOL_ID
     return trancheTokens.map((tranche) => {
       const calculateApy = (trancheToken: Token) => {
         if (isTinlakePool && getTrancheText(trancheToken) === 'senior') return formatPercentage(trancheToken.apy)
         if (isTinlakePool && trancheToken.seniority === 0) return '15%'
-        if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-        if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
-          return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-        if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
-          return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
         if (daysSinceCreation < 30) return 'N/A'
-        return trancheToken.yieldSinceInception
-          ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception))
-          : '-'
+        return trancheToken.apy ? `${trancheToken.apy}%` : '-'
       }
       return {
         tokenName: tranche.name,
@@ -141,7 +134,7 @@ export const TrancheTokenCards = ({
         tokenPrice: tranche.tokenPrice,
         subordination: tranche.protection,
         trancheId: tranche.id,
-        isTarget: getTarget(tranche),
+        isTarget: tranche.isTarget,
       }
     })
   }, [trancheTokens, daysSinceCreation, isTinlakePool, poolId])

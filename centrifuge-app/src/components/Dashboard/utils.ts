@@ -8,7 +8,6 @@ import { Dec } from '../../utils/Decimal'
 import { usePoolMetadataMulti } from '../../utils/usePools'
 import { useSubquery } from '../../utils/useSubquery'
 import { getAmount } from '../LoanList'
-import { CentrifugeTargetAPYs, DYF_POOL_ID, NS3_POOL_ID, centrifugeTargetAPYs } from '../PoolCard'
 import { CreateAssetFormValues } from './Assets/CreateAssetsDrawer'
 
 type FlattenedDataItem = {
@@ -259,17 +258,13 @@ const getTrancheText = (trancheToken: Token) => {
   return 'mezzanine'
 }
 
-export const calculateApyPerToken = (trancheToken: Token, pool: Pool) => {
+export const calculateApyPerToken = (trancheToken: Token, pool: PoolWithMetadata) => {
+  const trancheTarget = pool?.meta?.tranches?.[trancheToken.id]?.apyPercentage
   const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
-  const poolId = pool.id
+  if (trancheTarget) return formatPercentage(trancheTarget)
   if (getTrancheText(trancheToken) === 'senior')
     return formatPercentage(trancheToken?.interestRatePerSec ? trancheToken?.interestRatePerSec.toAprPercent() : Dec(0))
   if (trancheToken.seniority === 0) return '15%'
-  if (poolId === DYF_POOL_ID) return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-  if (poolId === NS3_POOL_ID && trancheToken.seniority === 0)
-    return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][0]
-  if (poolId === NS3_POOL_ID && trancheToken.seniority === 1)
-    return centrifugeTargetAPYs[poolId as CentrifugeTargetAPYs][1]
   if (daysSinceCreation < 30) return 'N/A'
   return trancheToken.yieldSinceInception ? formatPercentage(new Perquintill(trancheToken.yieldSinceInception)) : '-'
 }

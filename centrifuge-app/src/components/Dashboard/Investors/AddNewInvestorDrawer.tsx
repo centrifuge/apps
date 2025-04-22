@@ -1,17 +1,18 @@
-import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
-import { AddressInput, Box, Button, Drawer, Select, Stack } from '@centrifuge/fabric'
-import { isAddress } from 'ethers'
+import { Holder } from '@centrifuge/centrifuge-js'
+import { getChainInfo, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
+import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
+import { isAddress } from '@polkadot/util-crypto'
 import { Form, FormikContextType, FormikProvider, useFormik } from 'formik'
 import { useState } from 'react'
-import { isEvmAddress } from '../../../utils/address'
+import { isEvmAddress, isSubstrateAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { useInvestorList, usePoolMetadataMulti } from '../../../utils/usePools'
+import { usePoolMetadataMulti } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
   isOpen: boolean
   onClose: () => void
+  investors: Holder[]
 }
 
 type NewInvestorFormValues = {
@@ -21,13 +22,16 @@ type NewInvestorFormValues = {
   network: string
 }
 
-export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
+export function AddNewInvestorDrawer({ isOpen, onClose, investors }: AddNewInvestorDrawerProps) {
+  const utils = useCentrifugeUtils()
+  const {
+    substrate: { evmChainId: substrateEvmChainId },
+  } = useWallet()
   const { pools } = useSelectedPools(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
 
-  const investors = useInvestorList(poolId)
-  const existingInvestorsAddresses = investors?.map((i) => i.evmAddress?.toLowerCase()) ?? []
+  const poolInvestors = investors?.filter((i) => i.poolId === poolId)
 
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
@@ -36,36 +40,54 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
 
   const validate = (values: NewInvestorFormValues) => {
     const errors: Partial<NewInvestorFormValues> = {}
-    const convertedAddress = isEvmAddress(values.investorAddress)
-      ? evmToSubstrateAddress(values.investorAddress, Number(values.network) || 1)
-      : values.investorAddress
-    if (existingInvestorsAddresses.includes(convertedAddress.toLowerCase())) {
-      errors.investorAddress = 'Address already exists'
+    const validator =
+      Number(values.network) === 0 ? isSubstrateAddress(values.investorAddress) : isEvmAddress(values.investorAddress)
+
+    if (values.investorAddress && !validator) {
+      errors.investorAddress = 'Invalid address'
     }
+
     return errors
   }
 
   const formik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
     initialValues: {
-      trancheId: '',
+      trancheId: pools?.find((p) => p.id === poolId)?.tranches[0].id ?? '',
       investorAddress: '',
-      network: '',
+      network: '0',
     } as NewInvestorFormValues,
     onSubmit: (values) => {
       const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
       const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
-      const validator = typeof values.network === 'number' ? isEvmAddress : isAddress
-      const validAddress = validator(values.investorAddress) ? values.investorAddress : undefined
-      const domains = values.network ? [[values.network, validAddress]] : undefined
+      const domains = values.network ? [[values.network, values.investorAddress]] : undefined
 
-      execute([
-        values.poolId,
-        [[validAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]],
-        [],
-      ])
+      const centAddress =
+        values.network === '0' && substrateEvmChainId && isEvmAddress(values.investorAddress)
+          ? utils.evmToSubstrateAddress(values.investorAddress, substrateEvmChainId)
+          : utils.evmToSubstrateAddress(values.investorAddress, Number(values.network) || 1)
+
+      execute([poolId, [[centAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]], []])
     },
     validate,
   })
+
+  const convertedAddress = isAddress(formik.values.investorAddress)
+    ? utils.formatAddress(formik.values.investorAddress)
+    : ''
+
+  const existingInvestorsAddresses =
+    poolInvestors?.map((i) => {
+      return {
+        address: utils.formatAddress(i.evmAddress || i.accountId || '').toLowerCase(),
+        chainId: i.chainId,
+      }
+    }) ?? []
+
+  const addressAlreadyExists = existingInvestorsAddresses.some(
+    (i) => i.address === convertedAddress.toLowerCase() && i.chainId === Number(formik.values.network)
+  )
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="New investor">
@@ -86,7 +108,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   }
                   id="poolId"
                   name="poolId"
-                  value={formik.values.poolId}
+                  value={poolId}
                   onChange={(event) => {
                     const poolId = event.target.value
                     setPoolId(poolId)
@@ -98,11 +120,11 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   label="Select tranche token"
                   id="trancheId"
                   name="trancheId"
-                  disabled={pools?.find((pool) => pool.id === formik.values.poolId)?.tranches.length! === 1}
+                  disabled={pools?.find((pool) => pool.id === poolId)?.tranches.length! === 1}
                   value={formik.values.trancheId}
                   options={
                     pools
-                      ?.find((pool) => pool.id === formik.values.poolId)
+                      ?.find((pool) => pool.id === poolId)
                       ?.tranches.map((t) => {
                         return {
                           label: t.currency.displayName,
@@ -112,12 +134,12 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   }
                   onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
                 />
-                <AddressNetworkInput formik={formik} poolId={poolId} />
+                <AddressNetworkInput formik={formik} poolId={poolId} addressAlreadyExists={addressAlreadyExists} />
               </Stack>
               <Button
                 type="submit"
                 loading={isTransactionPending}
-                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress || !formik.values.network}
+                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress || addressAlreadyExists}
               >
                 Add new investor
               </Button>
@@ -129,7 +151,15 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
   )
 }
 
-function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<NewInvestorFormValues>; poolId: string }) {
+function AddressNetworkInput({
+  formik,
+  poolId,
+  addressAlreadyExists,
+}: {
+  formik: FormikContextType<NewInvestorFormValues>
+  poolId: string
+  addressAlreadyExists: boolean
+}) {
   const {
     evm: { chains },
   } = useWallet()
@@ -144,15 +174,20 @@ function AddressNetworkInput({ formik, poolId }: { formik: FormikContextType<New
         name="investorAddress"
         label="Wallet address"
         placeholder="Type here..."
-        onChange={(event) => formik.setFieldValue('investorAddress', event.target.value)}
+        onChange={formik.handleChange}
         errorMessage={formik.errors.investorAddress}
       />
+      {addressAlreadyExists && (
+        <Text variant="heading4" color="statusOk">
+          Address already exists
+        </Text>
+      )}
       <Select
         label="Network*"
         id="network"
         name="network"
         options={[
-          { value: '', label: 'Centrifuge' },
+          { value: '0', label: 'Centrifuge' },
           ...deployedLpChains
             .map((chainId) => ({
               value: String(chainId),

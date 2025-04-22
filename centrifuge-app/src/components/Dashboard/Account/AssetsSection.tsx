@@ -1,6 +1,5 @@
 import {
   ActiveLoan,
-  addressToHex,
   CurrencyBalance,
   CurrencyKey,
   ExternalLoan,
@@ -17,12 +16,10 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
-import { keccak256, SigningKey, toUtf8Bytes } from 'ethers'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from 'react-query'
-import { combineLatest, defer, firstValueFrom, switchMap } from 'rxjs'
-import { stringToHex } from 'viem'
+import { combineLatest, switchMap } from 'rxjs'
 import { DataTable } from '../../../../src/components/DataTable'
 import { AssetName, getAmount } from '../../../../src/components/LoanList'
 import { isCashLoan, isExternalLoan } from '../../../../src/pages/Loan/utils'
@@ -31,7 +28,6 @@ import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { useLiquidity } from '../../../../src/utils/useLiquidity'
 import { useActiveDomains } from '../../../../src/utils/useLiquidityPools'
-import { metadataQueryFn } from '../../../../src/utils/useMetadata'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { usePoolAccountOrders, usePoolFees } from '../../../../src/utils/usePools'
 import { hasValuationMethod } from '../utils'
@@ -196,96 +192,96 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
   const { execute, isLoading: isUpdating } = useCentrifugeTransaction(
     'Update NAV',
     (cent) => (args: [values: TransactionLoanData[]], options) => {
-      const $attestationHash = defer(async () => {
-        const nftsByNftId = new Map(
-          (
-            await firstValueFrom(
-              cent.nfts.getNfts([loans![0].asset.collectionId, activeLoans.map((l) => l.asset.nftId)])
-            )
-          ).map((nft) => [nft.id, nft])
-        )
-        const nftMetas = await Promise.all(
-          activeLoans.map((l) => {
-            const nft = nftsByNftId.get(l.asset.nftId)
-            if (!nft?.metadataUri) return null
-            return queryClient.fetchQuery(['metadata', nft.metadataUri], () => metadataQueryFn(nft.metadataUri!, cent))
-          })
-        )
-        const attestation: Attestation = {
-          portfolio: {
-            timestamp: Math.floor(Date.now() / 1000),
-            decimals: pool.currency.decimals,
-            assets: [
-              {
-                assetId: '0',
-                name: 'Onchain reserve',
-                quantity: pool.reserve.total.toString(),
-                price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
-              },
-              {
-                name: 'Accrued fees',
-                quantity: pool.nav.fees.toString(),
-                price: CurrencyBalance.fromFloat(-1, pool.currency.decimals).toString(),
-              },
-              ...activeLoans.map((l, i) =>
-                isExternalLoan(l)
-                  ? {
-                      assetId: l.id,
-                      name: nftMetas[i]?.name ?? '',
-                      quantity: CurrencyBalance.fromFloat(
-                        l.pricing.outstandingQuantity.toDecimal(),
-                        pool.currency.decimals
-                      ).toString(),
-                      price: (l as ActiveLoan).currentPrice?.toString() ?? '0',
-                    }
-                  : {
-                      assetId: l.id,
-                      name: nftMetas[i]?.name ?? '',
-                      quantity: (l as ActiveLoan).presentValue?.toString() ?? '0',
-                      price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
-                    }
-              ),
-            ],
-            netAssetValue: pool.nav.total.toString(),
-            tokenSupply: pool.tranches.map((t) => t.totalIssuance.toString()),
-            tokenPrice: pool.tranches.map((t) => t.tokenPrice?.toString() ?? '0'),
-            tokenAddresses: Object.fromEntries(
-              domains
-                ?.map((d) => [d.chainId, Object.values(d.trancheTokens) as string[]] as const)
-                .filter(([, tokens]) => !tokens.every((t) => t === null)) || []
-            ),
-          },
-        }
+      // const $attestationHash = defer(async () => {
+      // const nftsByNftId = new Map(
+      //   (
+      //     await firstValueFrom(
+      //       cent.nfts.getNfts([loans![0].asset.collectionId, activeLoans.map((l) => l.asset.nftId)])
+      //     )
+      //   ).map((nft) => [nft.id, nft])
+      // )
+      // const nftMetas = await Promise.all(
+      //   activeLoans.map((l) => {
+      //     const nft = nftsByNftId.get(l.asset.nftId)
+      //     if (!nft?.metadataUri) return null
+      //     return queryClient.fetchQuery(['metadata', nft.metadataUri], () => metadataQueryFn(nft.metadataUri!, cent))
+      //   })
+      // )
+      // const attestation: Attestation = {
+      //   portfolio: {
+      //     timestamp: Math.floor(Date.now() / 1000),
+      //     decimals: pool.currency.decimals,
+      //     assets: [
+      //       {
+      //         assetId: '0',
+      //         name: 'Onchain reserve',
+      //         quantity: pool.reserve.total.toString(),
+      //         price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
+      //       },
+      //       {
+      //         name: 'Accrued fees',
+      //         quantity: pool.nav.fees.toString(),
+      //         price: CurrencyBalance.fromFloat(-1, pool.currency.decimals).toString(),
+      //       },
+      //       ...activeLoans.map((l, i) =>
+      //         isExternalLoan(l)
+      //           ? {
+      //               assetId: l.id,
+      //               name: nftMetas[i]?.name ?? '',
+      //               quantity: CurrencyBalance.fromFloat(
+      //                 l.pricing.outstandingQuantity.toDecimal(),
+      //                 pool.currency.decimals
+      //               ).toString(),
+      //               price: (l as ActiveLoan).currentPrice?.toString() ?? '0',
+      //             }
+      //           : {
+      //               assetId: l.id,
+      //               name: nftMetas[i]?.name ?? '',
+      //               quantity: (l as ActiveLoan).presentValue?.toString() ?? '0',
+      //               price: CurrencyBalance.fromFloat(1, pool.currency.decimals).toString(),
+      //             }
+      //       ),
+      //     ],
+      //     netAssetValue: pool.nav.total.toString(),
+      //     tokenSupply: pool.tranches.map((t) => t.totalIssuance.toString()),
+      //     tokenPrice: pool.tranches.map((t) => t.tokenPrice?.toString() ?? '0'),
+      //     tokenAddresses: Object.fromEntries(
+      //       domains
+      //         ?.map((d) => [d.chainId, Object.values(d.trancheTokens) as string[]] as const)
+      //         .filter(([, tokens]) => !tokens.every((t) => t === null)) || []
+      //     ),
+      //   },
+      // }
 
-        let signature: { hash: string; publicKey: string; type: 'evm' | 'substrate' } | null = null
-        try {
-          const message = JSON.stringify(attestation.portfolio)
-          if (provider) {
-            const signer = await provider.getSigner()
-            const sig = await signer.signMessage(message)
-            const hash = keccak256(toUtf8Bytes(`\x19Ethereum Signed Message:\n${message.length}${message}`))
-            const recoveredPubKey = SigningKey.recoverPublicKey(hash, sig)
-            signature = { hash: sig, publicKey: recoveredPubKey, type: 'evm' }
-          } else if (substrate.selectedAccount?.address && substrate?.selectedWallet?.signer?.signRaw) {
-            const { address } = substrate.selectedAccount
-            const { signature: sig } = await substrate.selectedWallet.signer.signRaw({
-              address: address,
-              data: stringToHex(message),
-              type: 'bytes',
-            })
-            signature = { hash: sig, publicKey: addressToHex(address), type: 'substrate' }
-          }
-        } catch {}
-        if (!signature) return null
+      // let signature: { hash: string; publicKey: string; type: 'evm' | 'substrate' } | null = null
+      // try {
+      // const message = JSON.stringify(attestation.portfolio)
+      //   if (provider) {
+      //     const signer = await provider.getSigner()
+      //     const sig = await signer.signMessage(message)
+      //     const hash = keccak256(toUtf8Bytes(`\x19Ethereum Signed Message:\n${message.length}${message}`))
+      //     const recoveredPubKey = SigningKey.recoverPublicKey(hash, sig)
+      //     signature = { hash: sig, publicKey: recoveredPubKey, type: 'evm' }
+      //   } else if (substrate.selectedAccount?.address && substrate?.selectedWallet?.signer?.signRaw) {
+      //     const { address } = substrate.selectedAccount
+      //     const { signature: sig } = await substrate.selectedWallet.signer.signRaw({
+      //       address: address,
+      //       data: stringToHex(message),
+      //       type: 'bytes',
+      //     })
+      //     signature = { hash: sig, publicKey: addressToHex(address), type: 'substrate' }
+      //   }
+      // } catch {}
+      // if (!signature) return null
 
-        attestation.signature = signature
-        try {
-          const result = await firstValueFrom(cent.metadata.pinJson(attestation))
-          return result.ipfsHash
-        } catch {
-          return null
-        }
-      })
+      // attestation.signature = signature
+      // try {
+      //   const result = await firstValueFrom(cent.metadata.pinJson(attestation))
+      //   return result.ipfsHash
+      // } catch {
+      //   return null
+      // }
+      // })
 
       const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
       const updateTokenPrices = deployedDomains
@@ -301,11 +297,13 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
           )
         : []
 
-      return combineLatest([$attestationHash, ...updateTokenPrices]).pipe(
-        switchMap(([attestationHash, ...updateTokenPricesTxs]) => {
-          if (!attestationHash) {
-            throw new Error('Attestation signing failed')
-          }
+      // return combineLatest([$attestationHash, ...updateTokenPrices]).pipe(
+      return combineLatest([...updateTokenPrices]).pipe(
+        // switchMap(([attestationHash, ...updateTokenPricesTxs]) => {
+        switchMap(([...updateTokenPricesTxs]) => {
+          // if (!attestationHash) {
+          //   throw new Error('Attestation signing failed')
+          // }
           const [values] = args
           const batch = [
             ...values
@@ -315,10 +313,11 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
                 return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
               }),
             api.tx.oraclePriceCollection.updateCollection(pool.id),
-            api.tx.remarks.remark(
-              [{ Named: `attestation:${pool.id}:${attestationHash}` }],
-              api.tx.loans.updatePortfolioValuation(pool.id)
-            ),
+            api.tx.loans.updatePortfolioValuation(pool.id),
+            // api.tx.remarks.remark(
+            //   [{ Named: `attestation:${pool.id}:${attestationHash}` }],
+            //   api.tx.loans.updatePortfolioValuation(pool.id)
+            // ),
             api.tx.utility.batch(updateTokenPricesTxs),
           ]
 

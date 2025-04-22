@@ -366,36 +366,34 @@ const SendToken = ({ holding, isNativeTransfer }: SendProps) => {
             <Shelf pl={1} display="flex" justifyContent="flex-end">
               <Text variant="body2">Wallet balance: {formatBalance(holding.position, holding.currency.symbol, 2)}</Text>
             </Shelf>
-            {form.values.recipientAddress.startsWith('0x') && isNativeTransfer && (
-              <>
-                <Shelf bg="statusCriticalBg" borderRadius="2px" py={2} px={3}>
-                  <Text color="statusCritical" variant="body2">
-                    Only use this page to transfer native CFG to Centrifuge. Transfers to addresses on other networks or
-                    on exchanges could result in loss of funds. If you want to bridge native CFG to Ethereum, go to{' '}
-                    <a
-                      style={{ color: 'inherit', textDecoration: 'underline' }}
-                      href="https://bridge.centrifuge.io"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      bridge.centrifuge.io
-                    </a>
-                    .
-                  </Text>
-                </Shelf>
-                <Shelf>
-                  <Field name="isDisclaimerAgreed">
-                    {({ field, meta }: FieldProps) => (
-                      <Checkbox
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        label="I have read the above and understand the risk"
-                        {...field}
-                      />
-                    )}
-                  </Field>
-                </Shelf>
-              </>
-            )}
+            <>
+              <Shelf bg="statusCriticalBg" borderRadius="2px" py={2} px={3}>
+                <Text color="statusCritical" variant="body2">
+                  Only use this page to transfer native CFG to Centrifuge. Transfers to addresses on other networks or
+                  on exchanges could result in loss of funds. If you want to bridge native CFG to Ethereum, go to{' '}
+                  <a
+                    style={{ color: 'inherit', textDecoration: 'underline' }}
+                    href="https://bridge.centrifuge.io"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    bridge.centrifuge.io
+                  </a>
+                  .
+                </Text>
+              </Shelf>
+              <Shelf>
+                <Field name="isDisclaimerAgreed">
+                  {({ field, meta }: FieldProps) => (
+                    <Checkbox
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      label="I have read the above and understand the risk"
+                      {...field}
+                    />
+                  )}
+                </Field>
+              </Shelf>
+            </>
 
             <Button
               variant="primary"
