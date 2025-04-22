@@ -161,7 +161,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: 'Pool structure',
       value: metadata?.pool?.poolStructure ?? '-',
     },
-    ...(metadata?.pool?.poolRatings?.length
+    ...(metadata?.pool?.poolRatings?.length && metadata?.pool?.poolRatings[0]?.agency !== ''
       ? [
           {
             metric: 'Rating',
@@ -230,7 +230,6 @@ const TooltipBody = ({
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation()
   }
-
   return (
     <Box backgroundColor="backgroundInverted" display="flex" alignItems="center" borderRadius="8px">
       <Box display="flex" flexDirection="column" marginRight="12px">

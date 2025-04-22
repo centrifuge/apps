@@ -258,8 +258,10 @@ const getTrancheText = (trancheToken: Token) => {
   return 'mezzanine'
 }
 
-export const calculateApyPerToken = (trancheToken: Token, pool: Pool) => {
+export const calculateApyPerToken = (trancheToken: Token, pool: PoolWithMetadata) => {
+  const trancheTarget = pool?.meta?.tranches?.[trancheToken.id]?.apyPercentage
   const daysSinceCreation = pool?.createdAt ? daysBetween(new Date(pool.createdAt), new Date()) : 0
+  if (trancheTarget) return formatPercentage(trancheTarget)
   if (getTrancheText(trancheToken) === 'senior')
     return formatPercentage(trancheToken?.interestRatePerSec ? trancheToken?.interestRatePerSec.toAprPercent() : Dec(0))
   if (trancheToken.seniority === 0) return '15%'
