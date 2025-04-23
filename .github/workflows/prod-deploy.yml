@@ -147,7 +147,7 @@ jobs:
       #     echo "Target: ${{ matrix.function.handler }}"
       #     echo "Gcloud Region: ${{ vars.GCLOUD_REGION }}"
       #     echo "Service Account: ${{ env.SERVICE_ACCOUNT }}"
-          echo "Deploy Environment: production"
+      #     echo "Deploy Environment: production"
 
       # - name: Deploy Gfunction
       #   id: functionsdeploy
