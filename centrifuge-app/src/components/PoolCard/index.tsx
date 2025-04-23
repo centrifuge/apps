@@ -248,7 +248,7 @@ export function PoolCard({
             {isTinlakePool ? tinlakeTranches[tinlakeKey].investorType : metaData?.pool?.investorType ?? '-'}
           </StyledText>
         </Box>
-        {ratings.length ? (
+        {ratings.length && ratings[0]?.agency !== '' ? (
           <Box mt={2} mb={2} display="flex" justifyContent="space-between" alignItems="center">
             <Text variant="body2" color="textSecondary">
               Rating
