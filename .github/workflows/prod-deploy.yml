@@ -77,7 +77,7 @@ jobs:
       id-token: 'write'
     runs-on: ubuntu-latest
     # environment: production
-    if: ${{ github.event_name != 'pull_request' }}
+    # if: ${{ github.event_name != 'pull_request' }}
     steps:
 
       - name: Checkout
@@ -98,7 +98,7 @@ jobs:
         run: |
           echo "Mocking deployment of app.centrifuge.io"
           # Simulate a successful deployment
-          exit 0
+          exit 1
 
   deploy-functions:
     name: ${{ matrix.function.name }}-prod-deploy
