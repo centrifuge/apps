@@ -1,8 +1,8 @@
 name: Promote staging to PROD
 on:
-  pull_request:
-    paths:
-      - .github/workflows/prod-deploy.yml # For testing changes, won't deploy to prod
+  # pull_request:
+  #   paths:
+  #     - .github/workflows/prod-deploy.yml # For testing changes, won't deploy to prod
   release:
     types:
       - released
@@ -95,10 +95,10 @@ jobs:
           bucket_url: 'app.centrifuge.io'
           artifact_name: webpack
 
-
   deploy-functions:
     name: ${{ matrix.function.name }}-prod-deploy
     needs: get-release-artifacts
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -130,18 +130,6 @@ jobs:
           sparse-checkout: |
             .github/actions/deploy-gfunction
 
-      # - name: Debug deployment variables
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   run: |
-      #     echo "App Name: ${{ matrix.function.name }}-production"
-      #     echo "Artifact Name: ${{ matrix.function.name }}"
-      #     echo "GWIP: ${{ secrets.GWIP }}"
-      #     echo "GSA: ${{ secrets.GSA }}"
-      #     echo "Target: ${{ matrix.function.handler }}"
-      #     echo "Gcloud Region: ${{ vars.GCLOUD_REGION }}"
-      #     echo "Service Account: ${{ env.SERVICE_ACCOUNT }}"
-      #     echo "Deploy Environment: production"
-
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
@@ -156,42 +144,45 @@ jobs:
           service_account: ${{ env.SERVICE_ACCOUNT }}
           deploy_env: production
 
-  slack-notify-success:
+  slack-notify:
     needs: [deploy-app, deploy-functions]
-    if: success()
     runs-on: ubuntu-latest
+    if: always()
     steps:
-      - name: Notify prod deploy success
+      - name: DEBUG Job Status
+        run: |
+          echo "Deploy App Status: ${{ needs.deploy-app.result }}"
+          echo "Deploy Functions Status: ${{ needs.deploy-functions.result }}"
+          echo "Job Status: ${{ job.status }}"
+
+      - name: Set Deployment Status
+        id: deployment-status
+        run: |
+          if [[ "${{ needs.deploy-app.result }}" == "success" && "${{ needs.deploy-functions.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "title=Centrifuge app has been promoted to prod" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "title=⚠️ Centrifuge app production deployment failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Deployment Status
         uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: |
+          SLACK_COLOR: ${{ steps.deployment-status.outputs.status }}
+          SLACK_MESSAGE_ON_SUCCESS: |
             ✅ Production deployment successful!
             app.staging.centrifuge.io has been promoted to app.centrifuge.io and is now LIVE!
             Check out the new release -> https://github.com/centrifuge/apps/releases/
-          SLACK_USERNAME: 'Centrifuge GHA Bot'
-          SLACK_ICON: 'https://centrifuge.io/favicon.ico'
-          SLACK_TITLE: 'Centrifuge app has been promoted to prod.'
-          SLACK_FOOTER: 'Automatic message from centrifuge/apps repository Actions'
-          MSG_MINIMAL: true
-          SLACK_COLOR: 'good'
-
-  slack-notify-failure:
-    needs: [deploy-app, deploy-functions]
-    if: failure() && ${{ github.event_name != 'pull_request' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify prod deploy failure
-        uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: |
+          SLACK_MESSAGE_ON_FAILURE: |
             ❌ Production deployment failed!
             One or more jobs failed during the promotion to production.
+            Deploy App Status: ${{ needs.deploy-app.result }}
+            Deploy Functions Status: ${{ needs.deploy-functions.result }}
             Please check the workflow run for details -> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SLACK_USERNAME: 'Centrifuge GHA Bot'
           SLACK_ICON: 'https://centrifuge.io/favicon.ico'
-          SLACK_TITLE: '⚠️ Production Deployment Failed'
+          SLACK_TITLE: ${{ steps.deployment-status.outputs.title }}
           SLACK_FOOTER: 'Automatic message from centrifuge/apps repository Actions'
           MSG_MINIMAL: true
-          SLACK_COLOR: 'danger'
