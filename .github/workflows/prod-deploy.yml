@@ -1,8 +1,8 @@
 name: Promote staging to PROD
 on:
-  pull_request:
-    paths:
-      - .github/workflows/prod-deploy.yml # For testing changes, won't deploy to prod
+  # pull_request:
+  #   paths:
+  #     - .github/workflows/prod-deploy.yml # For testing changes, won't deploy to prod
   release:
     types:
       - released
