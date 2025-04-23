@@ -168,18 +168,26 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-
       - name: DEBUG Job Status
         run: |
           echo "Deploy App Status: ${{ needs.deploy-app.result }}"
           echo "Deploy Functions Status: ${{ needs.deploy-functions.result }}"
           echo "Job Status: ${{ job.status }}"
 
+      - name: Set Deployment Status
+        id: deployment-status
+        run: |
+          if [[ "${{ needs.deploy-app.result }}" == "success" && "${{ needs.deploy-functions.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+          fi
+
       - name: Notify Deployment Status
         uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_COLOR: ${{ job.status }}
+          SLACK_COLOR: ${{ steps.deployment-status.outputs.status }}
           SLACK_MESSAGE_ON_SUCCESS: |
             ✅ Production deployment successful!
             app.staging.centrifuge.io has been promoted to app.centrifuge.io and is now LIVE!
@@ -187,6 +195,8 @@ jobs:
           SLACK_MESSAGE_ON_FAILURE: |
             ❌ Production deployment failed!
             One or more jobs failed during the promotion to production.
+            Deploy App Status: ${{ needs.deploy-app.result }}
+            Deploy Functions Status: ${{ needs.deploy-functions.result }}
             Please check the workflow run for details -> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SLACK_USERNAME: 'Centrifuge GHA Bot'
           SLACK_ICON: 'https://centrifuge.io/favicon.ico'
