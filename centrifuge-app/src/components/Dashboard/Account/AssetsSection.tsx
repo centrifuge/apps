@@ -308,20 +308,6 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
             api.tx.utility.batch(updateTokenPricesTxs),
           ]
 
-          if (liquidityAdminAccount && orders?.length) {
-            batch.push(
-              api.tx.poolSystem.closeEpoch(pool.id),
-              ...orders
-                .slice(0, ordersFullyExecutable ? MAX_COLLECT : 0)
-                .map((order) =>
-                  api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
-                    order.accountId,
-                    [pool.id, order.trancheId]
-                  )
-                )
-            )
-          }
-
           const tx = api.tx.utility.batchAll(batch)
           return cent.wrapSignAndSend(api, tx, options)
         })
