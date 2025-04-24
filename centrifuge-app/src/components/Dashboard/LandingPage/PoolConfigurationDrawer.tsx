@@ -354,8 +354,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
     setPool(selectedPoolsWithMetadata[0])
   }
 
-  console.log('form.errors', form.errors)
-
   if (!selectedPoolsWithMetadata.length || !pool) return
 
   return (
