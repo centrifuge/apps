@@ -2,7 +2,7 @@ import { CurrencyMetadata, FileType, Perquintill, PoolMetadata, Rate } from '@ce
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
 import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
 import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
@@ -89,7 +89,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
   const cent = useCentrifuge()
   const { editPoolConfig } = useDebugFlags()
   const prefetchMetadata = usePrefetchMetadata()
-  const [isEditing, setIsEditing] = useState(false)
   const { poolsWithMetadata, selectedPoolsWithMetadata } = useSelectedPools()
   const [pool, setPool] = useState<PoolWithMetadata>(selectedPoolsWithMetadata[0])
 
@@ -112,18 +111,14 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
           )
         })
       )
-    },
-
-    {
-      onSuccess: () => {
-        setIsEditing(false)
-      },
     }
   )
 
+  const initialValues = useMemo(() => createPoolValues(pool), [pool])
+
   const form = useFormik<UpdatePoolFormValues>({
     enableReinitialize: true,
-    initialValues: createPoolValues(pool),
+    initialValues,
     validateOnBlur: true,
     validate: (values) => {
       let errors: FormikErrors<any> = {}
@@ -212,7 +207,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       return errors
     },
     onSubmit: async (values, actions) => {
-      setIsEditing(true)
       let logoUri
       let poolIcon
       let executiveSummary
@@ -239,12 +233,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       }
 
       const newPoolMetadata: PoolMetadata = {
-        pool: {
-          ...values.pool,
-        },
-        pod: {
-          ...values.pod,
-        },
+        ...pool.meta,
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
             minInitialInvestment: tranche.minInvestment.toString(),
@@ -271,7 +260,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       // Issuer logo
       if (logoUri) {
         newPoolMetadata.pool.issuer = {
-          ...values.pool.issuer,
+          ...pool.meta.pool.issuer,
           logo: { uri: logoUri, mime: 'image/png' },
         }
       }
@@ -318,6 +307,16 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
         newPoolMetadata.pool.poolRatings = updatedRatings as PoolMetadata['pool']['poolRatings']
       }
 
+      const hasTrancheChanges = initialValues.tranches.some((t1, i) => {
+        const t2 = values.tranches[i]
+        return (
+          t1.tokenName !== t2.tokenName ||
+          t1.symbolName !== t2.symbolName ||
+          t1.interestRate !== t2.interestRate ||
+          t1.minRiskBuffer !== t2.minRiskBuffer
+        )
+      })
+
       // Tranches
       const nonJuniorTranches = values.tranches.slice(1)
       const tranches = [
@@ -340,7 +339,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
         })),
       ]
 
-      execute([values.id, newPoolMetadata, tranches], { account })
+      execute([values.id, newPoolMetadata, hasTrancheChanges ? tranches : undefined], { account })
       actions.setSubmitting(false)
     },
   })
@@ -352,7 +351,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
   const resetToDefault = () => {
     form.resetForm()
     setOpen(false)
-    setIsEditing(false)
     setPool(selectedPoolsWithMetadata[0])
   }
 
@@ -448,9 +446,9 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
               <Stack gap={2} display="flex" justifyContent="flex-end" flexDirection="column">
                 <Button
                   onClick={form.submitForm}
-                  loading={isEditing || isLoading}
+                  loading={isLoading}
                   type="submit"
-                  disabled={!form.dirty || Object.keys(form.errors).length > 0}
+                  disabled={!form.dirty || !form.isValid}
                 >
                   Update
                 </Button>
