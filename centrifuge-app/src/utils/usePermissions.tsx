@@ -206,7 +206,6 @@ export function usePoolAccess(poolId: string) {
     []
   const aoProxies = (admin && proxies?.[admin]?.filter((p) => p.types.includes('Any')).map((p) => p.delegator)) || []
   const collections = useCollections()
-  console.log('multisig', multisig)
 
   const aoCollateralCollections: Record<string, Collection[]> = {}
   aoProxies.forEach((ao) => {
