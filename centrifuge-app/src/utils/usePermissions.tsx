@@ -8,6 +8,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
+  Network,
   truncateAddress,
   useCentrifugeQuery,
   useCentrifugeUtils,
@@ -15,6 +16,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Select } from '@centrifuge/fabric'
 import { ApiRx } from '@polkadot/api'
+import { isAddress } from '@polkadot/util-crypto'
 import { isAddress as isEvmAddress } from 'ethers'
 import * as React from 'react'
 import { combineLatest, combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs'
@@ -466,4 +468,32 @@ export function diffPermissions(storedValues: Admin[], formValues: Admin[], role
     add,
     remove,
   }
+}
+
+const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
+
+export function useInvestorStatus(poolId: string, address: string, network: Network = 'centrifuge') {
+  const {
+    substrate: { evmChainId: substrateEvmChainId },
+  } = useWallet()
+  const validator = typeof network === 'number' ? isEvmAddress : isAddress
+  const validAddress = validator(address) ? address : undefined
+  const utils = useCentrifugeUtils()
+  const centAddress =
+    validAddress && typeof network === 'number'
+      ? utils.evmToSubstrateAddress(address, network)
+      : substrateEvmChainId && isEvmAddress(address)
+      ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
+      : validAddress
+  const permissions = usePermissions(centAddress)
+
+  const allowedTranches = React.useMemo(
+    () =>
+      Object.entries(permissions?.pools[poolId]?.tranches ?? {})
+        .filter(([, t]) => new Date(t.permissionedTill).getTime() - Date.now() > SevenDaysMs)
+        .map(([tid]) => tid),
+    [permissions, poolId]
+  )
+
+  return { allowedTranches, permissions, centAddress, validAddress }
 }
