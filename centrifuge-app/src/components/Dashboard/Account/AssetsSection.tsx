@@ -12,7 +12,6 @@ import { Box, Button, CurrencyInput, Divider, Grid, Stack, Text } from '@centrif
 import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
-import { useQueryClient } from 'react-query'
 import { combineLatest, switchMap } from 'rxjs'
 import { DataTable } from '../../../../src/components/DataTable'
 import { AssetName, getAmount } from '../../../../src/components/LoanList'
@@ -20,10 +19,8 @@ import { isCashLoan, isExternalLoan } from '../../../../src/pages/Loan/utils'
 import { Dec } from '../../../../src/utils/Decimal'
 import { formatDate } from '../../../../src/utils/date'
 import { formatBalance } from '../../../../src/utils/formatting'
-import { useLiquidity } from '../../../../src/utils/useLiquidity'
 import { useActiveDomains } from '../../../../src/utils/useLiquidityPools'
-import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
-import { usePoolAccountOrders, usePoolFees } from '../../../../src/utils/usePools'
+import { usePoolFees } from '../../../../src/utils/usePools'
 import { hasValuationMethod } from '../utils'
 
 const MAX_COLLECT = 100
@@ -79,11 +76,8 @@ interface TransactionLoanData {
 type FormValues = Record<string, LoanData>
 
 export default function AssetsSection({ pool }: { pool: Pool }) {
-  const queryClient = useQueryClient()
   const api = useCentrifugeApi()
-  const orders = usePoolAccountOrders(pool.id)
   const poolFees = usePoolFees(pool.id)
-  const { ordersFullyExecutable } = useLiquidity(pool.id)
   const { data: domains } = useActiveDomains(pool.id)
   const [loans, isLoading] = useCentrifugeQuery(
     ['loans', pool.id],
@@ -95,7 +89,6 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
 
   const [update, setUpdate] = useState(false)
   const isTinlakePool = pool.id.startsWith('0x')
-  const [liquidityAdminAccount] = useSuitableAccounts({ poolId: pool.id, poolRole: ['LiquidityAdmin'] })
 
   // Needs to update when selecting a new pool
   useEffect(() => {
@@ -142,39 +135,6 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
 
       return acc
     }, {}) || {}
-
-  const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
-    'Start order execution',
-    (cent) => (args: [poolId: string, collect: boolean], options) =>
-      cent.pools.closeEpoch([args[0], false], { batch: true }).pipe(
-        switchMap((closeTx) => {
-          const tx = api.tx.utility.batchAll(
-            [
-              ...closeTx.method.args[0],
-              orders?.length
-                ? api.tx.utility.batch(
-                    orders
-                      .slice(0, MAX_COLLECT)
-                      .map((order) =>
-                        api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
-                          order.accountId,
-                          [pool.id, order.trancheId]
-                        )
-                      )
-                  )
-                : null,
-            ].filter(Boolean)
-          )
-          return cent.wrapSignAndSend(api, tx, options)
-        })
-      ),
-    {
-      onSuccess: () => {
-        setUpdate(false)
-        queryClient.invalidateQueries(['loans', pool.id])
-      },
-    }
-  )
 
   const { execute, isLoading: isUpdating } = useCentrifugeTransaction(
     'Update NAV',
