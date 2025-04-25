@@ -119,6 +119,14 @@ export const KeyMetrics = ({ poolId }: Props) => {
     })
   }, [metadata?.tranches])
 
+  const weightedAverageMaturity = useMemo(() => {
+    if (!metadata?.tranches) return null
+
+    return Object.values(metadata.tranches).map((item) => {
+      return item.weightedAverageMaturity ? item.weightedAverageMaturity : null
+    })
+  }, [metadata?.tranches])
+
   const metrics = [
     {
       metric: 'Asset type',
@@ -175,10 +183,18 @@ export const KeyMetrics = ({ poolId }: Props) => {
           },
         ]
       : []),
-
     {
       metric: <Tooltips type="expenseRatio" size="med" />,
       value: expenseRatio ? `${formatBalance(expenseRatio, '', 2)}%` : '-',
+    },
+    {
+      metric: 'Weighted Average Maturity',
+      value: weightedAverageMaturity?.length
+        ? weightedAverageMaturity.map((tranche, index) => {
+            const formatted = formatPercentage(tranche ?? 0)
+            return tranche && `${formatted} ${index !== weightedAverageMaturity?.length - 1 ? '-' : ''}`
+          })
+        : '-',
     },
   ]
 
