@@ -229,7 +229,7 @@ export const PoolStructureSection = () => {
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
                       options={[
-                        { value: 'usdc', label: 'USDC' },
+                        { value: 'nusdc', label: 'USDC' },
                         { value: 'usdt', label: 'USDT (coming soon)', disabled: true },
                         { value: 'dai', label: 'DAI (coming soon)', disabled: true },
                       ]}

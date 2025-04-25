@@ -259,7 +259,7 @@ const IssuerCreatePoolPage = () => {
       // pool structure
       poolStructure: 'revolving',
       assetClass: 'Private credit',
-      assetDenomination: 'USDC',
+      assetDenomination: 'nUSDC',
       subAssetClass: '',
       tranches: [createEmptyTranche('Junior')],
       // pool details section
@@ -495,6 +495,8 @@ const IssuerCreatePoolPage = () => {
       containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [step, containerRef])
+
+  console.log(values, currencies)
 
   return (
     <div ref={containerRef} style={{ maxHeight: '100vh', overflowY: 'auto' }}>
