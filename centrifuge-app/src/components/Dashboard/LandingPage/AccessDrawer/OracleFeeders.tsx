@@ -52,7 +52,7 @@ export function OracleFeeders({
   const initialValues = React.useMemo(
     () => ({
       feeders: storedInfo?.feeders.length ? storedInfo.feeders : [''],
-      minFeeders: storedInfo?.feeders.length || 1,
+      minFeeders: storedInfo?.minFeeders || 1,
     }),
     [storedInfo]
   )
