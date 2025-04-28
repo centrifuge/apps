@@ -7,29 +7,20 @@ import {
   Pool,
   TinlakeLoan,
 } from '@centrifuge/centrifuge-js'
-import {
-  useCentrifugeApi,
-  useCentrifugeQuery,
-  useCentrifugeTransaction,
-  useEvmProvider,
-  useWallet,
-} from '@centrifuge/centrifuge-react'
+import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
-import { useQueryClient } from 'react-query'
 import { combineLatest, switchMap } from 'rxjs'
 import { DataTable } from '../../../../src/components/DataTable'
 import { AssetName, getAmount } from '../../../../src/components/LoanList'
 import { isCashLoan, isExternalLoan } from '../../../../src/pages/Loan/utils'
-import { formatDate } from '../../../../src/utils/date'
 import { Dec } from '../../../../src/utils/Decimal'
+import { formatDate } from '../../../../src/utils/date'
 import { formatBalance } from '../../../../src/utils/formatting'
-import { useLiquidity } from '../../../../src/utils/useLiquidity'
 import { useActiveDomains } from '../../../../src/utils/useLiquidityPools'
-import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
-import { usePoolAccountOrders, usePoolFees } from '../../../../src/utils/usePools'
+import { usePoolFees } from '../../../../src/utils/usePools'
 import { hasValuationMethod } from '../utils'
 
 const MAX_COLLECT = 100
@@ -85,13 +76,8 @@ interface TransactionLoanData {
 type FormValues = Record<string, LoanData>
 
 export default function AssetsSection({ pool }: { pool: Pool }) {
-  const queryClient = useQueryClient()
-  const provider = useEvmProvider()
   const api = useCentrifugeApi()
-  const orders = usePoolAccountOrders(pool.id)
   const poolFees = usePoolFees(pool.id)
-  const { ordersFullyExecutable } = useLiquidity(pool.id)
-  const { substrate } = useWallet()
   const { data: domains } = useActiveDomains(pool.id)
   const [loans, isLoading] = useCentrifugeQuery(
     ['loans', pool.id],
@@ -103,12 +89,6 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
 
   const [update, setUpdate] = useState(false)
   const isTinlakePool = pool.id.startsWith('0x')
-  const [liquidityAdminAccount] = useSuitableAccounts({ poolId: pool.id, poolRole: ['LiquidityAdmin'] })
-  const [account] = useSuitableAccounts({
-    poolId: pool.id,
-    proxyType: ['Borrow', 'Invest'],
-    poolRole: ['LiquidityAdmin', 'PoolAdmin'],
-  })
 
   // Needs to update when selecting a new pool
   useEffect(() => {
@@ -155,39 +135,6 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
 
       return acc
     }, {}) || {}
-
-  const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
-    'Start order execution',
-    (cent) => (args: [poolId: string, collect: boolean], options) =>
-      cent.pools.closeEpoch([args[0], false], { batch: true }).pipe(
-        switchMap((closeTx) => {
-          const tx = api.tx.utility.batchAll(
-            [
-              ...closeTx.method.args[0],
-              orders?.length
-                ? api.tx.utility.batch(
-                    orders
-                      .slice(0, MAX_COLLECT)
-                      .map((order) =>
-                        api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
-                          order.accountId,
-                          [pool.id, order.trancheId]
-                        )
-                      )
-                  )
-                : null,
-            ].filter(Boolean)
-          )
-          return cent.wrapSignAndSend(api, tx, options)
-        })
-      ),
-    {
-      onSuccess: () => {
-        setUpdate(false)
-        queryClient.invalidateQueries(['loans', pool.id])
-      },
-    }
-  )
 
   const { execute, isLoading: isUpdating } = useCentrifugeTransaction(
     'Update NAV',
@@ -321,32 +268,10 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
             api.tx.utility.batch(updateTokenPricesTxs),
           ]
 
-          if (liquidityAdminAccount && orders?.length) {
-            batch.push(
-              api.tx.poolSystem.closeEpoch(pool.id),
-              ...orders
-                .slice(0, ordersFullyExecutable ? MAX_COLLECT : 0)
-                .map((order) =>
-                  api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
-                    order.accountId,
-                    [pool.id, order.trancheId]
-                  )
-                )
-            )
-          }
-
           const tx = api.tx.utility.batchAll(batch)
           return cent.wrapSignAndSend(api, tx, options)
         })
       )
-    },
-    {
-      onSuccess: () => {
-        closeEpochTx([pool.id, ordersFullyExecutable], {
-          account,
-          forceProxyType: ['Borrow', 'Invest'],
-        })
-      },
     }
   )
 
