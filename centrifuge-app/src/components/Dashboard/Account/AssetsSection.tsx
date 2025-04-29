@@ -464,7 +464,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
                 <Button
                   small
                   style={{ width: '170px' }}
-                  disabled={!form.dirty || isUpdating || loadingClose}
+                  disabled={!form.dirty || isUpdating}
                   onClick={() => form.submitForm()}
                 >
                   Update NAV
