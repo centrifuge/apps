@@ -246,6 +246,7 @@ export function CreateAssetsDrawer({ open, setOpen, type, setType }: CreateAsset
     setOpen(false)
     setType('create-asset')
     setIsUploadingTemplates(false)
+    setPid(poolsWithMetadata[0]?.id ?? '')
     form.resetForm()
   }
 
