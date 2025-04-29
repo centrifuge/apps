@@ -77,9 +77,11 @@ export default function CFGTokenMigrationCent() {
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<number>()
 
+  const totalAmountToMigrate = balance?.toNumber() - 10
+
   useEffect(() => {
     if (!initialTokenBalance && !balance.isZero()) {
-      setInitialTokenBalance(balance?.toNumber())
+      setInitialTokenBalance(totalAmountToMigrate)
     }
   }, [initialTokenBalance, balance])
 
@@ -273,7 +275,7 @@ export default function CFGTokenMigrationCent() {
                   <Divider color="borderSecondary" />
                   <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={2} mt={2}>
                     <Text variant="heading3">Total amount of CFG tokens</Text>
-                    <Text variant="heading3">-{formatBalance(balance?.toNumber(), '', 2)} CFG</Text>
+                    <Text variant="heading3">{formatBalance(totalAmountToMigrate, '', 2)} CFG</Text>
                   </Grid>
                   <Divider color="borderSecondary" />
 
