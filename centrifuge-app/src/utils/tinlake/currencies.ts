@@ -15,15 +15,15 @@ export const currencies = {
     key: 'wCFG',
     isPoolCurrency: false,
     isPermissioned: false,
-    displayName: 'wCFG',
+    displayName: 'wCFG (legacy)',
   },
-  newCFG: {
+  CFG: {
     decimals: 18,
-    name: 'New CFG',
-    symbol: 'newCFG',
-    key: 'newCFG',
+    name: 'CFG',
+    symbol: 'CFG',
+    key: 'CFG',
     isPoolCurrency: false,
     isPermissioned: false,
-    displayName: 'newCFG',
+    displayName: 'CFG',
   },
 }

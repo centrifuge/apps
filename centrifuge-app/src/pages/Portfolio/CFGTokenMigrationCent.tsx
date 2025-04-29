@@ -1,24 +1,39 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import {
   ConnectionGuard,
   useAddress,
   useBalances,
   useCentrifugeApi,
+  useCentrifugeQuery,
   useCentrifugeTransaction,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Divider, Grid, IconClock, IconInfo, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  Divider,
+  Grid,
+  IconArrowLeft,
+  IconClock,
+  IconInfo,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useEffect, useState } from 'react'
-import { firstValueFrom, switchMap } from 'rxjs'
+import { firstValueFrom, map, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
+import { RouterTextLink } from '../../../src/components/TextLink'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
-import { Dec } from '../../../src/utils/Decimal'
+import { Dec, Decimal } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { TooltipText } from './CFGTokenMigration'
 import MigrationSuccessPage from './MigrationSuccessPage'
+import { MigrationSupportLink } from './MigrationSupportLink'
 import { useAxelarStatusPoller } from './useAxelarStatus'
 import { TransactionData, useRecordTransaction } from './useRecordTransaction'
 
@@ -63,13 +78,17 @@ export default function CFGTokenMigrationCent() {
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false)
   const [axelarHash, setAxelarHash] = useState<string>('')
   const [step, setStep] = useState<number>(0)
-  const [initialTokenBalance, setInitialTokenBalance] = useState<number>()
+  const [initialTokenBalance, setInitialTokenBalance] = useState<Decimal>()
 
-  const totalAmount = balance?.toNumber() - 10
+  const [feeAmount] = useCentrifugeQuery(['feeAmount'], () =>
+    api.query.cfgMigration.feeAmount().pipe(map((data) => new CurrencyBalance(data.toPrimitive() as any, 18)))
+  )
+
+  const totalAmountToMigrate = balance.minus(feeAmount?.toDecimal() || Dec(0))
 
   useEffect(() => {
     if (!initialTokenBalance && !balance.isZero()) {
-      setInitialTokenBalance(totalAmount)
+      setInitialTokenBalance(totalAmountToMigrate)
     }
   }, [initialTokenBalance, balance])
 
@@ -124,7 +143,7 @@ export default function CFGTokenMigrationCent() {
             to_address: evmAddress,
             tx_hash: result.txHash,
             chain: 'centrifuge',
-            amount: balance?.toNumber(),
+            amount: totalAmountToMigrate.toNumber(),
           }
           await recordTransaction(transactionData)
         }
@@ -171,7 +190,12 @@ export default function CFGTokenMigrationCent() {
         flexDirection="column"
         gap={2}
       >
-        <CurrencyInput value={initialTokenBalance || 0} currency="CFG" label="Amount of CFG to migrate" disabled />
+        <CurrencyInput
+          value={initialTokenBalance?.toNumber() || 0}
+          currency="CFG"
+          label="Amount of CFG to migrate"
+          disabled
+        />
         <TextInput value={evmAddress} label="Ethereum wallet address" disabled />
       </Grid>
     )
@@ -200,6 +224,7 @@ export default function CFGTokenMigrationCent() {
           display="flex"
           justifyContent="center"
           alignItems="center"
+          flexDirection="column"
         >
           <Box
             backgroundColor="white"
@@ -253,16 +278,16 @@ export default function CFGTokenMigrationCent() {
                     </Text>
                   </Grid>
                   <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={3}>
-                    <Text variant="heading4">Legal gas fee estimate</Text>
+                    <Text variant="heading4">Gas fee estimate</Text>
                     <Text color="textSecondary" variant="body2">
-                      -{formatBalance(10, '', 2)} CFG
+                      -{formatBalance(feeAmount || 0, '', 2)} CFG
                     </Text>
                   </Grid>
 
                   <Divider color="borderSecondary" />
                   <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={2} mt={2}>
                     <Text variant="heading3">Total amount of CFG tokens</Text>
-                    <Text variant="heading3">-{formatBalance(totalAmount, '', 2)} CFG</Text>
+                    <Text variant="heading3">{formatBalance(totalAmountToMigrate, '', 2)} CFG</Text>
                   </Grid>
                   <Divider color="borderSecondary" />
 
@@ -382,7 +407,14 @@ export default function CFGTokenMigrationCent() {
                 address={evmAddress}
               />
             )}
+            <MigrationSupportLink />
           </Box>
+          {step === 3 && (
+            <Grid gridTemplateColumns="24px 1fr" alignItems="center" mb={2} width="30%">
+              <IconArrowLeft size="iconSmall" />
+              <RouterTextLink to="/portfolio">Back to portfolio</RouterTextLink>
+            </Grid>
+          )}
         </Box>
       </Box>
     </ConnectionGuard>

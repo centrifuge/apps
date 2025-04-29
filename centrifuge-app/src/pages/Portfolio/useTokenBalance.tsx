@@ -41,7 +41,7 @@ export const useTokenBalance = (userAddress: string | undefined) => {
             tokens[1].status === 'fulfilled' ? tokens[1].value.toString() : '0',
             18
           ).toDecimal(),
-          currency: currencies.newCFG,
+          currency: currencies.CFG,
         },
       }
     },

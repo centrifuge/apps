@@ -13,6 +13,7 @@ import { Dec, Decimal } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import MigrationSuccessPage from './MigrationSuccessPage'
+import { MigrationSupportLink } from './MigrationSupportLink'
 import { cfgConfig, useTokenBalance } from './useTokenBalance'
 
 export const TooltipText = () => {
@@ -67,8 +68,6 @@ export default function CFGTokenMigration() {
     getGasPrice()
   }, [])
 
-  const totalCost = balance?.minus(new Decimal(gasPrice || 0))
-
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
     `Migrate WCFG for CFG`,
     (cent) =>
@@ -88,7 +87,7 @@ export default function CFGTokenMigration() {
         cent.migration.approveForMigration(args, options),
     {
       onSuccess: ([cb]) => {
-        const amount = CurrencyBalance.fromFloat(0, 18)
+        const amount = CurrencyBalance.fromFloat(balance || 0, 18)
         setStep(2)
         executeDeposit([cb, amount, cfgConfig.iou])
       },
@@ -97,7 +96,7 @@ export default function CFGTokenMigration() {
 
   const migrate = () => {
     setStep(1)
-    executeApprove([() => {}, CurrencyBalance.fromFloat(0, 18), cfgConfig.legacy, cfgConfig.iou])
+    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
   }
 
   if (!debug.showCFGTokenMigration) {
@@ -134,7 +133,7 @@ export default function CFGTokenMigration() {
             {isMigrated ? (
               <MigrationSuccessPage
                 title="WCFG"
-                balance={totalCost?.toNumber() || 0}
+                balance={balance?.toNumber() || 0}
                 currencyName="WCFG"
                 address={address ?? ''}
               />
@@ -204,7 +203,7 @@ export default function CFGTokenMigration() {
                   <Divider color="borderSecondary" />
                   <Grid display="flex" justifyContent="space-between" mt={2}>
                     <Text variant="heading3">Total amount of CFG tokens</Text>
-                    <Text variant="heading3">{formatBalance(totalCost?.toNumber() || 0)} CFG</Text>
+                    <Text variant="heading3">{formatBalance(balance?.toNumber() || 0)} CFG</Text>
                   </Grid>
                 </Box>
 
@@ -217,6 +216,7 @@ export default function CFGTokenMigration() {
                 >
                   Approve WCFG and migrate
                 </Button>
+                <MigrationSupportLink />
                 <Box mt={2} justifyContent="center" display="flex">
                   <Stepper activeStep={step} setActiveStep={setStep} direction="row">
                     <Step
