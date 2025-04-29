@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { evmChains } from '../../../src/config'
 import { useTokenBalance } from '../../../src/pages/Portfolio/useTokenBalance'
+import { useAddress } from '../../../src/utils/useAddress'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
@@ -44,7 +45,6 @@ export type Holding = {
   connectedNetwork?: any
   hideCurrencyName?: boolean
   showMigration?: boolean
-  evmOnSubstrate?: boolean
 }
 
 const NetworkCell = ({ chainId }: { chainId: Holding['chainId'] }) => {
@@ -61,6 +61,21 @@ const NetworkCell = ({ chainId }: { chainId: Holding['chainId'] }) => {
         {(evmChains as any)[chainId as keyof typeof evmChains]?.name || 'Centrifuge'}
       </Text>
     </Box>
+  )
+}
+
+const MigrateButtonCell = () => {
+  const { evm, isEvmOnSubstrate } = useWallet()
+  const chainId = evm.chainId ?? undefined
+  const address = useAddress(chainId ? 'evm' : 'substrate')
+  return (
+    <RouterLinkButton
+      to={isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent'}
+      small
+      variant="inverted"
+    >
+      Migrate
+    </RouterLinkButton>
   )
 }
 
@@ -142,27 +157,10 @@ const columns: Column[] = [
     align: 'right',
     header: '', // invest redeem buttons
     width: 'max-content',
-    cell: ({
-      showActions,
-      poolId,
-      trancheId,
-      currency,
-      connectedNetwork,
-      address,
-      showMigration,
-      evmOnSubstrate,
-    }: Holding) => {
+    cell: ({ showActions, poolId, trancheId, currency, connectedNetwork, address, showMigration }: Holding) => {
       return (
         <Grid gap={1} display="flex" alignItems="flex-end">
-          {showMigration && (
-            <RouterLinkButton
-              to={isEvmAddress(address) && !evmOnSubstrate ? 'migrate/eth' : 'migrate/cent'}
-              small
-              variant="inverted"
-            >
-              Migrate
-            </RouterLinkButton>
-          )}
+          {showMigration && <MigrateButtonCell address={address} />}
           {showActions ? (
             trancheId ? (
               <Shelf gap={1}>
@@ -245,7 +243,6 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
   const currencies = usePoolCurrencies()
   const CFGPrice = useCFGTokenPrice()
   const tokenBalances = useTokenBalance(address)
-  const { isEvmOnSubstrate } = wallet
 
   const tokens: Holding[] = [
     ...portfolioTokens.map((token) => ({
@@ -295,7 +292,6 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       connectedNetwork: chainId,
       showMigration: debugFlags.showCFGTokenMigration && !tokenBalances.data?.legacy?.balance.isZero(),
       chainId: 1,
-      isEvmOnSubstrate,
     },
     tokenBalances.data?.new && {
       position: Dec(tokenBalances.data?.new?.balance || 0),
