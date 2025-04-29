@@ -201,7 +201,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
             variant="primary"
             small
             onClick={() => {
-              navigate(isEvmAddress(address) ? 'migrate/eth' : 'migrate/cent')
+              navigate(isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent')
             }}
           >
             Migrate tokens
@@ -213,7 +213,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       <Stack gap={4} my={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
-          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} py={1} px={2}>
+          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} py={1} px={2} overflow="hidden">
             <Grid gridTemplateColumns={['1fr 1fr']} gap={2} alignItems="center">
               <Text variant="heading4">Available to invest</Text>
               <Select

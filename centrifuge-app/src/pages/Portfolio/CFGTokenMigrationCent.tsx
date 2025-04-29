@@ -5,13 +5,25 @@ import {
   useCentrifugeApi,
   useCentrifugeTransaction,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Divider, Grid, IconClock, IconInfo, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  Divider,
+  Grid,
+  IconArrowLeft,
+  IconClock,
+  IconInfo,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useEffect, useState } from 'react'
 import { firstValueFrom, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
+import { RouterTextLink } from '../../../src/components/TextLink'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
 import { Dec } from '../../../src/utils/Decimal'
@@ -198,6 +210,7 @@ export default function CFGTokenMigrationCent() {
           display="flex"
           justifyContent="center"
           alignItems="center"
+          flexDirection="column"
         >
           <Box
             backgroundColor="white"
@@ -381,6 +394,12 @@ export default function CFGTokenMigrationCent() {
               />
             )}
           </Box>
+          {step === 3 && (
+            <Grid gridTemplateColumns="24px 1fr" alignItems="center" mb={2} width="30%">
+              <IconArrowLeft size="iconSmall" />
+              <RouterTextLink to="/portfolio">Back to portfolio</RouterTextLink>
+            </Grid>
+          )}
         </Box>
       </Box>
     </ConnectionGuard>
