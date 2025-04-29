@@ -76,7 +76,8 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const tokens = useHoldings(address, chainId)
   const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
-  const balance = isEvmAddress(address) ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
+  const balance =
+    isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({

@@ -67,8 +67,6 @@ export default function CFGTokenMigration() {
     getGasPrice()
   }, [])
 
-  const totalCost = balance?.minus(new Decimal(gasPrice || 0))
-
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
     `Migrate WCFG for CFG`,
     (cent) =>
@@ -134,7 +132,7 @@ export default function CFGTokenMigration() {
             {isMigrated ? (
               <MigrationSuccessPage
                 title="WCFG"
-                balance={totalCost?.toNumber() || 0}
+                balance={balance?.toNumber() || 0}
                 currencyName="WCFG"
                 address={address ?? ''}
               />
@@ -204,7 +202,7 @@ export default function CFGTokenMigration() {
                   <Divider color="borderSecondary" />
                   <Grid display="flex" justifyContent="space-between" mt={2}>
                     <Text variant="heading3">Total amount of CFG tokens</Text>
-                    <Text variant="heading3">{formatBalance(totalCost?.toNumber() || 0)} CFG</Text>
+                    <Text variant="heading3">{formatBalance(balance?.toNumber() || 0)} CFG</Text>
                   </Grid>
                 </Box>
 
