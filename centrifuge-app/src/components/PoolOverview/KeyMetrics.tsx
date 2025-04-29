@@ -122,9 +122,11 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const weightedAverageMaturity = useMemo(() => {
     if (!metadata?.tranches) return null
 
-    return Object.values(metadata.tranches).map((item) => {
-      return item.weightedAverageMaturity ? item.weightedAverageMaturity : null
-    })
+    return Object.values(metadata.tranches)
+      .map((item) => {
+        return item.weightedAverageMaturity ? item.weightedAverageMaturity : null
+      })
+      .filter(Boolean)
   }, [metadata?.tranches])
 
   const metrics = [
@@ -208,7 +210,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
           <PoolStatus status={getPoolStatus(pool)} />
         </Box>
         <Box marginTop={2}>
-          {metrics.map(({ metric, value }, index) => {
+          {metrics?.map(({ metric, value }, index) => {
             return (
               <Box key={index} display="flex" justifyContent="space-between" paddingY={1} alignItems="center">
                 <Text
