@@ -191,7 +191,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       metric: 'Weighted Average Maturity',
       value: weightedAverageMaturity?.length
         ? weightedAverageMaturity.map((tranche, index) => {
-            const formatted = formatPercentage(tranche ?? 0)
+            const formatted = formatPercentage(tranche ?? 0, false)
             return tranche && `${formatted} ${index !== weightedAverageMaturity?.length - 1 ? '-' : ''}`
           })
         : '-',

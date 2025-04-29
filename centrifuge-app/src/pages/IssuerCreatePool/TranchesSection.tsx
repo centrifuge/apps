@@ -177,8 +177,6 @@ export const TranchesSection = ({ isUpdating }: { isUpdating?: boolean }) => {
               <Box>
                 <FieldWithErrorMessage
                   as={NumberInput}
-                  placeholder="0.00"
-                  symbol="%"
                   name={`tranches.${index}.weightedAverageMaturity`}
                   label={<Text variant="heading4">Weighted Average Maturity</Text>}
                 />

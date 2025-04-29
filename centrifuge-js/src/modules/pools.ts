@@ -792,6 +792,7 @@ export type PoolMetadata = {
       minInitialInvestment: string
       apy: string
       apyPercentage: number | null
+      weightedAverageMaturity?: number | null
     }
   >
   loanTemplates?: {
