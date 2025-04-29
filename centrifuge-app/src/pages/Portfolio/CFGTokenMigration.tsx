@@ -86,7 +86,7 @@ export default function CFGTokenMigration() {
         cent.migration.approveForMigration(args, options),
     {
       onSuccess: ([cb]) => {
-        const amount = CurrencyBalance.fromFloat(0, 18)
+        const amount = CurrencyBalance.fromFloat(balance || 0, 18)
         setStep(2)
         executeDeposit([cb, amount, cfgConfig.iou])
       },
@@ -95,7 +95,7 @@ export default function CFGTokenMigration() {
 
   const migrate = () => {
     setStep(1)
-    executeApprove([() => {}, CurrencyBalance.fromFloat(0, 18), cfgConfig.legacy, cfgConfig.iou])
+    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
   }
 
   if (!debug.showCFGTokenMigration) {
