@@ -22,13 +22,26 @@ import { LoanTemplate, LoanTemplateAttribute } from '../../src/types'
 import { getCSVDownloadUrl } from '../../src/utils/getCSVDownloadUrl'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
-import { formatBalance, formatPercentage } from '../utils/formatting'
+import { formatBalance } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { useAllPoolAssetSnapshots, usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { prefetchRoute } from './Root'
+
+const DEMO = {
+  3: {
+    borrowerId: '25-0009TX',
+    collateralValue: '$1,500,000',
+    ltv: '55%',
+  },
+  4: {
+    borrowerId: '25-0001WY',
+    collateralValue: '$2,000,000',
+    ltv: '45%',
+  },
+}
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
@@ -187,9 +200,9 @@ export function LoanList({ loans }: Props) {
       : [
           {
             align: 'left',
-            header: <SortableTableHeader label="Market price" />,
-            cell: (l: Row) => formatBalance(l.marketPrice ?? 0, pool.currency, 4, 0),
-            sortKey: 'marketPrice',
+            header: <SortableTableHeader label="Borrower ID" />,
+            cell: (l: Row) => DEMO[l.id]?.borrowerId ?? '-',
+            sortKey: 'borrowerId',
           },
         ]),
     ...(isTinlakePool
@@ -197,9 +210,9 @@ export function LoanList({ loans }: Props) {
       : [
           {
             align: 'left',
-            header: <SortableTableHeader label="Market value" />,
-            cell: (l: Row) => formatBalance(l.marketValue ?? 0, pool.currency, 2, 0),
-            sortKey: 'marketValue',
+            header: <SortableTableHeader label="Collateral value" />,
+            cell: (l: Row) => DEMO[l.id]?.collateralValue ?? '-',
+            sortKey: 'collateralValue',
           },
         ]),
     ...(isTinlakePool
@@ -207,9 +220,9 @@ export function LoanList({ loans }: Props) {
       : [
           {
             align: 'left',
-            header: <SortableTableHeader label="Portfolio %" />,
-            cell: (l: Row) => formatPercentage(l.portfolioPercentage ?? 0, true, undefined, 1),
-            sortKey: 'portfolioPercentage',
+            header: <SortableTableHeader label="LTV" />,
+            cell: (l: Row) => DEMO[l.id]?.ltv ?? '-',
+            sortKey: 'ltv',
           },
         ]),
   ].filter(Boolean) as Column[]
@@ -344,7 +357,7 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
         variant="heading4"
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {metadata?.name}
+        {metadata?.name ?? loan.id}
       </TextWithPlaceholder>
     </Shelf>
   )
