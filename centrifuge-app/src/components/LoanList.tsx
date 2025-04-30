@@ -35,11 +35,13 @@ const DEMO = {
     borrowerId: '25-0009TX',
     collateralValue: '$1,500,000',
     ltv: '55%',
+    asset: 'Loan 1',
   },
   4: {
     borrowerId: '25-0001WY',
     collateralValue: '$2,000,000',
     ltv: '45%',
+    asset: 'Loan 2',
   },
 }
 
@@ -123,6 +125,8 @@ export function LoanList({ loans }: Props) {
     const portfolioPercentage =
       loan.status === 'Closed' || totalMarketValue === 0 ? 0 : (marketValue / totalMarketValue) * 100
 
+    console.log(loan)
+
     return {
       ...snapshot,
       nftIdSortKey: loan.asset.nftId,
@@ -148,7 +152,7 @@ export function LoanList({ loans }: Props) {
     {
       align: 'left',
       header: <SortableTableHeader label={isTinlakePool ? 'NFT ID' : 'Asset'} />,
-      cell: (l: Row) => <AssetName loan={l} />,
+      cell: (l: Row) => DEMO[l.id]?.asset ?? '-',
       sortKey: 'id',
     },
     ...(additionalColumns?.length
@@ -190,8 +194,8 @@ export function LoanList({ loans }: Props) {
       : [
           {
             align: 'left',
-            header: <SortableTableHeader label="Quantity" />,
-            cell: (l: Row) => <Amount loan={l} />,
+            header: <SortableTableHeader label="Amount outstanding" />,
+            cell: (l: Row) => formatBalance(l.outstandingDebt ?? 0, 'USD', 2, 0),
             sortKey: 'outstandingDebt',
           },
         ]),
