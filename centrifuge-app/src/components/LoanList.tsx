@@ -22,7 +22,7 @@ import { LoanTemplate, LoanTemplateAttribute } from '../../src/types'
 import { getCSVDownloadUrl } from '../../src/utils/getCSVDownloadUrl'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
-import { formatBalance, formatPercentage } from '../utils/formatting'
+import { formatBalance } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
@@ -38,6 +38,7 @@ type Row = (Loan | TinlakeLoan) & {
   marketPrice: CurrencyBalance
   marketValue: CurrencyBalance
   portfolioPercentage: string
+  currentPrice: CurrencyBalance
 }
 
 type Props = {
@@ -125,6 +126,8 @@ export function LoanList({ loans }: Props) {
           : '',
       maturityDate: loan.pricing.maturityDate,
       portfolioPercentage,
+      marketPrice: 'currentPrice' in loan ? loan.currentPrice : snapshot?.marketPrice,
+      marketValue: 'presentValue' in loan ? loan.presentValue : snapshot?.marketValue,
       ...loan,
     }
   })
@@ -188,8 +191,8 @@ export function LoanList({ loans }: Props) {
           {
             align: 'left',
             header: <SortableTableHeader label="Market price" />,
-            cell: (l: Row) => formatBalance(l.marketPrice ?? 0, pool.currency, 4, 0),
-            sortKey: 'marketPrice',
+            cell: (l: Row) => formatBalance(l.currentPrice ?? 0, pool.currency, 4, 0),
+            sortKey: 'currentPrice',
           },
         ]),
     ...(isTinlakePool
@@ -200,16 +203,6 @@ export function LoanList({ loans }: Props) {
             header: <SortableTableHeader label="Market value" />,
             cell: (l: Row) => formatBalance(l.marketValue ?? 0, pool.currency, 2, 0),
             sortKey: 'marketValue',
-          },
-        ]),
-    ...(isTinlakePool
-      ? []
-      : [
-          {
-            align: 'left',
-            header: <SortableTableHeader label="Portfolio %" />,
-            cell: (l: Row) => formatPercentage(l.portfolioPercentage ?? 0, true, undefined, 1),
-            sortKey: 'portfolioPercentage',
           },
         ]),
   ].filter(Boolean) as Column[]
