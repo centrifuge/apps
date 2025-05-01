@@ -86,7 +86,7 @@ export const UploadAssetTemplateForm = ({
   const pinFiles = async (newUpload: UploadedFile) => {
     setIsUploadingTemplates(true)
     try {
-      const templateMetadataHash = await lastValueFrom(cent.metadata.pinJson(newUpload.data))
+      const templateMetadataHash = await lastValueFrom(cent.metadata.pinJson({ ...newUpload.data.data }))
       const updatedUpload = { id: templateMetadataHash.ipfsHash, createdAt: new Date().toISOString() }
       form.setFieldValue('uploadedTemplates', [...form.values.uploadedTemplates, updatedUpload])
       setIsUploadingTemplates(false)
