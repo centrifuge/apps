@@ -12,7 +12,7 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { AssetSummary } from '../../../src/components/AssetSummary'
 import { SimpleLineChart } from '../../../src/components/Charts/SimpleLineChart'
-import { LoanLabel, getLoanLabelStatus } from '../../../src/components/LoanLabel'
+import { LoanLabel } from '../../../src/components/LoanLabel'
 import { RouterLinkButton } from '../../../src/components/RouterLinkButton'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -115,7 +115,6 @@ function Loan() {
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const borrowerAssetTransactions = useBorrowerAssetTransactions(`${poolId}`, `${loanId}`)
   const isOracle = loan && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-  const loanStatus = loan && getLoanLabelStatus(loan)[1]
 
   const getNetflow = (value: Number, type: string) => {
     if (positiveNetflows.includes(type)) return value

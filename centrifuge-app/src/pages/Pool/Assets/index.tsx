@@ -89,7 +89,7 @@ export function PoolDetailAssets() {
     {
       label: <Tooltips label={`Onchain reserve (${pool.currency.symbol})`} type="onchainReserve" />,
       value: (
-        <StyledRouterTextLink to={`pools/${pool.id}/assets/0`}>
+        <StyledRouterTextLink to={`/pools/${pool.id}/assets/0`}>
           <Text>{formatBalance(pool.reserve.total || 0)}</Text>
           <IconChevronRight size={20} />
         </StyledRouterTextLink>
