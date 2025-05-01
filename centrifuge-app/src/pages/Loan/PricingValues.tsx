@@ -54,7 +54,7 @@ export function PricingValues({ loan, pool }: Props) {
     const latestPrice = oracleCollection || { value: new CurrencyBalance(0, pool.currency.decimals), timestamp: 0 }
 
     const days = latestPrice.timestamp > 0 ? getAge(new Date(latestPrice.timestamp).toISOString()) : undefined
-    const priceLastUpdated = days && days.includes('0') ? 'Today' : `${days} ago`
+    const priceLastUpdated = days ? (days.includes('0') ? 'Today' : `${days} ago`) : '-'
 
     const accruedPrice = 'currentPrice' in loan && loan.currentPrice
 
@@ -80,8 +80,8 @@ export function PricingValues({ loan, pool }: Props) {
               ...(loan.status === 'Active' && loan.outstandingDebt.toDecimal().lte(0)
                 ? []
                 : !pricing.withLinearPricing
-                ? [{ label: 'Price last updated', value: priceLastUpdated }]
-                : [{ label: 'Last manual price update', value: priceLastUpdated }]),
+                ? [{ label: 'Price last updated', value: priceLastUpdated ?? '-' }]
+                : [{ label: 'Last manual price update', value: priceLastUpdated ?? '-' }]),
               ...(pricing.interestRate.gtn(0)
                 ? [
                     {
