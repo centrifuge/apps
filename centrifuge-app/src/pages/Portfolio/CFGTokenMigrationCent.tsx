@@ -142,7 +142,7 @@ export default function CFGTokenMigrationCent() {
             to_address: evmAddress,
             tx_hash: result.txHash,
             chain: 'centrifuge',
-            amount: balance?.toNumber(),
+            amount: totalAmountToMigrate.toNumber(),
           }
           await recordTransaction(transactionData)
         }
