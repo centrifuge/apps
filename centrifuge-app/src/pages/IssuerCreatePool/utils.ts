@@ -2,7 +2,7 @@ import Centrifuge, { FileType } from '@centrifuge/centrifuge-js'
 import { lastValueFrom } from 'rxjs'
 import { getFileDataURI } from '../../../src/utils/getFileDataURI'
 
-const pinFile = async (centrifuge: Centrifuge, file: File): Promise<FileType> => {
+export const pinFile = async (centrifuge: Centrifuge, file: File): Promise<FileType> => {
   const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(file)))
   return { uri: pinned.uri, mime: file.type }
 }

@@ -1,15 +1,15 @@
-import { CurrencyMetadata, FileType, Perquintill, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, Perquintill, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Divider, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import { useMemo, useState } from 'react'
-import { combineLatest, lastValueFrom, of, switchMap } from 'rxjs'
+import { combineLatest, of, switchMap } from 'rxjs'
+import { pinFile } from '../../../../src/pages/IssuerCreatePool/utils'
 import { PoolAnalysisSection } from '../../../pages/IssuerCreatePool/PoolAnalysisSection'
 import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
 import { ServiceProvidersSection } from '../../../pages/IssuerCreatePool/ServiceProvidersSection'
 import { TranchesSection } from '../../../pages/IssuerCreatePool/TranchesSection'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
-import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useDebugFlags } from '../../DebugFlags'
@@ -211,25 +211,16 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       let poolIcon
       let executiveSummary
 
-      // Pin files ( poolIcon, issuerLogo, executiveSummary)
-      const pinFile = async (file: File | FileType) => {
-        const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(file as File)))
-        return { uri: pinned.uri, mime: (file as File).type }
-      }
-
       if (values.pool.icon instanceof File) {
-        poolIcon = (await pinFile(values.pool.icon)).uri
-        prefetchMetadata(poolIcon)
+        poolIcon = await pinFile(cent, values.pool.icon)
       }
 
       if (values?.pool?.issuer?.logo instanceof File) {
-        logoUri = (await pinFile(values?.pool?.issuer?.logo)).uri
-        prefetchMetadata(logoUri)
+        logoUri = await pinFile(cent, values?.pool?.issuer?.logo)
       }
 
       if (values?.pool?.links?.executiveSummary && values?.pool?.links?.executiveSummary instanceof File) {
-        executiveSummary = (await pinFile(values?.pool?.links?.executiveSummary)).uri
-        prefetchMetadata(executiveSummary)
+        executiveSummary = await pinFile(cent, values?.pool?.links?.executiveSummary)
       }
 
       const newPoolMetadata: PoolMetadata = {
@@ -247,12 +238,12 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
       // Pool report (pool analysis in UI)
       if (values.pool.report && values?.pool?.report?.author?.avatar instanceof File) {
-        const avatar = (await pinFile(values?.pool?.report?.author?.avatar)).uri
+        const avatar = await pinFile(cent, values?.pool?.report?.author?.avatar)
         newPoolMetadata.pool.report = {
           ...values.pool.report,
           author: {
             ...values.pool.report.author,
-            avatar: { uri: avatar, mime: 'image/png' },
+            avatar,
           },
         }
       }
@@ -261,18 +252,18 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       if (logoUri) {
         newPoolMetadata.pool.issuer = {
           ...pool.meta.pool.issuer,
-          logo: { uri: logoUri, mime: 'image/png' },
+          logo: logoUri,
         }
       }
 
       // Executive summary (inside links)
       if (executiveSummary) {
-        newPoolMetadata.pool.links.executiveSummary = { uri: executiveSummary, mime: 'application/pdf' }
+        newPoolMetadata.pool.links.executiveSummary = executiveSummary
       }
 
       // Pool icon
       if (poolIcon) {
-        newPoolMetadata.pool.icon = { uri: poolIcon, mime: 'image/svg' }
+        newPoolMetadata.pool.icon = poolIcon
       }
 
       // Pool ratings
@@ -293,7 +284,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
             if (newReportFile) {
               try {
-                const pinnedFile = await pinFile(newReportFile)
+                const pinnedFile = await pinFile(cent, newReportFile as any)
                 mergedRating.reportFile = pinnedFile
               } catch (error) {
                 console.error('Error pinning file:', error)
@@ -444,12 +435,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
                 )}
               </Stack>
               <Stack gap={2} display="flex" justifyContent="flex-end" flexDirection="column">
-                <Button
-                  onClick={form.submitForm}
-                  loading={isLoading}
-                  type="submit"
-                  disabled={!form.dirty || !form.isValid}
-                >
+                <Button loading={isLoading} type="submit" disabled={!form.dirty || !form.isValid}>
                   Update
                 </Button>
                 <Button variant="inverted" onClick={resetToDefault}>
