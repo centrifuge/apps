@@ -6,14 +6,12 @@ import * as React from 'react'
 import { AssetList } from './AssetList'
 import { AssetTransactions } from './AssetTransactions'
 import { BalanceSheet } from './BalanceSheet'
-import { CashflowStatement } from './CashflowStatement'
 import { FeeTransactions } from './FeeTransactions'
 import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
 import { OracleTransactions } from './OracleTransactions'
 import Orders from './Orders'
 import { PoolBalance } from './PoolBalance'
-import { ProfitAndLoss } from './ProfitAndLoss'
 import { ReportContext } from './ReportContext'
 import { TokenPrice } from './TokenPrice'
 
@@ -37,9 +35,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}
         {report === 'balance-sheet' && <BalanceSheet pool={pool} />}
-        {report === 'cash-flow-statement' && <CashflowStatement pool={pool} />}
         {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
-        {report === 'profit-and-loss' && <ProfitAndLoss pool={pool} />}
         {report === 'orders' && <Orders pool={pool} />}
       </Box>
     </Box>

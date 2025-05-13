@@ -3,12 +3,12 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import { InvestRedeemContext, InvestRedeemProvider } from '../../../../src/components/InvestRedeem/InvestRedeemProvider'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
-import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
+import { IssuerDetails } from '../../../components/IssuerSection'
 import { LayoutSection } from '../../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
@@ -129,23 +129,9 @@ export function PoolDetailOverview() {
           </React.Suspense>
         )}
         <React.Suspense fallback={<Spinner />}>
-          <Grid
-            marginY={3}
-            borderBottom={`1px solid ${theme.colors.borderPrimary}`}
-            paddingBottom={3}
-            height="fit-content"
-            gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']}
-            gap={[2, 2, 3]}
-          >
-            <Card p={2} backgroundColor="backgroundSecondary">
-              <IssuerDetails metadata={metadata} />
-            </Card>
-            {metadata?.pool?.reports?.length || !isTinlakePool ? (
-              <Card p={2} backgroundColor="backgroundButtonSecondary">
-                <ReportDetails metadata={metadata} />
-              </Card>
-            ) : null}
-          </Grid>
+          <Card p={2} mt={3} mb={3} backgroundColor="backgroundSecondary">
+            <IssuerDetails metadata={metadata} />
+          </Card>
         </React.Suspense>
         {!isTinlakePool && (
           <React.Suspense fallback={<Spinner />}>
@@ -158,16 +144,13 @@ export function PoolDetailOverview() {
 }
 
 export function InvestButton(props: InvestRedeemProps) {
-  const { poolId, trancheId, metadata } = props
+  const { poolId, trancheId } = props
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
   const { connectedType, showNetworks } = useWallet()
-  const navigate = useNavigate()
 
   const getButtonText = (state: any) => {
-    if (!state.isAllowedToInvest && connectedType !== null) {
-      return 'Onboard'
-    } else if (connectedType === null) {
+    if (connectedType === null) {
       return 'Connect'
     } else {
       return state.isFirstInvestment ? 'Invest' : 'Invest/Redeem'
@@ -188,11 +171,7 @@ export function InvestButton(props: InvestRedeemProps) {
             return (
               <Button
                 onClick={() => {
-                  if (!state.isAllowedToInvest && connectedType !== null) {
-                    metadata?.onboarding?.externalOnboardingUrl
-                      ? window.open(metadata?.onboarding?.externalOnboardingUrl)
-                      : navigate(`/onboarding?poolId=${poolId}&trancheId=${trancheId}`)
-                  } else if (connectedType === null) {
+                  if (connectedType === null) {
                     showNetworks()
                   } else {
                     connectAndOpen()

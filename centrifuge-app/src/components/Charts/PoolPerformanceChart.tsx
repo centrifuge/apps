@@ -1,11 +1,10 @@
 import { DailyPoolState, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Box, IconDownload, Select, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
+import { Box, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { useTheme } from 'styled-components'
-import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
@@ -51,10 +50,7 @@ type CustomTickProps = {
   angle?: number
 }
 
-const rangeFilters = [
-  { value: '30d', label: '30 days' },
-  { value: '90d', label: '90 days' },
-]
+const rangeFilters = [{ value: '90d', label: '90 days' }]
 
 function calculateTranchePrices(pool: Pool) {
   if (!pool?.tranches) return { juniorTokenPrice: 0, seniorTokenPrice: null }
@@ -196,30 +192,6 @@ function PoolPerformanceChart() {
 
   const chartData = data.slice(-rangeNumber)
 
-  const dataUrl: any = React.useMemo(() => {
-    if (!chartData || !chartData?.length) {
-      return undefined
-    }
-
-    const filteredData = chartData.map((data) => {
-      const base = {
-        day: data.day,
-        nav: data.nav,
-        juniorTokenPrice: data.juniorTokenPrice ?? 0,
-        juniorAPY: data.juniorAPY,
-      }
-      if (data.seniorTokenPrice && data.seniorAPY) {
-        return {
-          ...base,
-          seniorTokenPrice: data.seniorTokenPrice,
-          seniorAPY: data.seniorAPY,
-        }
-      } else return { ...base }
-    })
-
-    return getCSVDownloadUrl(filteredData as any)
-  }, [chartData])
-
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
 
@@ -229,28 +201,11 @@ function PoolPerformanceChart() {
         <Text variant="body2" fontWeight="500">
           Pool performance
         </Text>
-        <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
-            Price
-          </TabsItem>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
-            APY
-          </TabsItem>
-        </Tabs>
-        <AnchorButton
-          download={`pool-${poolId}-timeseries.csv`}
-          href={dataUrl}
-          variant="inverted"
-          icon={IconDownload}
-          small
-        >
-          Download
-        </AnchorButton>
       </Stack>
       <CustomLegend selectedTabIndex={selectedTabIndex} data={today} setRange={setRange} />
       <Shelf gap={4} width="100%" color="textSecondary" mt={4}>
         {chartData?.length ? (
-          <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
+          <ResponsiveContainer width="100%" height={260} minHeight={260} maxHeight={260}>
             <ComposedChart data={chartData} margin={{ left: -36 }}>
               <defs>
                 <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -500,7 +455,7 @@ function CustomLegend({
         })}
       </Box>
       <Box>
-        <Select options={rangeFilters} onChange={toggleRange} hideBorder />
+        <Select options={rangeFilters} onChange={toggleRange} hideBorder disabled />
       </Box>
     </Box>
   )

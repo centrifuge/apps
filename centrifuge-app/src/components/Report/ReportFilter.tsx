@@ -1,16 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import {
-  AnchorButton,
-  Box,
-  Button,
-  DateInput,
-  IconBalanceSheet,
-  IconCashflow,
-  IconDownload,
-  IconProfitAndLoss,
-  Select,
-  Shelf,
-} from '@centrifuge/fabric'
+import { AnchorButton, Box, Button, DateInput, IconDownload, Select, Shelf, Text } from '@centrifuge/fabric'
 import { BalanceSheetReport, CashflowReport, ProfitAndLossReport } from '@centrifuge/sdk/dist/types/reports'
 import * as React from 'react'
 import { useNavigate } from 'react-router'
@@ -96,30 +85,7 @@ export function ReportFilter({ poolId }: ReportFilterProps) {
     >
       <Shelf alignItems="center" flexWrap="wrap" justifyContent="space-between" width="100%">
         <Shelf flexDirection={['column', 'row']}>
-          <StyledButton
-            selected={report === 'balance-sheet'}
-            variant={report === 'balance-sheet' ? 'secondary' : 'tertiary'}
-            icon={<IconBalanceSheet size={18} />}
-            onClick={() => changeTab('balance-sheet')}
-          >
-            Balance sheet
-          </StyledButton>
-          <StyledButton
-            selected={report === 'profit-and-loss'}
-            variant={report === 'profit-and-loss' ? 'secondary' : 'tertiary'}
-            icon={<IconProfitAndLoss size={18} />}
-            onClick={() => changeTab('profit-and-loss')}
-          >
-            Profit & loss
-          </StyledButton>
-          <StyledButton
-            selected={report === 'cash-flow-statement'}
-            variant={report === 'cash-flow-statement' ? 'secondary' : 'tertiary'}
-            icon={<IconCashflow size={18} />}
-            onClick={() => changeTab('cash-flow-statement')}
-          >
-            Cash flow
-          </StyledButton>
+          <Text variant="heading3">Balance sheet</Text>
         </Shelf>
 
         <Shelf flexDirection={['column', 'row']}>
