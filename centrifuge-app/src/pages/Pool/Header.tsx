@@ -58,7 +58,6 @@ export function PoolDetailHeader({ actions }: Props) {
       >
         <NavigationTabs>
           <NavigationTabsItem to={`/pools/${pid}`}>Overview</NavigationTabsItem>
-          <NavigationTabsItem to={`/pools/${pid}/assets`}>Assets</NavigationTabsItem>
           {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/reporting`}>Reports</NavigationTabsItem>}
           {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/data`}>Data</NavigationTabsItem>}
         </NavigationTabs>
