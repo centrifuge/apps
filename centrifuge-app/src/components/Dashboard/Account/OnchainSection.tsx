@@ -1,21 +1,9 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  CurrencyInput,
-  Grid,
-  IconChevronRight,
-  Shelf,
-  Stack,
-  Tabs,
-  TabsItem,
-  Text,
-} from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Grid, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import { PageSummary } from '../../../../src/components/PageSummary'
 import { Tooltips } from '../../../../src/components/Tooltips'
-import { StyledRouterTextLink } from '../../../../src/pages/Pool/Assets'
 import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
@@ -122,13 +110,6 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
 
   return (
     <Box backgroundColor="backgroundSecondary" borderRadius={8} p={2} mt={3}>
-      <Box display="flex" justifyContent="space-between">
-        <Text variant="heading1">Onchain reserve</Text>
-        <StyledRouterTextLink to={`/pools/${pool?.id}/assets/0`}>
-          <Text variant="heading1">{formatBalance(pool?.reserve.total || 0)} USDC</Text>
-          <IconChevronRight />
-        </StyledRouterTextLink>
-      </Box>
       <PageSummary
         data={pageSummaryData}
         style={{ marginLeft: 0, marginRight: 0, backgroundColor: 'white' }}
