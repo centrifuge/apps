@@ -86,7 +86,7 @@ export function IssuerDetailsSection({ isUpdating }: { isUpdating?: boolean }) {
             form.setFieldValue('pool.issuer.logo', file)
             setLogo(file)
           }}
-          accept="image/png, image/jpeg, image/jpg"
+          accept="image/*"
           placeholder="SVG, PNG, or JPG (max. 1MB; 480x480px)"
           label="Issuer logo"
           id="issuerLogo"
