@@ -13,6 +13,7 @@ import { Dec, Decimal } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import MigrationSuccessPage from './MigrationSuccessPage'
+import { MigrationSupportLink } from './MigrationSupportLink'
 import { cfgConfig, useTokenBalance } from './useTokenBalance'
 
 export const TooltipText = () => {
@@ -215,6 +216,7 @@ export default function CFGTokenMigration() {
                 >
                   Approve WCFG and migrate
                 </Button>
+                <MigrationSupportLink />
                 <Box mt={2} justifyContent="center" display="flex">
                   <Stepper activeStep={step} setActiveStep={setStep} direction="row">
                     <Step

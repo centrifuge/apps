@@ -33,6 +33,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { TooltipText } from './CFGTokenMigration'
 import MigrationSuccessPage from './MigrationSuccessPage'
+import { MigrationSupportLink } from './MigrationSupportLink'
 import { useAxelarStatusPoller } from './useAxelarStatus'
 import { TransactionData, useRecordTransaction } from './useRecordTransaction'
 
@@ -406,6 +407,7 @@ export default function CFGTokenMigrationCent() {
                 address={evmAddress}
               />
             )}
+            <MigrationSupportLink />
           </Box>
           {step === 3 && (
             <Grid gridTemplateColumns="24px 1fr" alignItems="center" mb={2} width="30%">
