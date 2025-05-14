@@ -277,7 +277,7 @@ export default function CFGTokenMigrationCent() {
                     </Text>
                   </Grid>
                   <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={3}>
-                    <Text variant="heading4">Legal gas fee estimate</Text>
+                    <Text variant="heading4">Gas fee estimate</Text>
                     <Text color="textSecondary" variant="body2">
                       -{formatBalance(feeAmount || 0, '', 2)} CFG
                     </Text>
