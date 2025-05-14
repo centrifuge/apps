@@ -1,14 +1,25 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { DataTable, SortableTableHeader } from '../../../components/DataTable'
+import { formatDate } from '../../../utils/date'
 
 export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined }) => {
   const assetsData = metadata?.holdingsCSV
+
+  const format = (value: any, header: string) => {
+    if (header.includes('date') && !header.includes('quantity')) {
+      return formatDate(value)
+    }
+    if (header.includes('%')) {
+      return `${value}%`
+    }
+    return value
+  }
 
   const columns = assetsData?.headers.map((header: string) => {
     return {
       align: 'left',
       header: <SortableTableHeader label={header} />,
-      cell: (l: any) => l[header],
+      cell: (l: any) => format(l[header], header.toLowerCase()),
       sortKey: header,
     }
   })
