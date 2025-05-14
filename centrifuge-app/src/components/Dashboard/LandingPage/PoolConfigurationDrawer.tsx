@@ -40,7 +40,7 @@ export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
     interestRate: number | null
     weightedAverageMaturity: number | null
   }[]
-  holdingsCSV: {
+  holdings: {
     headers: string[]
     data: {
       [key: string]: string | number
@@ -88,7 +88,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
             : null,
       }
     }),
-    holdingsCSV: pool.meta?.holdingsCSV || { headers: [], data: [] },
+    holdings: pool.meta?.holdings || { headers: [], data: [] },
   }
 }
 
@@ -231,7 +231,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
       const newPoolMetadata: PoolMetadata = {
         ...pool.meta,
-        holdingsCSV: values.holdingsCSV,
+        holdings: values.holdings,
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
             minInitialInvestment: tranche.minInvestment.toString(),

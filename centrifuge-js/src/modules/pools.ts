@@ -811,7 +811,7 @@ export type PoolMetadata = {
     podReadAccess?: boolean
     taxInfoRequired?: boolean
   }
-  holdingsCSV?: {
+  holdings?: {
     headers: string[]
     data: {
       [key: string]: string | number

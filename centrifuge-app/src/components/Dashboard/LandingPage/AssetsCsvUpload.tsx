@@ -63,7 +63,7 @@ export function AssetCsvUpload() {
     if (!file) return
     const text = await file.text()
     const result = csvToJson(text)
-    form.setFieldValue('holdingsCSV', result)
+    form.setFieldValue('holdings', result)
   }
 
   return <FileUpload accept=".csv" placeholder="Upload holdings CSV" onFileChange={uploadAsset} />

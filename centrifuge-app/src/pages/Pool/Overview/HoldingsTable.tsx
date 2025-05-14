@@ -1,11 +1,11 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { Text } from '@centrifuge/fabric'
+import { Stack, Text } from '@centrifuge/fabric'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../../../components/DataTable'
 import { formatDate } from '../../../utils/date'
 
 export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined }) => {
-  const assetsData = metadata?.holdingsCSV
+  const assetsData = metadata?.holdings
 
   const format = (value: any, header: string) => {
     if (header.includes('date') && !header.includes('quantity')) {
@@ -45,5 +45,10 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
     return null
   }
 
-  return <DataTable data={data || []} columns={columns || []} defaultSortKey="maturitydate" />
+  return (
+    <Stack gap={2} mt={2}>
+      <Text variant="heading2">Holdings</Text>
+      <DataTable data={data || []} columns={columns || []} defaultSortKey="maturitydate" />
+    </Stack>
+  )
 }
