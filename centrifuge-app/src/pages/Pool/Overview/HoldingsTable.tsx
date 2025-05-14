@@ -48,7 +48,7 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
   return (
     <Stack gap={2} mt={2}>
       <Text variant="heading2">Holdings</Text>
-      <DataTable data={data || []} columns={columns || []} defaultSortKey="maturitydate" />
+      <DataTable data={data || []} columns={columns || []} defaultSortKey="maturitydate" defaultSortOrder="asc" />
     </Stack>
   )
 }
