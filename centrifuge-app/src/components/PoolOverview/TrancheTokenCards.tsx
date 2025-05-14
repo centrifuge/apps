@@ -8,7 +8,6 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { PoolMetaDataPartial } from '../PoolList'
-import { Tooltips } from '../Tooltips'
 
 type Row = {
   tokenName: string
@@ -63,12 +62,9 @@ export const TrancheTokenCards = ({
         align: 'left',
         cell: (row: Row) => {
           return (
-            <Box>
-              <Text style={{ marginRight: 4 }} fontWeight="600" variant="heading2">
-                {row.apy}
-              </Text>
-              {row.isTarget && <Tooltips label="target" type="targetAPY" size="xs" />}
-            </Box>
+            <Text style={{ marginRight: 4 }} fontWeight="600" variant="heading2">
+              {row.apy}
+            </Text>
           )
         },
       },
@@ -134,7 +130,7 @@ export const TrancheTokenCards = ({
         tokenPrice: tranche.tokenPrice,
         subordination: tranche.protection,
         trancheId: tranche.id,
-        isTarget: tranche.isTarget,
+        isTarget: false,
       }
     })
   }, [trancheTokens, daysSinceCreation, isTinlakePool, poolId])

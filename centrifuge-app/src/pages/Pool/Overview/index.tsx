@@ -95,6 +95,7 @@ export function PoolDetailOverview() {
       const trancheMeta = metadata?.tranches?.[tranche.id]
       return {
         poolId: tranche.poolId,
+        // Target APY
         apy: trancheMeta?.apyPercentage ? trancheMeta?.apyPercentage : '0',
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
@@ -109,7 +110,7 @@ export function PoolDetailOverview() {
         tokenPrice: tranche.tokenPrice,
         yield30DaysAnnualized: tranche?.yield30DaysAnnualized?.toString() || '',
         yieldSinceInception: tranche?.yieldSinceInception?.toString() || '',
-        isTarget: (isTinlakePool && tranche.seniority === 0) || trancheMeta?.apy?.includes('Target'),
+        isTarget: false,
       }
     })
     .reverse()
