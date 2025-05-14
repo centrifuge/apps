@@ -1,4 +1,5 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { Text } from '@centrifuge/fabric'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../../../components/DataTable'
 import { formatDate } from '../../../utils/date'
@@ -13,18 +14,30 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
     if (header.includes('%')) {
       return `${value}%`
     }
-    if (header.includes('market value')) {
+    if (header.includes('marketvalue')) {
       return formatBalance(value, 'USD', 2)
+    }
+    if (header.includes('quantity')) {
+      return formatBalance(value, '', 2)
     }
     return value
   }
 
-  const columns = assetsData?.headers.map((header: string) => {
+  const columns = assetsData?.headers.map((header: string, index: number) => {
+    const transformedHeader = header.toLowerCase().split(' ').join('')
     return {
       align: 'left',
       header: <SortableTableHeader label={header} />,
-      cell: (l: any) => format(l[header], header.toLowerCase()),
-      sortKey: header,
+      cell: (l: any) => (
+        <Text variant={index === 0 ? 'heading4' : 'body2'}>{format(l[transformedHeader], transformedHeader)}</Text>
+      ),
+      sortKey: transformedHeader,
+    }
+  })
+
+  const data = assetsData?.data.map((row: any) => {
+    return {
+      ...Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().split(' ').join(''), value])),
     }
   })
 
@@ -32,5 +45,5 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
     return null
   }
 
-  return <DataTable data={(assetsData.data as any) || []} columns={columns || []} />
+  return <DataTable data={data || []} columns={columns || []} defaultSortKey="maturitydate" />
 }

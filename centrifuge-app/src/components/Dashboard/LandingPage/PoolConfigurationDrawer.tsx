@@ -42,7 +42,9 @@ export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
   }[]
   holdingsCSV: {
     headers: string[]
-    data: Record<string, (string | number)[]>
+    data: {
+      [key: string]: string | number
+    }[]
   }
 }
 
@@ -86,7 +88,7 @@ const createPoolValues = (pool: PoolWithMetadata) => {
             : null,
       }
     }),
-    holdingsCSV: pool.meta?.holdingsCSV || { headers: [], data: {} },
+    holdingsCSV: pool.meta?.holdingsCSV || { headers: [], data: [] },
   }
 }
 

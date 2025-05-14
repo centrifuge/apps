@@ -813,7 +813,9 @@ export type PoolMetadata = {
   }
   holdingsCSV?: {
     headers: string[]
-    data: Record<string, (string | number)[]>
+    data: {
+      [key: string]: string | number
+    }[]
   }
 }
 
