@@ -438,7 +438,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
                       {
                         title: (
                           <Box py={2}>
-                            <Text variant="heading3">Assets CSV</Text>
+                            <Text variant="heading3">Holdings CSV</Text>
                           </Box>
                         ),
                         body: <AssetCsvUpload />,

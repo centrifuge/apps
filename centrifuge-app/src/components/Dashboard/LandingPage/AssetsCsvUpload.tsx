@@ -66,5 +66,5 @@ export function AssetCsvUpload() {
     form.setFieldValue('holdingsCSV', result)
   }
 
-  return <FileUpload accept=".csv" placeholder="Upload assets CSV" onFileChange={uploadAsset} />
+  return <FileUpload accept=".csv" placeholder="Upload holdings CSV" onFileChange={uploadAsset} />
 }

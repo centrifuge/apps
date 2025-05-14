@@ -1,4 +1,5 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { formatBalance } from '../../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../../../components/DataTable'
 import { formatDate } from '../../../utils/date'
 
@@ -11,6 +12,9 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
     }
     if (header.includes('%')) {
       return `${value}%`
+    }
+    if (header.includes('market value')) {
+      return formatBalance(value, 'USD', 2)
     }
     return value
   }
