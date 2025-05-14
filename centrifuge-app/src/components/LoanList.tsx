@@ -228,6 +228,8 @@ export function LoanList({ loans }: Props) {
   const filteredData = showRepaid ? rows : rows.filter((row) => !row.marketValue?.isZero() && row.status === 'Active')
   const pagination = usePagination({ data: filteredData, pageSize: 20 })
 
+  console.log(filteredData)
+
   return (
     <>
       <Box pt={1} pb={2} paddingX={1} mt={2} display="flex" justifyContent="space-between" alignItems="center">

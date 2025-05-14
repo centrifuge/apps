@@ -161,6 +161,7 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
     return text.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())
   }
 
+  const hasCategories = metadata?.pool?.issuer?.categories?.length && metadata?.pool?.issuer?.categories[0].type !== ''
   return (
     <Stack>
       <Shelf display="flex" justifyContent="space-between" marginBottom={12}>
@@ -175,14 +176,14 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         )}
         <Links links={links} />
       </Shelf>
-      <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr 1fr']} gap={[2, 2]}>
+      <Grid height="fit-content" gridTemplateColumns={hasCategories ? ['1fr', '1fr 1fr'] : ['1fr']} gap={[2, 2]}>
         <Box marginRight={3}>
           <Text variant="heading2">{metadata?.pool?.issuer.name}</Text>
           <Text variant="body2" style={{ marginTop: '12px', lineHeight: '22px', letterSpacing: '-0.14px' }}>
             {metadata?.pool?.issuer.description}
           </Text>
         </Box>
-        {metadata?.pool?.issuer?.categories?.length ? (
+        {hasCategories ? (
           <Box bg="white" padding={2} borderRadius={10} ml={1} height="min-content" alignSelf="center">
             {metadata?.pool?.issuer?.categories.map((category) => (
               <Box display="flex" justifyContent="space-between" padding={1}>

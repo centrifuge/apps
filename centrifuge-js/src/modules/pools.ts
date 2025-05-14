@@ -811,6 +811,10 @@ export type PoolMetadata = {
     podReadAccess?: boolean
     taxInfoRequired?: boolean
   }
+  holdingsCSV?: {
+    headers: string[]
+    data: Record<string, (string | number)[]>
+  }
 }
 
 type AssetCurrencyData = {
