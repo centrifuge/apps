@@ -3,6 +3,7 @@ import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -20,6 +21,8 @@ export function PoolDetailHeader({ actions }: Props) {
   const isTinlakePool = pool.id.startsWith('0x')
   const theme = useTheme()
   const cent = useCentrifuge()
+
+  const { showReports } = useDebugFlags()
 
   const iconUri = metadata?.pool?.icon?.uri && cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)
 
@@ -59,7 +62,7 @@ export function PoolDetailHeader({ actions }: Props) {
         <NavigationTabs>
           <NavigationTabsItem to={`/pools/${pid}`}>Overview</NavigationTabsItem>
           {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/reporting`}>Reports</NavigationTabsItem>}
-          {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/data`}>Data</NavigationTabsItem>}
+          {!isTinlakePool && showReports && <NavigationTabsItem to={`/pools/${pid}/data`}>Data</NavigationTabsItem>}
         </NavigationTabs>
       </Shelf>
     </PageHeader>
