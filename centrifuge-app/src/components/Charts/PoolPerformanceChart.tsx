@@ -1,5 +1,5 @@
 import { DailyPoolState, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
-import { Box, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -201,6 +201,14 @@ function PoolPerformanceChart() {
         <Text variant="body2" fontWeight="500">
           Pool performance
         </Text>
+        <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
+            Price
+          </TabsItem>
+          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
+            APY
+          </TabsItem>
+        </Tabs>
       </Stack>
       <CustomLegend selectedTabIndex={selectedTabIndex} data={today} setRange={setRange} />
       <Shelf gap={4} width="100%" color="textSecondary" mt={4}>
@@ -454,9 +462,9 @@ function CustomLegend({
           )
         })}
       </Box>
-      <Box>
+      {/* <Box>
         <Select options={rangeFilters} onChange={toggleRange} hideBorder disabled />
-      </Box>
+      </Box> */}
     </Box>
   )
 }
