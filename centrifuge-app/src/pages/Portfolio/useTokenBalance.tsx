@@ -12,8 +12,8 @@ export const cfgConfig = isTestEnv
     }
   : {
       legacy: '0xc221b7e65ffc80de234bbb6667abdd46593d34f0',
-      iou: 'TODO',
-      new: 'TODO',
+      iou: '0xACF3c07BeBd65d5f7d86bc0bc716026A0C523069',
+      new: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
     }
 
 const ABI = ['function balanceOf(address owner) view returns (uint256)']
