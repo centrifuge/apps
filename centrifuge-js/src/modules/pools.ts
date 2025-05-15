@@ -2288,23 +2288,18 @@ export function getPoolsModule(inst: Centrifuge) {
       }),
       combineLatestWith($query),
       map(([pools, gqlResult]) => {
-        return (
-          pools
-            /// TODO: temporal, remove once we launch
-            .filter((pool) => pool.id !== '158696445')
-            .map((pool) => {
-              const gqlPool = gqlResult?.pools.nodes.find((r) => r.id === pool.id)
-              const poolWithGqlData: Pool = {
-                ...pool,
-                createdAt: gqlPool?.createdAt ?? null,
-                fees: {
-                  totalPaid: new CurrencyBalance(gqlPool?.sumPoolFeesPaidAmount ?? 0, pool.currency.decimals),
-                  totalPending: new CurrencyBalance(gqlPool?.sumPoolFeesPendingAmount ?? 0, pool.currency.decimals),
-                },
-              }
-              return poolWithGqlData
-            })
-        )
+        return pools.map((pool) => {
+          const gqlPool = gqlResult?.pools.nodes.find((r) => r.id === pool.id)
+          const poolWithGqlData: Pool = {
+            ...pool,
+            createdAt: gqlPool?.createdAt ?? null,
+            fees: {
+              totalPaid: new CurrencyBalance(gqlPool?.sumPoolFeesPaidAmount ?? 0, pool.currency.decimals),
+              totalPending: new CurrencyBalance(gqlPool?.sumPoolFeesPendingAmount ?? 0, pool.currency.decimals),
+            },
+          }
+          return poolWithGqlData
+        })
       }),
       repeatWhen(() => $events)
     )
