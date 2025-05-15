@@ -811,6 +811,12 @@ export type PoolMetadata = {
     podReadAccess?: boolean
     taxInfoRequired?: boolean
   }
+  holdings?: {
+    headers: string[]
+    data: {
+      [key: string]: string | number
+    }[]
+  }
 }
 
 type AssetCurrencyData = {
