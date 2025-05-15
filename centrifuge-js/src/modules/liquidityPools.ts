@@ -44,10 +44,10 @@ const config: Record<number, LPConfig> = {
     centrifugeRouter: '0xb1a07D21Fc8eD1eF2208395Bb3b262C66D3d3281',
   },
   42161: {
-    centrifugeRouter: '0x2F445BA946044C5F508a63eEaF7EAb673c69a1F4',
+    centrifugeRouter: '0xF35501E7fC4a076E744dbAFA883CED74CCF5009d',
   },
   8453: {
-    centrifugeRouter: '0xF35501E7fC4a076E744dbAFA883CED74CCF5009d',
+    centrifugeRouter: '0x5B82fFdaC6D77fBd21a4eeb9b8c540F77eeD1231',
   },
   42220: {
     centrifugeRouter: '0x5a00C4fF931f37202aD4Be1FDB297E9EDc1CBb33',
