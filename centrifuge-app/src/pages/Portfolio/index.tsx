@@ -14,7 +14,8 @@ import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { TransactionHistory } from './TransactionHistory'
+import { useMigrationPairs } from '../../utils/usePools'
+import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
 
 const StyledGrid = styled(Grid)`
@@ -66,7 +67,8 @@ function Portfolio() {
   )
 }
 
-function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
+function PortfolioDetails({ chainId }: { address: string; chainId: number | undefined }) {
+  const address = '4gGcg2kwzQGjKxR6i8CtzwCsVmKdqTz7jquek5jSt4zd4QB4'
   const ctx = useWallet()
   const { connectedType, isEvmOnSubstrate } = ctx
   const debugFlags = useDebugFlags()
@@ -78,6 +80,8 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
   const balance =
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
+
+  const migrationPairs = useMigrationPairs('0xda067e0b303dc4a297d20f2b356e44f0f2fca031d63eae6384eb813f8f794800')
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -245,7 +249,9 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        <TransactionHistory address={centAddress} />
+        {debugFlags.showCFGTokenMigration && migrationPairs && (
+          <MigrationTable migrationPairs={migrationPairs} address={centAddress} />
+        )}
       </Stack>
     </>
   )

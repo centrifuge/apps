@@ -237,6 +237,18 @@ export function useOracleTransactions(from?: Date, to?: Date) {
   return result
 }
 
+export function useMigrationPairs(accountId: string) {
+  const [result] = useCentrifugeQuery(
+    ['migrationPairs', accountId],
+    (cent) => cent.pools.getMigrationPairs([accountId]),
+    {
+      enabled: !!accountId,
+    }
+  )
+
+  return result
+}
+
 export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
   const { data: loans } = useLoans([poolId])
