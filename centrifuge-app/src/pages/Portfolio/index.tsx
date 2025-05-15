@@ -14,7 +14,8 @@ import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { TransactionHistory } from './TransactionHistory'
+import { useMigrationPairs } from '../../utils/usePools'
+import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
 
 const StyledGrid = styled(Grid)`
@@ -69,7 +70,6 @@ function Portfolio() {
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
   const ctx = useWallet()
   const { connectedType, isEvmOnSubstrate } = ctx
-  const debugFlags = useDebugFlags()
   const navigate = useNavigate()
   const theme = useTheme()
   const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
@@ -78,6 +78,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
   const balance =
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
+
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -181,7 +182,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   return (
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
-      {debugFlags.showCFGTokenMigration && !balance?.isZero() && (
+      {!balance?.isZero() && (
         <Grid
           display="flex"
           alignItems="center"
@@ -245,7 +246,9 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        <TransactionHistory address={centAddress} />
+        {/* {migrationPairs && (
+          <MigrationTable migrationPairs={migrationPairs} address={centAddress} />
+        )} */}
       </Stack>
     </>
   )

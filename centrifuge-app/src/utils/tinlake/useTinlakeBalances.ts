@@ -12,6 +12,7 @@ import { useQuery } from 'react-query'
 import { ethConfig } from '../../config'
 import { currencies } from './currencies'
 import { TinlakePool, useTinlakePools } from './useTinlakePools'
+import { cfgConfig } from '../../../src/pages/Portfolio/useTokenBalance'
 
 export function useTinlakeBalances(address?: string) {
   const {
@@ -112,7 +113,7 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Prov
         currencyAddress === cfgConfig.legacy
           ? currencies.wCFG
           : currencyAddress === cfgConfig.new
-          ? currencies.newCFG
+          ? currencies.wCFG
           : currencies.DAI,
     })
   })

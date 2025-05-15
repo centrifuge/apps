@@ -235,7 +235,6 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
   const centBalances = useBalances(centAddress)
   const match = useMatch('/portfolio')
   const isPortfolioPage = Boolean(match)
-  const debugFlags = useDebugFlags()
 
   const wallet = useWallet()
   const tinlakePools = useTinlakePools()
@@ -290,7 +289,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       currency: tokenBalances.data?.legacy?.currency,
       showActions: false,
       connectedNetwork: chainId,
-      showMigration: debugFlags.showCFGTokenMigration && !tokenBalances.data?.legacy?.balance.isZero(),
+      showMigration:  !tokenBalances.data?.legacy?.balance.isZero(),
       chainId: 1,
     },
     tokenBalances.data?.new && {
@@ -341,7 +340,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
             marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) ?? Dec(0) : Dec(0),
             showActions: isPortfolioPage,
             connectedNetwork: wallet.connectedNetworkName,
-            showMigration: debugFlags.showCFGTokenMigration && !centBalances?.native.balance.isZero(),
+            showMigration: !centBalances?.native.balance.isZero(),
           },
         ]
       : []),

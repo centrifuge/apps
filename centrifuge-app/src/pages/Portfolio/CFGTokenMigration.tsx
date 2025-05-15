@@ -49,7 +49,6 @@ export const TooltipText = () => {
 export default function CFGTokenMigration() {
   const theme = useTheme()
   const address = useAddress('evm')
-  const debug = useDebugFlags()
   const { data: tokenBalances } = useTokenBalance(address)
   const balance = tokenBalances?.legacy?.balance
   const CFGPrice = useCFGTokenPrice()
@@ -99,9 +98,6 @@ export default function CFGTokenMigration() {
     executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
   }
 
-  if (!debug.showCFGTokenMigration) {
-    return null
-  }
 
   return (
     // @ts-expect-error

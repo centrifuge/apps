@@ -35,7 +35,6 @@ import { TooltipText } from './CFGTokenMigration'
 import MigrationSuccessPage from './MigrationSuccessPage'
 import { MigrationSupportLink } from './MigrationSupportLink'
 import { useAxelarStatusPoller } from './useAxelarStatus'
-import { TransactionData, useRecordTransaction } from './useRecordTransaction'
 
 const StyledButton = styled(Box)<{ disabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.textPrimary};
@@ -64,9 +63,7 @@ const Header = () => {
 
 export default function CFGTokenMigrationCent() {
   const api = useCentrifugeApi()
-  const debug = useDebugFlags()
   const theme = useTheme()
-  const { recordTransaction } = useRecordTransaction()
   const address = useAddress()!
   const balances = useBalances(address)
   const balance = balances?.native.balance.toDecimal() || Dec(0)
@@ -138,14 +135,6 @@ export default function CFGTokenMigrationCent() {
           localStorage.setItem('axelarHash', axelarHash)
           setAxelarHash(axelarHash)
           setStep(2)
-          const transactionData: TransactionData = {
-            from_address: address,
-            to_address: evmAddress,
-            tx_hash: result.txHash,
-            chain: 'centrifuge',
-            amount: totalAmountToMigrate.toNumber(),
-          }
-          await recordTransaction(transactionData)
         }
       },
     }
@@ -205,9 +194,6 @@ export default function CFGTokenMigrationCent() {
     ? `https://testnet.axelarscan.io/gmp/${axelarHash}`
     : `https://axelarscan.io/gmp/${axelarHash}`
 
-  if (!debug.showCFGTokenMigration) {
-    return null
-  }
 
   return (
     <ConnectionGuard networks={['centrifuge']} mt={10} paddingX={12}>
