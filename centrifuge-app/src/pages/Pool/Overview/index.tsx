@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, PoolMetadata, Price } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -14,7 +14,6 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
 import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
 import { TrancheTokenCards } from '../../../components/PoolOverview/TrancheTokenCards'
-import { TransactionHistory } from '../../../components/PoolOverview/TransactionHistory'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { Dec } from '../../../utils/Decimal'
@@ -24,6 +23,7 @@ import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
+import { HoldingsTable } from './HoldingsTable'
 
 export type Token = {
   poolId: string
@@ -136,7 +136,7 @@ export function PoolDetailOverview() {
         </React.Suspense>
         {!isTinlakePool && (
           <React.Suspense fallback={<Spinner />}>
-            <TransactionHistory poolId={poolId} />
+            <HoldingsTable metadata={metadata as PoolMetadata | undefined} />
           </React.Suspense>
         )}
       </Box>

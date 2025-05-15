@@ -10,12 +10,12 @@ import { PoolRatingsSection } from '../../../pages/IssuerCreatePool/PoolRatings'
 import { ServiceProvidersSection } from '../../../pages/IssuerCreatePool/ServiceProvidersSection'
 import { TranchesSection } from '../../../pages/IssuerCreatePool/TranchesSection'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
-import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePoolAdmin, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useDebugFlags } from '../../DebugFlags'
 import { LoadBoundary } from '../../LoadBoundary'
 import { Spinner } from '../../Spinner'
 import { PoolWithMetadata } from '../utils'
+import { AssetCsvUpload } from './AssetsCsvUpload'
 import { DebugPoolConfig } from './DebugPoolConfig'
 import { IssuerDetailsSection } from './IssuerDetailsSection'
 import { PoolDescriptionSection } from './PoolDescriptionSection'
@@ -40,6 +40,12 @@ export type UpdatePoolFormValues = Omit<PoolMetadata, 'tranches'> & {
     interestRate: number | null
     weightedAverageMaturity: number | null
   }[]
+  holdings: {
+    headers: string[]
+    data: {
+      [key: string]: string | number
+    }[]
+  }
 }
 
 const createPoolValues = (pool: PoolWithMetadata) => {
@@ -82,13 +88,13 @@ const createPoolValues = (pool: PoolWithMetadata) => {
             : null,
       }
     }),
+    holdings: pool.meta?.holdings || { headers: [], data: [] },
   }
 }
 
 export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDrawerProps) {
   const cent = useCentrifuge()
   const { editPoolConfig } = useDebugFlags()
-  const prefetchMetadata = usePrefetchMetadata()
   const { poolsWithMetadata, selectedPoolsWithMetadata } = useSelectedPools()
   const [pool, setPool] = useState<PoolWithMetadata>(selectedPoolsWithMetadata[0])
 
@@ -225,6 +231,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
       const newPoolMetadata: PoolMetadata = {
         ...pool.meta,
+        holdings: values.holdings,
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
             minInitialInvestment: tranche.minInvestment.toString(),
@@ -429,6 +436,14 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
                           </Box>
                         ),
                         body: <TranchesSection isUpdating />,
+                      },
+                      {
+                        title: (
+                          <Box py={2}>
+                            <Text variant="heading3">Holdings CSV</Text>
+                          </Box>
+                        ),
+                        body: <AssetCsvUpload />,
                       },
                     ]}
                   />
