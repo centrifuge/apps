@@ -135,7 +135,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       value: `${capitalize(startCase(metadata?.pool?.asset?.class))} - ${metadata?.pool?.asset?.subClass}`,
     },
     {
-      metric: isTinlakePool ? '90-day APY' : 'Target',
+      metric: isTinlakePool ? '90-day APY' : 'APY',
       value: tinlakeData[poolId as TinlakeDataKey]
         ? tinlakeData[poolId as TinlakeDataKey]
         : tranchesAPY.map((tranche, index) => {
