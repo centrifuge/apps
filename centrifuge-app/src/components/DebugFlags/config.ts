@@ -50,6 +50,7 @@ export type Key =
   | 'showOracleTx'
   | 'showGmp'
   | 'showReports'
+  | 'showAPYGraph'
 
 export const flagsConfig = {
   address: {
@@ -136,6 +137,11 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showReports: {
+    alwaysShow: true,
+    default: false,
+    type: 'checkbox',
+  },
+  showAPYGraph: {
     alwaysShow: true,
     default: false,
     type: 'checkbox',

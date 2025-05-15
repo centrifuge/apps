@@ -9,6 +9,7 @@ import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
+import { useDebugFlags } from '../DebugFlags'
 import { Tooltips, tooltipText } from '../Tooltips'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getOneDayPerMonth, getRangeNumber } from './utils'
@@ -88,6 +89,7 @@ function getYieldFieldForFilter(
 
 function PoolPerformanceChart() {
   const theme = useTheme()
+  const { showAPYGraph } = useDebugFlags()
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0)
   const chartColor = theme.colors.textGold
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -201,14 +203,16 @@ function PoolPerformanceChart() {
         <Text variant="body2" fontWeight="500">
           Pool performance
         </Text>
-        <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
-            Price
-          </TabsItem>
-          <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
-            APY
-          </TabsItem>
-        </Tabs>
+        {showAPYGraph && (
+          <Tabs selectedIndex={selectedTabIndex} onChange={(index) => setSelectedTabIndex(index)}>
+            <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
+              Price
+            </TabsItem>
+            <TabsItem styleOverrides={{ padding: '8px' }} showBorder variant="secondary">
+              APY
+            </TabsItem>
+          </Tabs>
+        )}
       </Stack>
       <CustomLegend selectedTabIndex={selectedTabIndex} data={today} setRange={setRange} />
       <Shelf gap={4} width="100%" color="textSecondary" mt={4}>
