@@ -51,6 +51,7 @@ export type Key =
   | 'showGmp'
   | 'showReports'
   | 'showAPYGraph'
+  | 'showCFGTokenMigration'
 
 export const flagsConfig = {
   address: {
@@ -144,6 +145,11 @@ export const flagsConfig = {
   showAPYGraph: {
     alwaysShow: true,
     default: false,
+    type: 'checkbox',
+  },
+  showCFGTokenMigration: {
+    alwaysShow: true,
+    default: true,
     type: 'checkbox',
   },
 } satisfies Record<Key, DebugFlagConfig>

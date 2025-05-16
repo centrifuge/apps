@@ -3424,6 +3424,102 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getMigrationPairs(args: [accountId: string]) {
+    const [accountId] = args
+
+    const $query = inst.getSubqueryObservable<{
+      migrationPairs: {
+        nodes: {
+          sentMigrations: {
+            nodes: {
+              sentAmount: string
+              sentAt: string
+              toAccount: { evmAddress: string }
+              migrationPairId: string
+              id: string
+            }[]
+          }
+          receivedMigrations: {
+            nodes: {
+              receivedAmount: string
+              receivedAt: string
+              toAccount: { evmAddress: string }
+              migrationPairId: string
+              id: string
+            }[]
+          }
+        }[]
+      }
+    }>(
+      `query($accountId: String!) {
+        migrationPairs(
+          filter: {
+            fromAccountId: { equalTo: $accountId },
+          }){
+            nodes {
+             sentMigrations{
+              nodes{
+                toAccount {
+                  evmAddress
+                }
+                sentAmount
+                sentAt
+                id
+                migrationPairId
+              }
+             } 
+             receivedMigrations{
+              nodes{
+                toAccount {
+                  evmAddress
+                }
+                receivedAmount
+                receivedAt
+                migrationPairId
+                id
+             }
+            }
+          }
+       }
+      }
+      `,
+      {
+        accountId,
+      },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        const pairs = data?.migrationPairs.nodes ?? []
+
+        console.log(pairs)
+
+        const sentMigrations = pairs.flatMap((node) =>
+          node.sentMigrations.nodes.map((migration) => ({
+            sentAmount: new CurrencyBalance(migration.sentAmount, 18),
+            sentAt: migration.sentAt,
+            toAccount: migration.toAccount.evmAddress,
+            migrationPairId: migration.migrationPairId,
+            txHash: migration.id,
+          }))
+        )
+
+        const receivedMigrations = pairs.flatMap((node) =>
+          node.receivedMigrations.nodes.map((migration) => ({
+            receivedAmount: new CurrencyBalance(migration.receivedAmount, 18),
+            receivedAt: migration.receivedAt,
+            toAccount: migration.toAccount.evmAddress,
+            migrationPairId: migration.migrationPairId,
+            txHash: migration.id,
+          }))
+        )
+
+        return { sentMigrations, receivedMigrations }
+      })
+    )
+  }
+
   function getAssetSnapshots(args: [poolId: string, loanId: string, from?: Date, to?: Date]) {
     const [poolId, loanId, from, to] = args
 
@@ -4856,6 +4952,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyTVL,
     getInvestors,
     getAllPoolAssetSnapshots,
+    getMigrationPairs,
   }
 }
 
