@@ -67,8 +67,7 @@ function Portfolio() {
   )
 }
 
-function PortfolioDetails({ chainId }: { address: string; chainId: number | undefined }) {
-  const address = '4gGcg2kwzQGjKxR6i8CtzwCsVmKdqTz7jquek5jSt4zd4QB4'
+function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
   const ctx = useWallet()
   const { connectedType, isEvmOnSubstrate } = ctx
   const debugFlags = useDebugFlags()

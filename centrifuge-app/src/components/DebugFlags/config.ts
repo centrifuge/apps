@@ -149,7 +149,7 @@ export const flagsConfig = {
   },
   showCFGTokenMigration: {
     alwaysShow: true,
-    default: false,
+    default: true,
     type: 'checkbox',
   },
 } satisfies Record<Key, DebugFlagConfig>
