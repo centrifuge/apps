@@ -81,7 +81,6 @@ function PortfolioDetails({ chainId }: { address: string; chainId: number | unde
   const balance =
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
-  const migrationPairs = useMigrationPairs('0xda067e0b303dc4a297d20f2b356e44f0f2fca031d63eae6384eb813f8f794800')
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
