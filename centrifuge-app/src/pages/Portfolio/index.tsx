@@ -249,9 +249,9 @@ function PortfolioDetails({ chainId }: { address: string; chainId: number | unde
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        {debugFlags.showCFGTokenMigration && migrationPairs && (
+        {/* {debugFlags.showCFGTokenMigration && migrationPairs && (
           <MigrationTable migrationPairs={migrationPairs} address={centAddress} />
-        )}
+        )} */}
       </Stack>
     </>
   )
