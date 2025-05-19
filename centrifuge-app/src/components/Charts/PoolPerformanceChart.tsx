@@ -217,7 +217,7 @@ function PoolPerformanceChart() {
       <CustomLegend selectedTabIndex={selectedTabIndex} data={today} setRange={setRange} />
       <Shelf gap={4} width="100%" color="textSecondary" mt={4}>
         {chartData?.length ? (
-          <ResponsiveContainer width="100%" height={260} minHeight={260} maxHeight={260}>
+          <ResponsiveContainer width="100%" height={280} minHeight={280} maxHeight={280}>
             <ComposedChart data={chartData} margin={{ left: -36 }}>
               <defs>
                 <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -232,7 +232,7 @@ function PoolPerformanceChart() {
                 minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tick={(props) => <CustomTick {...props} y={190} />}
+                tick={(props) => <CustomTick {...props} y={270} />}
                 ticks={getOneDayPerMonth(chartData, 'day')}
               />
               <YAxis

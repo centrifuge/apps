@@ -23,7 +23,6 @@ import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useEffect, useState } from 'react'
 import { firstValueFrom, map, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { RouterTextLink } from '../../../src/components/TextLink'
 import { Tooltips } from '../../../src/components/Tooltips'
@@ -106,10 +105,9 @@ export default function CFGTokenMigrationCent() {
 
   // Check if the migration has been completed
   useAxelarStatusPoller({
-    isActive: step === 2,
+    isActive: step === 2 || !!localStorage.getItem('axelarHash'),
     onSuccess: () => {
       setStep(3)
-      localStorage.removeItem('axelarHash')
     },
   })
 
@@ -193,7 +191,6 @@ export default function CFGTokenMigrationCent() {
   const axelarUrl = isTestEnv
     ? `https://testnet.axelarscan.io/gmp/${axelarHash}`
     : `https://axelarscan.io/gmp/${axelarHash}`
-
 
   return (
     <ConnectionGuard networks={['centrifuge']} mt={10} paddingX={12}>

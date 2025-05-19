@@ -1,10 +1,8 @@
-import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { useBalances, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Grid, IconInfo, IconWallet, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled, { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
@@ -14,8 +12,6 @@ import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { useMigrationPairs } from '../../utils/usePools'
-import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
 
 const StyledGrid = styled(Grid)`
@@ -72,13 +68,11 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const { connectedType, isEvmOnSubstrate } = ctx
   const navigate = useNavigate()
   const theme = useTheme()
-  const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
   const tokens = useHoldings(address, chainId)
   const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
   const balance =
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
-
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({

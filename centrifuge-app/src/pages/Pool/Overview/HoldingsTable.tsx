@@ -2,14 +2,14 @@ import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Stack, Text } from '@centrifuge/fabric'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { DataTable, SortableTableHeader } from '../../../components/DataTable'
-import { formatDate } from '../../../utils/date'
+import { formatDate, isValidDate } from '../../../utils/date'
 
 export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined }) => {
   const assetsData = metadata?.holdings
 
   const format = (value: any, header: string) => {
     if (header.includes('date') && !header.includes('quantity')) {
-      return formatDate(value)
+      return isValidDate(value) ? formatDate(value) : '-'
     }
     if (header.includes('%')) {
       return `${value}%`
@@ -20,7 +20,8 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
     if (header.includes('quantity')) {
       return formatBalance(value, '', 2)
     }
-    return value
+
+    return !value ? '-' : value
   }
 
   const columns = assetsData?.headers.map((header: string, index: number) => {

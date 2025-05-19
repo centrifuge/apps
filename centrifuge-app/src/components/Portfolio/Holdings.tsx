@@ -22,7 +22,6 @@ import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
-import { useDebugFlags } from '../DebugFlags'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
 import { RouterLinkButton } from '../RouterLinkButton'
@@ -289,7 +288,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       currency: tokenBalances.data?.legacy?.currency,
       showActions: false,
       connectedNetwork: chainId,
-      showMigration:  !tokenBalances.data?.legacy?.balance.isZero(),
+      showMigration: !tokenBalances.data?.legacy?.balance.isZero(),
       chainId: 1,
     },
     tokenBalances.data?.new && {
@@ -320,7 +319,8 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
           connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
-    ...((wallet.connectedNetwork === 'centrifuge' && showActions) || centBalances?.native.balance.gtn(0)
+    ...((wallet.connectedNetworkName?.toLowerCase() === 'centrifuge' && showActions) ||
+    centBalances?.native.balance.gtn(0)
       ? [
           {
             currency: {
@@ -331,7 +331,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
               key: 'Native',
               isPoolCurrency: false,
               isPermissioned: false,
-              displayName: centBalances?.native.currency.symbol ?? 'CFG',
+              displayName: 'Legacy CFG',
             },
             poolId: '',
             trancheId: '',
