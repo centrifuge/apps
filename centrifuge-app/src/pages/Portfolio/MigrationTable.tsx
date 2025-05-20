@@ -1,28 +1,21 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
-import { isTestEnv } from '../../../src/config'
+import { Box, Text } from '@centrifuge/fabric'
 import { formatDateAndTime } from '../../../src/utils/date'
 import { formatBalance } from '../../../src/utils/formatting'
+import { useMigrationPairs } from '../../../src/utils/usePools'
 import { truncate } from '../../../src/utils/web3'
 import { DataTable, SortableTableHeader } from '../../components/DataTable'
 import { isEvmAddress } from '../../utils/address'
 
-const axelarUrl = isTestEnv ? 'https://testnet.axelarscan.io' : 'https://axelarscan.io'
-
 type Migration = {
-  sentAmount: CurrencyBalance
-  sentAt: string
+  sentAmount?: CurrencyBalance
+  sentAt?: string
   toAccount: string
   migrationPairId: string
   txHash: string
   receivedAmount?: CurrencyBalance
   receivedAt?: string
-}
-
-type MigrationPair = {
-  sentMigrations: Migration[]
-  receivedMigrations: Migration[]
 }
 
 type Row = {
@@ -62,9 +55,10 @@ function mergeMigrations(sentMigrations: Migration[], receivedMigrations: Migrat
   return Array.from(map.values()) as Row[]
 }
 
-export const MigrationTable = ({ migrationPairs, address }: { migrationPairs: MigrationPair; address: string }) => {
+export const MigrationTable = ({ address }: { address: string }) => {
   const utils = useCentrifugeUtils()
-  const { sentMigrations, receivedMigrations } = migrationPairs
+  const migrationPairs = useMigrationPairs(address)
+  const { sentMigrations, receivedMigrations } = migrationPairs ?? { sentMigrations: [], receivedMigrations: [] }
   const merged = mergeMigrations(sentMigrations, receivedMigrations)
 
   const data = merged.map((m) => ({
@@ -94,21 +88,7 @@ export const MigrationTable = ({ migrationPairs, address }: { migrationPairs: Mi
     {
       align: 'left',
       header: <SortableTableHeader label="Sent amount" />,
-      cell: (l: Row) => (
-        <Box display="flex" alignItems="center">
-          <Text variant="heading4">{l.sentAmount ? formatBalance(l.sentAmount, 'CFG', 2) : '-'}</Text>
-          <Stack
-            as="a"
-            href={`${axelarUrl}/tx/${l.txHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Transaction on Subscan.io"
-            ml={1}
-          >
-            <IconExternalLink size="iconSmall" color="textPrimary" />
-          </Stack>
-        </Box>
-      ),
+      cell: (l: Row) => <Text variant="heading4">{l.sentAmount ? formatBalance(l.sentAmount, 'CFG', 2) : '-'}</Text>,
       sortKey: 'sentAmount',
     },
     {
@@ -122,21 +102,7 @@ export const MigrationTable = ({ migrationPairs, address }: { migrationPairs: Mi
       header: <SortableTableHeader label="Received amount" />,
       cell: (l: Row) => {
         if (!l.receivedAmount) return <Text variant="heading4">-</Text>
-        return (
-          <Box display="flex" alignItems="center">
-            <Text variant="heading4">{l.receivedAmount ? formatBalance(l.receivedAmount, 'CFG', 2) : '-'}</Text>
-            <Stack
-              as="a"
-              href={`${axelarUrl}/tx/${l.txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Transaction on Subscan.io"
-              ml={1}
-            >
-              <IconExternalLink size="iconSmall" color="textPrimary" />
-            </Stack>
-          </Box>
-        )
+        return <Text variant="heading4">{l.receivedAmount ? formatBalance(l.receivedAmount, 'CFG', 2) : '-'}</Text>
       },
       sortKey: 'receivedAmount',
     },

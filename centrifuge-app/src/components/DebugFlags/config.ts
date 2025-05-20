@@ -51,6 +51,7 @@ export type Key =
   | 'showGmp'
   | 'showReports'
   | 'showAPYGraph'
+  | 'showMigrationIndexer'
 
 export const flagsConfig = {
   address: {
@@ -142,6 +143,11 @@ export const flagsConfig = {
     type: 'checkbox',
   },
   showAPYGraph: {
+    alwaysShow: true,
+    default: false,
+    type: 'checkbox',
+  },
+  showMigrationIndexer: {
     alwaysShow: true,
     default: false,
     type: 'checkbox',

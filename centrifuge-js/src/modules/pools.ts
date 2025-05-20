@@ -3493,14 +3493,13 @@ export function getPoolsModule(inst: Centrifuge) {
       map((data) => {
         const pairs = data?.migrationPairs.nodes ?? []
 
-        console.log(pairs)
-
         const sentMigrations = pairs.flatMap((node) =>
           node.sentMigrations.nodes.map((migration) => ({
             sentAmount: new CurrencyBalance(migration.sentAmount, 18),
             sentAt: migration.sentAt,
             toAccount: migration.toAccount.evmAddress,
             migrationPairId: migration.migrationPairId,
+            // extrinsic hash
             txHash: migration.id,
           }))
         )
@@ -3511,6 +3510,7 @@ export function getPoolsModule(inst: Centrifuge) {
             receivedAt: migration.receivedAt,
             toAccount: migration.toAccount.evmAddress,
             migrationPairId: migration.migrationPairId,
+            // evm tx hash
             txHash: migration.id,
           }))
         )

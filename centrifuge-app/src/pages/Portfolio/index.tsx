@@ -3,6 +3,7 @@ import { Box, Button, Grid, IconInfo, IconWallet, Select, Shelf, Stack, Text } f
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
@@ -12,6 +13,7 @@ import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
+import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
 
 const StyledGrid = styled(Grid)`
@@ -64,6 +66,7 @@ function Portfolio() {
 }
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
+  const { showMigrationIndexer } = useDebugFlags()
   const ctx = useWallet()
   const { connectedType, isEvmOnSubstrate } = ctx
   const navigate = useNavigate()
@@ -240,9 +243,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        {/* {migrationPairs && (
-          <MigrationTable migrationPairs={migrationPairs} address={centAddress} />
-        )} */}
+        {showMigrationIndexer && <MigrationTable address={address} />}
       </Stack>
     </>
   )
