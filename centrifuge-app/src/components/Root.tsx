@@ -79,6 +79,8 @@ const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 const PoolsPage = React.lazy(() => import('../pages/Pools'))
 const DashboardPage = React.lazy(() => import('../pages/Dashboard'))
+const CFGTokenMigrationPage = React.lazy(() => import('../pages/Portfolio/CFGTokenMigration'))
+const CFGTokenMigrationCentPage = React.lazy(() => import('../pages/Portfolio/CFGTokenMigrationCent'))
 
 const router = createHashRouter([
   {
@@ -118,6 +120,16 @@ const router = createHashRouter([
         handle: { component: PoolTransactionsPage },
       },
       { path: '/portfolio', element: <PortfolioPage />, handle: { component: PortfolioPage } },
+      {
+        path: '/portfolio/migrate/eth',
+        element: <CFGTokenMigrationPage />,
+        handle: { component: CFGTokenMigrationPage },
+      },
+      {
+        path: '/portfolio/migrate/cent',
+        element: <CFGTokenMigrationCentPage />,
+        handle: { component: CFGTokenMigrationCentPage },
+      },
       { path: '/prime/:dao', element: <PrimeDetailPage />, handle: { component: PrimeDetailPage } },
       { path: '/prime', element: <PrimePage />, handle: { component: PrimePage } },
       { path: '/disclaimer', element: <InvestmentDisclaimerPage />, handle: { component: InvestmentDisclaimerPage } },

@@ -11,6 +11,7 @@ type EnrichedStepProps = {
   setActiveStep?: React.Dispatch<number> | null
   maxStep?: number
   direction?: 'row' | 'column'
+  variant?: 'primary' | 'secondary'
 }
 
 type StepProps = {
@@ -46,29 +47,38 @@ const Hitearea = styled.button<{ direction?: string }>`
   cursor: pointer;
 `
 
-const Number = styled(Text)<{ isActive?: boolean; done: boolean }>`
-  background-color: ${({ theme, isActive, done }) =>
-    isActive && !done ? theme.colors.textGold : done ? theme.colors.statusOkBg : 'transparent'};
-  border: ${({ theme, isActive, done }) =>
+const Number = styled(Text)<{ isActive?: boolean; done: boolean; variant?: 'primary' | 'secondary' }>`
+  background-color: ${({ theme, isActive, done, variant }) =>
+    isActive && !done
+      ? theme.colors.textGold
+      : done
+      ? theme.colors.statusOkBg
+      : variant === 'secondary'
+      ? theme.colors.borderSecondary
+      : 'transparent'};
+  border: ${({ theme, isActive, done, variant }) =>
     isActive && !done
       ? `1px solid ${theme.colors.textGold}`
       : done
       ? `1px solid ${theme.colors.statusOk}`
-      : `1.73px solid ${theme.colors.backgroundButtonPrimaryDisabled}`};
+      : variant === 'secondary'
+      ? 'none'
+      : `1.73px solid ${theme.colors.borderSecondary}`};
   border-radius: 100%;
   width: 32px;
   height: 32px;
   text-align: center;
-  padding-top: 8px;
+  padding-top: ${({ variant }) => (variant === 'secondary' ? '8px' : '6px')};
   font-weight: 500;
+  font-size: 12px;
 `
 
 const Line = ({ direction }: { direction: 'row' | 'column' }) => {
   const theme = useTheme()
   return (
     <Box
-      borderTop={direction === 'row' ? `2px dashed ${theme.colors.backgroundButtonPrimaryDisabled}` : 'none'}
-      borderLeft={direction === 'column' ? `2px dashed ${theme.colors.backgroundButtonPrimaryDisabled}` : 'none'}
+      borderTop={direction === 'row' ? `2px dashed ${theme.colors.borderSecondary}` : 'none'}
+      borderLeft={direction === 'column' ? `2px dashed ${theme.colors.borderSecondary}` : 'none'}
       width={direction === 'row' ? '140px' : 0}
       height={direction === 'column' ? 80 : 0}
       mt={direction === 'row' ? 2 : 3}
@@ -78,13 +88,15 @@ const Line = ({ direction }: { direction: 'row' | 'column' }) => {
 }
 
 export const Step = (props: StepProps & EnrichedStepProps) => {
-  const { isActive, count, label, empty, setActiveStep, direction } = props
+  const { isActive, count, label, empty, setActiveStep, direction, isStepCompleted, variant } = props
 
   return (
     <Box
       display="flex"
       flexDirection={direction || 'column'}
       alignItems={direction === 'row' ? 'flex-start' : 'center'}
+      minWidth={120}
+      justifyContent="center"
     >
       <ListItem forwardedAs="li">
         <Hitearea
@@ -93,7 +105,7 @@ export const Step = (props: StepProps & EnrichedStepProps) => {
             !empty && setActiveStep && setActiveStep((count as number) + 1)
           }}
         >
-          <Number variant="body3" isActive={isActive} done={props.isStepCompleted}>
+          <Number isActive={isActive} done={isStepCompleted} variant={variant}>
             {count ? count + 1 : 1}
           </Number>
           <Text as="h3" variant="heading4" style={{ marginTop: 8 }}>

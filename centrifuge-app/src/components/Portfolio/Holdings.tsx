@@ -6,6 +6,8 @@ import { useMatch, useNavigate } from 'react-router'
 import { useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { evmChains } from '../../../src/config'
+import { useTokenBalance } from '../../../src/pages/Portfolio/useTokenBalance'
+import { useAddress } from '../../../src/utils/useAddress'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
@@ -41,6 +43,7 @@ export type Holding = {
   unrealizedYield?: Rate | null
   connectedNetwork?: any
   hideCurrencyName?: boolean
+  showMigration?: boolean
 }
 
 const NetworkCell = ({ chainId }: { chainId: Holding['chainId'] }) => {
@@ -60,6 +63,21 @@ const NetworkCell = ({ chainId }: { chainId: Holding['chainId'] }) => {
   )
 }
 
+const MigrateButtonCell = () => {
+  const { evm, isEvmOnSubstrate } = useWallet()
+  const chainId = evm.chainId ?? undefined
+  const address = useAddress(chainId ? 'evm' : 'substrate')
+  return (
+    <RouterLinkButton
+      to={isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent'}
+      small
+      variant="inverted"
+    >
+      Migrate
+    </RouterLinkButton>
+  )
+}
+
 const columns: Column[] = [
   {
     align: 'left',
@@ -67,7 +85,7 @@ const columns: Column[] = [
     cell: (token: Holding) => {
       return <TokenWithIcon {...token} />
     },
-    width: '150px',
+    width: '180px',
   },
   {
     align: 'center',
@@ -138,9 +156,10 @@ const columns: Column[] = [
     align: 'right',
     header: '', // invest redeem buttons
     width: 'max-content',
-    cell: ({ showActions, poolId, trancheId, currency, connectedNetwork }: Holding) => {
+    cell: ({ showActions, poolId, trancheId, currency, connectedNetwork, address, showMigration }: Holding) => {
       return (
-        <Grid gap={1} justifySelf="end">
+        <Grid gap={1} display="flex" alignItems="flex-end">
+          {showMigration && <MigrateButtonCell address={address} />}
           {showActions ? (
             trancheId ? (
               <Shelf gap={1}>
@@ -221,6 +240,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
   const portfolioTokens = usePortfolioTokens(centAddress)
   const currencies = usePoolCurrencies()
   const CFGPrice = useCFGTokenPrice()
+  const tokenBalances = useTokenBalance(address)
 
   const tokens: Holding[] = [
     ...portfolioTokens.map((token) => ({
@@ -259,6 +279,30 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
         connectedNetwork: wallet.connectedNetworkName,
       }
     }),
+    tokenBalances.data?.legacy && {
+      position: Dec(tokenBalances.data?.legacy?.balance || 0),
+      marketValue: Dec(tokenBalances.data?.legacy?.balance || 0).mul(Dec(CFGPrice ?? 0)),
+      tokenPrice: Dec(CFGPrice ?? 0),
+      trancheId: '',
+      poolId: '',
+      currency: tokenBalances.data?.legacy?.currency,
+      showActions: false,
+      connectedNetwork: chainId,
+      showMigration: !tokenBalances.data?.legacy?.balance.isZero(),
+      chainId: 1,
+    },
+    tokenBalances.data?.new && {
+      position: Dec(tokenBalances.data?.new?.balance || 0),
+      marketValue: Dec(tokenBalances.data?.new?.balance || 0).mul(Dec(CFGPrice ?? 0)),
+      tokenPrice: Dec(CFGPrice ?? 0),
+      trancheId: '',
+      poolId: '',
+      currency: tokenBalances.data?.new?.currency,
+      showActions: false,
+      connectedNetwork: chainId,
+      showMigration: false,
+      chainId: 1,
+    },
     ...(centBalances?.currencies
       ?.filter((currency) => currency.balance.gtn(0))
       .map((currency) => {
@@ -275,7 +319,8 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
           connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
-    ...((wallet.connectedNetwork === 'centrifuge' && showActions) || centBalances?.native.balance.gtn(0)
+    ...((wallet.connectedNetworkName?.toLowerCase() === 'centrifuge' && showActions) ||
+    centBalances?.native.balance.gtn(0)
       ? [
           {
             currency: {
@@ -286,7 +331,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
               key: 'Native',
               isPoolCurrency: false,
               isPermissioned: false,
-              displayName: centBalances?.native.currency.symbol ?? 'CFG',
+              displayName: 'Legacy CFG',
             },
             poolId: '',
             trancheId: '',
@@ -295,6 +340,7 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
             marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) ?? Dec(0) : Dec(0),
             showActions: isPortfolioPage,
             connectedNetwork: wallet.connectedNetworkName,
+            showMigration: !centBalances?.native.balance.isZero(),
           },
         ]
       : []),
@@ -369,10 +415,15 @@ export const TokenWithIcon = ({ poolId, currency, hideCurrencyName = false }: Ho
   const cent = useCentrifuge()
   const { sizes } = useTheme()
 
+  const displayEthLogo =
+    currency?.name?.toLowerCase()?.includes('eth') ||
+    currency.name.toLowerCase() === 'cfg' ||
+    currency.symbol.toLowerCase().includes('wcfg')
+
   const getIcon = () => {
     if (metadata?.pool?.icon?.uri) {
       return cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)
-    } else if (currency?.name?.toLowerCase()?.includes('eth')) {
+    } else if (displayEthLogo) {
       return ethLogo
     } else if (currency?.symbol?.toLowerCase() === 'dai') {
       return daiLogo

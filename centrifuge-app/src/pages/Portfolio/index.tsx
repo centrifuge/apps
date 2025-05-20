@@ -1,8 +1,9 @@
-import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
-import { useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Button, Grid, IconWallet, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useBalances, useWallet } from '@centrifuge/centrifuge-react'
+import { Box, Button, Grid, IconInfo, IconWallet, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
@@ -12,7 +13,8 @@ import { Dec } from '../../utils/Decimal'
 import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { TransactionHistory } from './TransactionHistory'
+import { MigrationTable } from './MigrationTable'
+import { useTokenBalance } from './useTokenBalance'
 
 const StyledGrid = styled(Grid)`
   height: 80vh;
@@ -38,9 +40,9 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress()
   const { showNetworks, evm } = useWallet()
   const chainId = evm.chainId ?? undefined
+  const address = useAddress(chainId ? 'evm' : 'substrate')
   return (
     <Box mb={2}>
       <LayoutSection alignItems="flex-start">
@@ -64,9 +66,16 @@ function Portfolio() {
 }
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
+  const { showMigrationIndexer } = useDebugFlags()
+  const ctx = useWallet()
+  const { connectedType, isEvmOnSubstrate } = ctx
+  const navigate = useNavigate()
   const theme = useTheme()
-  const centAddress = isEvmAddress(address) && chainId ? evmToSubstrateAddress(address, chainId) : address
   const tokens = useHoldings(address, chainId)
+  const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
+  const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
+  const balance =
+    isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -169,12 +178,40 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
 
   return (
     <>
-      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mb={2} />
+      <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
+      {!!balance && !balance?.isZero() && (
+        <Grid
+          display="flex"
+          alignItems="center"
+          gap={1}
+          backgroundColor="statusWarningBg"
+          p={1}
+          borderRadius={8}
+          mb={2}
+          border={`1px solid ${theme.colors.borderPrimary}`}
+          justifyContent="center"
+        >
+          <IconInfo size="iconSmall" />
+          <Text variant="body3">
+            Start your CFG migration — <b>click here</b> to begin the process and follow the easy steps.
+          </Text>
+          <Button
+            variant="primary"
+            small
+            onClick={() => {
+              navigate(isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent')
+            }}
+          >
+            Migrate tokens
+          </Button>
+        </Grid>
+      )}
+      {/* @ts-ignore */}
       <PortfolioSummary data={pageSummaryData} />
-      <Stack gap={4} mt={2}>
+      <Stack gap={4} my={2}>
         <Grid gridTemplateColumns={['1fr', '1fr 400px']} gap={4}>
           <CardPortfolioValue address={address} chainId={chainId} title="Portfolio performance" />
-          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} py={1} px={2}>
+          <Stack border={`1px solid ${theme.colors.borderPrimary}`} borderRadius={8} py={1} px={2} overflow="hidden">
             <Grid gridTemplateColumns={['1fr 1fr']} gap={2} alignItems="center">
               <Text variant="heading4">Available to invest</Text>
               <Select
@@ -206,7 +243,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        <TransactionHistory address={centAddress} />
+        {showMigrationIndexer && <MigrationTable address={address} />}
       </Stack>
     </>
   )
