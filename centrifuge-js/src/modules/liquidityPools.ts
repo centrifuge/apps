@@ -11,8 +11,7 @@ import { Call, multicall } from '../utils/evmMulticall'
 import { signERC2612Permit } from '../utils/signERC2612Permit'
 import * as ABI from './liquidityPools/abi'
 import { CurrencyKey, CurrencyMetadata, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
-import { Observable, of } from 'rxjs';
-
+import {of} from 'rxjs'
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -513,18 +512,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       })
     )
   }
-  
-    interface DomainRouter {
-        chainId: number;
-        router: string;
-        centrifugeRouter: string;
-    }
 
-    /**
-     * Emits a single array of hard-coded domain routers.
-     */
-    function getDomainRouters(): Observable<DomainRouter[]> {
-        const routers: DomainRouter[] = [
+    function getDomainRouters() {
+        const routers = [
             {
                 chainId: 1,
                 router: '0x85bafcadea202258e3512ffbc3e2c9ee6ad56365',
@@ -547,7 +537,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             },
         ];
 
-        return of(routers);
+        return import("rxjs/internal/observable/of").of(routers);
     }
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
