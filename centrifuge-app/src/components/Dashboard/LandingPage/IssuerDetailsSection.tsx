@@ -140,35 +140,6 @@ export function IssuerDetailsSection({ isUpdating }: { isUpdating?: boolean }) {
             />
           )}
         </Field>
-        <Field name="pool.details.title">
-          {({ field, meta, form }: FieldProps) => (
-            <Box position="relative">
-              <Field
-                name="pool.details.title"
-                label={<Text variant="heading4">Additional information</Text>}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  form.setFieldValue('pool.details.title', event.target.value)
-                }
-                onBlur={field.onBlur}
-                value={field.value}
-                as={TextInput}
-                placeholder="Title"
-                maxLength={100}
-              />
-            </Box>
-          )}
-        </Field>
-        <Field name="pool.details.description">
-          {({ field }: FieldProps) => (
-            <Field
-              name="pool.details.description"
-              as={TextAreaInput}
-              placeholder="Description"
-              maxLength={3000}
-              value={field.value}
-            />
-          )}
-        </Field>
       </Grid>
     </Box>
   )

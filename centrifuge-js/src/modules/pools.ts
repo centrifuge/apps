@@ -683,6 +683,7 @@ export interface PoolMetadataInput {
   // details
   poolName: string
   investorType: string
+  expenseRatio: number
   poolIcon: FileType
   poolType: 'open' | 'closed'
   maxReserve: number | ''
@@ -745,6 +746,7 @@ export type PoolMetadata = {
   pool: {
     name: string
     icon: FileType | null
+    expenseRatio: number
     asset: {
       class: 'Public credit' | 'Private credit'
       subClass: string
@@ -1160,6 +1162,7 @@ export function getPoolsModule(inst: Centrifuge) {
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
+        expenseRatio: metadata.expenseRatio,
         asset: {
           class: metadata.assetClass,
           subClass: metadata.subAssetClass,

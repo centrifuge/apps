@@ -20,7 +20,7 @@ import { Decimal } from '../../../src/utils/Decimal'
 import { evmChains } from '../../config'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
-import { useDailyTranchesStates, usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { useDailyTranchesStates, usePool, usePoolMetadata } from '../../utils/usePools'
 import { PoolStatus } from '../PoolCard/PoolStatus'
 import { getPoolStatus } from '../PoolList'
 import { Spinner } from '../Spinner'
@@ -88,15 +88,8 @@ export const KeyMetrics = ({ poolId }: Props) => {
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const poolFees = usePoolFees(poolId)
   const tranchesIds = pool.tranches.map((tranche) => tranche.id)
   const dailyTranches = useDailyTranchesStates(tranchesIds)
-
-  const expenseRatio = useMemo(() => {
-    return (
-      poolFees?.map((f) => f.amounts?.percentOfNav.toPercent().toNumber()).reduce((acc, f) => acc + (f ?? 0), 0) ?? 0
-    )
-  }, [poolFees])
 
   const tranchesAPY = useMemo(() => {
     // TODO: fix when we apy issue is solve, for now we will just use target
@@ -187,7 +180,7 @@ export const KeyMetrics = ({ poolId }: Props) => {
       : []),
     {
       metric: <Tooltips type="expenseRatio" size="med" />,
-      value: expenseRatio ? `${formatBalance(expenseRatio, '', 2)}%` : '-',
+      value: metadata?.pool?.expenseRatio ? `${formatBalance(metadata?.pool?.expenseRatio, '', 2)}%` : '-',
     },
     {
       metric: 'Weighted Average Maturity',
