@@ -3498,8 +3498,6 @@ export function getPoolsModule(inst: Centrifuge) {
       map((data) => {
         const pairs = data?.migrationPairs.nodes ?? []
 
-        console.log('pais', pairs)
-
         const sentMigrations = pairs.flatMap((node) =>
           node.sentMigrations.nodes.map((migration) => ({
             sentAmount: new CurrencyBalance(migration.sentAmount, 18),
@@ -3866,10 +3864,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 ),
                 frozen: new CurrencyBalance(
                   (nativeBalance as any).data.frozen.toString(),
-                  api.registry.chainDecimals[0]
-                ),
-                reserved: new CurrencyBalance(
-                  (nativeBalance as any).data.reserved.toString(),
                   api.registry.chainDecimals[0]
                 ),
                 locked: new CurrencyBalance(

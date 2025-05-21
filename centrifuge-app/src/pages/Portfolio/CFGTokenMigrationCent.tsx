@@ -73,8 +73,7 @@ export default function CFGTokenMigrationCent() {
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<Decimal>()
 
-  const isMigrationBlocked =
-    !(balances?.native as any)?.frozen?.isZero() || !(balances?.native as any)?.reserved?.isZero()
+  const isMigrationBlocked = !balances?.native.frozen.isZero() || !balances?.native.reserved.isZero()
 
   const [feeAmount] = useCentrifugeQuery(['feeAmount'], () =>
     api.query.cfgMigration.feeAmount().pipe(map((data) => new CurrencyBalance(data.toPrimitive() as any, 18)))
