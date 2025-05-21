@@ -3,7 +3,6 @@ import { Box, Button, Grid, IconInfo, IconWallet, Select, Shelf, Stack, Text } f
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled, { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
@@ -66,7 +65,6 @@ function Portfolio() {
 }
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
-  const { showMigrationIndexer } = useDebugFlags()
   const ctx = useWallet()
   const { connectedType, isEvmOnSubstrate } = ctx
   const navigate = useNavigate()
@@ -243,7 +241,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
           <Text variant="heading4">Investment positions</Text>
           <Holdings address={address} chainId={chainId} />
         </Box>
-        {showMigrationIndexer && <MigrationTable address={address} />}
+        <MigrationTable address={address} />
       </Stack>
     </>
   )

@@ -1,6 +1,6 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, Text } from '@centrifuge/fabric'
+import { CurrencyBalance, isEvm } from '@centrifuge/centrifuge-js'
+import { useCentrifugeUtils, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { Box, IconExternalLink, Text } from '@centrifuge/fabric'
 import { formatDateAndTime } from '../../../src/utils/date'
 import { formatBalance } from '../../../src/utils/formatting'
 import { useMigrationPairs } from '../../../src/utils/usePools'
@@ -11,11 +11,14 @@ import { isEvmAddress } from '../../utils/address'
 type Migration = {
   sentAmount?: CurrencyBalance
   sentAt?: string
-  toAccount: string
   migrationPairId: string
-  txHash: string
   receivedAmount?: CurrencyBalance
   receivedAt?: string
+  evmAddress?: string
+  receivedTxHash?: string
+  txHash?: string
+  toAccount?: string
+  sentTxHash?: string
 }
 
 type Row = {
@@ -26,6 +29,10 @@ type Row = {
   sentAt: string
   toAccount: string
   txHash: string
+  evmAddress?: string
+  accountId?: string
+  sentTxHash?: string
+  receivedTxHash?: string
 }
 
 function mergeMigrations(sentMigrations: Migration[], receivedMigrations: Migration[]): Row[] {
@@ -33,41 +40,53 @@ function mergeMigrations(sentMigrations: Migration[], receivedMigrations: Migrat
 
   sentMigrations.forEach((sent) => {
     const id = sent.migrationPairId
-    map.set(id, {
+    const amount = sent.sentAmount?.toString() || '0'
+    const key = `${id}:${amount}`
+
+    map.set(key, {
       migrationPairId: id,
       sentAmount: sent.sentAmount,
       sentAt: sent.sentAt,
+      sentTxHash: sent.sentTxHash,
       toAccount: sent.toAccount,
-      txHash: sent.txHash,
+      evmAddress: sent.evmAddress,
     })
   })
 
   receivedMigrations.forEach((rcv) => {
     const id = rcv.migrationPairId
-    const row = map.get(id) ?? { migrationPairId: id }
+    const amount = rcv.receivedAmount?.toString() || '0'
+    const key = `${id}:${amount}`
+
+    const row = map.get(key) ?? { migrationPairId: id }
     Object.assign(row, {
       receivedAmount: rcv.receivedAmount,
       receivedAt: rcv.receivedAt,
+      evmAddress: rcv.evmAddress,
+      toAccount: rcv.toAccount,
+      receivedTxHash: rcv.receivedTxHash,
     })
-    map.set(id, row)
+    map.set(key, row)
   })
 
   return Array.from(map.values()) as Row[]
 }
 
 export const MigrationTable = ({ address }: { address: string }) => {
+  const explorer = useGetExplorerUrl()
+
   const utils = useCentrifugeUtils()
   const migrationPairs = useMigrationPairs(address)
   const { sentMigrations, receivedMigrations } = migrationPairs ?? { sentMigrations: [], receivedMigrations: [] }
   const merged = mergeMigrations(sentMigrations, receivedMigrations)
 
   const data = merged.map((m) => ({
+    ...m,
     migrationPairId: m.migrationPairId,
     sentAmount: m.sentAmount,
     sentAt: m.sentAt,
     receivedAmount: m.receivedAmount,
     receivedAt: m.receivedAt,
-    txHash: m.txHash,
     toAccount: m.toAccount,
   }))
 
@@ -82,13 +101,33 @@ export const MigrationTable = ({ address }: { address: string }) => {
     {
       align: 'left',
       header: 'To address',
-      cell: (l: Row) => <Text variant="heading4">{l.toAccount}</Text>,
+      cell: (l: Row) => {
+        const address = l.evmAddress ? l.evmAddress : isEvm(l.toAccount) ? '0x' + l.toAccount.slice(2, 42) : l.toAccount
+        return <Text variant="heading4">{address}</Text>
+      },
       sortKey: 'toAccount',
     },
     {
       align: 'left',
       header: <SortableTableHeader label="Sent amount" />,
-      cell: (l: Row) => <Text variant="heading4">{l.sentAmount ? formatBalance(l.sentAmount, 'CFG', 2) : '-'}</Text>,
+      cell: (l: Row) => {
+        const txUrl = l.sentTxHash ? explorer.tx(l.sentTxHash) : ''
+        return (
+          <Box display="flex" alignItems="center">
+            <Text variant="heading4">{l.sentAmount ? formatBalance(l.sentAmount, 'CFG', 2) : '-'}</Text>
+            <Box
+              as="a"
+              href={txUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Transaction on block explorer"
+              ml={1}
+            >
+              <IconExternalLink size="iconSmall" color="textPrimary" />
+            </Box>
+          </Box>
+        )
+      },
       sortKey: 'sentAmount',
     },
     {
@@ -101,8 +140,23 @@ export const MigrationTable = ({ address }: { address: string }) => {
       align: 'left',
       header: <SortableTableHeader label="Received amount" />,
       cell: (l: Row) => {
-        if (!l.receivedAmount) return <Text variant="heading4">-</Text>
-        return <Text variant="heading4">{l.receivedAmount ? formatBalance(l.receivedAmount, 'CFG', 2) : '-'}</Text>
+        const txUrl = l.receivedTxHash ? explorer.tx(l.receivedTxHash, 1) : ''
+        if (!l.receivedAmount) return <Text variant="heading4">Pending</Text>
+        return (
+          <Box display="flex" alignItems="center">
+            <Text variant="heading4">{l.receivedAmount ? formatBalance(l.receivedAmount, 'CFG', 2) : '-'}</Text>
+            <Box
+              as="a"
+              href={txUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Transaction on block explorer"
+              ml={1}
+            >
+              <IconExternalLink size="iconSmall" color="textPrimary" />
+            </Box>
+          </Box>
+        )
       },
       sortKey: 'receivedAmount',
     },

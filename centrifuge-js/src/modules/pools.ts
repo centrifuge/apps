@@ -3437,13 +3437,15 @@ export function getPoolsModule(inst: Centrifuge) {
               toAccount: { evmAddress: string }
               migrationPairId: string
               id: string
+              toAccountId: string
             }[]
           }
           receivedMigrations: {
             nodes: {
+              toAccountId: string
               receivedAmount: string
               receivedAt: string
-              toAccount: { evmAddress: string }
+              toAccount: { evmAddress: string; chainId: string }
               migrationPairId: string
               id: string
             }[]
@@ -3462,6 +3464,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 toAccount {
                   evmAddress
                 }
+                toAccountId
                 sentAmount
                 sentAt
                 id
@@ -3470,8 +3473,10 @@ export function getPoolsModule(inst: Centrifuge) {
              } 
              receivedMigrations{
               nodes{
+                toAccountId
                 toAccount {
                   evmAddress
+                  chainId
                 }
                 receivedAmount
                 receivedAt
@@ -3493,14 +3498,16 @@ export function getPoolsModule(inst: Centrifuge) {
       map((data) => {
         const pairs = data?.migrationPairs.nodes ?? []
 
+        console.log('pais', pairs)
+
         const sentMigrations = pairs.flatMap((node) =>
           node.sentMigrations.nodes.map((migration) => ({
             sentAmount: new CurrencyBalance(migration.sentAmount, 18),
             sentAt: migration.sentAt,
-            toAccount: migration.toAccount.evmAddress,
             migrationPairId: migration.migrationPairId,
-            // extrinsic hash
-            txHash: migration.id,
+            sentTxHash: migration.id,
+            toAccount: migration.toAccountId,
+            evmAddress: migration.toAccount.evmAddress,
           }))
         )
 
@@ -3508,10 +3515,10 @@ export function getPoolsModule(inst: Centrifuge) {
           node.receivedMigrations.nodes.map((migration) => ({
             receivedAmount: new CurrencyBalance(migration.receivedAmount, 18),
             receivedAt: migration.receivedAt,
-            toAccount: migration.toAccount.evmAddress,
+            evmAddress: migration.toAccount.evmAddress,
+            toAccount: migration.toAccountId,
             migrationPairId: migration.migrationPairId,
-            // evm tx hash
-            txHash: migration.id,
+            receivedTxHash: migration.id,
           }))
         )
 
