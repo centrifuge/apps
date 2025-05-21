@@ -1,5 +1,5 @@
 import { DailyPoolState, Perquintill, Pool, Token } from '@centrifuge/centrifuge-js'
-import { Box, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
+import { Box, Select, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -51,7 +51,10 @@ type CustomTickProps = {
   angle?: number
 }
 
-const rangeFilters = [{ value: '90d', label: '90 days' }]
+const rangeFilters = [
+  { value: '90d', label: '90 days' },
+  { value: '30d', label: '30 days' },
+]
 
 function calculateTranchePrices(pool: Pool) {
   if (!pool?.tranches) return { juniorTokenPrice: 0, seniorTokenPrice: null }
@@ -466,9 +469,9 @@ function CustomLegend({
           )
         })}
       </Box>
-      {/* <Box>
-        <Select options={rangeFilters} onChange={toggleRange} hideBorder disabled />
-      </Box> */}
+      <Box>
+        <Select options={rangeFilters} onChange={toggleRange} hideBorder />
+      </Box>
     </Box>
   )
 }

@@ -49,7 +49,7 @@ export type Key =
   | 'showTokenYields'
   | 'showOracleTx'
   | 'showGmp'
-  | 'showReports'
+  | 'showData'
   | 'showAPYGraph'
 
 export const flagsConfig = {
@@ -136,7 +136,7 @@ export const flagsConfig = {
     default: false,
     type: 'checkbox',
   },
-  showReports: {
+  showData: {
     alwaysShow: true,
     default: false,
     type: 'checkbox',
