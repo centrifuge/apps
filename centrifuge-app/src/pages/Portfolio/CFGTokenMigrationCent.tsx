@@ -281,12 +281,7 @@ export default function CFGTokenMigrationCent() {
                     lost tokens.
                   </Text>
                 </Grid>
-                <Button
-                  small
-                  style={{ width: '100%' }}
-                  onClick={() => setStep(1)}
-                  disabled={!isAddressValid || isMigrationBlocked}
-                >
+                <Button small style={{ width: '100%' }} onClick={() => setStep(1)} disabled={!isAddressValid}>
                   Migrate
                 </Button>
               </>
