@@ -79,7 +79,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
   const isMigrationBlocked = isCentChain
-    ? !balances?.native.frozen.isZero() || !balances?.native.reserved.isZero()
+    ? !balances?.native?.frozen?.isZero() || !balances?.native?.reserved?.isZero()
     : false
 
   const convertedTokens = useMemo(() => {
