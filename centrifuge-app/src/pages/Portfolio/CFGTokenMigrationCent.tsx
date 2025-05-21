@@ -21,7 +21,7 @@ import {
 } from '@centrifuge/fabric'
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useEffect, useState } from 'react'
-import { firstValueFrom, map, switchMap } from 'rxjs'
+import { map, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { RouterTextLink } from '../../../src/components/TextLink'
@@ -31,9 +31,7 @@ import { Dec, Decimal } from '../../../src/utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { TooltipText } from './CFGTokenMigration'
-import MigrationSuccessPage from './MigrationSuccessPage'
 import { MigrationSupportLink } from './MigrationSupportLink'
-import { useAxelarStatusPoller } from './useAxelarStatus'
 
 const StyledButton = styled(Box)<{ disabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.textPrimary};
@@ -72,7 +70,6 @@ export default function CFGTokenMigrationCent() {
   const [evmAddress, setEvmAddress] = useState<string>('')
   const [isAddressValid, setIsAddressValid] = useState<boolean>(false)
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false)
-  const [axelarHash, setAxelarHash] = useState<string>('')
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<Decimal>()
 
@@ -103,14 +100,6 @@ export default function CFGTokenMigrationCent() {
     getAddressFromWallet()
   }, [])
 
-  // Check if the migration has been completed
-  useAxelarStatusPoller({
-    isActive: step === 2 || !!localStorage.getItem('axelarHash'),
-    onSuccess: () => {
-      setStep(3)
-    },
-  })
-
   const { execute: executeMigration, isLoading: isLoadingMigration } = useCentrifugeTransaction(
     'Migrate CFG',
     (cent) => (_, options) => {
@@ -122,19 +111,7 @@ export default function CFGTokenMigrationCent() {
       )
     },
     {
-      onSuccess: async (_, result) => {
-        const block = await firstValueFrom(api.rpc.chain.getBlockHash(result.blockNumber))
-        const apiAt = await api.at(block)
-        const events = await firstValueFrom(apiAt.query.system.events())
-        const event = (events as any).find(({ event }: { event: any }) => api.events.ethereum.Executed.is(event))
-        if (event) {
-          const eventData = event.toHuman() as any
-          const axelarHash = eventData.event.data.transactionHash
-          localStorage.setItem('axelarHash', axelarHash)
-          setAxelarHash(axelarHash)
-          setStep(2)
-        }
-      },
+      onSuccess: () => setStep(2),
     }
   )
 
@@ -187,10 +164,6 @@ export default function CFGTokenMigrationCent() {
       </Grid>
     )
   }
-
-  const axelarUrl = isTestEnv
-    ? `https://testnet.axelarscan.io/gmp/${axelarHash}`
-    : `https://axelarscan.io/gmp/${axelarHash}`
 
   return (
     <ConnectionGuard networks={['centrifuge']} mt={10} paddingX={12}>
@@ -364,35 +337,21 @@ export default function CFGTokenMigrationCent() {
                     <Text variant="heading3">Migration inititated</Text>
                   </Grid>
                   <Text variant="body2">
-                    [{evmAddress}] Your migration has been initiated{' '}
-                    <b>
-                      <a
-                        href={axelarUrl}
-                        style={{ color: theme.colors.textPrimary, textDecoration: 'underline' }}
-                        target="_blank"
-                      >
-                        (click to view details)
-                      </a>
-                    </b>
-                    . The bridge transaction is expected to complete in approximately: <b>20 mins</b>.
+                    Your migration has been initiated. You can view the migration details in the Migration table on the
+                    <RouterTextLink to="/portfolio">
+                      <b> Portfolio page</b>
+                    </RouterTextLink>
+                    . Please note that it may take <b>up to 5 minutes</b> for the migration to appear in the table and
+                    <b> up to 20 minutes</b> for the bridge transaction to complete.
                   </Text>
                 </Grid>
 
                 <ConfirmationDetails />
               </Box>
             )}
-
-            {step === 3 && (
-              <MigrationSuccessPage
-                title="CFG"
-                currencyName="Legacy CFG"
-                balance={initialTokenBalance || 0}
-                address={evmAddress}
-              />
-            )}
             <MigrationSupportLink />
           </Box>
-          {step === 3 && (
+          {step === 2 && (
             <Grid gridTemplateColumns="24px 1fr" alignItems="center" mb={2} width="30%">
               <IconArrowLeft size="iconSmall" />
               <RouterTextLink to="/portfolio">Back to portfolio</RouterTextLink>
