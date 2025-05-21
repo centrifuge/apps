@@ -537,7 +537,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             },
         ];
 
-        return import("rxjs/internal/observable/of").of(routers);
+        return of(routers);
     }
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
