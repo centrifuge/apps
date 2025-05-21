@@ -1,8 +1,9 @@
 import { useBalances, useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Button, Grid, IconInfo, IconWallet, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Grid, IconInfo, IconWallet, IconWarning, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled, { useTheme } from 'styled-components'
+import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
@@ -65,15 +66,21 @@ function Portfolio() {
 }
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
-  const ctx = useWallet()
-  const { connectedType, isEvmOnSubstrate } = ctx
+  const debugFlags = useDebugFlags()
   const navigate = useNavigate()
   const theme = useTheme()
+  const ctx = useWallet()
+  const { connectedType, isEvmOnSubstrate } = ctx
+  const isCentChain = connectedType !== 'evm' || isEvmOnSubstrate
   const tokens = useHoldings(address, chainId)
-  const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
+  const balances = useBalances(isCentChain ? address : undefined)
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
   const balance =
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
+
+  const isMigrationBlocked = isCentChain
+    ? !(balances?.native as any)?.frozen?.isZero() || !(balances?.native as any)?.reserved?.isZero()
+    : false
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -178,31 +185,53 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     <>
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
       {!!balance && !balance?.isZero() && (
-        <Grid
-          display="flex"
-          alignItems="center"
-          gap={1}
-          backgroundColor="statusWarningBg"
-          p={1}
-          borderRadius={8}
-          mb={2}
-          border={`1px solid ${theme.colors.borderPrimary}`}
-          justifyContent="center"
-        >
-          <IconInfo size="iconSmall" />
-          <Text variant="body3">
-            Start your CFG migration — <b>click here</b> to begin the process and follow the easy steps.
-          </Text>
-          <Button
-            variant="primary"
-            small
-            onClick={() => {
-              navigate(isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent')
-            }}
+        <>
+          {isMigrationBlocked && (
+            <Grid
+              display="flex"
+              alignItems="center"
+              gap={1}
+              backgroundColor="statusCriticalBg"
+              p={1}
+              borderRadius={8}
+              mb={2}
+              border={`1px solid ${theme.colors.borderPrimary}`}
+              justifyContent="center"
+            >
+              <IconWarning size="iconSmall" />
+              <Text variant="body3">
+                Some of your token holdings are locked. These either need to be all unlocked, or you need to transfer
+                the unlocked part to another wallet, and migrate from that wallet.
+              </Text>
+            </Grid>
+          )}
+          <Grid
+            display="flex"
+            alignItems="center"
+            gap={1}
+            backgroundColor="statusWarningBg"
+            p={1}
+            borderRadius={8}
+            mb={2}
+            border={`1px solid ${theme.colors.borderPrimary}`}
+            justifyContent="center"
           >
-            Migrate tokens
-          </Button>
-        </Grid>
+            <IconInfo size="iconSmall" />
+            <Text variant="body3">
+              Start your CFG migration — <b>click here</b> to begin the process and follow the easy steps.
+            </Text>
+            <Button
+              variant="primary"
+              small
+              onClick={() => {
+                navigate(isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent')
+              }}
+              disabled={isMigrationBlocked}
+            >
+              Migrate tokens
+            </Button>
+          </Grid>
+        </>
       )}
       {/* @ts-ignore */}
       <PortfolioSummary data={pageSummaryData} />

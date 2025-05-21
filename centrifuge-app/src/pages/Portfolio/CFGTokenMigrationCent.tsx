@@ -73,6 +73,9 @@ export default function CFGTokenMigrationCent() {
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<Decimal>()
 
+  const isMigrationBlocked =
+    !(balances?.native as any)?.frozen?.isZero() || !(balances?.native as any)?.reserved?.isZero()
+
   const [feeAmount] = useCentrifugeQuery(['feeAmount'], () =>
     api.query.cfgMigration.feeAmount().pipe(map((data) => new CurrencyBalance(data.toPrimitive() as any, 18)))
   )
@@ -126,7 +129,7 @@ export default function CFGTokenMigrationCent() {
       const provider = new BrowserProvider(window.ethereum)
       const signer = await provider.getSigner()
 
-      const message = `Verify ownership of this address: ${evmAddress}`
+      const message = `I hereby confirm ownership of wallet: ${evmAddress} for the CFG token migration at ${new Date().toISOString()}`
       const signature = await signer.signMessage(message)
       const recoveredAddress = verifyMessage(message, signature)
       const formattedAddress = getAddress(evmAddress)
@@ -279,7 +282,12 @@ export default function CFGTokenMigrationCent() {
                     lost tokens.
                   </Text>
                 </Grid>
-                <Button small style={{ width: '100%' }} onClick={() => setStep(1)} disabled={!isAddressValid}>
+                <Button
+                  small
+                  style={{ width: '100%' }}
+                  onClick={() => setStep(1)}
+                  disabled={!isAddressValid || isMigrationBlocked}
+                >
                   Migrate
                 </Button>
               </>
@@ -341,8 +349,8 @@ export default function CFGTokenMigrationCent() {
                     <RouterTextLink to="/portfolio">
                       <b> Portfolio page</b>
                     </RouterTextLink>
-                    . Please note that it may take <b>up to 5 minutes</b> for the migration to appear in the table and
-                    <b> up to 20 minutes</b> for the bridge transaction to complete.
+                    . Please note that it may take <b>an average of 5 minutes</b> for the migration to appear in the
+                    table and <b>about 20 minutes</b> for the bridge transaction to complete.
                   </Text>
                 </Grid>
 
