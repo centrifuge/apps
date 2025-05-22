@@ -3866,6 +3866,10 @@ export function getPoolsModule(inst: Centrifuge) {
                   (nativeBalance as any).data.frozen.toString(),
                   api.registry.chainDecimals[0]
                 ),
+                reserved: new CurrencyBalance(
+                  (nativeBalance as any).data.reserved.toString(),
+                  api.registry.chainDecimals[0]
+                ),
                 locked: new CurrencyBalance(
                   (nativeLocks as unknown as AccountNativeLock[]).reduce(
                     (sum, lock) => sum.add(new BN(lock.amount.toString())),
