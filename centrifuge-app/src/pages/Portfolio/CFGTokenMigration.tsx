@@ -58,6 +58,7 @@ export default function CFGTokenMigration() {
 
   const allowance = useCheckAllowance(address).data
   const isPendingAllowance = allowance && !allowance?.isZero()
+  const isAllowanceSameAsBalance = allowance?.toNumber() === balance?.toNumber()
 
   useEffect(() => {
     async function getGasPrice() {
@@ -71,9 +72,9 @@ export default function CFGTokenMigration() {
 
   useEffect(() => {
     if (isPendingAllowance) {
-      setStep(allowance?.toNumber() === balance?.toNumber() ? 2 : 0)
+      setStep(isAllowanceSameAsBalance ? 2 : 0)
     }
-  }, [isPendingAllowance])
+  }, [isPendingAllowance, isAllowanceSameAsBalance])
 
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
     `Migrate WCFG for CFG`,
@@ -102,7 +103,7 @@ export default function CFGTokenMigration() {
   )
 
   const migrate = () => {
-    if (isPendingAllowance) {
+    if (isAllowanceSameAsBalance) {
       executeDeposit([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.iou])
     } else {
       setStep(1)
@@ -221,7 +222,7 @@ export default function CFGTokenMigration() {
                   loading={isApproving || isDepositing}
                   disabled={balance?.isZero()}
                 >
-                  {isPendingAllowance ? 'Migrate WCFG' : 'Approve WCFG and migrate'}
+                  {isAllowanceSameAsBalance ? 'Migrate WCFG' : 'Approve WCFG and migrate'}
                 </Button>
                 <MigrationSupportLink />
                 <Box mt={2} justifyContent="center" display="flex">
