@@ -5,7 +5,6 @@ import BN from 'bn.js'
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { useEvmTransaction } from '../../../src/utils/tinlake/useEvmTransaction'
 import { Tooltips } from '../../components/Tooltips'
@@ -14,7 +13,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import MigrationSuccessPage from './MigrationSuccessPage'
 import { MigrationSupportLink } from './MigrationSupportLink'
-import { cfgConfig, useTokenBalance } from './useTokenBalance'
+import { cfgConfig, useCheckAllowance, useTokenBalance } from './useTokenBalance'
 
 export const TooltipText = () => {
   return (
@@ -57,6 +56,9 @@ export default function CFGTokenMigration() {
   const [step, setStep] = useState<number>(0)
   const [gasPrice, setGasPrice] = useState<string>('')
 
+  const allowance = useCheckAllowance(address).data
+  const isPendingAllowance = allowance && !allowance?.isZero()
+
   useEffect(() => {
     async function getGasPrice() {
       const gas = await window.ethereum.request({
@@ -66,6 +68,12 @@ export default function CFGTokenMigration() {
     }
     getGasPrice()
   }, [])
+
+  useEffect(() => {
+    if (isPendingAllowance) {
+      setStep(allowance?.toNumber() === balance?.toNumber() ? 2 : 0)
+    }
+  }, [isPendingAllowance])
 
   const { execute: executeDeposit, isLoading: isDepositing } = useEvmTransaction(
     `Migrate WCFG for CFG`,
@@ -94,10 +102,13 @@ export default function CFGTokenMigration() {
   )
 
   const migrate = () => {
-    setStep(1)
-    executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
+    if (isPendingAllowance) {
+      executeDeposit([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.iou])
+    } else {
+      setStep(1)
+      executeApprove([() => {}, CurrencyBalance.fromFloat(balance || 0, 18), cfgConfig.legacy, cfgConfig.iou])
+    }
   }
-
 
   return (
     // @ts-expect-error
@@ -210,7 +221,7 @@ export default function CFGTokenMigration() {
                   loading={isApproving || isDepositing}
                   disabled={balance?.isZero()}
                 >
-                  Approve WCFG and migrate
+                  {isPendingAllowance ? 'Migrate WCFG' : 'Approve WCFG and migrate'}
                 </Button>
                 <MigrationSupportLink />
                 <Box mt={2} justifyContent="center" display="flex">
