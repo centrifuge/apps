@@ -4,6 +4,9 @@ import { useQuery } from 'react-query'
 import { isTestEnv } from '../../../src/config'
 import { currencies } from '../../../src/utils/tinlake/currencies'
 
+const ABI = ['function balanceOf(address owner) view returns (uint256)']
+const IOU_ABI = ['function allowance(address owner, address spender) view returns (uint256)']
+
 export const cfgConfig = isTestEnv
   ? {
       legacy: '0x657a4556e60A6097975e2E6dDFbb399E5ee9a58b',
@@ -15,8 +18,6 @@ export const cfgConfig = isTestEnv
       iou: '0xACF3c07BeBd65d5f7d86bc0bc716026A0C523069',
       new: '0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94',
     }
-
-const ABI = ['function balanceOf(address owner) view returns (uint256)']
 
 export const useTokenBalance = (userAddress: string | undefined) => {
   return useQuery(
@@ -48,5 +49,20 @@ export const useTokenBalance = (userAddress: string | undefined) => {
     {
       enabled: !!userAddress,
     }
+  )
+}
+
+export const useCheckAllowance = (userAddress: string | undefined) => {
+  return useQuery(
+    ['checkAllowance', userAddress],
+    async () => {
+      const provider = new BrowserProvider(window.ethereum)
+      const allowance = await new ethers.Contract(cfgConfig.legacy, IOU_ABI, provider).allowance(
+        userAddress!,
+        cfgConfig.iou
+      )
+      return new CurrencyBalance(allowance.toString(), 18).toDecimal()
+    },
+    { enabled: !!userAddress }
   )
 }

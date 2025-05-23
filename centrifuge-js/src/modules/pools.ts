@@ -3437,13 +3437,15 @@ export function getPoolsModule(inst: Centrifuge) {
               toAccount: { evmAddress: string }
               migrationPairId: string
               id: string
+              toAccountId: string
             }[]
           }
           receivedMigrations: {
             nodes: {
+              toAccountId: string
               receivedAmount: string
               receivedAt: string
-              toAccount: { evmAddress: string }
+              toAccount: { evmAddress: string; chainId: string }
               migrationPairId: string
               id: string
             }[]
@@ -3462,6 +3464,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 toAccount {
                   evmAddress
                 }
+                toAccountId
                 sentAmount
                 sentAt
                 id
@@ -3470,8 +3473,10 @@ export function getPoolsModule(inst: Centrifuge) {
              } 
              receivedMigrations{
               nodes{
+                toAccountId
                 toAccount {
                   evmAddress
+                  chainId
                 }
                 receivedAmount
                 receivedAt
@@ -3497,10 +3502,10 @@ export function getPoolsModule(inst: Centrifuge) {
           node.sentMigrations.nodes.map((migration) => ({
             sentAmount: new CurrencyBalance(migration.sentAmount, 18),
             sentAt: migration.sentAt,
-            toAccount: migration.toAccount.evmAddress,
             migrationPairId: migration.migrationPairId,
-            // extrinsic hash
-            txHash: migration.id,
+            sentTxHash: migration.id,
+            toAccount: migration.toAccountId,
+            evmAddress: migration.toAccount.evmAddress,
           }))
         )
 
@@ -3508,10 +3513,10 @@ export function getPoolsModule(inst: Centrifuge) {
           node.receivedMigrations.nodes.map((migration) => ({
             receivedAmount: new CurrencyBalance(migration.receivedAmount, 18),
             receivedAt: migration.receivedAt,
-            toAccount: migration.toAccount.evmAddress,
+            evmAddress: migration.toAccount.evmAddress,
+            toAccount: migration.toAccountId,
             migrationPairId: migration.migrationPairId,
-            // evm tx hash
-            txHash: migration.id,
+            receivedTxHash: migration.id,
           }))
         )
 
@@ -3855,6 +3860,14 @@ export function getPoolsModule(inst: Centrifuge) {
               native: {
                 balance: new CurrencyBalance(
                   (nativeBalance as any).data.free.toString(),
+                  api.registry.chainDecimals[0]
+                ),
+                frozen: new CurrencyBalance(
+                  (nativeBalance as any).data.frozen.toString(),
+                  api.registry.chainDecimals[0]
+                ),
+                reserved: new CurrencyBalance(
+                  (nativeBalance as any).data.reserved.toString(),
                   api.registry.chainDecimals[0]
                 ),
                 locked: new CurrencyBalance(
