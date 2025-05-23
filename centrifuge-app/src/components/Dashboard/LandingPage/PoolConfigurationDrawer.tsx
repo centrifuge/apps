@@ -231,6 +231,9 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
       const newPoolMetadata: PoolMetadata = {
         ...pool.meta,
+        pool: {
+          ...values.pool,
+        },
         holdings: values.holdings,
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
@@ -258,7 +261,7 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
       // Issuer logo
       if (logoUri) {
         newPoolMetadata.pool.issuer = {
-          ...pool.meta.pool.issuer,
+          ...values.pool.issuer,
           logo: logoUri,
         }
       }
@@ -336,6 +339,8 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
           weightedAverageMaturity: tranche.weightedAverageMaturity,
         })),
       ]
+
+      console.log('newPoolMetadata', newPoolMetadata, values)
 
       execute([values.id, newPoolMetadata, hasTrancheChanges ? tranches : undefined], { account })
       actions.setSubmitting(false)

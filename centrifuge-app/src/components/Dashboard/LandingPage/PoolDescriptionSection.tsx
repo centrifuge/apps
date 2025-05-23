@@ -1,5 +1,5 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Grid, ImageUpload, Select, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Grid, ImageUpload, NumberInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -95,6 +95,15 @@ export function PoolDescriptionSection({ isUpdating }: { isUpdating?: boolean })
             />
           )}
         </Field>
+        <Field
+          name="expenseRatio"
+          as={NumberInput}
+          label="Expense ratio"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => form.setFieldValue('pool.expenseRatio', e.target.value)}
+          value={form.values.pool.expenseRatio}
+          placeholder="0.00"
+          symbol="%"
+        />
         <Field
           name="poolStructure"
           as={TextInput}
