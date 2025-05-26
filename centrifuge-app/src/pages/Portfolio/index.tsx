@@ -3,7 +3,6 @@ import { Box, Button, Grid, IconInfo, IconWallet, IconWarning, Select, Shelf, St
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import styled, { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../../src/components/DebugFlags'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings, TokenWithIcon, useHoldings } from '../../components/Portfolio/Holdings'
@@ -15,6 +14,31 @@ import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
+
+export function MigrationFrozenBanner({ isMigrationBlocked }: { isMigrationBlocked: boolean }) {
+  const theme = useTheme()
+  if (!isMigrationBlocked) return null
+
+  return (
+    <Grid
+      display="flex"
+      alignItems="center"
+      gap={1}
+      backgroundColor="statusCriticalBg"
+      p={1}
+      borderRadius={8}
+      mb={2}
+      border={`1px solid ${theme.colors.borderPrimary}`}
+      justifyContent="center"
+    >
+      <IconWarning size="iconSmall" />
+      <Text variant="body3">
+        Some of your token holdings are locked. These either need to be all unlocked, or you need to transfer the
+        unlocked part to another wallet, and migrate from that wallet.
+      </Text>
+    </Grid>
+  )
+}
 
 const StyledGrid = styled(Grid)`
   height: 80vh;
@@ -66,7 +90,6 @@ function Portfolio() {
 }
 
 function PortfolioDetails({ address, chainId }: { address: string; chainId: number | undefined }) {
-  const debugFlags = useDebugFlags()
   const navigate = useNavigate()
   const theme = useTheme()
   const ctx = useWallet()
@@ -186,25 +209,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
       {!!balance && !balance?.isZero() && (
         <>
-          {isMigrationBlocked && (
-            <Grid
-              display="flex"
-              alignItems="center"
-              gap={1}
-              backgroundColor="statusCriticalBg"
-              p={1}
-              borderRadius={8}
-              mb={2}
-              border={`1px solid ${theme.colors.borderPrimary}`}
-              justifyContent="center"
-            >
-              <IconWarning size="iconSmall" />
-              <Text variant="body3">
-                Some of your token holdings are locked. These either need to be all unlocked, or you need to transfer
-                the unlocked part to another wallet, and migrate from that wallet.
-              </Text>
-            </Grid>
-          )}
+          <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} />
           <Grid
             display="flex"
             alignItems="center"
