@@ -33,8 +33,8 @@ export function MigrationFrozenBanner({ isMigrationBlocked }: { isMigrationBlock
     >
       <IconWarning size="iconSmall" />
       <Text variant="body3">
-        Some of your token holdings are locked. These either need to be all unlocked, or you need to transfer the
-        unlocked part to another wallet, and migrate from that wallet.
+        You have reserved or locked tokens. To migrate, you will need to transfer your unlocked tokens to a new wallet
+        then migrate.
       </Text>
     </Grid>
   )
