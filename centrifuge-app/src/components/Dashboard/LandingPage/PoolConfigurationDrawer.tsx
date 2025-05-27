@@ -340,8 +340,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
         })),
       ]
 
-      console.log('newPoolMetadata', newPoolMetadata, values)
-
       execute([values.id, newPoolMetadata, hasTrancheChanges ? tranches : undefined], { account })
       actions.setSubmitting(false)
     },
