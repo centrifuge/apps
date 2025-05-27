@@ -124,7 +124,6 @@ export const TrancheTokenCards = ({
         return trancheToken.apy ? `${trancheToken.apy}%` : '-'
       }
 
-      console.log(daysSinceCreation)
       return {
         tokenName: tranche.name,
         apy: calculateApy(tranche),
