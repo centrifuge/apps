@@ -1,11 +1,11 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Grid, Shelf, Stack, Tabs, TabsItem, Text } from '@centrifuge/fabric'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { PageSummary } from '../../../../src/components/PageSummary'
 import { Tooltips } from '../../../../src/components/Tooltips'
-import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
+import { useLiquidity } from '../../../../src/utils/useLiquidity'
 import { useSuitableAccounts } from '../../../../src/utils/usePermissions'
 import { useInvestorList } from '../../../../src/utils/usePools'
 
@@ -18,6 +18,7 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
   const [maxReserve, setMaxReserve] = useState(pool?.reserve.max.toDecimal().toNumber())
   const [error, setError] = useState<string | undefined>(undefined)
   const canEditMaxReserve = !!account
+  const { sumOfLockedInvestments, sumOfLockedRedemptions } = useLiquidity(pool.id)
 
   const { execute: setMaxReserveTx, isLoading } = useCentrifugeTransaction(
     'Set max reserve',
@@ -69,45 +70,6 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
     },
   ]
 
-  const pendingInvestments = useMemo(() => {
-    if (!pool || !pool.tranches || !investors) {
-      return { 0: Dec(0), 1: Dec(0) }
-    }
-
-    return investors.reduce(
-      (acc, investor) => {
-        const tranche = pool.tranches.find((t) => t.id === investor.trancheId)
-        if (tranche) {
-          const key = tranche.seniority === 0 ? 0 : 1
-          acc[key] = acc[key].add(investor.pendingInvestCurrency.toDecimal())
-        }
-        return acc
-      },
-      { 0: Dec(0), 1: Dec(0) }
-    )
-  }, [pool, investors])
-
-  const pendingRedemptions = useMemo(() => {
-    if (!pool || !pool.tranches || !investors) {
-      return { 0: Dec(0), 1: Dec(0) }
-    }
-
-    return investors.reduce(
-      (acc, investor) => {
-        const tranche = pool.tranches.find((t) => t.id === investor.trancheId)
-        if (tranche) {
-          const key = tranche.seniority === 0 ? 0 : 1
-          acc[key] = acc[key].add(investor.pendingRedeemTrancheTokens.toDecimal())
-        }
-        return acc
-      },
-      { 0: Dec(0), 1: Dec(0) }
-    )
-  }, [pool, investors])
-
-  const redemptions = pendingRedemptions[selectedTabIndexRedemptions as keyof typeof pendingRedemptions]
-  const investments = pendingInvestments[selectedTabIndexInvestments as keyof typeof pendingInvestments]
-
   return (
     <Box backgroundColor="backgroundSecondary" borderRadius={8} p={2} mt={3}>
       <PageSummary
@@ -154,11 +116,11 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
               )}
             </Box>
             <Text
-              variant={investments.isZero() ? 'body2' : 'heading1'}
-              color={investments.isZero() ? 'textSecondary' : 'textPrimary'}
-              style={{ marginTop: investments.isZero() ? '12px' : 0 }}
+              variant={sumOfLockedInvestments.isZero() ? 'body2' : 'heading1'}
+              color={sumOfLockedInvestments.isZero() ? 'textSecondary' : 'textPrimary'}
+              style={{ marginTop: sumOfLockedInvestments.isZero() ? '12px' : 0 }}
             >
-              {investments.isZero() ? 'No pending investments' : formatBalance(investments)}
+              {sumOfLockedInvestments.isZero() ? 'No pending investments' : formatBalance(sumOfLockedInvestments)}
             </Text>
           </Stack>
           <Stack backgroundColor="backgroundPage" borderRadius={8} p={2} border="1px solid" borderColor="borderPrimary">
@@ -178,11 +140,11 @@ export default function OnchainSection({ pool }: { pool: Pool }) {
               )}
             </Box>
             <Text
-              variant={redemptions.isZero() ? 'body2' : 'heading1'}
-              color={redemptions.isZero() ? 'textSecondary' : 'textPrimary'}
-              style={{ marginTop: redemptions.isZero() ? '12px' : 0 }}
+              variant={sumOfLockedRedemptions.isZero() ? 'body2' : 'heading1'}
+              color={sumOfLockedRedemptions.isZero() ? 'textSecondary' : 'textPrimary'}
+              style={{ marginTop: sumOfLockedRedemptions.isZero() ? '12px' : 0 }}
             >
-              {redemptions.isZero() ? 'No pending redemptions' : formatBalance(redemptions)}
+              {sumOfLockedRedemptions.isZero() ? 'No pending redemptions' : formatBalance(sumOfLockedRedemptions)}
             </Text>
           </Stack>
         </Grid>
