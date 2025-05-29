@@ -119,7 +119,7 @@ export function EditAdminConfigDrawer({ open, onClose }: { open: boolean; onClos
         <FormikProvider value={form}>
           <Form>
             <Box display="flex" flexDirection="column" height="85vh">
-              <Stack mb={3}>
+              <Stack mb={3} overflow="auto">
                 <FieldArray name="admins">
                   {(fldArr) => (
                     <Stack gap={3}>
