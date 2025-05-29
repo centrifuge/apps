@@ -63,8 +63,6 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
           }
         )
       }
-
-      execute([poolId, [[centAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]], []])
     },
     validate: (values) => {
       const errors: FormikErrors<NewInvestorFormValues> = {}
@@ -86,6 +84,13 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
   )
 
   const addressAlreadyExists = allowedTranches.includes(formik.values.trancheId)
+
+  console.log(
+    formik.values.network ? [[formik.values.network, validAddress]] : undefined,
+    centAddress,
+    formik.values.trancheId,
+    account
+  )
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="New investor">
