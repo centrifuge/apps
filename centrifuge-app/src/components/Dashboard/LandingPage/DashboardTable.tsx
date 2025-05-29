@@ -120,6 +120,9 @@ export function DashboardTable() {
             Pending multi-sig
           </Button>
         )}
+        <Button variant="inverted" small icon={IconUsers} onClick={() => setAccessDrawerOpen(true)}>
+          Access
+        </Button>
         {editAdminConfig && (
           <Button variant="inverted" small icon={IconUsers} onClick={() => setEditAdminConfigOpen(true)}>
             Edit admin config
