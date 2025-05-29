@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { isEvmAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { useInvestorStatus } from '../../../utils/usePermissions'
+import { useInvestorStatus, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePoolMetadataMulti } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
@@ -29,6 +29,8 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
 
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'] })
+
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
     (cent) => cent.pools.updatePoolRoles
@@ -45,15 +47,26 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
       network: '',
     },
     onSubmit: (values) => {
+      if (!centAddress) return
+      const trancheId = values.trancheId
       const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
       const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
+      const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
       const domains = values.network ? [[values.network, values.investorAddress]] : undefined
+      const isAllowed = allowedTranches.includes(trancheId)
 
-      const centAddress = values.network
-        ? utils.evmToSubstrateAddress(values.investorAddress, values.network)
-        : values.network === '' && substrateEvmChainId && isEvmAddress(values.investorAddress)
-        ? utils.evmToSubstrateAddress(values.investorAddress, substrateEvmChainId)
-        : values.investorAddress
+      if (isAllowed) {
+        execute([poolId!, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
+          account,
+        })
+      } else {
+        execute(
+          [poolId!, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []],
+          {
+            account,
+          }
+        )
+      }
 
       execute([poolId, [[centAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]], []])
     },
@@ -70,7 +83,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
     },
   })
 
-  const { allowedTranches } = useInvestorStatus(
+  const { allowedTranches, centAddress } = useInvestorStatus(
     poolId,
     formik.values.investorAddress,
     formik.values.network || 'centrifuge'
