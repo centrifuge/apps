@@ -23,6 +23,7 @@ import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useEffect, useState } from 'react'
 import { map, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
+import { MigrationFrozenBanner } from '.'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { RouterTextLink } from '../../../src/components/TextLink'
 import { Tooltips } from '../../../src/components/Tooltips'
@@ -174,6 +175,7 @@ export default function CFGTokenMigrationCent() {
         <LayoutSection alignItems="flex-start">
           <Text variant="heading1">Portfolio</Text>
         </LayoutSection>
+        <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} />
         <Box
           backgroundColor="backgroundSecondary"
           border={`1px solid ${theme.colors.borderSecondary}`}
@@ -286,7 +288,7 @@ export default function CFGTokenMigrationCent() {
                   small
                   style={{ width: '100%' }}
                   onClick={() => setStep(1)}
-                  disabled={!isAddressValid || isMigrationBlocked}
+                  disabled={!isAddressValid || isMigrationBlocked || balance.isZero()}
                 >
                   Migrate
                 </Button>
