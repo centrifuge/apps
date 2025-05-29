@@ -241,6 +241,7 @@ export function usePoolAccess(poolId: string) {
                   const key = (keyData.toHuman() as any)[2]
                   const value = valueData.toPrimitive() as { blockedAt: number }
                   const blockNumber = block.block.header.number.toNumber()
+
                   if (blockNumber > value.blockedAt) return null as never
                   if ('Local' in key) {
                     return {
@@ -248,10 +249,10 @@ export function usePoolAccess(poolId: string) {
                       location: 'centrifuge',
                     }
                   } else if ('Address' in key) {
-                    if ('EVM' in key.Address)
+                    if ('Evm' in key.Address)
                       return {
-                        address: key.Address.EVM[1].toLowerCase(),
-                        location: { evm: Number(key.Address.EVM[0].replace(/\D/g, '')) },
+                        address: key.Address.Evm[1].toLowerCase(),
+                        location: { evm: Number(key.Address.Evm[0].replace(/\D/g, '')) },
                       }
                   } else if ('Xcm' in key) {
                     if (!key.Xcm?.V3?.interior?.X2?.[1]?.AccountId32?.id) {
