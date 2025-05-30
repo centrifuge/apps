@@ -1,4 +1,4 @@
-import { getChainInfo, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
+import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import { Form, FormikContextType, FormikErrors, FormikProvider, useFormik } from 'formik'
@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { isEvmAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
-import { useInvestorStatus } from '../../../utils/usePermissions'
+import { useInvestorStatus, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePoolMetadataMulti } from '../../../utils/usePools'
 
 type AddNewInvestorDrawerProps = {
@@ -21,13 +21,11 @@ type NewInvestorFormValues = {
 }
 
 export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
-  const utils = useCentrifugeUtils()
-  const {
-    substrate: { evmChainId: substrateEvmChainId },
-  } = useWallet()
   const { pools } = useSelectedPools(true)
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
+
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'], proxyType: ['Invest'] })
 
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
@@ -45,17 +43,26 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
       network: '',
     },
     onSubmit: (values) => {
+      if (!centAddress || !validAddress) return
+      const trancheId = values.trancheId
       const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
       const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
-      const domains = values.network ? [[values.network, values.investorAddress]] : undefined
+      const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+      const domains = values.network ? [[values.network, validAddress]] : undefined
+      const isAllowed = allowedTranches.includes(trancheId)
 
-      const centAddress = values.network
-        ? utils.evmToSubstrateAddress(values.investorAddress, values.network)
-        : values.network === '' && substrateEvmChainId && isEvmAddress(values.investorAddress)
-        ? utils.evmToSubstrateAddress(values.investorAddress, substrateEvmChainId)
-        : values.investorAddress
-
-      execute([poolId, [[centAddress!, { TrancheInvestor: [values.trancheId, SevenDaysFromNow, domains as any] }]], []])
+      if (isAllowed) {
+        execute([poolId!, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
+          account,
+        })
+      } else {
+        execute(
+          [poolId!, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []],
+          {
+            account,
+          }
+        )
+      }
     },
     validate: (values) => {
       const errors: FormikErrors<NewInvestorFormValues> = {}
@@ -70,7 +77,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
     },
   })
 
-  const { allowedTranches } = useInvestorStatus(
+  const { allowedTranches, centAddress, validAddress } = useInvestorStatus(
     poolId,
     formik.values.investorAddress,
     formik.values.network || 'centrifuge'
@@ -126,7 +133,12 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
               <Button
                 type="submit"
                 loading={isTransactionPending}
-                disabled={!!formik.errors.investorAddress || !formik.values.investorAddress || addressAlreadyExists}
+                disabled={
+                  !!formik.errors.investorAddress ||
+                  !formik.values.investorAddress ||
+                  addressAlreadyExists ||
+                  !validAddress
+                }
               >
                 Add new investor
               </Button>
@@ -182,9 +194,8 @@ function AddressNetworkInput({
             }))
             .filter((option) => option.label !== ''),
         ]}
-        onChange={(event) =>
-          formik.setFieldValue('network', event.target.value === '' ? '' : Number(event.target.value))
-        }
+        onChange={(event) => formik.setFieldValue('network', Number(event.target.value))}
+        disabled={!deployedLpChains.length}
       />
     </Stack>
   )
