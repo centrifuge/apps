@@ -141,9 +141,30 @@ function PoolPerformanceChart() {
 
   const trancheTodayPrice = calculateTranchePrices(pool as Pool)
 
+  // The nav broke on May 28th, so we need to hardcode some data for that day
+  const adjustedPoolStates =
+    pool.id === '4139607887'
+      ? truncatedPoolStates?.flatMap((day, i, arr) => {
+          const d = new Date(day.timestamp)
+          const isMay28 = d.getFullYear() === 2025 && d.getMonth() === 4 && d.getDate() === 28
+
+          if (isMay28 && i > 0) {
+            const prev = arr[i - 1]
+            return [
+              {
+                ...prev,
+                timestamp: day.timestamp,
+              },
+            ]
+          }
+
+          return [day]
+        })
+      : truncatedPoolStates ?? []
+
   const data: ChartData[] = React.useMemo(
     () =>
-      truncatedPoolStates?.map((day) => {
+      adjustedPoolStates?.map((day) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
 
         const trancheKeys = Object.keys(day.tranches)
