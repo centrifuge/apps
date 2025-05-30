@@ -143,22 +143,24 @@ function PoolPerformanceChart() {
 
   // The nav broke on May 28th, so we need to hardcode some data for that day
   const adjustedPoolStates =
-    truncatedPoolStates?.flatMap((day, i, arr) => {
-      const d = new Date(day.timestamp)
-      const isMay28 = d.getFullYear() === 2025 && d.getMonth() === 4 && d.getDate() === 28
+    pool.id === '4139607887'
+      ? truncatedPoolStates?.flatMap((day, i, arr) => {
+          const d = new Date(day.timestamp)
+          const isMay28 = d.getFullYear() === 2025 && d.getMonth() === 4 && d.getDate() === 28
 
-      if (isMay28 && i > 0) {
-        const prev = arr[i - 1]
-        return [
-          {
-            ...prev,
-            timestamp: day.timestamp,
-          },
-        ]
-      }
+          if (isMay28 && i > 0) {
+            const prev = arr[i - 1]
+            return [
+              {
+                ...prev,
+                timestamp: day.timestamp,
+              },
+            ]
+          }
 
-      return [day]
-    }) ?? []
+          return [day]
+        })
+      : truncatedPoolStates ?? []
 
   const data: ChartData[] = React.useMemo(
     () =>
