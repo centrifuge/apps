@@ -85,6 +85,7 @@ export function OracleFeeders({
           api.tx.utility.batchAll([
             api.tx.oraclePriceCollection.proposeUpdateCollectionInfo(poolId, info),
             api.tx.oraclePriceCollection.applyUpdateCollectionInfo(poolId, blake2AsHex(change.toU8a(), 256)),
+            api.tx.oraclePriceCollection.updateCollection(poolId),
           ]),
           account,
           undefined
