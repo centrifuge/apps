@@ -22,7 +22,7 @@ export function PoolDetailHeader({ actions }: Props) {
   const theme = useTheme()
   const cent = useCentrifuge()
 
-  const { showReports } = useDebugFlags()
+  const { showReports, showAssets } = useDebugFlags()
 
   const iconUri = metadata?.pool?.icon?.uri && cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)
 
@@ -63,6 +63,7 @@ export function PoolDetailHeader({ actions }: Props) {
           <NavigationTabsItem to={`/pools/${pid}`}>Overview</NavigationTabsItem>
           {!isTinlakePool && <NavigationTabsItem to={`/pools/${pid}/reporting`}>Reports</NavigationTabsItem>}
           {!isTinlakePool && showReports && <NavigationTabsItem to={`/pools/${pid}/data`}>Data</NavigationTabsItem>}
+          {showAssets && <NavigationTabsItem to={`/pools/${pid}/assets`}>Assets</NavigationTabsItem>}
         </NavigationTabs>
       </Shelf>
     </PageHeader>
