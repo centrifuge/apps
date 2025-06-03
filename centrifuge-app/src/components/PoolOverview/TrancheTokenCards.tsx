@@ -123,6 +123,7 @@ export const TrancheTokenCards = ({
         if (daysSinceCreation < 30) return 'N/A'
         return trancheToken.apy ? `${trancheToken.apy}%` : '-'
       }
+
       return {
         tokenName: tranche.name,
         apy: calculateApy(tranche),
