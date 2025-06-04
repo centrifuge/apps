@@ -1,8 +1,9 @@
-import { getChainInfo, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { getChainInfo, useCentrifugeApi, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { AddressInput, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import { Form, FormikContextType, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useState } from 'react'
+import { firstValueFrom } from 'rxjs'
 import { isEvmAddress } from '../../../utils/address'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { useActiveDomains } from '../../../utils/useLiquidityPools'
@@ -22,14 +23,61 @@ type NewInvestorFormValues = {
 
 export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerProps) {
   const { pools } = useSelectedPools(true)
+  const api = useCentrifugeApi()
   const poolMetadata = usePoolMetadataMulti(pools ?? [])
   const [poolId, setPoolId] = useState(pools?.[0]?.id ?? '')
 
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'], proxyType: ['Invest'] })
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'] })
 
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Add new investor',
-    (cent) => cent.pools.updatePoolRoles
+    (cent) =>
+      (
+        [poolId, trancheId, _chainId, centAddress, _evmAddress, validDuration]: [
+          string,
+          string,
+          number | undefined,
+          string,
+          string,
+          number
+        ],
+        options
+      ) =>
+        cent.pools.updatePoolRoles(
+          [poolId, [[centAddress, { TrancheInvestor: [trancheId, validDuration] }]], []],
+          options
+        ),
+    {
+      onSuccess: async (args, result) => {
+        const [poolId, trancheId, chainId, , evmAddress] = args
+
+        if (!chainId) return
+
+        const event = result.events.find(({ event }) => api.events.permissions.Added.is(event))
+        if (event) {
+          const eventData = event.toHuman() as any
+          const validDuration = eventData.event.data.role?.PoolRole?.TrancheInvestor?.[1]?.replace(/\D/g, '')
+
+          if (!validDuration) return
+
+          const hash = ((result.data as any).toHuman() as any).status.InBlock
+          const apiAt = await api.at(hash)
+          const timestampAtBlock = await firstValueFrom(apiAt.query.timestamp.now())
+          const timestamp = (timestampAtBlock.toPrimitive() as number) / 1000
+
+          executeUpdateMember([poolId, trancheId, chainId, evmAddress, timestamp + Number(validDuration)])
+        }
+      },
+    }
+  )
+
+  const { isLoading: isUpdateMemberPending, execute: executeUpdateMember } = useCentrifugeTransaction(
+    'Update member on EVM chain',
+    (cent) =>
+      ([poolId, trancheId, chainId, evmAddress, validTill]: [string, string, number, string, number], options) => {
+        const tx = api.tx.liquidityPools.updateMember(poolId, trancheId, { EVM: [chainId, evmAddress] }, validTill)
+        return cent.wrapSignAndSend(api, tx, options)
+      }
   )
 
   const pool = pools?.find((p) => p.id === poolId)
@@ -45,24 +93,11 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
     onSubmit: (values) => {
       if (!centAddress || !validAddress) return
       const trancheId = values.trancheId
-      const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
-      const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
-      const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
-      const domains = values.network ? [[values.network, validAddress]] : undefined
-      const isAllowed = allowedTranches.includes(trancheId)
+      const OneHundredYears = 100 * 365 * 24 * 60 * 60
 
-      if (isAllowed) {
-        execute([poolId!, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
-          account,
-        })
-      } else {
-        execute(
-          [poolId!, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []],
-          {
-            account,
-          }
-        )
-      }
+      execute([poolId, trancheId, values.network || undefined, centAddress, validAddress, OneHundredYears], {
+        account,
+      })
     },
     validate: (values) => {
       const errors: FormikErrors<NewInvestorFormValues> = {}
@@ -83,7 +118,7 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
     formik.values.network || 'centrifuge'
   )
 
-  const addressAlreadyExists = allowedTranches.includes(formik.values.trancheId)
+  const alreadyAllowed = formik.values.trancheId in allowedTranches
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} width="33%" innerPaddingTop={3} title="New investor">
@@ -128,16 +163,13 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
                   }
                   onChange={(event) => formik.setFieldValue('trancheId', event.target.value)}
                 />
-                <AddressNetworkInput formik={formik} poolId={poolId} addressAlreadyExists={addressAlreadyExists} />
+                <AddressNetworkInput formik={formik} poolId={poolId} addressAlreadyExists={alreadyAllowed} />
               </Stack>
               <Button
                 type="submit"
-                loading={isTransactionPending}
+                loading={isTransactionPending || isUpdateMemberPending}
                 disabled={
-                  !!formik.errors.investorAddress ||
-                  !formik.values.investorAddress ||
-                  addressAlreadyExists ||
-                  !validAddress
+                  !!formik.errors.investorAddress || !formik.values.investorAddress || alreadyAllowed || !validAddress
                 }
               >
                 Add new investor
@@ -178,7 +210,7 @@ function AddressNetworkInput({
       />
       {addressAlreadyExists && (
         <Text variant="heading4" color="statusOk">
-          Address already exists
+          Address already allowed
         </Text>
       )}
       <Select
