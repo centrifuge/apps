@@ -488,7 +488,6 @@ export function useInvestorStatus(poolId: string, address: string, network: Netw
       : validAddress
   const permissions = usePermissions(centAddress)
 
-  console.log('permissions?.pools[poolId]?.tranches', permissions?.pools[poolId]?.tranches)
   const allowedTranches = React.useMemo(
     () =>
       Object.fromEntries(
@@ -498,7 +497,5 @@ export function useInvestorStatus(poolId: string, address: string, network: Netw
       ),
     [permissions, poolId]
   )
-  console.log('allowedTranches', allowedTranches)
-
   return { allowedTranches, permissions, centAddress, validAddress }
 }
