@@ -490,11 +490,12 @@ export function useInvestorStatus(poolId: string, address: string, network: Netw
 
   const allowedTranches = React.useMemo(
     () =>
-      Object.entries(permissions?.pools[poolId]?.tranches ?? {})
-        .filter(([, t]) => new Date(t.permissionedTill).getTime() - Date.now() > SevenDaysMs)
-        .map(([tid]) => tid),
+      Object.fromEntries(
+        Object.entries(permissions?.pools[poolId]?.tranches ?? {}).filter(
+          ([, permission]) => new Date(permission.permissionedTill).getTime() - Date.now() > SevenDaysMs
+        )
+      ),
     [permissions, poolId]
   )
-
   return { allowedTranches, permissions, centAddress, validAddress }
 }

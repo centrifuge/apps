@@ -8,10 +8,9 @@ import { useSelectedPools } from '../../../../utils/contexts/SelectedPoolsContex
 import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
 import { usePoolAccess, usePoolAdmin, useSuitableAccounts } from '../../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../../utils/usePools'
-import { useDebugFlags } from '../../../DebugFlags'
 import { LoadBoundary } from '../../../LoadBoundary'
 import { AOFormValues, AssetOriginators } from './AssetOriginator'
-import { DebugAdmins, DebugAdminsFormValues } from './DebugAdmins'
+import { DebugAdminsFormValues } from './DebugAdmins'
 import { FeedersFormValues, OracleFeeders } from './OracleFeeders'
 import { PoolManagers, PoolManagersFormValues } from './PoolManagers'
 
@@ -58,7 +57,6 @@ function PoolName({ poolId }: { poolId: string }) {
 }
 
 function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () => void }) {
-  const { editAdminConfig } = useDebugFlags()
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const api = useCentrifugeApi()
@@ -165,15 +163,6 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
                   ),
                   sublabel: 'Pool delegates are authorized to perform designated pool actions by the pool manager.',
                 },
-                ...(editAdminConfig
-                  ? [
-                      {
-                        title: 'Admin config',
-                        body: <DebugAdmins poolId={poolId} handle={debugAdminsRef} />,
-                        sublabel: 'Debug flag access to admin config',
-                      },
-                    ]
-                  : []),
               ]}
             />
           </Stack>
