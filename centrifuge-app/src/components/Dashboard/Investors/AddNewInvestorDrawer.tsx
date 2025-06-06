@@ -54,18 +54,22 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
         if (!chainId) return
 
         const event = result.events.find(({ event }) => api.events.permissions.Added.is(event))
+        console.log('event', event)
         if (event) {
           const eventData = event.toHuman() as any
-          const validDuration = eventData.event.data.role?.PoolRole?.TrancheInvestor?.[1]?.replace(/\D/g, '')
+          const validDuration = Number(eventData.event.data.role?.PoolRole?.TrancheInvestor?.[1]?.replace(/\D/g, ''))
 
+          console.log('validDuration', validDuration)
           if (!validDuration) return
 
           const hash = ((result.data as any).toHuman() as any).status.InBlock
           const apiAt = await api.at(hash)
           const timestampAtBlock = await firstValueFrom(apiAt.query.timestamp.now())
-          const timestamp = (timestampAtBlock.toPrimitive() as number) / 1000
+          const timestamp = Number(timestampAtBlock.toPrimitive()) / 1000
+          console.log('timestamp', timestamp)
+          console.log('validUntil', timestamp + validDuration)
 
-          executeUpdateMember([poolId, trancheId, chainId, evmAddress, timestamp + Number(validDuration)])
+          executeUpdateMember([poolId, trancheId, chainId, evmAddress, timestamp + validDuration])
         }
       },
     }
@@ -93,9 +97,9 @@ export function AddNewInvestorDrawer({ isOpen, onClose }: AddNewInvestorDrawerPr
     onSubmit: (values) => {
       if (!centAddress || !validAddress) return
       const trancheId = values.trancheId
-      const OneHundredYears = 100 * 365 * 24 * 60 * 60
+      const TenYears = 10 * 365 * 24 * 60 * 60
 
-      execute([poolId, trancheId, values.network || undefined, centAddress, validAddress, OneHundredYears], {
+      execute([poolId, trancheId, values.network || undefined, centAddress, validAddress, TenYears], {
         account,
       })
     },
