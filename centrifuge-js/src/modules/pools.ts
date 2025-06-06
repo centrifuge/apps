@@ -3857,6 +3857,10 @@ export function getPoolsModule(inst: Centrifuge) {
             const balances = {
               tranches: [] as AccountTokenBalance[],
               currencies: [] as AccountCurrencyBalance[],
+              consumers: new CurrencyBalance(
+                (nativeBalance as any).consumers.toString(),
+                api.registry.chainDecimals[0]
+              ),
               native: {
                 balance: new CurrencyBalance(
                   (nativeBalance as any).data.free.toString(),
@@ -3890,6 +3894,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 free: string | number
                 reserved: string | number
                 frozen: string | number
+                consumers: string | number
               }
 
               const currency = findCurrency(currencies, key)

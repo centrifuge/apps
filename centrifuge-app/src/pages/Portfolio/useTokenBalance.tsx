@@ -1,5 +1,6 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { BrowserProvider, ethers } from 'ethers'
+import { useEvmProvider } from '@centrifuge/centrifuge-react'
+import { ethers } from 'ethers'
 import { useQuery } from 'react-query'
 import { isTestEnv } from '../../../src/config'
 import { currencies } from '../../../src/utils/tinlake/currencies'
@@ -20,10 +21,10 @@ export const cfgConfig = isTestEnv
     }
 
 export const useTokenBalance = (userAddress: string | undefined) => {
+  const provider = useEvmProvider()
   return useQuery(
     ['tokenBalance', userAddress],
     async () => {
-      const provider = new BrowserProvider(window.ethereum)
       const tokens = await Promise.allSettled([
         new ethers.Contract(cfgConfig.legacy, ABI, provider).balanceOf(userAddress!),
         new ethers.Contract(cfgConfig.new, ABI, provider).balanceOf(userAddress!),
@@ -53,10 +54,10 @@ export const useTokenBalance = (userAddress: string | undefined) => {
 }
 
 export const useCheckAllowance = (userAddress: string | undefined) => {
+  const provider = useEvmProvider()
   return useQuery(
     ['checkAllowance', userAddress],
     async () => {
-      const provider = new BrowserProvider(window.ethereum)
       const allowance = await new ethers.Contract(cfgConfig.legacy, IOU_ABI, provider).allowance(
         userAddress!,
         cfgConfig.iou

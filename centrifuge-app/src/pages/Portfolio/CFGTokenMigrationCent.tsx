@@ -74,7 +74,8 @@ export default function CFGTokenMigrationCent() {
   const [step, setStep] = useState<number>(0)
   const [initialTokenBalance, setInitialTokenBalance] = useState<Decimal>()
 
-  const isMigrationBlocked = !balances?.native?.frozen?.isZero() || !balances?.native?.reserved?.isZero()
+  const isMigrationBlocked =
+    !balances?.native?.frozen?.isZero() || !balances?.native?.reserved?.isZero() || !balances?.consumers?.isZero()
 
   const [feeAmount] = useCentrifugeQuery(['feeAmount'], () =>
     api.query.cfgMigration.feeAmount().pipe(map((data) => new CurrencyBalance(data.toPrimitive() as any, 18)))
@@ -175,7 +176,7 @@ export default function CFGTokenMigrationCent() {
         <LayoutSection alignItems="flex-start">
           <Text variant="heading1">Portfolio</Text>
         </LayoutSection>
-        <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} />
+        <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
         <Box
           backgroundColor="backgroundSecondary"
           border={`1px solid ${theme.colors.borderSecondary}`}
