@@ -15,9 +15,21 @@ import { useAddress } from '../../utils/useAddress'
 import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
 
-export function MigrationFrozenBanner({ isMigrationBlocked }: { isMigrationBlocked: boolean }) {
+export function MigrationFrozenBanner({
+  isMigrationBlocked,
+  balances,
+}: {
+  isMigrationBlocked: boolean
+  balances: any
+}) {
   const theme = useTheme()
   if (!isMigrationBlocked) return null
+
+  const consumers = balances?.native?.consumers?.toDecimal() || Dec(0)
+  const frozen = balances?.native?.frozen?.toDecimal() || Dec(0)
+  const reserved = balances?.native?.reserved?.toDecimal() || Dec(0)
+
+  const amount = consumers.add(frozen).add(reserved)
 
   return (
     <Grid
@@ -33,8 +45,8 @@ export function MigrationFrozenBanner({ isMigrationBlocked }: { isMigrationBlock
     >
       <IconWarning size="iconSmall" />
       <Text variant="body3">
-        You have reserved or locked tokens. To migrate, you will need to transfer your unlocked tokens to a new wallet
-        then migrate.
+        Please transfer your funds to another wallet to be able to perform the migration as you currently have{' '}
+        <b>{formatBalance(amount)}</b> tokens locked/consumed.
       </Text>
     </Grid>
   )
@@ -102,7 +114,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
 
   const isMigrationBlocked = isCentChain
-    ? !balances?.native?.frozen?.isZero() || !balances?.native?.reserved?.isZero()
+    ? !balances?.native?.frozen?.isZero() || !balances?.native?.reserved?.isZero() || !balances?.consumers?.isZero()
     : false
 
   const convertedTokens = useMemo(() => {
@@ -209,7 +221,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
       {!!balance && !balance?.isZero() && (
         <>
-          <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} />
+          <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
           <Grid
             display="flex"
             alignItems="center"
