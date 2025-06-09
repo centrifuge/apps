@@ -64,8 +64,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   const poolManagersRef = useRef<FormHandle>(null)
   const aoRef = useRef<FormHandle>(null)
   const feedersRef = useRef<FormHandle>(null)
-  const debugAdminsRef = useRef<FormHandle>(null)
-  const refs = [aoRef, feedersRef, poolManagersRef, debugAdminsRef]
+  const refs = [aoRef, feedersRef, poolManagersRef]
   const admin = usePoolAdmin(poolId)
 
   const access = usePoolAccess(poolId)

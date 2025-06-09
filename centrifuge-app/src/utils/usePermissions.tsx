@@ -23,6 +23,7 @@ import { combineLatest, combineLatestWith, filter, map, repeatWhen, switchMap, t
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
 import { usePool, usePoolMetadata, usePools } from './usePools'
+import { usePoolFeeders } from './usePoolsForWhichAccountIsFeeder'
 
 export function usePermissions(address?: string) {
   const [result] = useCentrifugeQuery(['permissions', address], (cent) => cent.pools.getUserPermissions([address!]), {
@@ -52,6 +53,7 @@ export function useUserPermissionsMulti(addresses: string[], options?: { enabled
 
 // Better name welcomed lol
 export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
+  const { poolsByFeeder } = usePoolFeeders()
   const {
     substrate: { combinedAccounts, proxiesAreLoading },
   } = useWallet()
@@ -66,8 +68,10 @@ export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
       .flat(2)
   )
 
+  const feederPoolIds = new Set(actingAddresses.flatMap((address) => poolsByFeeder[address] || []))
+
   const pools = usePools(false)
-  const filtered = pools?.filter((p) => poolIds.has(p.id))
+  const filtered = pools?.filter((p) => poolIds.has(p.id) || feederPoolIds.has(p.id))
 
   return filtered
 }
