@@ -1,5 +1,5 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useRef, useState } from 'react'
@@ -10,11 +10,10 @@ import { usePoolAccess, usePoolAdmin, useSuitableAccounts } from '../../../../ut
 import { usePool, usePoolMetadata } from '../../../../utils/usePools'
 import { LoadBoundary } from '../../../LoadBoundary'
 import { AOFormValues, AssetOriginators } from './AssetOriginator'
-import { DebugAdminsFormValues } from './DebugAdmins'
 import { FeedersFormValues, OracleFeeders } from './OracleFeeders'
 import { PoolManagers, PoolManagersFormValues } from './PoolManagers'
 
-type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues & DebugAdminsFormValues
+type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues
 
 export type FormHandle = {
   getBatch: (
@@ -96,7 +95,14 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
           }
 
           if (newMetadata !== metadata) {
-            batches.unshift(await firstValueFrom(cent.pools.setMetadata([poolId, newMetadata], { batch: true })))
+            batches.unshift(
+              wrapProxyCallsForAccount(
+                api,
+                await firstValueFrom(cent.pools.setMetadata([poolId, newMetadata], { batch: true })),
+                adminDelegateAccount!,
+                undefined
+              )
+            )
           }
           return batches.flat()
         }).pipe(
@@ -118,7 +124,6 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
       },
       withdrawAddresses: [],
       delegates: [],
-      admins: [],
     },
     validate: (values) => {
       const combinedErrors = {}
@@ -139,7 +144,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   if (!aoDelegateAccount || !adminDelegateAccount) return null
 
   const hasChanges = refs.some((ref) => ref.current?.hasChanges(form.values))
-
+  console.log('HELLOOOOOOOO', hasChanges, form.isValid, form.errors)
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
