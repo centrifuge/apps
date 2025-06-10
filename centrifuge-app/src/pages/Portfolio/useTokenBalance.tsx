@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useEvmProvider } from '@centrifuge/centrifuge-react'
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { ethers } from 'ethers'
 import { useQuery } from 'react-query'
 import { isTestEnv } from '../../../src/config'
@@ -21,9 +21,10 @@ export const cfgConfig = isTestEnv
     }
 
 export const useTokenBalance = (userAddress: string | undefined) => {
-  const provider = useEvmProvider()
+  const { evm } = useWallet()
+  const provider = evm.getProvider(evm.chainId!)
   return useQuery(
-    ['tokenBalance', userAddress],
+    ['tokenBalance', userAddress, evm.chainId],
     async () => {
       const tokens = await Promise.allSettled([
         new ethers.Contract(cfgConfig.legacy, ABI, provider).balanceOf(userAddress!),
@@ -54,9 +55,10 @@ export const useTokenBalance = (userAddress: string | undefined) => {
 }
 
 export const useCheckAllowance = (userAddress: string | undefined) => {
-  const provider = useEvmProvider()
+  const { evm } = useWallet()
+  const provider = evm.getProvider(evm.chainId!)
   return useQuery(
-    ['checkAllowance', userAddress],
+    ['checkAllowance', userAddress, evm.chainId],
     async () => {
       const allowance = await new ethers.Contract(cfgConfig.legacy, IOU_ABI, provider).allowance(
         userAddress!,
