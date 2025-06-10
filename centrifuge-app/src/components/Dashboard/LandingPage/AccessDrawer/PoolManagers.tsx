@@ -2,7 +2,7 @@ import Centrifuge, { ComputedMultisig, computeMultisig, PoolMetadata } from '@ce
 import { CombinedSubstrateAccount, useCentrifugeApi, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { useFormikContext } from 'formik'
 import * as React from 'react'
-import { combineLatest, map, of } from 'rxjs'
+import { map, of } from 'rxjs'
 import type { FormHandle } from '.'
 import { diffPermissions, usePoolAccess } from '../../../../utils/usePermissions'
 import { MultisigForm } from '../../../MultisigForm'
@@ -43,7 +43,7 @@ export function PoolManagers({
     return (
       values.adminMultisig.threshold !== initialValues.adminMultisig.threshold ||
       values.adminMultisig.signers.length !== initialValues.adminMultisig.signers.length ||
-      !values.adminMultisig.signers.every((s) => initialValues.adminMultisig.signers.includes(s))
+      new Set(values.adminMultisig.signers).symmetricDifference(new Set(initialValues.adminMultisig.signers)).size > 0
     )
   }
 
@@ -89,32 +89,29 @@ export function PoolManagers({
       ['LiquidityAdmin', 'InvestorAdmin']
     )
 
-    return combineLatest([
-      cent.pools.setMetadata([poolId, newPoolMetadata], { batch: true }),
-      cent.pools.updatePoolRoles(
-        [poolId, [...access.missingAdminPermissions, ...permissionsToAdd], permissionsToRemove],
-        { batch: true }
-      ),
-    ]).pipe(
-      map(([metadataTx, permissionTx]) => {
-        return {
-          batch: [
-            wrapProxyCallsForAccount(
-              api,
-              api.tx.utility.batchAll([
-                metadataTx,
-                ...permissionTx.method.args[0],
-                ...addedDelegates.map((addr) => api.tx.proxy.addProxy(addr, 'Any', 0)),
-                ...removedDelegates.map((addr) => api.tx.proxy.removeProxy(addr, 'Any', 0)),
-              ]),
-              account,
-              undefined
-            ),
-          ],
-          metadata: newPoolMetadata,
-        }
+    return cent.pools
+      .updatePoolRoles([poolId, [...access.missingAdminPermissions, ...permissionsToAdd], permissionsToRemove], {
+        batch: true,
       })
-    )
+      .pipe(
+        map((permissionTx) => {
+          return {
+            batch: [
+              wrapProxyCallsForAccount(
+                api,
+                api.tx.utility.batchAll([
+                  ...permissionTx.method.args[0],
+                  ...addedDelegates.map((addr) => api.tx.proxy.addProxy(addr, 'Any', 0)),
+                  ...removedDelegates.map((addr) => api.tx.proxy.removeProxy(addr, 'Any', 0)),
+                ]),
+                account,
+                undefined
+              ),
+            ],
+            metadata: newPoolMetadata,
+          }
+        })
+      )
   }
 
   React.useImperativeHandle(handle, () => ({

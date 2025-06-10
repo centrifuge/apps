@@ -9,8 +9,10 @@ import { Dec } from '../../../../src/utils/Decimal'
 import { formatBalance } from '../../../../src/utils/formatting'
 import { useSelectedPools } from '../../../utils/contexts/SelectedPoolsContext'
 import { DataTable, SortableTableHeader } from '../../DataTable'
+import { useDebugFlags } from '../../DebugFlags'
 import { calculateApyPerToken } from '../utils'
 import { AccessDrawer } from './AccessDrawer'
+import { EditAdminConfigDrawer } from './EditAdminConfigDrawer'
 import { PendingMultisigDrawer } from './PendingMultisigDrawer'
 import { PoolConfigurationDrawer } from './PoolConfigurationDrawer'
 
@@ -25,9 +27,11 @@ export type Row = {
 }
 
 export function DashboardTable() {
+  const { editAdminConfig } = useDebugFlags()
   const [open, setOpen] = useState(false)
   const [accessDrawerOpen, setAccessDrawerOpen] = useState(false)
   const [pendingMultisigsDrawerOpen, setPendingMultisigsDrawerOpen] = useState(false)
+  const [editAdminConfigOpen, setEditAdminConfigOpen] = useState(false)
   const theme = useTheme()
   const cent = useCentrifuge()
   const { selectedPoolsWithMetadata } = useSelectedPools()
@@ -119,7 +123,11 @@ export function DashboardTable() {
         <Button variant="inverted" small icon={IconUsers} onClick={() => setAccessDrawerOpen(true)}>
           Access
         </Button>
-
+        {editAdminConfig && (
+          <Button variant="inverted" small icon={IconUsers} onClick={() => setEditAdminConfigOpen(true)}>
+            Edit admin config
+          </Button>
+        )}
         <Button variant="inverted" small icon={IconSettings} onClick={() => setOpen(true)}>
           Configuration
         </Button>
@@ -137,6 +145,7 @@ export function DashboardTable() {
       <PoolConfigurationDrawer open={open} setOpen={setOpen} />
       <AccessDrawer isOpen={accessDrawerOpen} onClose={() => setAccessDrawerOpen(false)} />
       <PendingMultisigDrawer open={pendingMultisigsDrawerOpen} onClose={() => setPendingMultisigsDrawerOpen(false)} />
+      <EditAdminConfigDrawer open={editAdminConfigOpen} onClose={() => setEditAdminConfigOpen(false)} />
     </Box>
   )
 }

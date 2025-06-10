@@ -1,5 +1,5 @@
 import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Button, Drawer, Select, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import { useRef, useState } from 'react'
@@ -8,14 +8,12 @@ import { useSelectedPools } from '../../../../utils/contexts/SelectedPoolsContex
 import { useFocusInvalidInput } from '../../../../utils/useFocusInvalidInput'
 import { usePoolAccess, usePoolAdmin, useSuitableAccounts } from '../../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../../utils/usePools'
-import { useDebugFlags } from '../../../DebugFlags'
 import { LoadBoundary } from '../../../LoadBoundary'
 import { AOFormValues, AssetOriginators } from './AssetOriginator'
-import { DebugAdmins, DebugAdminsFormValues } from './DebugAdmins'
 import { FeedersFormValues, OracleFeeders } from './OracleFeeders'
 import { PoolManagers, PoolManagersFormValues } from './PoolManagers'
 
-type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues & DebugAdminsFormValues
+type FormValues = FeedersFormValues & PoolManagersFormValues & AOFormValues
 
 export type FormHandle = {
   getBatch: (
@@ -58,7 +56,6 @@ function PoolName({ poolId }: { poolId: string }) {
 }
 
 function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () => void }) {
-  const { editAdminConfig } = useDebugFlags()
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const api = useCentrifugeApi()
@@ -66,8 +63,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   const poolManagersRef = useRef<FormHandle>(null)
   const aoRef = useRef<FormHandle>(null)
   const feedersRef = useRef<FormHandle>(null)
-  const debugAdminsRef = useRef<FormHandle>(null)
-  const refs = [aoRef, feedersRef, poolManagersRef, debugAdminsRef]
+  const refs = [aoRef, feedersRef, poolManagersRef]
   const admin = usePoolAdmin(poolId)
 
   const access = usePoolAccess(poolId)
@@ -99,7 +95,14 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
           }
 
           if (newMetadata !== metadata) {
-            batches.unshift(await firstValueFrom(cent.pools.setMetadata([poolId, newMetadata], { batch: true })))
+            batches.unshift(
+              wrapProxyCallsForAccount(
+                api,
+                await firstValueFrom(cent.pools.setMetadata([poolId, newMetadata], { batch: true })),
+                adminDelegateAccount!,
+                undefined
+              )
+            )
           }
           return batches.flat()
         }).pipe(
@@ -121,7 +124,6 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
       },
       withdrawAddresses: [],
       delegates: [],
-      admins: [],
     },
     validate: (values) => {
       const combinedErrors = {}
@@ -142,7 +144,7 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
   if (!aoDelegateAccount || !adminDelegateAccount) return null
 
   const hasChanges = refs.some((ref) => ref.current?.hasChanges(form.values))
-
+  console.log('HELLOOOOOOOO', hasChanges, form.isValid, form.errors)
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
@@ -165,15 +167,6 @@ function AccessDrawerInner({ poolId, onClose }: { poolId: string; onClose: () =>
                   ),
                   sublabel: 'Pool delegates are authorized to perform designated pool actions by the pool manager.',
                 },
-                ...(editAdminConfig
-                  ? [
-                      {
-                        title: 'Admin config',
-                        body: <DebugAdmins poolId={poolId} handle={debugAdminsRef} />,
-                        sublabel: 'Debug flag access to admin config',
-                      },
-                    ]
-                  : []),
               ]}
             />
           </Stack>

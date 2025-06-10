@@ -4,7 +4,7 @@ import { map } from 'rxjs'
 import { isSubstrateAddress } from './address'
 import { usePools } from './usePools'
 
-function usePoolFeeders() {
+export function usePoolFeeders() {
   const api = useCentrifugeApi()
   const [storedInfo] = useCentrifugeQuery(['oracleCollectionInfos'], () =>
     api.query.oraclePriceCollection.collectionInfo.entries().pipe(
