@@ -58,7 +58,7 @@ export const useCheckAllowance = (userAddress: string | undefined) => {
   const { evm } = useWallet()
   const provider = evm.getProvider(evm.chainId!)
   return useQuery(
-    ['checkAllowance', userAddress, provider],
+    ['checkAllowance', userAddress],
     async () => {
       const allowance = await new ethers.Contract(cfgConfig.legacy, IOU_ABI, provider).allowance(
         userAddress!,
