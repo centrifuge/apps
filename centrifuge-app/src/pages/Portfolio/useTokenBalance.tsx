@@ -22,10 +22,10 @@ export const cfgConfig = isTestEnv
 
 export const useTokenBalance = (userAddress: string | undefined) => {
   const { evm } = useWallet()
-  const provider = evm.getProvider(evm.chainId!)
   return useQuery(
     ['tokenBalance', userAddress, evm.chainId],
     async () => {
+      const provider = evm.getProvider(evm.chainId!)
       const tokens = await Promise.allSettled([
         new ethers.Contract(cfgConfig.legacy, ABI, provider).balanceOf(userAddress!),
         new ethers.Contract(cfgConfig.new, ABI, provider).balanceOf(userAddress!),
@@ -49,23 +49,23 @@ export const useTokenBalance = (userAddress: string | undefined) => {
       }
     },
     {
-      enabled: !!userAddress,
+      enabled: !!userAddress && evm.chainId !== undefined,
     }
   )
 }
 
 export const useCheckAllowance = (userAddress: string | undefined) => {
   const { evm } = useWallet()
-  const provider = evm.getProvider(evm.chainId!)
   return useQuery(
     ['checkAllowance', userAddress, evm.chainId],
     async () => {
+      const provider = evm.getProvider(evm.chainId!)
       const allowance = await new ethers.Contract(cfgConfig.legacy, IOU_ABI, provider).allowance(
         userAddress!,
         cfgConfig.iou
       )
       return new CurrencyBalance(allowance.toString(), 18).toDecimal()
     },
-    { enabled: !!userAddress }
+    { enabled: !!userAddress && evm.chainId !== undefined }
   )
 }

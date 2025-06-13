@@ -171,120 +171,124 @@ export default function CFGTokenMigrationCent() {
   }
 
   return (
-    <ConnectionGuard networks={['centrifuge']} mt={10} paddingX={12}>
-      <Box mb={2}>
-        <LayoutSection alignItems="flex-start">
-          <Text variant="heading1">Portfolio</Text>
-        </LayoutSection>
-        <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
+    <Box mb={2}>
+      <LayoutSection alignItems="flex-start">
+        <Text variant="heading1">Portfolio</Text>
+      </LayoutSection>
+      <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
+      <Box
+        backgroundColor="backgroundSecondary"
+        border={`1px solid ${theme.colors.borderSecondary}`}
+        borderRadius={8}
+        height="90vh"
+        m={2}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexDirection="column"
+      >
         <Box
-          backgroundColor="backgroundSecondary"
-          border={`1px solid ${theme.colors.borderSecondary}`}
+          backgroundColor="white"
           borderRadius={8}
-          height="90vh"
           m={2}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexDirection="column"
+          p={2}
+          width={502}
+          style={{
+            boxShadow: '4px 8px 24px 0px #0000000D',
+          }}
         >
-          <Box
-            backgroundColor="white"
-            borderRadius={8}
-            m={2}
-            p={2}
-            width={502}
-            style={{
-              boxShadow: '4px 8px 24px 0px #0000000D',
-            }}
-          >
-            {step === 0 && (
-              <>
-                <Header />
-                <Grid gridTemplateColumns="1fr 140px 140px" alignItems="center" mb={2} mt={2}>
-                  <Box>
-                    <Text variant="body3" color="textSecondary">
-                      Position
-                    </Text>
-                    <Text variant="heading3">{formatBalance(balance?.toNumber(), '', 2)} CFG (Legacy)</Text>
-                  </Box>
-                  <Box>
-                    <Text variant="body3" color="textSecondary">
-                      Value
-                    </Text>
-                    <Text variant="heading3">{formatBalance(wcfgValue, '', 2)} USD</Text>
-                  </Box>
-                  <Box>
-                    <Text variant="body3" color="textSecondary">
-                      CFG price
-                    </Text>
-                    <Text variant="heading3">{formatBalance(CFGPrice || 0, '', 2)} USD</Text>
-                  </Box>
-                </Grid>
-                <Box border={`1px solid ${theme.colors.borderSecondary}`} borderRadius={8} p={2} mb={3}>
-                  <Box display="flex" flexDirection="column">
-                    <CurrencyInput
-                      value={balance?.toNumber()}
-                      currency="CFG"
-                      label="Amount of CFG (Legacy) to migrate"
-                      disabled
-                    />
-                    <Text style={{ marginTop: 8, alignSelf: 'flex-end' }} variant="body2">
-                      Wallet balance: {formatBalance(balance, '', 2)} CFG
-                    </Text>
-                  </Box>
-                  <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mt={3} mb={1}>
-                    <Text variant="heading4">Amount of CFG tokens</Text>
-                    <Text color="textSecondary" variant="body2">
-                      {formatBalance(balance, '', 2)} CFG
-                    </Text>
-                  </Grid>
-                  <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={3}>
-                    <Text variant="heading4">Gas fee estimate</Text>
-                    <Text color="textSecondary" variant="body2">
-                      -{formatBalance(feeAmount || 0, '', 2)} CFG
-                    </Text>
-                  </Grid>
-
-                  <Divider color="borderSecondary" />
-                  <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={2} mt={2}>
-                    <Text variant="heading3">Total amount of CFG tokens</Text>
-                    <Text variant="heading3">{formatBalance(totalAmountToMigrate, '', 2)} CFG</Text>
-                  </Grid>
-                  <Divider color="borderSecondary" />
-
-                  <Grid gridTemplateColumns="1fr 1fr" alignItems="center" mt={2} gap={2} mb={2} position="relative">
-                    <TextInput value={evmAddress} label="Ethereum wallet address" disabled />
-                    {isAddressValid ? (
-                      <Box
-                        backgroundColor="statusOkBg"
-                        borderRadius={4}
-                        display="flex"
-                        justifyContent="center"
-                        marginTop={3}
-                        paddingY={1}
-                      >
-                        <Text variant="heading4">Wallet verified</Text>
-                      </Box>
-                    ) : (
-                      <StyledButton
-                        as="button"
-                        onClick={verifyAddress}
-                        disabled={isLoadingVerification || !evmAddress}
-                        style={{ position: 'absolute', right: 0, top: 0, width: '50%' }}
-                      >
-                        {isLoadingVerification ? 'Verifying...' : 'Connect wallet and sign message to verify access'}
-                      </StyledButton>
-                    )}
-                  </Grid>
+          {step === 0 && (
+            <>
+              <Header />
+              <Grid gridTemplateColumns="1fr 140px 140px" alignItems="center" mb={2} mt={2}>
+                <Box>
+                  <Text variant="body3" color="textSecondary">
+                    Position
+                  </Text>
+                  <Text variant="heading3">{formatBalance(balance?.toNumber(), '', 2)} CFG (Legacy)</Text>
                 </Box>
-                <Grid display="flex" gap={1} mb={2}>
-                  <IconInfo size="iconSmall" />
-                  <Text variant="body2">
-                    Please ensure you have access to this Ethereum address. Any incorrect address added will result in
-                    lost tokens.
+                <Box>
+                  <Text variant="body3" color="textSecondary">
+                    Value
+                  </Text>
+                  <Text variant="heading3">{formatBalance(wcfgValue, '', 2)} USD</Text>
+                </Box>
+                <Box>
+                  <Text variant="body3" color="textSecondary">
+                    CFG price
+                  </Text>
+                  <Text variant="heading3">{formatBalance(CFGPrice || 0, '', 2)} USD</Text>
+                </Box>
+              </Grid>
+              <Box border={`1px solid ${theme.colors.borderSecondary}`} borderRadius={8} p={2} mb={3}>
+                <Box display="flex" flexDirection="column">
+                  <CurrencyInput
+                    value={balance?.toNumber()}
+                    currency="CFG"
+                    label="Amount of CFG (Legacy) to migrate"
+                    disabled
+                  />
+                  <Text style={{ marginTop: 8, alignSelf: 'flex-end' }} variant="body2">
+                    Wallet balance: {formatBalance(balance, '', 2)} CFG
+                  </Text>
+                </Box>
+                <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mt={3} mb={1}>
+                  <Text variant="heading4">Amount of CFG tokens</Text>
+                  <Text color="textSecondary" variant="body2">
+                    {formatBalance(balance, '', 2)} CFG
                   </Text>
                 </Grid>
+                <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={3}>
+                  <Text variant="heading4">Gas fee estimate</Text>
+                  <Text color="textSecondary" variant="body2">
+                    -{formatBalance(feeAmount || 0, '', 2)} CFG
+                  </Text>
+                </Grid>
+
+                <Divider color="borderSecondary" />
+                <Grid display="flex" alignItems="center" gap={2} justifyContent="space-between" mb={2} mt={2}>
+                  <Text variant="heading3">Total amount of CFG tokens</Text>
+                  <Text variant="heading3">{formatBalance(totalAmountToMigrate, '', 2)} CFG</Text>
+                </Grid>
+                <Divider color="borderSecondary" />
+
+                <Grid gridTemplateColumns="1fr 1fr" alignItems="center" mt={2} gap={2} mb={2} position="relative">
+                  <TextInput value={evmAddress} label="Ethereum wallet address" disabled />
+                  {isAddressValid ? (
+                    <Box
+                      backgroundColor="statusOkBg"
+                      borderRadius={4}
+                      display="flex"
+                      justifyContent="center"
+                      marginTop={3}
+                      paddingY={1}
+                    >
+                      <Text variant="heading4">Wallet verified</Text>
+                    </Box>
+                  ) : (
+                    <StyledButton
+                      as="button"
+                      onClick={verifyAddress}
+                      disabled={isLoadingVerification || !evmAddress}
+                      style={{ position: 'absolute', right: 0, top: 0, width: '50%' }}
+                    >
+                      {isLoadingVerification ? 'Verifying...' : 'Connect wallet and sign message to verify access'}
+                    </StyledButton>
+                  )}
+                </Grid>
+              </Box>
+              <Grid display="flex" gap={1} mb={2}>
+                <IconInfo size="iconSmall" />
+                <Text variant="body2">
+                  Please ensure you have access to this Ethereum address. Any incorrect address added will result in
+                  lost tokens.
+                </Text>
+              </Grid>
+              <ConnectionGuard
+                networks={['centrifuge']}
+                body="Please connect to the Centrifuge network to continue."
+                showConnect
+              >
                 <Button
                   small
                   style={{ width: '100%' }}
@@ -293,83 +297,83 @@ export default function CFGTokenMigrationCent() {
                 >
                   Migrate
                 </Button>
-              </>
-            )}
-
-            {step === 1 && (
-              <Box>
-                <Header />
-                <Text variant="body2" color="textSecondary" style={{ marginTop: 16 }}>
-                  Review the details before migrating CFG tokens from Ethereum to Centrifuge.
-                </Text>
-                <ConfirmationDetails />
-                <Grid display="flex" gap={1} mb={2} mt={2}>
-                  <IconInfo size="iconSmall" />
-                  <Text variant="body2">Please note that there will be a delay during the bridging process.</Text>
-                </Grid>
-                <Divider color="borderSecondary" />
-                <Grid display="flex" gap={1} mb={2} mt={2}>
-                  <Button
-                    small
-                    style={{ width: '100%' }}
-                    onClick={() => setStep(0)}
-                    variant="inverted"
-                    disabled={isLoadingMigration}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    small
-                    style={{ width: '100%' }}
-                    onClick={migrate}
-                    loading={isLoadingMigration}
-                    disabled={isLoadingMigration}
-                  >
-                    Confirm
-                  </Button>
-                </Grid>
-              </Box>
-            )}
-
-            {step === 2 && (
-              <Box>
-                <Header />
-                <Grid
-                  backgroundColor={theme.colors.statusInfoBg}
-                  borderRadius={8}
-                  p={2}
-                  mt={2}
-                  display="flex"
-                  flexDirection="column"
-                  gap={2}
-                >
-                  <Grid display="flex" gap={1} alignItems="center">
-                    <IconClock />
-                    <Text variant="heading3">Migration inititated</Text>
-                  </Grid>
-                  <Text variant="body2">
-                    Your migration has been initiated. You can view the migration details in the Migration table on the
-                    <RouterTextLink to="/portfolio">
-                      <b> Portfolio page</b>
-                    </RouterTextLink>
-                    . Please note that it may take <b>an average of 5 minutes</b> for the migration to appear in the
-                    table and <b>about 20 minutes</b> for the bridge transaction to complete.
-                  </Text>
-                </Grid>
-
-                <ConfirmationDetails />
-              </Box>
-            )}
-            <MigrationSupportLink />
-          </Box>
-          {step === 2 && (
-            <Grid gridTemplateColumns="24px 1fr" alignItems="center" mb={2} width="30%">
-              <IconArrowLeft size="iconSmall" />
-              <RouterTextLink to="/portfolio">Back to portfolio</RouterTextLink>
-            </Grid>
+              </ConnectionGuard>
+            </>
           )}
+
+          {step === 1 && (
+            <Box>
+              <Header />
+              <Text variant="body2" color="textSecondary" style={{ marginTop: 16 }}>
+                Review the details before migrating CFG tokens from Ethereum to Centrifuge.
+              </Text>
+              <ConfirmationDetails />
+              <Grid display="flex" gap={1} mb={2} mt={2}>
+                <IconInfo size="iconSmall" />
+                <Text variant="body2">Please note that there will be a delay during the bridging process.</Text>
+              </Grid>
+              <Divider color="borderSecondary" />
+              <Grid display="flex" gap={1} mb={2} mt={2}>
+                <Button
+                  small
+                  style={{ width: '100%' }}
+                  onClick={() => setStep(0)}
+                  variant="inverted"
+                  disabled={isLoadingMigration}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  small
+                  style={{ width: '100%' }}
+                  onClick={migrate}
+                  loading={isLoadingMigration}
+                  disabled={isLoadingMigration}
+                >
+                  Confirm
+                </Button>
+              </Grid>
+            </Box>
+          )}
+
+          {step === 2 && (
+            <Box>
+              <Header />
+              <Grid
+                backgroundColor={theme.colors.statusInfoBg}
+                borderRadius={8}
+                p={2}
+                mt={2}
+                display="flex"
+                flexDirection="column"
+                gap={2}
+              >
+                <Grid display="flex" gap={1} alignItems="center">
+                  <IconClock />
+                  <Text variant="heading3">Migration inititated</Text>
+                </Grid>
+                <Text variant="body2">
+                  Your migration has been initiated. You can view the migration details in the Migration table on the
+                  <RouterTextLink to="/portfolio">
+                    <b> Portfolio page</b>
+                  </RouterTextLink>
+                  . Please note that it may take <b>an average of 5 minutes</b> for the migration to appear in the table
+                  and <b>about 20 minutes</b> for the bridge transaction to complete.
+                </Text>
+              </Grid>
+
+              <ConfirmationDetails />
+            </Box>
+          )}
+          <MigrationSupportLink />
         </Box>
+        {step === 2 && (
+          <Grid gridTemplateColumns="24px 1fr" alignItems="center" mb={2} width="30%">
+            <IconArrowLeft size="iconSmall" />
+            <RouterTextLink to="/portfolio">Back to portfolio</RouterTextLink>
+          </Grid>
+        )}
       </Box>
-    </ConnectionGuard>
+    </Box>
   )
 }
