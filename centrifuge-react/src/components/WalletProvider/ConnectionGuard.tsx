@@ -67,9 +67,7 @@ export function ConnectionGuard({
     <Stack gap={2} pb={3} {...props}>
       <Text variant="body3">{body}</Text>
       {networks.length === 1 ? (
-        <Button onClick={() => switchNetwork(networks[0])} variant="secondary">
-          Switch to {name}
-        </Button>
+        <Button onClick={() => switchNetwork(networks[0])}>Switch to {name}</Button>
       ) : (
         <Popover
           renderTrigger={(props, ref, state) => (
