@@ -38,7 +38,12 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
 
   const data = assetsData?.data.map((row: any) => {
     return {
-      ...Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().split(' ').join(''), value])),
+      ...Object.fromEntries(
+        Object.entries(row).map(([key, value]) => {
+          const k = key.toLowerCase().split(' ').join('')
+          return [k, k.includes('maturitydate') ? new Date(value as string) : value]
+        })
+      ),
     }
   })
 
