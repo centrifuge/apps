@@ -15,21 +15,16 @@ import { useAddress } from '../../utils/useAddress'
 import { MigrationTable } from './MigrationTable'
 import { useTokenBalance } from './useTokenBalance'
 
-export function MigrationFrozenBanner({
-  isMigrationBlocked,
-  balances,
-}: {
-  isMigrationBlocked: boolean
-  balances: any
-}) {
+export function MigrationFrozenBanner({ balances }: { balances: any }) {
   const theme = useTheme()
-  if (!isMigrationBlocked) return null
 
   const consumers = balances?.native?.consumers?.toDecimal() || Dec(0)
   const frozen = balances?.native?.frozen?.toDecimal() || Dec(0)
   const reserved = balances?.native?.reserved?.toDecimal() || Dec(0)
 
   const amount = consumers.add(frozen).add(reserved)
+
+  if (amount.isZero()) return null
 
   return (
     <Grid
@@ -112,10 +107,6 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
   const { data: tokenBalances } = useTokenBalance(isEvmAddress(address) ? address : undefined)
   const balance =
     isEvmAddress(address) && !isEvmOnSubstrate ? tokenBalances?.legacy.balance : balances?.native.balance.toDecimal()
-
-  const isMigrationBlocked = isCentChain
-    ? !balances?.native?.frozen?.isZero() || !balances?.native?.reserved?.isZero() || !balances?.consumers?.isZero()
-    : false
 
   const convertedTokens = useMemo(() => {
     return tokens.map((token) => ({
@@ -221,7 +212,7 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
       <Box borderBottom={`1px solid ${theme.colors.borderPrimary}`} pb={1} mx={2} mb={2} />
       {!!balance && !balance?.isZero() && (
         <>
-          <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
+          <MigrationFrozenBanner balances={balances} />
           <Grid
             display="flex"
             alignItems="center"
@@ -243,7 +234,6 @@ function PortfolioDetails({ address, chainId }: { address: string; chainId: numb
               onClick={() => {
                 navigate(isEvmAddress(address) && !isEvmOnSubstrate ? 'migrate/eth' : 'migrate/cent')
               }}
-              disabled={isMigrationBlocked}
             >
               Migrate tokens
             </Button>
