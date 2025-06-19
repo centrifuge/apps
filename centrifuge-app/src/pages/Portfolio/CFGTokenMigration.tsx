@@ -8,6 +8,7 @@ import { useTheme } from 'styled-components'
 import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { useEvmTransaction } from '../../../src/utils/tinlake/useEvmTransaction'
 import { Tooltips } from '../../components/Tooltips'
+import { isTestEnv } from '../../config'
 import { Dec, Decimal } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
@@ -112,109 +113,101 @@ export default function CFGTokenMigration() {
   }
 
   return (
-    // @ts-expect-error
-    <ConnectionGuard networks={[1, 11155111]} paddingX={12}>
-      <Box mb={2}>
-        <LayoutSection alignItems="flex-start">
-          <Text variant="heading1">Portfolio</Text>
-        </LayoutSection>
+    <Box mb={2}>
+      <LayoutSection alignItems="flex-start">
+        <Text variant="heading1">Portfolio</Text>
+      </LayoutSection>
+      <Box
+        backgroundColor="backgroundSecondary"
+        border={`1px solid ${theme.colors.borderSecondary}`}
+        borderRadius={8}
+        height="80vh"
+        m={2}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
         <Box
-          backgroundColor="backgroundSecondary"
-          border={`1px solid ${theme.colors.borderSecondary}`}
+          backgroundColor="white"
           borderRadius={8}
-          height="80vh"
           m={2}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
+          p={2}
+          width={500}
+          style={{
+            boxShadow: '4px 8px 24px 0px #0000000D',
+          }}
         >
-          <Box
-            backgroundColor="white"
-            borderRadius={8}
-            m={2}
-            p={2}
-            width={500}
-            style={{
-              boxShadow: '4px 8px 24px 0px #0000000D',
-            }}
-          >
-            {isMigrated ? (
-              <MigrationSuccessPage
-                title="WCFG"
-                balance={balance?.toNumber() || 0}
-                currencyName="WCFG"
-                address={address ?? ''}
-              />
-            ) : (
-              <>
-                <Grid gridTemplateColumns="1fr 24px" alignItems="center" mb={2}>
-                  <Text variant="heading2">{`WCFG -> CFG Migration`}</Text>
-                  <Tooltips
-                    type="nav"
-                    placement="bottom"
-                    label={<IconInfo size="iconSmall" />}
-                    body={<TooltipText />}
-                  />
-                </Grid>
-                <Divider color="borderSecondary" />
-                <Grid gridTemplateColumns="1fr 1fr 1fr" alignItems="center" mb={2} mt={2}>
-                  <Box>
-                    <Text variant="body3" color="textSecondary">
-                      Position
-                    </Text>
-                    <Text variant="heading3">{formatBalance(balance?.toNumber() || 0, '', 2)} WCFG</Text>
-                  </Box>
-                  <Box>
-                    <Text variant="body3" color="textSecondary">
-                      Value
-                    </Text>
-                    <Text variant="heading3">{formatBalance(wcfgValue, '', 2)} USD</Text>
-                  </Box>
-                  <Box>
-                    <Text variant="body3" color="textSecondary">
-                      CFG price
-                    </Text>
-                    <Text variant="heading3">{formatBalance(CFGPrice || 0, '', 2)} USD</Text>
-                  </Box>
-                </Grid>
-                <Box border={`1px solid ${theme.colors.borderSecondary}`} borderRadius={8} p={2} mb={3}>
-                  <Box display="flex" flexDirection="column">
-                    <CurrencyInput
-                      value={balance?.toNumber() || 0}
-                      currency="WCFG"
-                      label="Amount of WCFG to migrate"
-                      disabled
-                      secondaryValue="Max"
-                    />
-                    <Text style={{ marginTop: 8, alignSelf: 'flex-end' }} variant="body2">
-                      Wallet balance: {formatBalance(balance?.toNumber() || 0)} WCFG
-                    </Text>
-                  </Box>
+          {isMigrated ? (
+            <MigrationSuccessPage
+              title="WCFG"
+              balance={balance?.toNumber() || 0}
+              currencyName="WCFG"
+              address={address ?? ''}
+            />
+          ) : (
+            <>
+              <Grid gridTemplateColumns="1fr 24px" alignItems="center" mb={2}>
+                <Text variant="heading2">{`WCFG -> CFG Migration`}</Text>
+                <Tooltips type="nav" placement="bottom" label={<IconInfo size="iconSmall" />} body={<TooltipText />} />
+              </Grid>
+              <Divider color="borderSecondary" />
+              <Grid gridTemplateColumns="1fr 1fr 1fr" alignItems="center" mb={2} mt={2}>
+                <Box>
+                  <Text variant="body3" color="textSecondary">
+                    Position
+                  </Text>
+                  <Text variant="heading3">{formatBalance(balance?.toNumber() || 0, '', 2)} WCFG</Text>
+                </Box>
+                <Box>
+                  <Text variant="body3" color="textSecondary">
+                    Value
+                  </Text>
+                  <Text variant="heading3">{formatBalance(wcfgValue, '', 2)} USD</Text>
+                </Box>
+                <Box>
+                  <Text variant="body3" color="textSecondary">
+                    CFG price
+                  </Text>
+                  <Text variant="heading3">{formatBalance(CFGPrice || 0, '', 2)} USD</Text>
+                </Box>
+              </Grid>
+              <Box border={`1px solid ${theme.colors.borderSecondary}`} borderRadius={8} p={2} mb={3}>
+                <Box display="flex" flexDirection="column">
                   <CurrencyInput
                     value={balance?.toNumber() || 0}
-                    currency="CFG"
-                    label="Amount of CFG tokens"
+                    currency="WCFG"
+                    label="Amount of WCFG to migrate"
                     disabled
+                    secondaryValue="Max"
                   />
-                  <Grid display="flex" justifyContent="space-between" mt={2} mb={2}>
-                    <Text variant="heading4">Amount of CFG tokens</Text>
-                    <Text variant="body2" color="textSecondary">
-                      {formatBalance(balance?.toNumber() || 0)} WCFG
-                    </Text>
-                  </Grid>
-                  <Grid display="flex" justifyContent="space-between" mt={2} mb={2}>
-                    <Text variant="heading4">Network cost</Text>
-                    <Text variant="body2" color="textSecondary">
-                      - {formatBalance(new Decimal(gasPrice || 0), '', 2)} Gwei
-                    </Text>
-                  </Grid>
-                  <Divider color="borderSecondary" />
-                  <Grid display="flex" justifyContent="space-between" mt={2}>
-                    <Text variant="heading3">Total amount of CFG tokens</Text>
-                    <Text variant="heading3">{formatBalance(balance?.toNumber() || 0)} CFG</Text>
-                  </Grid>
+                  <Text style={{ marginTop: 8, alignSelf: 'flex-end' }} variant="body2">
+                    Wallet balance: {formatBalance(balance?.toNumber() || 0)} WCFG
+                  </Text>
                 </Box>
-
+                <CurrencyInput value={balance?.toNumber() || 0} currency="CFG" label="Amount of CFG tokens" disabled />
+                <Grid display="flex" justifyContent="space-between" mt={2} mb={2}>
+                  <Text variant="heading4">Amount of CFG tokens</Text>
+                  <Text variant="body2" color="textSecondary">
+                    {formatBalance(balance?.toNumber() || 0)} WCFG
+                  </Text>
+                </Grid>
+                <Grid display="flex" justifyContent="space-between" mt={2} mb={2}>
+                  <Text variant="heading4">Network cost</Text>
+                  <Text variant="body2" color="textSecondary">
+                    - {formatBalance(new Decimal(gasPrice || 0), '', 2)} Gwei
+                  </Text>
+                </Grid>
+                <Divider color="borderSecondary" />
+                <Grid display="flex" justifyContent="space-between" mt={2}>
+                  <Text variant="heading3">Total amount of CFG tokens</Text>
+                  <Text variant="heading3">{formatBalance(balance?.toNumber() || 0)} CFG</Text>
+                </Grid>
+              </Box>
+              <ConnectionGuard
+                networks={isTestEnv ? [11155111] : [1]}
+                body="Please connect to the Ethereum to continue."
+                showConnect
+              >
                 <Button
                   small
                   style={{ width: '100%' }}
@@ -224,30 +217,24 @@ export default function CFGTokenMigration() {
                 >
                   {isAllowanceSameAsBalance ? 'Migrate WCFG' : 'Approve WCFG and migrate'}
                 </Button>
-                <MigrationSupportLink />
-                <Box mt={2} justifyContent="center" display="flex">
-                  <Stepper activeStep={step} setActiveStep={setStep} direction="row">
-                    <Step
-                      label="Approve"
-                      isActive={step === 1}
-                      isStepCompleted={step === 2}
-                      empty
-                      variant="secondary"
-                    />
-                    <Step
-                      label="Confirm migration"
-                      isActive={step === 2}
-                      isStepCompleted={isMigrated}
-                      empty
-                      variant="secondary"
-                    />
-                  </Stepper>
-                </Box>
-              </>
-            )}
-          </Box>
+              </ConnectionGuard>
+              <MigrationSupportLink />
+              <Box mt={2} justifyContent="center" display="flex">
+                <Stepper activeStep={step} setActiveStep={setStep} direction="row">
+                  <Step label="Approve" isActive={step === 1} isStepCompleted={step === 2} empty variant="secondary" />
+                  <Step
+                    label="Confirm migration"
+                    isActive={step === 2}
+                    isStepCompleted={isMigrated}
+                    empty
+                    variant="secondary"
+                  />
+                </Stepper>
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
-    </ConnectionGuard>
+    </Box>
   )
 }
