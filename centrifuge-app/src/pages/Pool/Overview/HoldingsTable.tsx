@@ -47,7 +47,7 @@ export const HoldingsTable = ({ metadata }: { metadata: PoolMetadata | undefined
     }
   })
 
-  if (!assetsData) {
+  if (!assetsData || assetsData.data.length === 0) {
     return null
   }
 
