@@ -231,6 +231,10 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
 
       const newPoolMetadata: PoolMetadata = {
         ...pool.meta,
+        pool: {
+          ...pool.meta.pool,
+          expenseRatio: values.pool.expenseRatio,
+        },
         holdings: values.holdings,
         tranches: values.tranches.reduce((acc, tranche) => {
           acc[tranche.id] = {
@@ -337,6 +341,8 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
         })),
       ]
 
+      console.log('newPoolMetadata', newPoolMetadata)
+
       execute([values.id, newPoolMetadata, hasTrancheChanges ? tranches : undefined], { account })
       actions.setSubmitting(false)
     },
@@ -358,7 +364,6 @@ export function PoolConfigurationDrawer({ open, setOpen }: PoolConfigurationDraw
     <LoadBoundary>
       <Drawer isOpen={open} onClose={resetToDefault} title="Edit configuration" width="33%">
         <Divider color="backgroundSecondary" />
-
         <Select
           label="Select pool"
           options={poolsWithMetadata.map((pool) => ({

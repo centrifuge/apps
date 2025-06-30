@@ -694,6 +694,7 @@ export interface PoolMetadataInput {
   website: string
   forum: string
   email: string
+  expenseRatio: number
   executiveSummary: FileType | null
   details?: IssuerDetail[]
   issuerCategories: { type: string; value: string; description?: string }[]
@@ -751,6 +752,7 @@ export type PoolMetadata = {
     }
     investorType: string
     poolStructure: string
+    expenseRatio?: number
     poolFees?: {
       id: number
       name: string
@@ -1173,6 +1175,7 @@ export function getPoolsModule(inst: Centrifuge) {
           shortDescription: metadata.issuerShortDescription,
           categories: metadata.issuerCategories,
         },
+        expenseRatio: metadata.expenseRatio ?? 0,
         poolStructure: metadata.poolStructure,
         investorType: metadata.investorType,
         links: {
