@@ -45,7 +45,7 @@ type ReportsType = Report | DataReport
 
 const centrifuge = new Centrifuge({
   environment: 'mainnet',
-  indexerUrl: 'https://api.centrifuge.io/',
+  indexerUrl: 'https://v2.api.centrifuge.io/',
 })
 
 export function useReport<T extends ReportsType>(
