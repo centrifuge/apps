@@ -134,7 +134,7 @@ export const UploadAssetTemplateForm = ({
       )}
 
       <Box mt={2}>
-        {!poolAdmin ? (
+        {!!poolAdmin ? (
           <FileUpload
             errorMessage={errorMessage}
             accept="application/json"
