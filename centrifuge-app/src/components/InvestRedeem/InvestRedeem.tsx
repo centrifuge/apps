@@ -136,8 +136,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
                 `${state.trancheCurrency?.name} is only available to Non-U.S. persons.`
               ) : (
                 <>
-                  {metadata?.pool?.issuer?.name} Anemoy Capital SPC Limited tokens are available only for Non-U.S.
-                  Professional Investors.{' '}
+                  {metadata?.pool?.issuer?.name} tokens are available only for Non-U.S. Professional Investors.{' '}
                   <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
                     Learn more
                   </AnchorTextLink>
