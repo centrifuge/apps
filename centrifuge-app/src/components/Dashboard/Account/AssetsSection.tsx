@@ -1,12 +1,4 @@
-import {
-  ActiveLoan,
-  CurrencyBalance,
-  CurrencyKey,
-  ExternalLoan,
-  Loan,
-  Pool,
-  TinlakeLoan,
-} from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, ExternalLoan, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Divider, Grid, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
@@ -231,18 +223,20 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
       // })
 
       const deployedDomains = domains?.filter((domain) => domain.hasDeployedLp)
-      const updateTokenPrices = deployedDomains
-        ? deployedDomains.flatMap((domain) =>
-            Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
-              return domain.currencies
-                .filter((cur) => !!poolsByCurrency[cur.address])
-                .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
-                .map(([tid, curKey]) =>
-                  cent.liquidityPools.updateTokenPrice([pool.id, tid, curKey, domain.chainId], { batch: true })
-                )
-            })
-          )
-        : []
+      //const updateTokenPrices = deployedDomains
+      //? deployedDomains.flatMap((domain) =>
+      //    Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+      //      return domain.currencies
+      //        .filter((cur) => !!poolsByCurrency[cur.address])
+      //        .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+      //        .map(([tid, curKey]) =>
+      //          cent.liquidityPools.updateTokenPrice([pool.id, tid, curKey, domain.chainId], { batch: true })
+      //        )
+      //    })
+      //  )
+      //: []
+
+      const updateTokenPrices: any[] = []
 
       // return combineLatest([$attestationHash, ...updateTokenPrices]).pipe(
       return combineLatest([...updateTokenPrices]).pipe(
@@ -265,7 +259,7 @@ export default function AssetsSection({ pool }: { pool: Pool }) {
             //   [{ Named: `attestation:${pool.id}:${attestationHash}` }],
             //   api.tx.loans.updatePortfolioValuation(pool.id)
             // ),
-            api.tx.utility.batch(updateTokenPricesTxs),
+            //api.tx.utility.batch(updateTokenPricesTxs),
           ]
 
           const tx = api.tx.utility.batchAll(batch)
