@@ -24,7 +24,6 @@ import { useEffect, useState } from 'react'
 import { map, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import { MigrationFrozenBanner } from '.'
-import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { RouterTextLink } from '../../../src/components/TextLink'
 import { Tooltips } from '../../../src/components/Tooltips'
 import { isTestEnv } from '../../../src/config'
@@ -171,16 +170,12 @@ export default function CFGTokenMigrationCent() {
   }
 
   return (
-    <Box mb={2}>
-      <LayoutSection alignItems="flex-start">
-        <Text variant="heading1">Portfolio</Text>
-      </LayoutSection>
+    <Box mb={2} mt={10}>
       <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
       <Box
         backgroundColor="backgroundSecondary"
         border={`1px solid ${theme.colors.borderSecondary}`}
         borderRadius={8}
-        height="90vh"
         m={2}
         display="flex"
         justifyContent="center"

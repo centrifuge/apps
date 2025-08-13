@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
+import { useDebugFlags } from '../DebugFlags/context'
 import { Footer } from '../Footer'
 import { LogoLink } from '../LogoLink-deprecated'
 import { Menu } from '../Menu'
@@ -72,6 +73,7 @@ export const LayoutBase = () => {
   const location = useLocation()
   const isDesktop = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
+  const { killApp } = useDebugFlags()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -82,13 +84,22 @@ export const LayoutBase = () => {
 
   return (
     <>
-      {isDesktop && (
+      {isDesktop && !killApp && (
         <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
           <WalletMenu />
         </Box>
       )}
 
-      {!isDesktop && (
+      {killApp && (
+        <Box>
+          <LogoLink />
+          <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
+            <WalletMenu />
+          </Box>
+        </Box>
+      )}
+
+      {!isDesktop && !killApp && (
         <MobileHeader>
           <LogoLink />
           <Box display="flex" alignItems="center" marginLeft="auto">
@@ -106,13 +117,13 @@ export const LayoutBase = () => {
         </MobileHeader>
       )}
 
-      {isDesktop && (
+      {isDesktop && !killApp && (
         <Sidebar>
           <SidebarMenu />
         </Sidebar>
       )}
 
-      {!isDesktop && (
+      {!isDesktop && !killApp && (
         <Drawer
           isOpen={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -125,11 +136,17 @@ export const LayoutBase = () => {
         </Drawer>
       )}
 
-      <Content>
+      {killApp ? (
         <Box mx={2}>
           <Outlet />
         </Box>
-      </Content>
+      ) : (
+        <Content>
+          <Box mx={2}>
+            <Outlet />
+          </Box>
+        </Content>
+      )}
     </>
   )
 }

@@ -1,14 +1,17 @@
 import { Box, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Navigate } from 'react-router'
 import { Dec } from '../../src/utils/Decimal'
 import { formatBalance } from '../../src/utils/formatting'
 import { useListedPools } from '../../src/utils/useListedPools'
+import { useDebugFlags } from '../components/DebugFlags/context'
 import { LayoutSection } from '../components/LayoutBase/LayoutSection'
 import { PoolList } from '../components/PoolList'
 import { prefetchRoute } from '../components/Root'
 import { config } from '../config'
 
 export default function PoolsPage() {
+  const { killApp } = useDebugFlags()
   const [, listedTokens] = useListedPools()
 
   const totalValueLocked = React.useMemo(() => {
@@ -28,6 +31,10 @@ export default function PoolsPage() {
     prefetchRoute('/pools/1')
     prefetchRoute('/pools/tokens')
   }, [])
+
+  if (killApp) {
+    return <Navigate to="/migrate" />
+  }
 
   return (
     <LayoutSection>

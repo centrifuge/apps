@@ -5,7 +5,6 @@ import BN from 'bn.js'
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { LayoutSection } from '../../../src/components/LayoutBase/LayoutSection'
 import { useEvmTransaction } from '../../../src/utils/tinlake/useEvmTransaction'
 import { Tooltips } from '../../components/Tooltips'
 import { isTestEnv } from '../../config'
@@ -113,15 +112,11 @@ export default function CFGTokenMigration() {
   }
 
   return (
-    <Box mb={2}>
-      <LayoutSection alignItems="flex-start">
-        <Text variant="heading1">Portfolio</Text>
-      </LayoutSection>
+    <Box mb={2} mt={10}>
       <Box
         backgroundColor="backgroundSecondary"
         border={`1px solid ${theme.colors.borderSecondary}`}
         borderRadius={8}
-        height="80vh"
         m={2}
         display="flex"
         justifyContent="center"

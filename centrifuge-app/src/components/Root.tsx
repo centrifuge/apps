@@ -20,6 +20,7 @@ import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LayoutBase } from './LayoutBase'
 import { LoadBoundary } from './LoadBoundary'
+import Migrate from './Migrate'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
 import { SupportedBrowserBanner } from './SupportedBrowserBanner'
@@ -89,7 +90,7 @@ const router = createHashRouter([
     children: [
       {
         path: '/',
-        element: <Navigate to="/pools" replace />,
+        element: <Navigate to="/migrate" replace />,
       },
       {
         path: '/dashboard/*',
@@ -120,16 +121,6 @@ const router = createHashRouter([
         handle: { component: PoolTransactionsPage },
       },
       { path: '/portfolio', element: <PortfolioPage />, handle: { component: PortfolioPage } },
-      {
-        path: '/portfolio/migrate/eth',
-        element: <CFGTokenMigrationPage />,
-        handle: { component: CFGTokenMigrationPage },
-      },
-      {
-        path: '/portfolio/migrate/cent',
-        element: <CFGTokenMigrationCentPage />,
-        handle: { component: CFGTokenMigrationCentPage },
-      },
       { path: '/prime/:dao', element: <PrimeDetailPage />, handle: { component: PrimeDetailPage } },
       { path: '/prime', element: <PrimePage />, handle: { component: PrimePage } },
       { path: '/disclaimer', element: <InvestmentDisclaimerPage />, handle: { component: InvestmentDisclaimerPage } },
@@ -147,6 +138,24 @@ const router = createHashRouter([
         element: <ConvertAddressPage />,
         handle: { component: ConvertAddressPage },
       },
+
+      //// NEW APP ROUTES
+      {
+        path: '/migrate',
+        element: <Migrate />,
+      },
+      {
+        path: '/migrate/eth',
+        element: <CFGTokenMigrationPage />,
+        handle: { component: CFGTokenMigrationPage },
+      },
+      {
+        path: '/migrate/cent',
+        element: <CFGTokenMigrationCentPage />,
+        handle: { component: CFGTokenMigrationCentPage },
+      },
+
+      //// END NEW APP ROUTES
       { path: '*', element: <NotFoundPage />, handle: { component: NotFoundPage } },
     ],
     errorElement: <NotFoundPage />,
