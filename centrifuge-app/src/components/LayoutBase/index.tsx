@@ -6,6 +6,7 @@ import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { useDebugFlags } from '../DebugFlags/context'
 import { Footer } from '../Footer'
+import { LogoCentrifugeText } from '../LogoCentrifuge'
 import { LogoLink } from '../LogoLink-deprecated'
 import { Menu } from '../Menu'
 
@@ -83,7 +84,7 @@ export const LayoutBase = () => {
   }, [location])
 
   return (
-    <>
+    <Box backgroundColor={killApp ? 'backgroundSecondary' : 'white'}>
       {isDesktop && !killApp && (
         <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
           <WalletMenu />
@@ -92,7 +93,10 @@ export const LayoutBase = () => {
 
       {killApp && (
         <Box>
-          <LogoLink />
+          <Box paddingTop="26px" pl={6}>
+            <LogoCentrifugeText width={60} height={60} />
+          </Box>
+
           <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
             <WalletMenu />
           </Box>
@@ -137,9 +141,7 @@ export const LayoutBase = () => {
       )}
 
       {killApp ? (
-        <Box mx={2}>
-          <Outlet />
-        </Box>
+        <Outlet />
       ) : (
         <Content>
           <Box mx={2}>
@@ -147,6 +149,6 @@ export const LayoutBase = () => {
           </Box>
         </Content>
       )}
-    </>
+    </Box>
   )
 }
