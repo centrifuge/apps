@@ -112,7 +112,7 @@ export default function CFGTokenMigration() {
   }
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" paddingTop={4} paddingBottom={4}>
+    <Box display="flex" justifyContent="center" alignItems="center">
       <Box
         backgroundColor="white"
         borderRadius={8}

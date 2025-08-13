@@ -170,13 +170,12 @@ export default function CFGTokenMigrationCent() {
   }
 
   return (
-    <Box paddingTop={4} paddingBottom={4}>
+    <Box paddingBottom={4}>
       <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
       <Box m={2} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
         <Box
           backgroundColor="white"
           borderRadius={8}
-          m={2}
           p={2}
           width={502}
           border={`1px solid ${theme.colors.borderSecondary}`}
