@@ -1,7 +1,7 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Drawer, IconButton, IconHamburger, IconX } from '@centrifuge/fabric'
 import { useEffect, useState } from 'react'
-import { Outlet, useLocation } from 'react-router'
+import { Navigate, Outlet, useLocation } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { useDebugFlags } from '../DebugFlags/context'
@@ -82,6 +82,10 @@ export const LayoutBase = () => {
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [location])
+
+  if (killApp && !location.pathname.startsWith('/migrate')) {
+    return <Navigate to="/migrate" replace />
+  }
 
   return (
     <Box backgroundColor={killApp ? 'backgroundSecondary' : 'white'}>

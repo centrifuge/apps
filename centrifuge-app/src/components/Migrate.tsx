@@ -10,5 +10,6 @@ export default function Migrate() {
   if (isEvmAddress(address) && !isEvmOnSubstrate) {
     return <Navigate to="/migrate/eth" />
   }
+
   return <Navigate to="/migrate/cent" />
 }
