@@ -33,6 +33,7 @@
     "@makerdao/multicall": "^0.12.0",
     "@polkadot/react-identicon": "~3.1.4",
     "@styled-system/css": "^5.1.5",
+    "@types/yup": "^0.32.0",
     "bn.js": "^5.2.1",
     "formik": "^2.4.5",
     "isomorphic-ws": "^5.0.0",
@@ -51,7 +52,8 @@
     "typescript": "~5.3.3",
     "viem": "^2.21.53",
     "vitest": "^1.2.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "yup": "^1.7.0"
   },
   "devDependencies": {
     "@synthetixio/synpress": "^3.7.3",
