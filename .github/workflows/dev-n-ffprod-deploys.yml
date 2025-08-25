@@ -14,9 +14,9 @@ jobs:
     secrets: inherit
     with:
       deploy_env: development
-  ff-prod:
-    name: deploy-ff-prod
-    uses: ./.github/workflows/centrifuge-app.yml
-    secrets: inherit
-    with:
-      deploy_env: 'ff-prod'
+  # ff-prod:
+  #   name: deploy-ff-prod
+  #   uses: ./.github/workflows/centrifuge-app.yml
+  #   secrets: inherit
+  #   with:
+  #     deploy_env: 'ff-prod'

@@ -47,7 +47,7 @@ runs:
         if ${{ inputs.deploy_to == 'production' }}; then
           # PRODUCTION
           echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
-          echo "front_url=app.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "front_url=migrate.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT        
         elif ${{ inputs.deploy_to == 'altair' }}; then
           # ALTAIR
@@ -57,7 +57,7 @@ runs:
         elif ${{ inputs.deploy_to == 'staging' }}; then
           # STAGING
           echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
-          echo "front_url=app.staging.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "front_url=migrate.staging.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT
           # env_name is production because it needs to use the prod variable files inside each app
         elif ${{ inputs.deploy_to == 'demo' }}; then

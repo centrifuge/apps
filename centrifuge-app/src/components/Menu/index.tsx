@@ -63,37 +63,39 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
 
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const { showSwaps } = useDebugFlags()
+  const { showSwaps, killApp } = useDebugFlags()
   const iconSize = 'iconSmall'
   const isLarge = useIsAboveBreakpoint('L')
 
-  const menuItems = [
-    {
-      label: 'Dashboard',
-      icon: <IconDashboard size={iconSize} color="white" />,
-      subMenu: ['Account', 'Assets', 'Investors'],
-      enabled: pools.length > 0,
-      route: '/dashboard',
-      withToggle: false,
-    },
-    { label: 'Pools', icon: <IconInvestments size={iconSize} color="white" />, route: '/pools', enabled: true },
-    { label: 'Portfolio', icon: <IconWallet size={iconSize} color="white" />, route: '/portfolio', enabled: true },
-    { label: 'Prime', icon: <IconGlobe size={iconSize} color="white" />, route: '/prime', enabled: true },
-    {
-      label: 'Governance',
-      icon: <IconGovernance size={iconSize} color="white" />,
-      subMenu: ['Onchain voting', 'Offchain voting', 'Governance forum'],
-      enabled: true,
-      withToggle: true,
-    },
-    {
-      label: 'NFTs',
-      icon: <IconNft size={iconSize} color="white" />,
-      route: '/nfts',
-      enabled: config.network !== 'centrifuge',
-    },
-    { label: 'Swaps', icon: <IconSwitch size={iconSize} color="white" />, route: '/swaps', enabled: showSwaps },
-  ]
+  const menuItems = killApp
+    ? []
+    : [
+        {
+          label: 'Dashboard',
+          icon: <IconDashboard size={iconSize} color="white" />,
+          subMenu: ['Account', 'Assets', 'Investors'],
+          enabled: pools.length > 0,
+          route: '/dashboard',
+          withToggle: false,
+        },
+        { label: 'Pools', icon: <IconInvestments size={iconSize} color="white" />, route: '/pools', enabled: true },
+        { label: 'Portfolio', icon: <IconWallet size={iconSize} color="white" />, route: '/portfolio', enabled: true },
+        { label: 'Prime', icon: <IconGlobe size={iconSize} color="white" />, route: '/prime', enabled: true },
+        {
+          label: 'Governance',
+          icon: <IconGovernance size={iconSize} color="white" />,
+          subMenu: ['Onchain voting', 'Offchain voting', 'Governance forum'],
+          enabled: true,
+          withToggle: true,
+        },
+        {
+          label: 'NFTs',
+          icon: <IconNft size={iconSize} color="white" />,
+          route: '/nfts',
+          enabled: config.network !== 'centrifuge',
+        },
+        { label: 'Swaps', icon: <IconSwitch size={iconSize} color="white" />, route: '/swaps', enabled: showSwaps },
+      ]
 
   return (
     <Box width="100%" display="flex" flexDirection="column" mt={isLarge ? 6 : 0}>

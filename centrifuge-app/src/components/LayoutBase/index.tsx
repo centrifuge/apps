@@ -1,10 +1,12 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Drawer, IconButton, IconHamburger, IconX } from '@centrifuge/fabric'
 import { useEffect, useState } from 'react'
-import { Outlet, useLocation } from 'react-router'
+import { Navigate, Outlet, useLocation } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
+import { useDebugFlags } from '../DebugFlags/context'
 import { Footer } from '../Footer'
+import { LogoCentrifugeText } from '../LogoCentrifuge'
 import { LogoLink } from '../LogoLink-deprecated'
 import { Menu } from '../Menu'
 
@@ -72,6 +74,7 @@ export const LayoutBase = () => {
   const location = useLocation()
   const isDesktop = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
+  const { killApp } = useDebugFlags()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -80,15 +83,31 @@ export const LayoutBase = () => {
     setMobileMenuOpen(false)
   }, [location])
 
+  if (killApp && !location.pathname.startsWith('/migrate')) {
+    return <Navigate to="/migrate" replace />
+  }
+
   return (
-    <>
-      {isDesktop && (
+    <Box backgroundColor={killApp ? 'backgroundSecondary' : 'white'}>
+      {isDesktop && !killApp && (
         <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
           <WalletMenu />
         </Box>
       )}
 
-      {!isDesktop && (
+      {killApp && (
+        <Box>
+          <Box paddingTop="26px" pl={6}>
+            <LogoCentrifugeText width={60} height={60} />
+          </Box>
+
+          <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
+            <WalletMenu />
+          </Box>
+        </Box>
+      )}
+
+      {!isDesktop && !killApp && (
         <MobileHeader>
           <LogoLink />
           <Box display="flex" alignItems="center" marginLeft="auto">
@@ -106,13 +125,13 @@ export const LayoutBase = () => {
         </MobileHeader>
       )}
 
-      {isDesktop && (
+      {isDesktop && !killApp && (
         <Sidebar>
           <SidebarMenu />
         </Sidebar>
       )}
 
-      {!isDesktop && (
+      {!isDesktop && !killApp && (
         <Drawer
           isOpen={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -125,11 +144,15 @@ export const LayoutBase = () => {
         </Drawer>
       )}
 
-      <Content>
-        <Box mx={2}>
-          <Outlet />
-        </Box>
-      </Content>
-    </>
+      {killApp ? (
+        <Outlet />
+      ) : (
+        <Content>
+          <Box mx={2}>
+            <Outlet />
+          </Box>
+        </Content>
+      )}
+    </Box>
   )
 }
