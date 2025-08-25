@@ -5,10 +5,7 @@
     "centrifuge-js",
     "centrifuge-app",
     "centrifuge-react",
-    "simulation-tests",
-    "onboarding-api",
-    "faucet-api",
-    "pinning-api"
+    "simulation-tests"
   ],
   "devDependencies": {
     "@types/bn.js": "^5.1.1",
@@ -38,11 +35,8 @@
   "scripts": {
     "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
     "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
-    "onboarding-api": "yarn workspace @centrifuge/onboarding-api start:functions",
-    "pinning-api": "yarn workspace pinning-api start:functions",
     "centrifuge-app": "yarn workspace @centrifuge/centrifuge-app start",
-    "faucet-api": "yarn workspace @centrifuge/faucet-api start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn pinning-api\" \"yarn centrifuge-app\" -p name -n \"onboarding-api,pinning-api,centrifuge-app\"",
+    "build": "yarn workspace @centrifuge/fabric build && yarn workspace @centrifuge/centrifuge-js build && yarn workspace @centrifuge/centrifuge-react build && yarn workspace @centrifuge/centrifuge-app build:app",
     "postinstall": "npx husky install"
   },
   "resolutions": {
