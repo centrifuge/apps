@@ -11,7 +11,7 @@ import { prefetchRoute } from '../components/Root'
 import { config } from '../config'
 
 export default function PoolsPage() {
-  const { killApp } = useDebugFlags()
+  const { hideApp } = useDebugFlags()
   const [, listedTokens] = useListedPools()
 
   const totalValueLocked = React.useMemo(() => {
@@ -32,7 +32,7 @@ export default function PoolsPage() {
     prefetchRoute('/pools/tokens')
   }, [])
 
-  if (killApp) {
+  if (hideApp) {
     return <Navigate to="/migrate" />
   }
 

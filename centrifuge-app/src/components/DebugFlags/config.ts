@@ -31,7 +31,7 @@ export type DebugFlagConfig =
     }
 
 export type Key =
-  | 'killApp'
+  | 'hideApp'
   | 'showFinoa'
   | 'showOrderExecution'
   | 'address'
@@ -55,7 +55,7 @@ export type Key =
   | 'showAssets'
 
 export const flagsConfig = {
-  killApp: {
+  hideApp: {
     alwaysShow: true,
     default: true,
     type: 'checkbox',

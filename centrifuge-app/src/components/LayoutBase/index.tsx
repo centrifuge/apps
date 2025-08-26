@@ -74,7 +74,7 @@ export const LayoutBase = () => {
   const location = useLocation()
   const isDesktop = useIsAboveBreakpoint('L')
   const isMedium = useIsAboveBreakpoint('M')
-  const { killApp } = useDebugFlags()
+  const { hideApp } = useDebugFlags()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -83,19 +83,19 @@ export const LayoutBase = () => {
     setMobileMenuOpen(false)
   }, [location])
 
-  if (killApp && !location.pathname.startsWith('/migrate')) {
+  if (hideApp && !location.pathname.startsWith('/migrate')) {
     return <Navigate to="/migrate" replace />
   }
 
   return (
-    <Box backgroundColor={killApp ? 'backgroundSecondary' : 'white'}>
-      {isDesktop && !killApp && (
+    <Box backgroundColor={hideApp ? 'backgroundSecondary' : 'white'}>
+      {isDesktop && !hideApp && (
         <Box position="fixed" top="1rem" right="1rem" zIndex={theme.zIndices.header} mt={2} marginRight={1}>
           <WalletMenu />
         </Box>
       )}
 
-      {killApp && (
+      {hideApp && (
         <Box>
           <Box paddingTop="26px" pl={6}>
             <LogoCentrifugeText width={60} height={60} />
@@ -107,7 +107,7 @@ export const LayoutBase = () => {
         </Box>
       )}
 
-      {!isDesktop && !killApp && (
+      {!isDesktop && !hideApp && (
         <MobileHeader>
           <LogoLink />
           <Box display="flex" alignItems="center" marginLeft="auto">
@@ -125,13 +125,13 @@ export const LayoutBase = () => {
         </MobileHeader>
       )}
 
-      {isDesktop && !killApp && (
+      {isDesktop && !hideApp && (
         <Sidebar>
           <SidebarMenu />
         </Sidebar>
       )}
 
-      {!isDesktop && !killApp && (
+      {!isDesktop && !hideApp && (
         <Drawer
           isOpen={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -144,7 +144,7 @@ export const LayoutBase = () => {
         </Drawer>
       )}
 
-      {killApp ? (
+      {hideApp ? (
         <Outlet />
       ) : (
         <Content>
