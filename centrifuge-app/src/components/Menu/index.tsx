@@ -63,11 +63,11 @@ const StyledRouterLinkButton = styled(RouterLinkButton)`
 
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const { showSwaps, killApp } = useDebugFlags()
+  const { showSwaps, hideApp } = useDebugFlags()
   const iconSize = 'iconSmall'
   const isLarge = useIsAboveBreakpoint('L')
 
-  const menuItems = killApp
+  const menuItems = hideApp
     ? []
     : [
         {
