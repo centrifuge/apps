@@ -45,7 +45,7 @@ type ReportsType = Report | DataReport
 
 const centrifuge = new Centrifuge({
   environment: 'mainnet',
-  indexerUrl: 'https://v2.api.centrifuge.io/',
+  indexerUrl: 'https://api-main.cfg.embrio.tech/',
 })
 
 export function useReport<T extends ReportsType>(
