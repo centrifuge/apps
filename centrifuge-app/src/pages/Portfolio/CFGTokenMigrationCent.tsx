@@ -21,6 +21,7 @@ import {
 } from '@centrifuge/fabric'
 import { BrowserProvider, getAddress, verifyMessage } from 'ethers'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { map, switchMap } from 'rxjs'
 import styled, { useTheme } from 'styled-components'
 import { MigrationFrozenBanner } from '.'
@@ -59,6 +60,7 @@ const Header = () => {
 }
 
 export default function CFGTokenMigrationCent() {
+  const navigate = useNavigate()
   const api = useCentrifugeApi()
   const theme = useTheme()
   const address = useAddress()!
@@ -172,6 +174,28 @@ export default function CFGTokenMigrationCent() {
   return (
     <Box paddingBottom={4}>
       <MigrationFrozenBanner isMigrationBlocked={isMigrationBlocked} balances={balances} />
+
+      <Grid
+        display="flex"
+        alignItems="center"
+        gap={1}
+        backgroundColor="statusWarningBg"
+        p={1}
+        borderRadius={8}
+        mb={2}
+        border={`1px solid ${theme.colors.borderPrimary}`}
+        justifyContent="center"
+        mt={2}
+      >
+        <IconInfo size="iconSmall" />
+        <Text variant="body3">
+          Looking to migrate Wrapped CFG?
+          <Button onClick={() => navigate('/migrate/eth')} small style={{ marginLeft: 8 }}>
+            Migrate here
+          </Button>
+        </Text>
+      </Grid>
+
       <Box m={2} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
         <Box
           backgroundColor="white"
